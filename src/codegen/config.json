@@ -1,0 +1,267 @@
+{
+  "classes": [
+    {
+      "className": "java.lang.ArithmeticException",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.Class",
+      "methods": [
+        {
+          "methodName": "forName"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.ClassCastException",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.ClassLoader",
+      "methods": [
+        {
+          "methodName": "getSystemClassLoader"
+        },
+        {
+          "methodName": "loadClass"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.Exception",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.NegativeArraySizeException",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.NullPointerException",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.Object",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        },
+        {
+          "methodName": "toString"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.String",
+      "methods": [
+        {
+          "methodName": "valueOf",
+          "methodSignature": "(I)Ljava/lang/String;"
+        },
+        {
+          "methodName": "valueOf",
+          "methodSignature": "(J)Ljava/lang/String;"
+        },
+        {
+          "methodName": "valueOf",
+          "methodSignature": "(F)Ljava/lang/String;"
+        },
+        {
+          "methodName": "valueOf",
+          "methodSignature": "(D)Ljava/lang/String;"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.Thread",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        },
+        {
+          "methodName": "join",
+          "methodSignature": "()V"
+        },
+        {
+          "methodName": "sleep",
+          "methodSignature": "(J)V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.lang.Throwable",
+      "methods": [
+        {
+          "methodName": "printStackTrace",
+          "methodSignature": "(Ljava/io/PrintWriter;)V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.io.PrintWriter",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "(Ljava/io/Writer;)V"
+        },
+        {
+          "methodName": "flush"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.io.StringWriter",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.util.logging.Logger",
+      "methods": [
+        {
+          "methodName": "setLevel"
+        },
+        {
+          "methodName": "logp",
+          "methodSignature": "(Ljava/util/logging/Level;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.ClassPathLookup",
+      "methods": [
+        {
+          "methodName": "readClassFile"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.DynamicLogHelper",
+      "methods": [
+        {
+          "methodName": "getLogger"
+        },
+        {
+          "methodName": "getInfoLevel"
+        },
+        {
+          "methodName": "getWarningLevel"
+        },
+        {
+          "methodName": "getSevereLevel"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.GcpHubClient",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.HubClient",
+      "methods": [
+        {
+          "methodName": "registerDebuggee"
+        },
+        {
+          "methodName": "listActiveBreakpoints"
+        },
+        {
+          "methodName": "transmitBreakpointUpdate"
+        },
+        {
+          "methodName": "shutdown"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.HubClient$ListActiveBreakpointsResult",
+      "methods": [
+        {
+          "methodName": "getIsTimeout"
+        },
+        {
+          "methodName": "getFormat"
+        },
+        {
+          "methodName": "getActiveBreakpoints"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.Statistician",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.api.client.util.DateTime",
+      "methods": [
+        {
+          "methodName": "<init>"
+        },
+        {
+          "methodName": "parseRfc3339"
+        },
+        {
+          "methodName": "toStringRfc3339"
+        },
+        {
+          "methodName": "getValue"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    }
+  ]
+}

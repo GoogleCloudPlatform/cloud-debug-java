@@ -60,7 +60,6 @@ TARGET_TAR_GZ_APPENGINE = $(BUILD_TARGET_PATH)/cdbg_java_agent.tar.gz
 TARGET_TAR_GZ_GCE = $(BUILD_TARGET_PATH)/cdbg_java_agent_gce.tar.gz
 TARGET_TAR_GZ_SERVICE_ACCOUNT = $(BUILD_TARGET_PATH)/cdbg_java_agent_service_account.tar.gz
 TARGET_VERSION_TXT = $(BUILD_TARGET_PATH)/version.txt
-CDBG_CONFIG_XML = cdbg_config.xml
 APPENGINE_FORMAT_SCRIPT = format-env-appengine-vm.sh
 
 ANTLR_RUNTIME_SOURCES = \
@@ -210,21 +209,21 @@ $(INTERNALS_JAR_STRIPPED): $(INTERNALS_JAR_FULL)
 	java -jar $(JARJAR_PATH) process strip_service_account_auth_jarjar_rules.txt $(INTERNALS_JAR_FULL) $(INTERNALS_JAR_STRIPPED)
 
 # Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
-$(TARGET_TAR_GZ_APPENGINE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
+$(TARGET_TAR_GZ_APPENGINE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
+	tar cfvz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
 
 # Java Cloud Debugger package used on GCE with metadata service 
 # authentication (default and recommended solution)
-$(TARGET_TAR_GZ_GCE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML)
+$(TARGET_TAR_GZ_GCE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
+	tar cfvz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar
 
 # Java Cloud Debugger package used on GCE with service account authentication 
 # (fallback solution used when metadata service authentication can't be used). 
-$(TARGET_TAR_GZ_SERVICE_ACCOUNT): $(TARGET_AGENT) $(INTERNALS_JAR_FULL) $(CDBG_CONFIG_XML)
+$(TARGET_TAR_GZ_SERVICE_ACCOUNT): $(TARGET_AGENT) $(INTERNALS_JAR_FULL)
 	cp $(INTERNALS_JAR_FULL) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
+	tar cfvz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar
 
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account

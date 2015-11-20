@@ -474,47 +474,6 @@ bool JavaClass::LoadWithClassLoader(
 }
 
 
-bool JavaClass::DefineClass(
-    const char* class_name,
-    const std::vector<jbyte>& class_code) {
-  ReleaseRef();
-
-  JavaClass class_loader_cls;
-  if (!class_loader_cls.FindWithJNI("java/lang/ClassLoader")) {
-    return false;
-  }
-
-  jmethodID get_system_class_loader_method = class_loader_cls.GetStaticMethod(
-      "getSystemClassLoader",
-      "()Ljava/lang/ClassLoader;");
-  if (get_system_class_loader_method == nullptr) {
-    return false;
-  }
-
-  JniLocalRef system_class_loader(jni()->CallStaticObjectMethod(
-      class_loader_cls.get(),
-      get_system_class_loader_method));
-
-  JniLocalRef cls_local_ref(jni()->DefineClass(
-      class_name,
-      system_class_loader.get(),
-      &class_code[0],
-      class_code.size()));
-
-  if (!JniCheckNoException("DefineClass")) {
-    return false;
-  }
-
-  if (cls_local_ref == nullptr) {
-    LOG(ERROR) << "New class could not be loaded into JVM, class name: "
-               << class_name;
-    return false;
-  }
-
-  return Assign(static_cast<jclass>(cls_local_ref.get()));
-}
-
-
 void JavaClass::ReleaseRef() {
   cls_ = nullptr;
 }

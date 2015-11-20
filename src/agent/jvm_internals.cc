@@ -27,6 +27,8 @@ DECLARE_bool(enable_transformer);
 namespace devtools {
 namespace cdbg {
 
+#include "internals_class_loader_static_defs.inl"
+
 // Name of the ClassLoader class that we are loading from
 // "cdbg_java_agent_internals_loader.class".
 static constexpr char kClassLoaderClassPath[] =
@@ -43,28 +45,6 @@ static constexpr char kFormatMessageClassName[] =
 
 static constexpr char kFormatMessageClassSignature[] =
     "Lcom/google/devtools/cdbg/debuglets/java/FormatMessage;";
-
-// Loads the content of "cdbg_java_agent_internals_loader.class" file expected
-// to be present in agentdir. Returns empty buffer if the file is not there.
-static std::vector<jbyte> GetClassLoaderBinary(const string& agentdir) {
-  const string classloader_path =
-      agentdir + "/cdbg_java_agent_internals_loader.class";
-
-  LOG(INFO) << "Loading class loader from " << classloader_path;
-
-  // Open the file:
-  std::ifstream file(classloader_path, std::ios::binary);
-  if (!file.is_open()) {
-    LOG(ERROR) << "Class loader file not found: " << classloader_path;
-    return std::vector<jbyte>();
-  }
-
-  // Read the data
-  return std::vector<jbyte>(
-      std::istreambuf_iterator<char>(file),
-      std::istreambuf_iterator<char>());
-}
-
 
 bool JvmInternals::LoadInternals(const string& agentdir) {
   if (!LoadClassLoader(agentdir)) {
@@ -320,21 +300,23 @@ std::set<string> JvmInternals::ReadApplicationResource(
 bool JvmInternals::LoadClassLoader(const string& agentdir) {
   DCHECK(class_loader_obj_ == nullptr);
 
-  // Load the class loader binary.
-  std::vector<jbyte> class_loader = GetClassLoaderBinary(agentdir);
-  if (class_loader.empty()) {
-    LOG(ERROR) << "InternalsClassLoader not available";
-    return false;
-  }
-
   // Load the class in JVM.
-  JavaClass class_loader_cls;
-  if (!class_loader_cls.DefineClass(
-        kClassLoaderClassPath,
-        class_loader)) {
+  auto define_class_rc = CatchOr(
+      "DefineClass",
+      JniLocalRef(jni()->DefineClass(
+          kClassLoaderClassPath,
+          GetSystemClassLoader(),
+          reinterpret_cast<const jbyte*>(
+              kcdbg_java_agent_internals_loader_class),
+          arraysize(kcdbg_java_agent_internals_loader_class))))
+      .Release(ExceptionAction::LOG_AND_IGNORE);
+  if (define_class_rc == nullptr) {
     LOG(ERROR) << "InternalsClassLoader could not be loaded into JVM";
     return false;
   }
+
+  JavaClass class_loader_cls;
+  class_loader_cls.Assign(static_cast<jclass>(define_class_rc.get()));
 
   jmethodID constructor_method =
       class_loader_cls.GetConstructor("(Ljava/lang/String;)V");

@@ -81,11 +81,6 @@ class JavaClass {
       jobject class_loader_obj,
       const char* class_name);
 
-  // Creates a new class from the binary BLOB.
-  bool DefineClass(
-      const char* class_name,
-      const std::vector<jbyte>& class_code);
-
   // Releases the global reference to Java class object. This function must be
   // called before this class is destroyed.
   void ReleaseRef();

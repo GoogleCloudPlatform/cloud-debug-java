@@ -52,6 +52,7 @@ INCLUDES = \
 
 TARGET_AGENT = cdbg_java_agent.so
 INTERNALS_CLASS_LOADER = cdbg_java_agent_internals_loader.class
+INTERNALS_CLASS_LOADER_STATIC_DEFS = internals_class_loader_static_defs.inl
 INTERNALS_JAR_FULL = internals_full.jar
 INTERNALS_JAR_STRIPPED = internals_stripped.jar
 SERVICE_ACCOUNT_AUTH_TOOL = $(BUILD_TARGET_PATH)/cdbg_service_account_auth.jar
@@ -170,7 +171,7 @@ else
 	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR_FULL)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json .
 endif
 
-$(TARGET_AGENT): $(SOURCES) $(HEADERS) $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS) $(JNI_PROXIES_GENERATED_SOURCES) $(JNI_PROXIES_GENERATED_HEADERS)
+$(TARGET_AGENT): $(SOURCES) $(HEADERS) $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS) $(JNI_PROXIES_GENERATED_SOURCES) $(JNI_PROXIES_GENERATED_HEADERS) $(INTERNALS_CLASS_LOADER_STATIC_DEFS)
 	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) $(LDFLAGS) $(SOURCES) $(LIBS) -o $(TARGET_AGENT) $(LDS_FLAGS)
 
 $(INTERNALS_CLASS_LOADER):
@@ -181,6 +182,9 @@ else
 	cd internals-class-loader ; javac -g:none -d target src/main/java/com/google/devtools/cdbg/*.java
 endif
 	cp internals-class-loader/target/com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $(INTERNALS_CLASS_LOADER)
+
+$(INTERNALS_CLASS_LOADER_STATIC_DEFS): $(INTERNALS_CLASS_LOADER)
+	python ../codegen/static_def_gen.py $@ .:^$(INTERNALS_CLASS_LOADER)$
 
 $(INTERNALS_JAR_FULL):
 ifeq ($(JAVA_BUILD),maven)
@@ -206,21 +210,21 @@ $(INTERNALS_JAR_STRIPPED): $(INTERNALS_JAR_FULL)
 	java -jar $(JARJAR_PATH) process strip_service_account_auth_jarjar_rules.txt $(INTERNALS_JAR_FULL) $(INTERNALS_JAR_STRIPPED)
 
 # Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
-$(TARGET_TAR_GZ_APPENGINE): $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
+$(TARGET_TAR_GZ_APPENGINE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
+	tar cfvz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML) $(APPENGINE_FORMAT_SCRIPT)
 
 # Java Cloud Debugger package used on GCE with metadata service 
 # authentication (default and recommended solution)
-$(TARGET_TAR_GZ_GCE): $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML)
+$(TARGET_TAR_GZ_GCE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(CDBG_CONFIG_XML)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
+	tar cfvz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
 
 # Java Cloud Debugger package used on GCE with service account authentication 
 # (fallback solution used when metadata service authentication can't be used). 
-$(TARGET_TAR_GZ_SERVICE_ACCOUNT): $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) $(INTERNALS_JAR_FULL) $(CDBG_CONFIG_XML)
+$(TARGET_TAR_GZ_SERVICE_ACCOUNT): $(TARGET_AGENT) $(INTERNALS_JAR_FULL) $(CDBG_CONFIG_XML)
 	cp $(INTERNALS_JAR_FULL) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) $(INTERNALS_CLASS_LOADER) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
+	tar cfvz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(CDBG_CONFIG_XML)
 
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account

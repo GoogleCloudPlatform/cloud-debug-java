@@ -501,30 +501,34 @@ std::unique_ptr<Config> DefaultConfig() {
   Config::Builder builder;
 
   if (FLAGS_enable_safe_caller) {
-    Config::Method::CallQuota expression_method_call_quota;
+    Config::MethodCallQuota expression_method_call_quota;
     expression_method_call_quota.max_classes_load =
         FLAGS_expression_max_classes_load_quota;
     expression_method_call_quota.max_interpreter_instructions =
         FLAGS_expression_max_interpreter_instructions_quota;
 
-    Config::Method::CallQuota pretty_printers_method_call_quota;
+    Config::MethodCallQuota pretty_printers_method_call_quota;
     pretty_printers_method_call_quota.max_classes_load =
         FLAGS_pretty_printers_max_classes_load_quota;
     pretty_printers_method_call_quota.max_interpreter_instructions =
         FLAGS_pretty_printers_max_interpreter_instructions_quota;
 
-    Config::Method::CallQuota dynamic_log_method_call_quota;
+    Config::MethodCallQuota dynamic_log_method_call_quota;
     dynamic_log_method_call_quota.max_classes_load =
         FLAGS_dynamic_log_max_classes_load_quota;
     dynamic_log_method_call_quota.max_interpreter_instructions =
         FLAGS_dynamic_log_max_interpreter_instructions_quota;
 
     builder.SetDefaultMethodRule(InterpretAll().build());
-    builder.SetQuotas(
-        expression_method_call_quota,
-        pretty_printers_method_call_quota,
+    builder.SetQuota(
+        Config::EXPRESSION_EVALUATION,
+        expression_method_call_quota);
+    builder.SetQuota(
+        Config::PRETTY_PRINTERS,
+        pretty_printers_method_call_quota);
+    builder.SetQuota(
+        Config::DYNAMIC_LOG,
         dynamic_log_method_call_quota);
-
   } else {
     builder.SetDefaultMethodRule(BlockAll().build());
   }

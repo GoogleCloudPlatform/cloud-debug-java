@@ -15,7 +15,7 @@ using devtools::cdbg::nanojava::NanoJavaInterpreter;
 
 SafeMethodCaller::SafeMethodCaller(
     const Config* config,
-    Config::Method::CallQuota quota,
+    Config::MethodCallQuota quota,
     ClassIndexer* class_indexer,
     ClassFilesCache* class_files_cache)
     : config_(config),

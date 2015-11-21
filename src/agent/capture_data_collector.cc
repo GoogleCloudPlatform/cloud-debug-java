@@ -71,7 +71,7 @@ void CaptureDataCollector::Collect(
       // We don't expect any methods to be called while reading fields.
       SafeMethodCaller method_caller(
           &config,
-          Config::Method::CallQuota(),  // Default quota of zero for everything.
+          Config::MethodCallQuota(),  // Default quota of zero for everything.
           class_indexer,
           class_files_cache);
 
@@ -109,7 +109,7 @@ void CaptureDataCollector::Collect(
     } else if (watches[i].evaluator != nullptr) {
       SafeMethodCaller method_caller(
           &config,
-          config.expression_method_call_quota(),
+          config.GetQuota(Config::EXPRESSION_EVALUATION),
           class_indexer,
           class_files_cache);
 
@@ -144,7 +144,7 @@ void CaptureDataCollector::Collect(
 
   SafeMethodCaller method_caller(
       &config,
-      config.pretty_printers_method_call_quota(),
+      config.GetQuota(Config::PRETTY_PRINTERS),
       class_indexer,
       class_files_cache);
 

@@ -53,20 +53,6 @@ class Config {
       Interpret,
     };
 
-    // Defines quota on how much time and memory we are ready to spend in safe
-    // method caller. The quota is contextual: e.g. all method calls in a single
-    // instance of dynamic log. It is not per-method.
-    struct CallQuota {
-      // Maximum number of classes that the code is allowed to load during
-      // method execution. Each class load takes between 100-400 microseconds.
-      int32 max_classes_load { 0 };
-
-      // Maximum number of instructions that the NanoJava interpreter is allowed
-      // to execute. Note that each instruction has a different cost, so this
-      // limit does not provide exact timing guarantees.
-      int32 max_interpreter_instructions { 0 };
-    };
-
     // Method name. If empty matches any method.
     string name;
 
@@ -103,6 +89,37 @@ class Config {
     bool returns_temporary_object = false;
   };
 
+  // Defines quota on how much time and memory we are ready to spend in safe
+  // method caller. The quota is contextual: e.g. all method calls in a single
+  // instance of dynamic log. It is not per-method.
+  struct MethodCallQuota {
+    // Maximum number of classes that the code is allowed to load during
+    // method execution. Each class load takes between 100-400 microseconds.
+    int32 max_classes_load { 0 };
+
+    // Maximum number of instructions that the NanoJava interpreter is allowed
+    // to execute. Note that each instruction has a different cost, so this
+    // limit does not provide exact timing guarantees.
+    int32 max_interpreter_instructions { 0 };
+  };
+
+  // Defines the type of quota (i.e. where the quota is used).
+  enum MethodCallQuotaType {
+    // Call quota for expression evaluation (used in conditions and watched
+    // expressions).
+    EXPRESSION_EVALUATION,
+
+    // Call quota for pretty printers. For example pretty printers will invoke
+    // "iterator()" method on all classes implementing "Iterable" interface.
+    PRETTY_PRINTERS,
+
+    // Call quota for dynamic logs.
+    DYNAMIC_LOG,
+
+    // Total number of different quota types. Not to be used.
+    MAX_TYPES
+  };
+
   // Builds the immutable debuglet configuration. This class is not thread safe.
   class Builder {
    public:
@@ -122,10 +139,9 @@ class Config {
     // the method rules set with "SetClassConfig" and "AddMethodRule" match.
     Builder& SetDefaultMethodRule(Method rule);
 
-    Builder& SetQuotas(
-        const Method::CallQuota& expression_method_call_quota,
-        const Method::CallQuota& pretty_printers_method_call_quota,
-        const Method::CallQuota& dynamic_log_method_call_quota);
+    Builder& SetQuota(
+        MethodCallQuotaType quota_type,
+        const MethodCallQuota& quota);
 
     std::unique_ptr<Config> Build() { return std::move(config_); }
 
@@ -151,22 +167,10 @@ class Config {
       const string& method_name,
       const string& method_signature) const;
 
-  // Gets the method call quota for expression evaluation (used in conditions
-  // and watched expressions).
-  const Method::CallQuota& expression_method_call_quota() const {
-    return expression_method_call_quota_;
-  }
-
-  // Gets the method call quota for pretty printers. For example pretty
-  // printers will invoke "iterator()" method on all classes implementing
-  // "Iterable" interface.
-  const Method::CallQuota& pretty_printers_method_call_quota() const {
-    return pretty_printers_method_call_quota_;
-  }
-
-  // Gets the method call quota for dynamic logs.
-  const Method::CallQuota& dynamic_log_method_call_quota() const {
-    return dynamic_log_method_call_quota_;
+  // Gets the method call quota for the specified use.
+  const MethodCallQuota& GetQuota(MethodCallQuotaType type) const {
+    DCHECK((type >= 0) && (type < arraysize(quota_)));
+    return quota_[type];
   }
 
  private:
@@ -184,16 +188,8 @@ class Config {
   // configuration.
   Method default_rule_;
 
-  // Method call quota for expression evaluation (used in conditions and
-  // watched expressions).
-  Method::CallQuota expression_method_call_quota_;
-
-  // Method call quota for pretty printers. For example pretty printers
-  // will invoke "iterator()" method on all classes implementing "Iterable".
-  Method::CallQuota pretty_printers_method_call_quota_;
-
-  // Method call quota for dynamic logs.
-  Method::CallQuota dynamic_log_method_call_quota_;
+  // Method call quotas.
+  MethodCallQuota quota_[MAX_TYPES];
 
   DISALLOW_COPY_AND_ASSIGN(Config);
 };

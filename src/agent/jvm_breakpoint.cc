@@ -406,7 +406,7 @@ void JvmBreakpoint::DoLogAction(
 
   SafeMethodCaller method_caller(
       evaluators_->config,
-      evaluators_->config->dynamic_log_method_call_quota(),
+      evaluators_->config->GetQuota(Config::DYNAMIC_LOG),
       evaluators_->class_indexer,
       evaluators_->class_files_cache);
 
@@ -430,7 +430,7 @@ bool JvmBreakpoint::EvaluateCondition(
     jthread thread) {
   SafeMethodCaller method_caller(
       evaluators_->config,
-      evaluators_->config->expression_method_call_quota(),
+      evaluators_->config->GetQuota(Config::EXPRESSION_EVALUATION),
       evaluators_->class_indexer,
       evaluators_->class_files_cache);
 

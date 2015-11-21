@@ -108,14 +108,11 @@ Config::Builder& Config::Builder::SetDefaultMethodRule(Config::Method rule) {
 }
 
 
-Config::Builder& Config::Builder::SetQuotas(
-    const Config::Method::CallQuota& expression_method_call_quota,
-    const Config::Method::CallQuota& pretty_printers_method_call_quota,
-    const Config::Method::CallQuota& dynamic_log_method_call_quota) {
-  config_->expression_method_call_quota_ = expression_method_call_quota;
-  config_->pretty_printers_method_call_quota_ =
-      pretty_printers_method_call_quota;
-  config_->dynamic_log_method_call_quota_ = dynamic_log_method_call_quota;
+Config::Builder& Config::Builder::SetQuota(
+    Config::MethodCallQuotaType type,
+    const Config::MethodCallQuota& quota) {
+  DCHECK((type >= 0) && (type < arraysize(quota_)));
+  config_->quota_[type] = quota;
 
   return *this;
 }

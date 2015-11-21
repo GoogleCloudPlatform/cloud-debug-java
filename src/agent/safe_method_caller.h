@@ -31,7 +31,7 @@ class SafeMethodCaller
   // printers, hence passing it explicitly, rather than getting from "config".
   SafeMethodCaller(
       const Config* config,
-      Config::Method::CallQuota quota,
+      Config::MethodCallQuota quota,
       ClassIndexer* class_indexer,
       ClassFilesCache* class_files_cache);
 
@@ -173,7 +173,7 @@ class SafeMethodCaller
 
   // Quota settings for method calls invoked by this instance
   // of "SafeMethodCaller".
-  const Config::Method::CallQuota quota_;
+  const Config::MethodCallQuota quota_;
 
   // Resolves class signature to java.lang.Class<?> objects.
   ClassIndexer* const class_indexer_;

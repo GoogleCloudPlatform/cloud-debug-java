@@ -17,7 +17,6 @@
 #include "jvm_class_metadata_reader.h"
 
 #include <algorithm>
-#include <set>
 #include "jni_utils.h"
 #include "jvm_instance_field_reader.h"
 #include "jvm_static_field_reader.h"
@@ -85,112 +84,25 @@ JvmClassMetadataReader::GetClassMetadata(jclass cls) {
 
 
 void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
-  int err = JVMTI_ERROR_NONE;
-
-  JvmtiBuffer<char> signature_buffer;
-  err = jvmti()->GetClassSignature(cls, signature_buffer.ref(), nullptr);
-  if (err != JVMTI_ERROR_NONE) {
-    LOG(ERROR) << "GetClassSignature failed, error: " << err;
+  string signature = GetClassSignature(cls);
+  if (signature.empty()) {
     return;
   }
 
-  metadata->signature = JSignatureFromSignature(signature_buffer.get());
-
-  JniLocalRef current_class_ref;
+  metadata->signature = JSignatureFromSignature(signature);
 
   // Start from the current class and go down the inheritance chain.
-  current_class_ref.reset(jni()->NewLocalRef(cls));
+  JniLocalRef current_class_ref = JniNewLocalRef(cls);
 
   // Maintain set of methods we discovered in superclasses to ignore those
   // in base classes. The pair stores method name and signature.
   std::set<std::pair<string, string>> registered_methods;
 
   while (current_class_ref != nullptr) {
-    JvmtiBuffer<char> class_signature_buffer;
-    err = jvmti()->GetClassSignature(
+    LoadSingleClassMetadata(
         static_cast<jclass>(current_class_ref.get()),
-        class_signature_buffer.ref(),
-        nullptr);
-    if (err != JVMTI_ERROR_NONE) {
-      // If we cannot load some ancestors, we will simply stop at that level
-      // and display all that we could retrieve.
-      LOG(ERROR) << "GetClassSignature failed, error: " << err;
-      break;
-    }
-
-    string class_signature = class_signature_buffer.get();
-
-    // Load list of all the fields of the class. This includes both member
-    // and static fields.
-    jint cls_fields_count = 0;
-    JvmtiBuffer<jfieldID> cls_fields;
-    err = jvmti()->GetClassFields(
-        static_cast<jclass>(current_class_ref.get()),
-        &cls_fields_count,
-        cls_fields.ref());
-
-    if (err != JVMTI_ERROR_NONE) {
-      LOG(ERROR) << "GetClassFields failed, error: " << err;
-    } else {
-      // Walk fields in reverse order so that the fields from the base class
-      // show up before the fields from the subclass.
-      for (int i = cls_fields_count - 1; i >= 0; --i) {
-        LoadFieldInfo(
-            static_cast<jclass>(current_class_ref.get()),
-            class_signature,
-            cls_fields.get()[i],
-            metadata);
-      }
-    }
-
-    // Load list of all the methods of the class.
-    jint methods_count = 0;
-    JvmtiBuffer<jmethodID> methods;
-    err = jvmti()->GetClassMethods(
-        static_cast<jclass>(current_class_ref.get()),
-        &methods_count,
-        methods.ref());
-    if (err != JVMTI_ERROR_NONE) {
-      LOG(ERROR) << "GetClassMethods failed, error: " << err;
-    } else {
-      // Load metadata of each method. We don't care about the order of methods
-      // in the list.
-      for (int i = 0; i < methods_count; ++i) {
-        Method method_metadata = LoadMethodInfo(
-            static_cast<jclass>(current_class_ref.get()),
-            class_signature,
-            methods.get()[i]);
-
-        if (method_metadata.name.empty()) {
-          continue;
-        }
-
-        // If two instance methods have the same arguments, the one in the
-        // superclass overrides the one in the base class. This will be true
-        // even if return types are difference (this is called covariance).
-        std::pair<string, string> key;
-        if (method_metadata.is_static()) {
-          key = {
-            method_metadata.name,
-            method_metadata.signature
-          };
-        } else {
-          key = {
-            method_metadata.name,
-            TrimReturnType(method_metadata.signature)
-          };
-        }
-
-        // Skip base class methods that the inherited classes overwrote.
-        if (registered_methods.find(key) != registered_methods.end()) {
-          continue;
-        }
-
-        // Add the method to the registry.
-        registered_methods.insert(std::move(key));
-        metadata->methods.push_back(std::move(method_metadata));
-      }
-    }
+        &registered_methods,
+        metadata);
 
     // Free the current local reference and allocate a new local reference
     // corresponding to the superclass of "current_class_ref".
@@ -206,6 +118,87 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
   std::reverse(
       metadata->static_fields.begin(),
       metadata->static_fields.end());
+}
+
+
+void JvmClassMetadataReader::LoadSingleClassMetadata(
+    jclass cls,
+    std::set<std::pair<string, string>>* registered_methods,
+    Entry* metadata) {
+  jvmtiError err = JVMTI_ERROR_NONE;
+
+  string class_signature = GetClassSignature(cls);
+  if (class_signature.empty()) {
+    return;
+  }
+
+  // Load list of all the fields of the class. This includes both member
+  // and static fields.
+  jint cls_fields_count = 0;
+  JvmtiBuffer<jfieldID> cls_fields;
+  err = jvmti()->GetClassFields(cls, &cls_fields_count, cls_fields.ref());
+  if (err != JVMTI_ERROR_NONE) {
+    LOG(ERROR) << "GetClassFields failed, error: " << err;
+  } else {
+    // Walk fields in reverse order so that the fields from the base class
+    // show up before the fields from the subclass.
+    for (int i = cls_fields_count - 1; i >= 0; --i) {
+      LoadFieldInfo(
+          cls,
+          class_signature,
+          cls_fields.get()[i],
+          metadata);
+    }
+  }
+
+  // Load list of all the methods of the class.
+  jint methods_count = 0;
+  JvmtiBuffer<jmethodID> methods;
+  err = jvmti()->GetClassMethods(
+      cls,
+      &methods_count,
+      methods.ref());
+  if (err != JVMTI_ERROR_NONE) {
+    LOG(ERROR) << "GetClassMethods failed, error: " << err;
+  } else {
+    // Load metadata of each method. We don't care about the order of methods
+    // in the list.
+    for (int i = 0; i < methods_count; ++i) {
+      Method method_metadata = LoadMethodInfo(
+          cls,
+          class_signature,
+          methods.get()[i]);
+
+      if (method_metadata.name.empty()) {
+        continue;
+      }
+
+      // If two instance methods have the same arguments, the one in the
+      // superclass overrides the one in the base class. This will be true
+      // even if return types are difference (this is called covariance).
+      std::pair<string, string> key;
+      if (method_metadata.is_static()) {
+        key = {
+          method_metadata.name,
+          method_metadata.signature
+        };
+      } else {
+        key = {
+          method_metadata.name,
+          TrimReturnType(method_metadata.signature)
+        };
+      }
+
+      // Skip base class methods that the inherited classes overwrote.
+      if (registered_methods->find(key) != registered_methods->end()) {
+        continue;
+      }
+
+      // Add the method to the registry.
+      registered_methods->insert(std::move(key));
+      metadata->methods.push_back(std::move(method_metadata));
+    }
+  }
 }
 
 

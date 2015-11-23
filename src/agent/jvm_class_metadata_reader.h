@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <memory>
+#include <set>
 #include "common.h"
 #include "class_metadata_reader.h"
 #include "jobject_map.h"
@@ -71,9 +72,15 @@ class JvmClassMetadataReader : public ClassMetadataReader {
   const Entry& GetClassMetadata(jclass cls) override;
 
  private:
-  // Loads metadata of Java class into "metadata". The function assumes
-  // previously uninitialized structure.
+  // Loads metadata of Java class and its superclasses into "metadata". The
+  // function assumes previously uninitialized structure.
   void LoadClassMetadata(jclass cls, Entry* metadata);
+
+  // Loads metadata of a single Java class ignoring overloaded methods.
+  void LoadSingleClassMetadata(
+      jclass cls,
+      std::set<std::pair<string, string>>* registered_methods,
+      Entry* metadata);
 
   // Loads class field and appends it to the appropriate list in "metadata".
   // In case of error, the field is skipped and "metadata" is not changed.

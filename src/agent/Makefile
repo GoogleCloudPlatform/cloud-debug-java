@@ -49,6 +49,9 @@ INCLUDES = \
 	-I/usr/lib/jvm/java-7-openjdk-amd64/include \
 	-I$(THIRD_PARTY_INCLUDE_PATH) \
 	-I$(ANTLR_CPP_LIB_INCLUDE) \
+	-I. \
+	-I../codegen \
+	-Iantlrgen \
 
 TARGET_AGENT = cdbg_java_agent.so
 INTERNALS_CLASS_LOADER = cdbg_java_agent_internals_loader.class
@@ -105,30 +108,36 @@ JAVA_EXPRESSION_GRAMMAR_FILE = \
 	java_expression.g \
 
 ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES = \
-	JavaExpressionCompiler.cc \
-	JavaExpressionLexer.cc \
-	JavaExpressionParser.cc \
+	antlrgen/JavaExpressionCompiler.cc \
+	antlrgen/JavaExpressionLexer.cc \
+	antlrgen/JavaExpressionParser.cc \
 
 ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS = \
-	JavaExpressionCompiler.hpp \
-	JavaExpressionCompilerTokenTypes.hpp \
-	JavaExpressionLexer.hpp \
-	JavaExpressionLexerTokenTypes.hpp \
-	JavaExpressionParser.hpp \
-	JavaExpressionParserTokenTypes.hpp \
+	antlrgen/JavaExpressionCompiler.hpp \
+	antlrgen/JavaExpressionCompilerTokenTypes.hpp \
+	antlrgen/JavaExpressionLexer.hpp \
+	antlrgen/JavaExpressionLexerTokenTypes.hpp \
+	antlrgen/JavaExpressionParser.hpp \
+	antlrgen/JavaExpressionParserTokenTypes.hpp \
 
 JNI_PROXIES_GENERATED_SOURCES = \
-	jni_proxy_*.cc \
+	../codegen/jni_proxy_*.cc \
 
 JNI_PROXIES_GENERATED_HEADERS = \
-	jni_proxy_*.h \
+	../codegen/jni_proxy_*.h \
 
-SOURCES = \
-	*.cc \
+JNI_PROXIES_GENERATED_OBJECTS = \
+	jni_proxy_*.o \
+
+SOURCES := \
+	$(wildcard *.cc) \
+	$(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) \
 	$(ANTLR_RUNTIME_SOURCES) \
 
-HEADERS = \
-	*.h \
+OBJECTS=$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(SOURCES)))
+
+HEADERS := \
+	$(wildcard *.h) \
 
 LIBS= \
 	-lrt \
@@ -150,28 +159,39 @@ SPACE := $(empty) $(empty)
 GOOGLE_API_CLIENT_JARS_CLASS_PATH := $(subst $(SPACE),:,$(GOOGLE_API_CLIENT_JARS))
 
 all: \
-	$(TARGET_TAR_GZ_APPENGINE) \
-	$(TARGET_TAR_GZ_GCE) \
-	$(TARGET_TAR_GZ_SERVICE_ACCOUNT) \
+	packages \
 	$(SERVICE_ACCOUNT_AUTH_TOOL) \
 	$(TARGET_VERSION_TXT) \
 
-$(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): $(JAVA_EXPRESSION_GRAMMAR_FILE)
-	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool $(JAVA_EXPRESSION_GRAMMAR_FILE)
+antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
+	mkdir antlrgen
+	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE) 
 
-$(JNI_PROXIES_GENERATED_SOURCES) $(JNI_PROXIES_GENERATED_HEADERS): $(INTERNALS_JAR_FULL)
+$(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen
+
+
+jni_proxies_src: $(INTERNALS_JAR_FULL)
 ifeq ($(JAVA_BUILD),maven)
 	cd ../codegen && mvn clean install
-	java -cp "../codegen/target/jni_proxy_code_gen_tool-SNAPSHOT-jar-with-dependencies.jar" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json .
+	java -cp "../codegen/target/jni_proxy_code_gen_tool-SNAPSHOT-jar-with-dependencies.jar" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
 else
 	mkdir -p ../codegen/target
 	cd ../codegen ; javac -g -cp "$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH)" -d target src/main/java/devtools/cdbg/debuglets/java/codegen/*.java
 	cp ../codegen/src/main/java/devtools/cdbg/debuglets/java/codegen/*.tpl ../codegen/target/devtools/cdbg/debuglets/java/codegen
-	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR_FULL)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json .
+	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR_FULL)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
 endif
 
-$(TARGET_AGENT): $(SOURCES) $(HEADERS) $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS) $(JNI_PROXIES_GENERATED_SOURCES) $(JNI_PROXIES_GENERATED_HEADERS) $(INTERNALS_CLASS_LOADER_STATIC_DEFS)
-	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) $(LDFLAGS) $(SOURCES) $(LIBS) -o $(TARGET_AGENT) $(LDS_FLAGS)
+%.o: %.cpp antlrgen
+	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $< -o $@
+
+%.o: %.cc $(HEADERS) antlrgen jni_proxies_src $(INTERNALS_CLASS_LOADER_STATIC_DEFS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $< -o $@
+
+jni_proxies_obj: jni_proxies_src
+	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $(JNI_PROXIES_GENERATED_SOURCES)
+
+$(TARGET_AGENT): $(OBJECTS) jni_proxies_obj
+	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) $(LDFLAGS) $(OBJECTS) $(JNI_PROXIES_GENERATED_OBJECTS) $(LIBS) -o $(TARGET_AGENT) $(LDS_FLAGS)
 
 $(INTERNALS_CLASS_LOADER):
 ifeq ($(JAVA_BUILD),maven)
@@ -208,22 +228,20 @@ endif
 $(INTERNALS_JAR_STRIPPED): $(INTERNALS_JAR_FULL)
 	java -jar $(JARJAR_PATH) process strip_service_account_auth_jarjar_rules.txt $(INTERNALS_JAR_FULL) $(INTERNALS_JAR_STRIPPED)
 
-# Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
-$(TARGET_TAR_GZ_APPENGINE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(APPENGINE_FORMAT_SCRIPT)
+# Generate packages:
+# 1. Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
+# 2. Java Cloud Debugger package used on GCE with metadata service
+#    authentication (default and recommended solution)
+# 3. Java Cloud Debugger package used on GCE with service account authentication
+#    (fallback solution used when metadata service authentication can't be
+#    used).
+packages: $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(INTERNALS_JAR_FULL) $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
-
-# Java Cloud Debugger package used on GCE with metadata service 
-# authentication (default and recommended solution)
-$(TARGET_TAR_GZ_GCE): $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED)
+	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar
-
-# Java Cloud Debugger package used on GCE with service account authentication 
-# (fallback solution used when metadata service authentication can't be used). 
-$(TARGET_TAR_GZ_SERVICE_ACCOUNT): $(TARGET_AGENT) $(INTERNALS_JAR_FULL)
+	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar
 	cp $(INTERNALS_JAR_FULL) cdbg_java_agent_internals.jar
-	tar cfvz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar
+	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar
 
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account

@@ -40,6 +40,9 @@ JSONCPP_URL=https://github.com/open-source-parsers/jsoncpp/tarball/3a0c4fcc82d25
 
 ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 
+# Parallelize the build over N threads where N is the number of cores * 1.5.
+PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
+
 # Clean up any previous build files.
 rm -rf ${ROOT}/third_party/gflags* \
        ${ROOT}/third_party/glog* \
@@ -57,7 +60,7 @@ cmake -DCMAKE_CXX_FLAGS=-fpic \
       -DGFLAGS_NAMESPACE=google \
       -DCMAKE_INSTALL_PREFIX:PATH=${ROOT}/third_party/install \
       ..
-make
+make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
@@ -69,7 +72,7 @@ cd glog-*
 ./configure --with-pic \
             --prefix=${ROOT}/third_party/install \
             --with-gflags=${ROOT}/third_party/install
-make
+make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
@@ -83,13 +86,14 @@ cd build
 cmake -DCMAKE_CXX_FLAGS=-fpic \
       -DCMAKE_INSTALL_PREFIX:PATH=${ROOT}/third_party/install \
       ..
-make
+make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
 # Build the debugger agent.
 pushd ${ROOT}/src/agent
-make BUILD_TARGET_PATH=${ROOT} \
+make ${PARALLEL_BUILD_OPTION} \
+     BUILD_TARGET_PATH=${ROOT} \
      THIRD_PARTY_LIB_PATH=${ROOT}/third_party/install/lib \
      THIRD_PARTY_INCLUDE_PATH=${ROOT}/third_party/install/include
 popd

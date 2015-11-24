@@ -401,6 +401,10 @@ static void SerializeModel(
     (*root)["value"] = Json::Value(model.value.value());
   }
 
+  if (!model.type.empty()) {
+    (*root)["type"] = Json::Value(model.type);
+  }
+
   if (model.var_table_index.has_value()) {
     (*root)["varTableIndex"] =
         Json::Value(static_cast<int>(model.var_table_index.value()));
@@ -427,6 +431,13 @@ std::unique_ptr<VariableModel> DeserializeModel<VariableModel>(
     model->value = JsonCppGetString(root, "value");
   } else {
     model->value.clear();
+  }
+
+  // Type.
+  if (root.isMember("type")) {
+    model->type = JsonCppGetString(root, "type");
+  } else {
+    model->type.clear();
   }
 
   // Reference to object in "variable_table".

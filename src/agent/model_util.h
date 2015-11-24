@@ -161,6 +161,7 @@ class VariableBuilder {
   explicit VariableBuilder(const VariableModel& source) {
     data_->name = source.name;
     data_->value = source.value;
+    data_->type = source.type;
     data_->var_table_index = source.var_table_index;
 
     data_->members.reserve(source.members.size());
@@ -194,6 +195,16 @@ class VariableBuilder {
 
   VariableBuilder& clear_value() {
     data_->value.clear();
+    return *this;
+  }
+
+  VariableBuilder& set_type(string type) {
+    data_->type = std::move(type);
+    return *this;
+  }
+
+  VariableBuilder& clear_type() {
+    data_->type.clear();
     return *this;
   }
 

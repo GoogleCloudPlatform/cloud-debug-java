@@ -64,6 +64,7 @@ struct SourceLocationModel {
 struct VariableModel {
   string name;
   Nullable<string> value;
+  string type;
   Nullable<uint64> var_table_index;
   std::vector<std::unique_ptr<VariableModel>> members;
   std::unique_ptr<StatusMessageModel> status;

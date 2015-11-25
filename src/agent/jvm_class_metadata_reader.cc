@@ -21,6 +21,7 @@
 #include "jvm_instance_field_reader.h"
 #include "jvm_static_field_reader.h"
 #include "jvmti_buffer.h"
+#include "jni_proxy_object.h"
 
 namespace devtools {
 namespace cdbg {
@@ -104,10 +105,27 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
         &registered_methods,
         metadata);
 
+    LoadImplementedInterfacesMetadata(
+        static_cast<jclass>(current_class_ref.get()),
+        &registered_methods,
+        metadata);
+
     // Free the current local reference and allocate a new local reference
     // corresponding to the superclass of "current_class_ref".
-    current_class_ref.reset(
+    JniLocalRef next(
         jni()->GetSuperclass(static_cast<jclass>(current_class_ref.get())));
+
+    // Don't skip "java.lang.Object" even if "cls" is an interface.
+    if ((next == nullptr) &&
+        !jni()->IsSameObject(current_class_ref.get(),
+                             jniproxy::Object()->GetClass())) {
+      LoadSingleClassMetadata(
+          jniproxy::Object()->GetClass(),
+          &registered_methods,
+          metadata);
+    }
+
+    current_class_ref = std::move(next);
   }
 
   // Reverse the the lists to accomodate for LoadFieldInfo appending new
@@ -118,6 +136,28 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
   std::reverse(
       metadata->static_fields.begin(),
       metadata->static_fields.end());
+}
+
+
+void JvmClassMetadataReader::LoadImplementedInterfacesMetadata(
+    jclass parent,
+    std::set<std::pair<string, string>>* registered_methods,
+    Entry* metadata) {
+  jvmtiError err = JVMTI_ERROR_NONE;
+
+  jint count = 0;
+  JvmtiBuffer<jclass> interfaces;
+  err = jvmti()->GetImplementedInterfaces(parent, &count, interfaces.ref());
+  if (err != JVMTI_ERROR_NONE) {
+    LOG(ERROR) << "GetImplementedInterfaces failed, error: " << err;
+    return;
+  }
+
+  for (int i = 0; i < count; ++i) {
+    jclass interface = interfaces.get()[i];
+    LoadSingleClassMetadata(interface, registered_methods, metadata);
+    LoadImplementedInterfacesMetadata(interface, registered_methods, metadata);
+  }
 }
 
 

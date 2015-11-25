@@ -76,6 +76,12 @@ class JvmClassMetadataReader : public ClassMetadataReader {
   // function assumes previously uninitialized structure.
   void LoadClassMetadata(jclass cls, Entry* metadata);
 
+  // Loads metadata of all implemented interfaces of a class.
+  void LoadImplementedInterfacesMetadata(
+      jclass parent,
+      std::set<std::pair<string, string>>* registered_methods,
+      Entry* metadata);
+
   // Loads metadata of a single Java class ignoring overloaded methods.
   void LoadSingleClassMetadata(
       jclass cls,

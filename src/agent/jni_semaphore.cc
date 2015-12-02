@@ -61,7 +61,7 @@ bool JniSemaphore::Initialize() {
   // enum values are objects.
   JavaClass time_unit_cls;
   if (!time_unit_cls.FindWithJNI("java/util/concurrent/TimeUnit")) {
-    return nullptr;
+    return false;
   }
 
   time_unit_ms_ = JniNewGlobalRef(

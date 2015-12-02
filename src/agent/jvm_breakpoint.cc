@@ -31,7 +31,6 @@
 #include "model.h"
 #include "model_util.h"
 #include "resolved_source_location.h"
-#include "safe_method_caller.h"
 #include "statistician.h"
 
 DEFINE_int32(
@@ -361,17 +360,9 @@ void JvmBreakpoint::DoCaptureAction(
 
   // Capture the data at a breakpoint hit and prepare it for formatting. The
   // formatting will happen in a worker thread at a later time.
-  std::unique_ptr<CaptureDataCollector> collector(new CaptureDataCollector);
-  collector->Collect(
-      *evaluators_->config,
-      evaluators_->class_files_cache,
-      evaluators_->eval_call_stack,
-      evaluators_->class_indexer,
-      evaluators_->class_metadata_reader,
-      evaluators_->method_locals,
-      evaluators_->object_evaluator,
-      state->watches(),
-      thread);
+  std::unique_ptr<CaptureDataCollector> collector(
+      new CaptureDataCollector(evaluators_));
+  collector->Collect(state->watches(), thread);
 
   // Enqueue the breakpoint result and deactivate the breakpoint.
   BreakpointBuilder builder(*definition_);
@@ -404,16 +395,13 @@ void JvmBreakpoint::DoLogAction(
     return;
   }
 
-  SafeMethodCaller method_caller(
-      evaluators_->config,
-      evaluators_->config->GetQuota(Config::DYNAMIC_LOG),
-      evaluators_->class_indexer,
-      evaluators_->class_files_cache);
+  std::unique_ptr<MethodCaller> method_caller =
+      evaluators_->method_caller_factory(Config::DYNAMIC_LOG);
 
   LogDataCollector collector;
 
   collector.Collect(
-      &method_caller,
+      method_caller.get(),
       evaluators_->object_evaluator,
       state->watches(),
       thread);
@@ -428,16 +416,13 @@ void JvmBreakpoint::DoLogAction(
 bool JvmBreakpoint::EvaluateCondition(
     const CompiledExpression& condition,
     jthread thread) {
-  SafeMethodCaller method_caller(
-      evaluators_->config,
-      evaluators_->config->GetQuota(Config::EXPRESSION_EVALUATION),
-      evaluators_->class_indexer,
-      evaluators_->class_files_cache);
+  std::unique_ptr<MethodCaller> method_caller =
+      evaluators_->method_caller_factory(Config::EXPRESSION_EVALUATION);
 
   EvaluationContext evaluation_context;
   evaluation_context.frame_depth = 0;  // Topmost call frame.
   evaluation_context.thread = thread;
-  evaluation_context.method_caller = &method_caller;
+  evaluation_context.method_caller = method_caller.get();
 
   ErrorOr<JVariant> condition_result =
       condition.evaluator->Evaluate(evaluation_context);

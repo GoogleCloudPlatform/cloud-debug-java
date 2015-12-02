@@ -140,6 +140,7 @@ HEADERS := \
 	$(wildcard *.h) \
 
 LIBS= \
+	-ldl \
 	-lrt \
 	-pthread \
 	$(THIRD_PARTY_LIB_PATH)/libjsoncpp.a \

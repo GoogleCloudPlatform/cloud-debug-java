@@ -50,11 +50,13 @@ class ValueFormatter {
 
   // Formats variable value to a string format. "FormatValue" can be called
   // even if this is a reference. In this case the function will return
-  // something like "<Object>".
+  // something like "<Object>". The optional "type" is set to the type
+  // name of "source" (e.g. "int"). If type not needed, "type" can be nullptr.
   static void Format(
       const NamedJVariant& source,
       const Options& options,
-      string* formatted_value);
+      string* formatted_value,
+      string* type);
 };
 
 

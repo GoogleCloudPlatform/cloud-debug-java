@@ -30,7 +30,7 @@ class JvmInternals : public ClassPathLookup {
   // Loads helper functionality implemented in Java into the local JVM. A custom
   // "ClassLoader" is used to isolate the loaded namespace from the debugged
   // program.
-  bool LoadInternals(const string& agentdir);
+  bool LoadInternals();
 
   // Loads the helped functionality with the specified class loader.
   bool LoadInternalsWithClassLoader(jobject internals_class_loader);
@@ -40,8 +40,7 @@ class JvmInternals : public ClassPathLookup {
   // postpone this call until the functionality is actually needed.
   bool CreateClassPathLookupInstance(
       bool use_default_class_path,
-      jobject extra_class_path,
-      const string& config_file_path);
+      jobject extra_class_path);
 
   // Returns true if "CreateInstance" was previously called and succeeded.
   bool HasInstance() const { return class_path_lookup_.instance; }

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <memory>
 #include <sstream>
 #include "common.h"
 #include "jvm_eval_call_stack.h"
 #include "jvm_internals.h"
+#include "jvmti_buffer.h"
 #include "statistician.h"
 #include "version.h"
 
@@ -71,16 +74,6 @@ DEFINE_string(
     "",
     "Path to .p12 file containing private key of the service account");
 #endif
-
-DEFINE_bool(
-    enable_transformer,
-    false,
-    "Enables runtime transformation of methods, making them safe");
-
-DEFINE_string(
-    cdbg_agentdir,
-    "",
-    "directory containing all auxiliary debuglet files");
 
 
 #ifdef APPENGINE_CLASSIC
@@ -235,6 +228,40 @@ static bool InitializeJvmtiCallbacks() {
 }
 
 
+// Set default log directory to Java default temporary directory. The directory
+// can still be customized through FLAGS_logdir flag.
+static void TrySetDefaultLogDirectory() {
+  jvmtiError err = JVMTI_ERROR_NONE;
+
+  // Default logs directory in tomcat web server is "${catalina.base}/logs".
+  devtools::cdbg::JvmtiBuffer<char> catalina_base_buffer;
+  err = devtools::cdbg::jvmti()->GetSystemProperty(
+      "catalina.base",
+      catalina_base_buffer.ref());
+  if (err == JVMTI_ERROR_NONE) {
+    string tomcat_log_dir = catalina_base_buffer.get();
+    tomcat_log_dir += "/logs";
+
+    DIR* dir = opendir(tomcat_log_dir.c_str());
+    if (dir) {
+      closedir(dir);
+      FLAGS_log_dir = tomcat_log_dir;
+      return;
+    }
+  }
+
+  // Directory pointed by "java.io.tmpdir" is a good default for logs.
+  devtools::cdbg::JvmtiBuffer<char> tmpdir_buffer;
+  err = devtools::cdbg::jvmti()->GetSystemProperty(
+      "java.io.tmpdir",
+      tmpdir_buffer.ref());
+  if (err == JVMTI_ERROR_NONE) {
+    FLAGS_log_dir = tmpdir_buffer.get();
+  }
+}
+
+
+
 static void InitEnvironment(const char* options) {
   // Split agent options to command line argument style data structure.
   std::stringstream ss((options != nullptr) ? options : "");
@@ -254,6 +281,7 @@ static void InitEnvironment(const char* options) {
   // application we are debugging).
   FLAGS_logtostderr = false;
   FLAGS_stderrthreshold = 3;  // By default only fatal errors go to stderr.
+  TrySetDefaultLogDirectory();
 
   int argc = argv_vector.size();
   char** argv = &argv_vector[0];
@@ -288,14 +316,6 @@ static void CleanupAgent() {
 // Entry point for JVMTI agent.
 JNIEXPORT jint JNICALL
 Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
-  InitEnvironment(options);
-
-  g_internals = new devtools::cdbg::JvmInternals;
-
-#ifdef STANDALONE_BUILD
-  LOG(INFO) << "Build time: " __DATE__ " " __TIME__;
-#endif  // STANDALONE_BUILD
-
   // Get JVMTI interface.
   jvmtiEnv* jvmti = nullptr;
   int err = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION);
@@ -304,6 +324,14 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
   }
 
   devtools::cdbg::set_jvmti(jvmti);
+
+  InitEnvironment(options);
+
+  g_internals = new devtools::cdbg::JvmInternals;
+
+#ifdef STANDALONE_BUILD
+  LOG(INFO) << "Build time: " __DATE__ " " __TIME__;
+#endif  // STANDALONE_BUILD
 
   // Initialize JVMTI callbacks.
   if (!InitializeJvmtiCallbacks()) {
@@ -323,27 +351,6 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
           devtools::cdbg::BreakpointToJson,
           devtools::cdbg::BreakpointFromJson));
 #endif
-
-  // Verify flags.
-  if (FLAGS_cdbg_agentdir.empty()) {
-    LOG(ERROR) << "Missing cdbg_agentdir flag";
-    return 1;
-  }
-
-  if (FLAGS_cdbg_agentdir.front() != '/') {
-    // It is a security vulnerability to proceed without absolute directory
-    // because we will be loading files relative to current directory, which
-    // can be cicumvented.
-    LOG(ERROR) << "cdbg_agentdir flag must be absolute path: "
-               << FLAGS_cdbg_agentdir;
-    return 1;
-  }
-
-  if (FLAGS_cdbg_agentdir.back() == '/') {
-    LOG(ERROR) << "cdbg_agentdir flag must not end with a slash: "
-               << FLAGS_cdbg_agentdir;
-    return 1;
-  }
 
 // Start the agent.
   g_instance = new devtools::cdbg::JvmtiAgent(

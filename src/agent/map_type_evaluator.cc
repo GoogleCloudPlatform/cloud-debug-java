@@ -144,8 +144,10 @@ void MapTypeEvaluator::TryInlineMap(
 
     entry_key.well_known_jclass = map_keys_well_known_jclass;
 
+    // We don't need to include the type information as the type is only
+    // associated with the value, never with the key.
     string key;
-    ValueFormatter::Format(entry_key, ValueFormatter::Options(), &key);
+    ValueFormatter::Format(entry_key, ValueFormatter::Options(), &key, nullptr);
 
     member.name.clear();
     member.name.reserve(key.size() + 2);
@@ -155,7 +157,6 @@ void MapTypeEvaluator::TryInlineMap(
 
     member.status = entry_value.status;
     member.value.swap(&entry_value.value);
-    member.status = entry_value.status;
   }
 }
 

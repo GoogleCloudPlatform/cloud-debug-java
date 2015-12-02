@@ -20,6 +20,7 @@
 #include "jni_utils.h"
 #include "jvm_breakpoint.h"
 #include "jvm_breakpoints_manager.h"
+#include "safe_method_caller.h"
 #include "statistician.h"
 #include "stopwatch.h"
 
@@ -39,19 +40,25 @@ Debugger::Debugger(
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
     ClassPathLookup* class_path_lookup,
     FormatQueue* format_queue)
-    : eval_call_stack_(eval_call_stack),
+    : config_(config),
+      eval_call_stack_(eval_call_stack),
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
       object_evaluator_(&class_indexer_, class_metadata_reader_.get()),
       class_files_cache_(&class_indexer_, FLAGS_cdbg_class_files_cache_size) {
-  evaluators_.config = config;
   evaluators_.class_path_lookup = class_path_lookup;
   evaluators_.class_indexer = &class_indexer_;
   evaluators_.eval_call_stack = eval_call_stack_;
   evaluators_.method_locals = method_locals_.get();
   evaluators_.class_metadata_reader = class_metadata_reader_.get();
   evaluators_.object_evaluator = &object_evaluator_;
-  evaluators_.class_files_cache = &class_files_cache_;
+  evaluators_.method_caller_factory = [this](Config::MethodCallQuotaType type) {
+    return std::unique_ptr<MethodCaller>(new SafeMethodCaller(
+        config_,
+        config_->GetQuota(type),
+        &class_indexer_,
+        &class_files_cache_));
+  };
 
   auto factory = [this, scheduler, format_queue](
       BreakpointsManager* breakpoints_manager,

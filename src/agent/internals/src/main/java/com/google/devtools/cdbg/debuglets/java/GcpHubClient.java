@@ -48,10 +48,13 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.DatatypeConverter;
 
 class GcpHubClient implements HubClient {
   /**
@@ -507,19 +510,35 @@ class GcpHubClient implements HubClient {
       return gson.fromJson(property, RegisterDebuggeeMessage.class);
     }
 
-    // Compute uniquifier if not computed yet.
-    // TODO(vlif): simplify it. We only need to hash labels, debuglet version, project ID
-    // and source contexts.
-    if (uniquifier == null) {
-      uniquifier = classPathLookup.computeDebuggeeUniquifier(
-          metadata.getProjectId() + "/"
-          + labels.hashCode() + "/"
-          + GcpDebugletVersion.MAJOR_VERSION + "/");
-    }
-
     // Read source context files if not done yet.
     if (sourceContextFiles == null) {
       sourceContextFiles = classPathLookup.readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME);
+    }
+
+    if (uniquifier == null) {
+      boolean hasSourceContext = ((sourceContextFiles != null) && (sourceContextFiles.length > 0));
+
+      // Compute uniquifier of debuggee properties.
+      MessageDigest hash = MessageDigest.getInstance("SHA1");
+      hash.update(metadata.getProjectId().getBytes(UTF_8));
+      hash.update(new byte[] { 0 });
+      hash.update(labels.toString().getBytes(UTF_8));
+      hash.update(new byte[] { 0, GcpDebugletVersion.MAJOR_VERSION });
+      if (hasSourceContext) {
+        for (String sourceContextFile : sourceContextFiles) {
+          hash.update(sourceContextFile.getBytes(UTF_8));
+          hash.update(new byte[] { 0 });
+        }
+      }
+
+      uniquifier = DatatypeConverter.printHexBinary(hash.digest());
+
+      if (!labels.containsKey(GcpEnvironment.DEBUGGEE_MINOR_VERSION_LABEL) && !hasSourceContext) {
+        // There is no source context and minor version. It means that different versions of the
+        // application may be running with the same debuggee properties. Hash of application
+        // binaries to generate different debuggees in this case.
+        uniquifier = classPathLookup.computeDebuggeeUniquifier(uniquifier);
+      }
     }
 
     // Format the request body.

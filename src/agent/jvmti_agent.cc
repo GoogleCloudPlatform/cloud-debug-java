@@ -40,9 +40,6 @@ DEFINE_string(
     "additional directories and files containing resolvable binaries");
 
 
-DECLARE_string(cdbg_agentdir);
-DECLARE_bool(enable_transformer);
-
 using google::SetCommandLineOption;
 
 namespace devtools {
@@ -150,16 +147,6 @@ bool JvmtiAgent::OnLoad() {
       LOG(ERROR) << "AddCapabilities failed, error: " << err;
       // The best we can do here is to continue. We don't want to fail Java
       // process loading just because there was some problem with debugger.
-    }
-  }
-
-  if (!FLAGS_cdbg_agentdir.empty() && FLAGS_enable_transformer) {
-    jvmtiError err = jvmti()->AddToSystemClassLoaderSearch(
-        (FLAGS_cdbg_agentdir + "/cdbg_transformer.jar").c_str());
-
-    if (err != JVMTI_ERROR_NONE) {
-      LOG(ERROR) << "Enable transformer failed, error: " << err;
-      // TODO(jmozzino): Disable transformer.
     }
   }
 
@@ -298,7 +285,7 @@ void JvmtiAgent::EnableJvmtiDebuggerNotifications(jvmtiEventMode mode) {
 bool JvmtiAgent::OnWorkerReady() {
   // Connect to Java internals implementation.
 {
-    if (!internals_->LoadInternals(FLAGS_cdbg_agentdir)) {
+    if (!internals_->LoadInternals()) {
       LOG(ERROR) << "Internals could not be initialized";
       return false;
     }
@@ -333,10 +320,7 @@ bool JvmtiAgent::OnWorkerReady() {
   // Currently we need "ClassPathLookup" very early to compute uniquifier.
   if (!internals_->CreateClassPathLookupInstance(
         true,
-        JniToJavaStringArray(extra_class_path).get(),
-        FLAGS_cdbg_agentdir.empty()
-            ? ""
-            : FLAGS_cdbg_agentdir + "/cdbg_config.xml")) {
+        JniToJavaStringArray(extra_class_path).get())) {
     return false;
   }
 

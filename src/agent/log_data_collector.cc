@@ -97,7 +97,7 @@ static string FormatValue(const NamedJVariant& result, bool quote_string) {
   format_options.quote_string = quote_string;
 
   string formatted_value;
-  ValueFormatter::Format(result, format_options, &formatted_value);
+  ValueFormatter::Format(result, format_options, &formatted_value, nullptr);
 
   return formatted_value;
 }

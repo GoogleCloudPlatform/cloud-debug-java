@@ -821,7 +821,7 @@ bool ClassFile::Method::Load(int offset, int* method_size) {
   const ConstantPool::Utf8Ref* signature =
       constant_pool->GetUtf8(data.ReadUInt16BE(offset + 4));
   if (signature == nullptr) {
-    return nullptr;
+    return false;
   }
 
   signature_ = *signature;
@@ -829,7 +829,7 @@ bool ClassFile::Method::Load(int offset, int* method_size) {
   JMethodSignature parsed_signature;
   if (!ParseJMethodSignature(signature_.str(), &parsed_signature)) {
     LOG(ERROR) << "Failed to parse method signature " << signature_.str();
-    return nullptr;
+    return false;
   }
 
   return_type_ = JSignatureToType(
@@ -837,7 +837,7 @@ bool ClassFile::Method::Load(int offset, int* method_size) {
       parsed_signature.return_type);
   if (return_type_ == nullptr) {
     LOG(ERROR) << "Invalid method return type";
-    return nullptr;
+    return false;
   }
 
   const uint16 attributes_count = data.ReadUInt16BE(offset + 6);

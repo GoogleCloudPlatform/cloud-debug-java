@@ -25,13 +25,13 @@
 #include "method_locals.h"
 #include "model_util.h"
 #include "object_evaluator.h"
-#include "safe_method_caller.h"
 #include "value_formatter.h"
 
 namespace devtools {
 namespace cdbg {
 
-CaptureDataCollector::CaptureDataCollector() {
+CaptureDataCollector::CaptureDataCollector(JvmEvaluators* evaluators)
+    : evaluators_(evaluators) {
   // Reserve "var_table_index" 0 for memory objects that we didn't capture
   // because collector ran out of quota.
   memory_objects_.push_back(MemoryObject());
@@ -44,21 +44,14 @@ CaptureDataCollector::~CaptureDataCollector() {
 
 
 void CaptureDataCollector::Collect(
-    const Config& config,
-    ClassFilesCache* class_files_cache,
-    EvalCallStack* eval_call_stack,
-    ClassIndexer* class_indexer,
-    ClassMetadataReader* class_metadata_reader,
-    MethodLocals* method_locals,
-    ObjectEvaluator* object_evaluator,
     const std::vector<CompiledExpression>& watches,
     jthread thread) {
-  DCHECK(eval_call_stack_ == nullptr) << "Collect can only be called once";
-  eval_call_stack_ = CHECK_NOTNULL(eval_call_stack);
+  std::unique_ptr<MethodCaller> pretty_printers_method_caller =
+      evaluators_->method_caller_factory(Config::PRETTY_PRINTERS);
 
   // Walk the call stack.
   std::vector<EvalCallStack::JvmFrame> jvm_frames;
-  eval_call_stack_->Read(thread, &jvm_frames);
+  evaluators_->eval_call_stack->Read(thread, &jvm_frames);
 
   const int call_frames_count = jvm_frames.size();
   call_frames_.resize(call_frames_count);
@@ -68,22 +61,13 @@ void CaptureDataCollector::Collect(
     // Collect local variables.
     if ((depth < kMethodLocalsFrames) &&
         (jvm_frames[depth].code_location.method != nullptr)) {
-      // We don't expect any methods to be called while reading fields.
-      SafeMethodCaller method_caller(
-          &config,
-          Config::MethodCallQuota(),  // Default quota of zero for everything.
-          class_indexer,
-          class_files_cache);
-
       EvaluationContext evaluation_context;
       evaluation_context.thread = thread;
       evaluation_context.frame_depth = depth;
-      evaluation_context.method_caller = &method_caller;
+      evaluation_context.method_caller = pretty_printers_method_caller.get();
 
       ReadLocalVariables(
           evaluation_context,
-          class_metadata_reader,
-          method_locals,
           jvm_frames[depth].code_location.method,
           jvm_frames[depth].code_location.location,
           &call_frames_[depth].arguments,
@@ -107,20 +91,16 @@ void CaptureDataCollector::Collect(
       watch_results_[i].compile_error_message = {ExpressionSensitiveData, { }};
 
     } else if (watches[i].evaluator != nullptr) {
-      SafeMethodCaller method_caller(
-          &config,
-          config.GetQuota(Config::EXPRESSION_EVALUATION),
-          class_indexer,
-          class_files_cache);
+      std::unique_ptr<MethodCaller> expression_method_caller =
+          evaluators_->method_caller_factory(Config::EXPRESSION_EVALUATION);
 
       EvaluationContext evaluation_context;
       evaluation_context.thread = thread;
       evaluation_context.frame_depth = 0;
-      evaluation_context.method_caller = &method_caller;
+      evaluation_context.method_caller = expression_method_caller.get();
 
       EvaluateWatchedExpression(
           evaluation_context,
-          class_metadata_reader,
           *watches[i].evaluator,
           &watch_results_[i].evaluation_result);
 
@@ -142,16 +122,10 @@ void CaptureDataCollector::Collect(
   ++it_pending_object;  // First entry has a special meaning of "buffer full".
   ++captured_variable_table_size;
 
-  SafeMethodCaller method_caller(
-      &config,
-      config.GetQuota(Config::PRETTY_PRINTERS),
-      class_indexer,
-      class_files_cache);
-
   while ((it_pending_object != memory_objects_.end()) &&
          CanCollectMoreMemoryObjects()) {
-    object_evaluator->Evaluate(
-        &method_caller,
+    evaluators_->object_evaluator->Evaluate(
+        pretty_printers_method_caller.get(),
         it_pending_object->object_ref,
         &it_pending_object->members);
 
@@ -227,6 +201,11 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
       } else {
         object_variable.reset(new VariableModel);
 
+        object_variable->type = TypeNameFromSignature({
+            JType::Object,
+            GetObjectClassSignature(memory_object.object_ref)
+        });
+
         if (!memory_object.status.description.format.empty()) {
           object_variable->status =
               StatusMessageBuilder(memory_object.status).build();
@@ -245,8 +224,6 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
 
 void CaptureDataCollector::ReadLocalVariables(
     const EvaluationContext& evaluation_context,
-    ClassMetadataReader* class_metadata_reader,
-    MethodLocals* method_locals,
     jmethodID method,
     jlocation location,
     std::vector<NamedJVariant>* arguments,
@@ -257,7 +234,7 @@ void CaptureDataCollector::ReadLocalVariables(
   }
 
   std::shared_ptr<const MethodLocals::Entry> entry =
-      method_locals->GetLocalVariables(method);
+      evaluators_->method_locals->GetLocalVariables(method);
 
   // TODO(vlif): refactor this function to add locals and arguments to
   // output vectors as we go.
@@ -310,7 +287,6 @@ void CaptureDataCollector::ReadLocalVariables(
 
 void CaptureDataCollector::EvaluateWatchedExpression(
     const EvaluationContext& evaluation_context,
-    ClassMetadataReader* class_metadata_reader,
     const ExpressionEvaluator& watch_evaluator,
     NamedJVariant* result) {
   ErrorOr<JVariant> evaluation_result =
@@ -373,8 +349,9 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
       ValueFormatter::Format(
           source,
           ValueFormatter::Options(),
-          &formatted_value);
-      target->value = formatted_value;
+          &formatted_value,
+          &target->type);
+      target->value = std::move(formatted_value);
     } else {
       jobject ref = nullptr;
       const int* var_table_index = nullptr;
@@ -408,7 +385,7 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
 string CaptureDataCollector::GetFunctionName(int depth) const {
   const int frame_info_key = call_frames_[depth].frame_info_key;
   const auto& frame_info =
-      eval_call_stack_->ResolveCallFrameKey(frame_info_key);
+      evaluators_->eval_call_stack->ResolveCallFrameKey(frame_info_key);
 
   string function_name =
       TypeNameFromJObjectSignature(frame_info.class_signature);
@@ -423,7 +400,7 @@ std::unique_ptr<SourceLocationModel>
 CaptureDataCollector::GetCallFrameSourceLocation(int depth) const {
   const int frame_info_key = call_frames_[depth].frame_info_key;
   const auto& frame_info =
-      eval_call_stack_->ResolveCallFrameKey(frame_info_key);
+      evaluators_->eval_call_stack->ResolveCallFrameKey(frame_info_key);
 
   std::unique_ptr<SourceLocationModel> location(new SourceLocationModel);
 

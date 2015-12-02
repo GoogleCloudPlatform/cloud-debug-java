@@ -17,6 +17,9 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_EVALUATORS_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_EVALUATORS_H_
 
+#include "config.h"
+#include "method_caller.h"
+
 namespace devtools {
 namespace cdbg {
 
@@ -25,18 +28,12 @@ class ClassMetadataReader;
 class ClassPathLookup;
 class EvalCallStack;
 class MethodLocals;
-class Config;
 class ObjectEvaluator;
-class ClassFilesCache;
 
 // Convinience structure that bundles all the evaluation classes together
 // to avoid passing a lot of parameters.
 // All the fields have to be set.
 struct JvmEvaluators {
-  // Debugger agent configuration.
-  // TODO(vlif): remove it from this structure.
-  const Config* config = nullptr;
-
   // Proxy for ClassPathLookup class implemented in
   // cdbg_java_agent_internals.jar
   // TODO(vlif): remove it from this structure.
@@ -58,8 +55,9 @@ struct JvmEvaluators {
   // Evaluates members of Java objects.
   ObjectEvaluator* object_evaluator = nullptr;
 
-  // Global cache of loaded class files for safe caller.
-  ClassFilesCache* class_files_cache = nullptr;
+  // Factory for safe method caller.
+  std::function<std::unique_ptr<MethodCaller>(
+      Config::MethodCallQuotaType type)> method_caller_factory;
 };
 
 

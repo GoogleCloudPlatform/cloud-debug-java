@@ -37,7 +37,6 @@ CDBG_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARGS="-agentpath:${CDBG_ROOT}/cdbg_java_agent.so="
 ARGS+="--log_dir=/var/log/app_engine"
 ARGS+=",--logtostderr=false"
-ARGS+=",--cdbg_agentdir=${CDBG_ROOT}"
 ARGS+=",--cdbg_extra_class_path=${APP_WEB_INF_DIR}/classes:${APP_WEB_INF_DIR}/lib"
 
 echo "${ARGS}"

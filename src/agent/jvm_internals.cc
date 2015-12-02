@@ -16,13 +16,12 @@
 
 #include "jvm_internals.h"
 
+#include <dlfcn.h>
 #include <fstream>  // NOLINT
 #include "jvariant.h"
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "stopwatch.h"
-
-DECLARE_bool(enable_transformer);
 
 namespace devtools {
 namespace cdbg {
@@ -46,8 +45,37 @@ static constexpr char kFormatMessageClassName[] =
 static constexpr char kFormatMessageClassSignature[] =
     "Lcom/google/devtools/cdbg/debuglets/java/FormatMessage;";
 
-bool JvmInternals::LoadInternals(const string& agentdir) {
-  if (!LoadClassLoader(agentdir)) {
+// Gets the absolute path to the Java Cloud Debugger agent directory. The
+// returned path does not have a trailing slash. Returns empty string on error.
+static string GetAgentDirectory() {
+  Dl_info dl_info = { 0 };
+  if (!dladdr(reinterpret_cast<void*>(GetAgentDirectory), &dl_info)) {
+    LOG(ERROR) << "Failed to determined agent directory";
+    return string();
+  }
+
+  if (dl_info.dli_fname == nullptr) {
+    LOG(ERROR) << "Shared library location is missing";
+    return string();
+  }
+
+  const char* end = strrchr(dl_info.dli_fname, '/');
+  if (end == nullptr) {
+    LOG(ERROR) << "Invalid shared library location: " << dl_info.dli_fname;
+    return string();
+  }
+
+  return string(dl_info.dli_fname, end);
+}
+
+
+bool JvmInternals::LoadInternals() {
+  const string agent_directory = GetAgentDirectory();
+  if (agent_directory.empty()) {
+    return false;
+  }
+
+  if (!LoadClassLoader(agent_directory)) {
     return false;
   }
 
@@ -80,8 +108,7 @@ bool JvmInternals::LoadInternalsWithClassLoader(
 
 bool JvmInternals::CreateClassPathLookupInstance(
     bool use_default_class_path,
-    jobject extra_class_path,
-    const string& config_file_path) {
+    jobject extra_class_path) {
   Stopwatch stopwatch;
 
   JniLocalRef instance_local_ref(jni()->NewObject(
@@ -89,7 +116,7 @@ bool JvmInternals::CreateClassPathLookupInstance(
       class_path_lookup_.constructor,
       use_default_class_path,
       extra_class_path,
-      JniToJavaString(config_file_path).get()));
+      nullptr));
 
   if (!JniCheckNoException("new ClassPathLookup(...)")) {
     return false;

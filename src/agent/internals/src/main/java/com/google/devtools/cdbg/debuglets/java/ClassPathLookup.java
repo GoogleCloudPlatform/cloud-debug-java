@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -98,16 +99,27 @@ final class ClassPathLookup {
         ((extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath)),
         configLocation);
 
+    // Try to guess where application classes might be besides class path. We only do it if the
+    // debugger uses default configuration. If the user additional directories, we use that and
+    // not try to guess anything.
+    if (useDefaultClassPath && ((extraClassPath == null) || (extraClassPath.length == 0))) {
+      extraClassPath = findExtraClassPath();
+    }
+
     this.useDefaultClassPath = useDefaultClassPath;
     this.extraClassPath = extraClassPath;
 
     MethodsFilter.Builder configBuilder = new MethodsFilter.Builder();
 
     // Primary configuration (either in file or resource).
-    // TODO(vlif): deprecate the option of having primary configuration in a file
+    // TODO(vlif): XML based configuration is deprecated. Remove this code when native agent
+    // doesn't need it anymore.
     try {
       if ((configLocation == null) || configLocation.isEmpty()) {
-        configBuilder.add(getClass().getResourceAsStream("cdbg_config.xml"));
+        InputStream inputStream = getClass().getResourceAsStream("cdbg_config.xml");
+        if (inputStream != null) {
+          configBuilder.add(inputStream);
+        }
       } else {
         configBuilder.add(new FileInputStream(configLocation));
       }
@@ -350,7 +362,61 @@ final class ClassPathLookup {
     
     return resourceStream;
   }
-  
+
+  /**
+   * Tries to figure out additional directories where application class might be.
+   *
+   * Usually all application classes are located within the directories and .JAR files specified
+   * in a class path. There are some exceptions to it though. An application can use a custom
+   * class loader and load application classes from virtually anywhere. It is impossible to infer
+   * all the locations of potential application classes.
+   *
+   * Web servers (e.g. jetty, tomcat) are a special case. They always load application classes from
+   * a directory that's not on the class path. Since the scenario of debugging an application that
+   * runs in a web server is important, we want to try to guess where the application classes might
+   * be. The alternative is to have the user always specify the location, but it complicates the
+   * debugger deployment.
+   *
+   * In general case, it's hard to determine the location of the web application. We would need to
+   * read configuration files of the web server, and each web server has a different one. We
+   * therefore only support the simplest, but the most common case, when the web application lives
+   * in the default ROOT directory.
+   *
+   * This function is marked as public for unit tests.
+   */
+  public static String[] findExtraClassPath() {
+    Set<String> paths = new HashSet<>();
+
+    // Tomcat.
+    addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/lib");
+    addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/classes");
+
+    // Jetty.
+    addSystemPropertyRelative(paths, "jetty.base", "webapps/ROOT/WEB-INF/lib");
+    addSystemPropertyRelative(paths, "jetty.base", "webapps/ROOT/WEB-INF/classes");
+
+    return paths.toArray(new String[0]);
+  }
+
+  /**
+   * Appends a path relative to the base path defined in a system property.
+   *
+   * No effect if the system property is not defined or the combined path does not exist.
+   */
+  private static void addSystemPropertyRelative(Set<String> paths, String name, String suffix) {
+    String value = System.getProperty(name);
+    if ((value == null) || value.isEmpty()) {
+      return;
+    }
+
+    File path = new File(value, suffix);
+    if (!path.exists()) {
+      return;
+    }
+
+    paths.add(path.toString());
+  }
+
   /**
    * Finds paths of all .class and .jar files listed through JVM class path and
    * {@code extraClassPath}.

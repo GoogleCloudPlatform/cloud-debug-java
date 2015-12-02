@@ -79,12 +79,15 @@ class Debugger {
       std::vector<std::unique_ptr<BreakpointModel>> breakpoints);
 
  private:
+  // Debugger agent configuration.
+  Config* const config_;
+
+  // Reads stack trace upon a breakpoint hit. Not owned by this class.
+  EvalCallStack* const eval_call_stack_;
+
   // Indexes all the available Java classes and locates classes based on
   // a type name.
   JvmClassIndexer class_indexer_;
-
-  // Reads stack trace upon a breakpoint hit.  Does not take ownership.
-  EvalCallStack* eval_call_stack_;
 
   // Evaluates values of local variables in a given call frame.
   std::unique_ptr<MethodLocals> method_locals_;

@@ -22,8 +22,8 @@
 #include "class_indexer.h"
 #include "class_metadata_reader.h"
 #include "common.h"
-#include "config.h"
 #include "jobject_map.h"
+#include "jvm_evaluators.h"
 #include "model.h"
 #include "readers_factory.h"
 #include "type_util.h"
@@ -65,19 +65,11 @@ class ClassFilesCache;
 //    will be transmitted to the Hub service.
 class CaptureDataCollector {
  public:
-  CaptureDataCollector();
+  explicit CaptureDataCollector(JvmEvaluators* evaluators);
   virtual ~CaptureDataCollector();
 
-  // Reads the state of the the debugged program. All arguments are in-params.
-  // None of the parameters are stored beyond the call to "Collect".
+  // Reads the state of the the debugged program.
   void Collect(
-      const Config& config,
-      ClassFilesCache* class_files_cache,
-      EvalCallStack* eval_call_stack,
-      ClassIndexer* class_indexer,
-      ClassMetadataReader* class_metadata_reader,
-      MethodLocals* method_locals,
-      ObjectEvaluator* object_evaluator,
       const std::vector<CompiledExpression>& watches,
       jthread thread);
 
@@ -154,7 +146,6 @@ class CaptureDataCollector {
   // returns sets an error message in "result".
   void EvaluateWatchedExpression(
       const EvaluationContext& evaluation_context,
-      ClassMetadataReader* class_metadata_reader,
       const ExpressionEvaluator& watch_evaluator,
       NamedJVariant* result);
 
@@ -196,16 +187,16 @@ class CaptureDataCollector {
   // as virtual and protected for unit testing purposes.
   virtual void ReadLocalVariables(
       const EvaluationContext& evaluation_context,
-      ClassMetadataReader* class_metadata_reader,
-      MethodLocals* method_locals,
       jmethodID method,
       jlocation location,
       std::vector<NamedJVariant>* arguments,
       std::vector<NamedJVariant>* local_variables);
 
  private:
-  // Keep the instance of "EvalCallStack" around for formatting of call frames.
-  EvalCallStack* eval_call_stack_ { nullptr };
+  // Bundles all the evaluation classes together. Evaluators are guaranteed
+  // to be valid throughout the lifetime of "CaptureDataCollector".
+  // Not owned by this class.
+  JvmEvaluators* const evaluators_;
 
   // Captured data of call frames that can be formatted into the message
   // for Hub service.

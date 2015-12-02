@@ -185,15 +185,30 @@ int ValueFormatter::GetTotalDataSize(const NamedJVariant& data) {
 void ValueFormatter::Format(
     const NamedJVariant& source,
     const Options& options,
-    string* formatted_value) {
+    string* formatted_value,
+    string* type) {
   // Format Java string.
   if (IsJavaString(source)) {
     FormatJavaString(source, options, formatted_value);
+    if (type != nullptr) {
+      if (source.value.has_non_null_object()) {
+        *type = "String";
+      } else {
+        type->clear();
+      }
+    }
     return;
   }
 
   // Format primitive value (or null).
   *formatted_value = source.value.ToString(true);
+  if (type != nullptr) {
+    if (source.value.type() != JType::Object) {
+      *type = TypeNameFromSignature({ source.value.type() });
+    } else {  // "source" represents Java "null", which doesn't have a type.
+      type->clear();
+    }
+  }
 }
 
 

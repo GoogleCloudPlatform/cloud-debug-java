@@ -239,236 +239,260 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   // Build set of classes, but use internal names, to make the code cleaner.
   std::map<string, std::vector<Config::Method>> classes;
 
-  classes["java/lang/Object"] = ToMethods({
-    Allow("equals")
-        .signature("(Ljava/lang/Object;)Z")
-        .applies_to_derived_classes(),
-    Allow("getClass")
-        .signature("()Ljava/lang/Class;")
-        .applies_to_derived_classes(),
-    Allow("hashCode")
-        .signature("()I")
-        .applies_to_derived_classes(),
-    Allow("clone")
-        .signature("()Ljava/lang/Object;")
-        .applies_to_derived_classes()
-        .pre_call(ObjectClonePre)
-        .returns_temporary_object(),
-    Allow("toString")
-        .signature("()Ljava/lang/String;")
-        .applies_to_derived_classes(),
-    Block("wait")
-        .signature("()V")
-        .applies_to_derived_classes(),
-    Block("wait")
-        .signature("(J)V")
-        .applies_to_derived_classes(),
-    Block("wait")
-        .signature("(JI)V")
-        .applies_to_derived_classes(),
-    Block("notify")
-        .signature("()V")
-        .applies_to_derived_classes(),
-    Block("notifyAll")
-        .signature("()V")
-        .applies_to_derived_classes()
-  });
+  [&classes]() {
+      classes["java/lang/Object"] = ToMethods({
+        Allow("equals")
+            .signature("(Ljava/lang/Object;)Z")
+            .applies_to_derived_classes(),
+        Allow("getClass")
+            .signature("()Ljava/lang/Class;")
+            .applies_to_derived_classes(),
+        Allow("hashCode")
+            .signature("()I")
+            .applies_to_derived_classes(),
+        Allow("clone")
+            .signature("()Ljava/lang/Object;")
+            .applies_to_derived_classes()
+            .pre_call(ObjectClonePre)
+            .returns_temporary_object(),
+        Allow("toString")
+            .signature("()Ljava/lang/String;")
+            .applies_to_derived_classes(),
+        Block("wait")
+            .signature("()V")
+            .applies_to_derived_classes(),
+        Block("wait")
+            .signature("(J)V")
+            .applies_to_derived_classes(),
+        Block("wait")
+            .signature("(JI)V")
+            .applies_to_derived_classes(),
+        Block("notify")
+            .signature("()V")
+            .applies_to_derived_classes(),
+        Block("notifyAll")
+            .signature("()V")
+            .applies_to_derived_classes()
+      });
+  }();
 
-  classes["java/lang/Class"] = ToMethods({
-    Block("forName"),
-    Block("getClassLoader"),
-    Block("getClassLoader0"),
-    Block("newInstance"),
-    Block("setSigners"),
-    Allow("getCanonicalName"),
-    Allow("getComponentType"),
-    Allow("getDeclaringClass"),
-    Allow("getEnclosingClass"),
-    Allow("getEnumConstants"),
-    Allow("getGenericInterfaces"),
-    Allow("getGenericSuperclass"),
-    Allow("getInterfaces"),
-    Allow("getModifiers"),
-    Allow("getName"),
-    Allow("getPackage"),
-    Allow("getSigners"),
-    Allow("getSimpleBinaryName"),
-    Allow("getSimpleName"),
-    Allow("getSuperclass"),
-    Allow("getTypeParameters"),
-    Allow("isAnnotation"),
-    Allow("isAnonymousClass"),
-    Allow("isArray"),
-    Allow("isAssignableFrom"),
-    Allow("isEnum"),
-    Allow("isInstance"),
-    Allow("isInterface"),
-    Allow("isLocalClass"),
-    Allow("isLocalOrAnonymousClass"),
-    Allow("isMemberClass"),
-    Allow("isPrimitive"),
-    Allow("isSynthetic"),
-    Allow("toString")
-  });
+  [&classes]() {
+      classes["java/lang/Class"] = ToMethods({
+        Block("forName"),
+        Block("getClassLoader"),
+        Block("getClassLoader0"),
+        Block("newInstance"),
+        Block("setSigners"),
+        Allow("getCanonicalName"),
+        Allow("getComponentType"),
+        Allow("getDeclaringClass"),
+        Allow("getEnclosingClass"),
+        Allow("getEnumConstants"),
+        Allow("getGenericInterfaces"),
+        Allow("getGenericSuperclass"),
+        Allow("getInterfaces"),
+        Allow("getModifiers"),
+        Allow("getName"),
+        Allow("getPackage"),
+        Allow("getSigners"),
+        Allow("getSimpleBinaryName"),
+        Allow("getSimpleName"),
+        Allow("getSuperclass"),
+        Allow("getTypeParameters"),
+        Allow("isAnnotation"),
+        Allow("isAnonymousClass"),
+        Allow("isArray"),
+        Allow("isAssignableFrom"),
+        Allow("isEnum"),
+        Allow("isInstance"),
+        Allow("isInterface"),
+        Allow("isLocalClass"),
+        Allow("isLocalOrAnonymousClass"),
+        Allow("isMemberClass"),
+        Allow("isPrimitive"),
+        Allow("isSynthetic"),
+        Allow("toString")
+      });
+  }();
 
-  classes["java/lang/Math"] = ToMethods({ AllowAll() });
+  [&classes]() {
+      classes["java/lang/Math"] = ToMethods({ AllowAll() });
+  }();
 
-  classes["java/lang/StrictMath"] = ToMethods({ AllowAll() });
+  [&classes]() {
+      classes["java/lang/StrictMath"] = ToMethods({ AllowAll() });
+  }();
 
-  // TODO(vlif): add "pre_call" to string constructors that copy array.
-  classes["java/lang/String"] = ToMethods({
-    Allow("format").pre_call(StringFormatPre),
-    Interpret("copyValueOf"),  // unsafe if the string is too long.
-    Interpret("getBytes"),  // unsafe if the string is too long.
-    Interpret("getChars"),  // unsafe unless destination is a temporary object.
-    Interpret("toCharArray"),  // unsafe if the string is too long.
-    Interpret("valueOf")
-        .signature("(Ljava/lang/Object;)Ljava/lang/String;"),
-    AllowAll()
-  });
+  [&classes]() {
+      // TODO(vlif): add "pre_call" to string constructors that copy array.
+      classes["java/lang/String"] = ToMethods({
+        Allow("format").pre_call(StringFormatPre),
+        Interpret("copyValueOf"),  // unsafe if the string is too long.
+        Interpret("getBytes"),  // unsafe if the string is too long.
+        Interpret("getChars"),  // unsafe unless destination is temporary.
+        Interpret("toCharArray"),  // unsafe if the string is too long.
+        Interpret("valueOf")
+            .signature("(Ljava/lang/Object;)Ljava/lang/String;"),
+        AllowAll()
+      });
+  }();
 
-  classes["java/lang/StringBuilder"] = ToMethods({
-    Interpret("append")
-        .signature("(Ljava/lang/Object;)Ljava/lang/StringBuilder;"),
-    Allow("append")
-        .require_temporary_object(),
-  });
-
-  classes["java/lang/System"] = ToMethods({
-    Allow("arraycopy").pre_call(SystemArraycopyPre),
-    Allow("getenv"),
-    Allow("getProperties"),
-    Allow("getProperty"),
-  });
-
-  // TODO(vlif): augment with interpreter call stack (which JDK implementation
-  // of "Throwable.fillInStackTrace" is not aware of).
-  classes["java/lang/Throwable"] = ToMethods({
-    Allow("fillInStackTrace")
-        .signature("()Ljava/lang/Throwable;")
-        .require_temporary_object()
-        .applies_to_derived_classes()
-  });
-
-  const string wrapper_types[] = {
-    "Boolean",
-    "Byte",
-    "Short",
-    "Character",
-    "Integer",
-    "Long",
-    "Float",
-    "Double"
-  };
-
-  for (const string& wrapper_type : wrapper_types) {
-    classes["java/lang/" + wrapper_type] = ToMethods({ AllowAll() });
-  }
-
-  const string collection_classes[] = {
-    "java/util/ArrayDeque",
-    "java/util/ArrayList",
-    "java/util/Arrays$ArrayList",
-    "java/util/Collections$EmptyList",
-    "java/util/Collections$EmptyMap",
-    "java/util/Collections$EmptySet",
-    "java/util/Collections$SynchronizedSet",
-    "java/util/Collections$UnmodifiableMap",
-    "java/util/concurrent/ArrayBlockingQueue",
-    "java/util/concurrent/ConcurrentHashMap",
-    "java/util/concurrent/ConcurrentHashMap$EntrySet",
-    "java/util/concurrent/ConcurrentHashMap$EntrySetView",
-    "java/util/concurrent/ConcurrentLinkedDeque",
-    "java/util/concurrent/ConcurrentLinkedQueue",
-    "java/util/concurrent/ConcurrentSkipListMap",
-    "java/util/concurrent/ConcurrentSkipListMap$EntrySet",
-    "java/util/concurrent/CopyOnWriteArrayList",
-    "java/util/concurrent/CopyOnWriteArraySet",
-    "java/util/concurrent/LinkedBlockingDeque",
-    "java/util/concurrent/LinkedBlockingQueue",
-    "java/util/EnumMap",
-    "java/util/EnumSet",
-    "java/util/HashMap",
-    "java/util/HashMap$EntrySet",
-    "java/util/HashSet",
-    "java/util/Hashtable",
-    "java/util/IdentityHashMap",
-    "java/util/LinkedHashMap",
-    "java/util/LinkedHashMap$LinkedEntrySet",
-    "java/util/LinkedHashSet",
-    "java/util/LinkedList",
-    "java/util/PriorityQueue",
-    "java/util/Properties",
-    "java/util/Stack",
-    "java/util/TreeMap",
-    "java/util/TreeMap$EntrySet",
-    "java/util/TreeSet",
-    "java/util/Vector",
-    "java/util/WeakHashMap"
-  };
-
-  for (const string& collection_class : collection_classes) {
-    classes[collection_class] = ToMethods({
-      Allow("entrySet"),
-      Allow("get"),
-      Allow("isEmpty"),
-      Allow("iterator"),
-      Allow("keySet"),
-      Allow("size")
+  [&classes]() {
+    classes["java/lang/StringBuilder"] = ToMethods({
+      Interpret("append")
+          .signature("(Ljava/lang/Object;)Ljava/lang/StringBuilder;"),
+      Allow("append")
+          .require_temporary_object(),
     });
-  }
+  }();
 
-  const string iterator_classes[] = {
-    "java/util/AbstractList$Itr",
-    "java/util/ArrayDeque$DeqIterator",
-    "java/util/ArrayList$Itr",
-    "java/util/Collections$EmptyIterator",
-    "java/util/HashMap$EntryIterator",
-    "java/util/HashMap$KeyIterator",
-    "java/util/Hashtable$Enumerator",
-    "java/util/LinkedHashMap$EntryIterator",
-    "java/util/LinkedHashMap$KeyIterator",
-    "java/util/LinkedHashMap$LinkedEntryIterator",
-    "java/util/LinkedHashMap$LinkedKeyIterator",
-    "java/util/LinkedList$ListItr",
-    "java/util/PriorityQueue$Itr",
-    "java/util/TreeMap$EntryIterator",
-    "java/util/TreeMap$KeyIterator",
-    "java/util/Vector$Itr",
-    "java/util/concurrent/ArrayBlockingQueue$Itr",
-    "java/util/concurrent/ConcurrentHashMap$EntryIterator",
-    "java/util/concurrent/ConcurrentLinkedDeque$Itr",
-    "java/util/concurrent/ConcurrentLinkedQueue$Itr",
-    "java/util/concurrent/ConcurrentSkipListMap$EntryIterator",
-    "java/util/concurrent/CopyOnWriteArrayList$COWIterator",
-    "java/util/concurrent/LinkedBlockingDeque$Itr",
-    "java/util/concurrent/LinkedBlockingQueue$Itr",
-  };
+  [&classes]() {
+      classes["java/lang/System"] = ToMethods({
+        Allow("arraycopy").pre_call(SystemArraycopyPre),
+        Allow("getenv"),
+        Allow("getProperties"),
+        Allow("getProperty"),
+      });
+  }();
 
-  for (const string& iterator_class : iterator_classes) {
-    classes[iterator_class] = ToMethods({
-      Allow("hasNext"),
-      Allow("next")
-    });
-  }
+  [&classes]() {
+      // TODO(vlif): augment with interpreter call stack (which JDK
+      // implementation of "Throwable.fillInStackTrace" is not aware of).
+      classes["java/lang/Throwable"] = ToMethods({
+        Allow("fillInStackTrace")
+            .signature("()Ljava/lang/Throwable;")
+            .require_temporary_object()
+            .applies_to_derived_classes()
+      });
+  }();
 
-  const string map_entry_classes[] = {
-    "java/util/AbstractMap$SimpleImmutableEntry",
-    "java/util/HashMap$Entry",  // Java 7.
-    "java/util/HashMap$Node",  // Java 8.
-    "java/util/Hashtable$Entry",
-    "java/util/LinkedHashMap$Entry",
-    "java/util/TreeMap$Entry",
-    "java/util/concurrent/ConcurrentHashMap$WriteThroughEntry",
-    "java/util/concurrent/ConcurrentHashMap$MapEntry"
-  };
+  [&classes]() {
+      const string wrapper_types[] = {
+        "Boolean",
+        "Byte",
+        "Short",
+        "Character",
+        "Integer",
+        "Long",
+        "Float",
+        "Double"
+      };
 
-  for (const string& map_entry_class : map_entry_classes) {
-    classes[map_entry_class] = ToMethods({
-      Allow("getKey"),
-      Allow("getValue")
-    });
-  }
+      for (const string& wrapper_type : wrapper_types) {
+        classes["java/lang/" + wrapper_type] = ToMethods({ AllowAll() });
+      }
+  }();
+
+  [&classes]() {
+      const string collection_classes[] = {
+        "java/util/ArrayDeque",
+        "java/util/ArrayList",
+        "java/util/Arrays$ArrayList",
+        "java/util/Collections$EmptyList",
+        "java/util/Collections$EmptyMap",
+        "java/util/Collections$EmptySet",
+        "java/util/Collections$SynchronizedSet",
+        "java/util/Collections$UnmodifiableMap",
+        "java/util/concurrent/ArrayBlockingQueue",
+        "java/util/concurrent/ConcurrentHashMap",
+        "java/util/concurrent/ConcurrentHashMap$EntrySet",
+        "java/util/concurrent/ConcurrentHashMap$EntrySetView",
+        "java/util/concurrent/ConcurrentLinkedDeque",
+        "java/util/concurrent/ConcurrentLinkedQueue",
+        "java/util/concurrent/ConcurrentSkipListMap",
+        "java/util/concurrent/ConcurrentSkipListMap$EntrySet",
+        "java/util/concurrent/CopyOnWriteArrayList",
+        "java/util/concurrent/CopyOnWriteArraySet",
+        "java/util/concurrent/LinkedBlockingDeque",
+        "java/util/concurrent/LinkedBlockingQueue",
+        "java/util/EnumMap",
+        "java/util/EnumSet",
+        "java/util/HashMap",
+        "java/util/HashMap$EntrySet",
+        "java/util/HashSet",
+        "java/util/Hashtable",
+        "java/util/IdentityHashMap",
+        "java/util/LinkedHashMap",
+        "java/util/LinkedHashMap$LinkedEntrySet",
+        "java/util/LinkedHashSet",
+        "java/util/LinkedList",
+        "java/util/PriorityQueue",
+        "java/util/Properties",
+        "java/util/Stack",
+        "java/util/TreeMap",
+        "java/util/TreeMap$EntrySet",
+        "java/util/TreeSet",
+        "java/util/Vector",
+        "java/util/WeakHashMap"
+      };
+
+      for (const string& collection_class : collection_classes) {
+        classes[collection_class] = ToMethods({
+          Allow("entrySet"),
+          Allow("get"),
+          Allow("isEmpty"),
+          Allow("iterator"),
+          Allow("keySet"),
+          Allow("size")
+        });
+      }
+  }();
+
+  [&classes]() {
+      const string iterator_classes[] = {
+        "java/util/AbstractList$Itr",
+        "java/util/ArrayDeque$DeqIterator",
+        "java/util/ArrayList$Itr",
+        "java/util/Collections$EmptyIterator",
+        "java/util/HashMap$EntryIterator",
+        "java/util/HashMap$KeyIterator",
+        "java/util/Hashtable$Enumerator",
+        "java/util/LinkedHashMap$EntryIterator",
+        "java/util/LinkedHashMap$KeyIterator",
+        "java/util/LinkedHashMap$LinkedEntryIterator",
+        "java/util/LinkedHashMap$LinkedKeyIterator",
+        "java/util/LinkedList$ListItr",
+        "java/util/PriorityQueue$Itr",
+        "java/util/TreeMap$EntryIterator",
+        "java/util/TreeMap$KeyIterator",
+        "java/util/Vector$Itr",
+        "java/util/concurrent/ArrayBlockingQueue$Itr",
+        "java/util/concurrent/ConcurrentHashMap$EntryIterator",
+        "java/util/concurrent/ConcurrentLinkedDeque$Itr",
+        "java/util/concurrent/ConcurrentLinkedQueue$Itr",
+        "java/util/concurrent/ConcurrentSkipListMap$EntryIterator",
+        "java/util/concurrent/CopyOnWriteArrayList$COWIterator",
+        "java/util/concurrent/LinkedBlockingDeque$Itr",
+        "java/util/concurrent/LinkedBlockingQueue$Itr",
+      };
+
+      for (const string& iterator_class : iterator_classes) {
+        classes[iterator_class] = ToMethods({
+          Allow("hasNext"),
+          Allow("next")
+        });
+      }
+  }();
+
+  [&classes]() {
+      const string map_entry_classes[] = {
+        "java/util/AbstractMap$SimpleImmutableEntry",
+        "java/util/HashMap$Entry",  // Java 7.
+        "java/util/HashMap$Node",  // Java 8.
+        "java/util/Hashtable$Entry",
+        "java/util/LinkedHashMap$Entry",
+        "java/util/TreeMap$Entry",
+        "java/util/concurrent/ConcurrentHashMap$WriteThroughEntry",
+        "java/util/concurrent/ConcurrentHashMap$MapEntry"
+      };
+
+      for (const string& map_entry_class : map_entry_classes) {
+        classes[map_entry_class] = ToMethods({
+          Allow("getKey"),
+          Allow("getValue")
+        });
+      }
+  }();
 
   //
   // Additional configuration provided through flags.

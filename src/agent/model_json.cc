@@ -89,6 +89,15 @@ static void SerializeModel(
 }
 
 
+static void SerializeModel(
+    const std::map<string, string>& model,
+    Json::Value* root) {
+  for (const auto& element : model) {
+    (*root)[element.first] = Json::Value(element.second);
+  }
+}
+
+
 template <typename TElement>
 static bool DeserializeModel(
     const Json::Value& root,
@@ -103,6 +112,34 @@ static bool DeserializeModel(
     }
 
     model->push_back(std::move(element_model));
+  }
+
+  return true;
+}
+
+
+static bool DeserializeModel(
+    const Json::Value& root,
+    std::map<string, string>* model) {
+  model->clear();
+
+  if (root.isNull()) {
+    return true;
+  }
+
+  if (!root.isObject()) {
+    LOG(WARNING) << "Bad map type";
+    return false;
+  }
+
+  for (const string& key : root.getMemberNames()) {
+    string value = JsonCppGetString(root, key.c_str());
+    if (value.empty()) {
+      LOG(WARNING) << "Bad map entry for " << key;
+      return false;
+    }
+
+    model->emplace(key, value);
   }
 
   return true;
@@ -546,6 +583,10 @@ static void SerializeModel(
   SerializeModel(model.evaluated_expressions, "evaluatedExpressions", root);
 
   SerializeModel(model.variable_table, "variableTable", root);
+
+  if (!model.labels.empty()) {
+    SerializeModel(model.labels, &(*root)["labels"]);
+  }
 }
 
 
@@ -610,6 +651,10 @@ std::unique_ptr<BreakpointModel> DeserializeModel<BreakpointModel>(
   if (!DeserializeModel(
         root["variableTable"],
         &model->variable_table)) {
+    return nullptr;
+  }
+
+  if (!DeserializeModel(root["labels"], &model->labels)) {
     return nullptr;
   }
 

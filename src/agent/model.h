@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_H_
 
 #include <vector>
+#include <map>
 #include <memory>
 #include "nullable.h"
 #include "common.h"
@@ -102,6 +103,7 @@ struct BreakpointModel {
   std::vector<std::unique_ptr<StackFrameModel>> stack;
   std::vector<std::unique_ptr<VariableModel>> evaluated_expressions;
   std::vector<std::unique_ptr<VariableModel>> variable_table;
+  std::map<string, string> labels;
 };
 
 // BreakpointModel in serialized form that we send to the Java code. The

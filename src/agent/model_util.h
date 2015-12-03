@@ -384,6 +384,8 @@ class BreakpointBuilder {
     for (const auto& variable_table_item : source.variable_table) {
       add_variable_table_item(VariableBuilder(*variable_table_item).build());
     }
+
+    set_labels(source.labels);
   }
 
   BreakpointBuilder& set_id(string id) {
@@ -503,6 +505,21 @@ class BreakpointBuilder {
   BreakpointBuilder& add_capture_buffer_full_variable_table_item() {
     return add_variable_table_item(
         VariableBuilder::build_capture_buffer_full_variable());
+  }
+
+  BreakpointBuilder& clear_labels() {
+    data_->labels.clear();
+    return *this;
+  }
+
+  BreakpointBuilder& set_labels(std::map<string, string> labels) {
+    data_->labels = std::move(labels);
+    return *this;
+  }
+
+  BreakpointBuilder& add_label(string key, string value) {
+    data_->labels.emplace(key, value);
+    return *this;
   }
 
   std::unique_ptr<BreakpointModel> build() {

@@ -139,7 +139,7 @@ static bool DeserializeModel(
       return false;
     }
 
-    model->emplace(key, value);
+    (*model)[key] = value;
   }
 
   return true;

@@ -517,8 +517,8 @@ class BreakpointBuilder {
     return *this;
   }
 
-  BreakpointBuilder& add_label(string key, string value) {
-    data_->labels.emplace(key, value);
+  BreakpointBuilder& add_label(const string& key, const string& value) {
+    data_->labels[key] = value;
     return *this;
   }
 

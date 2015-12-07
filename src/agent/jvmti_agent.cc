@@ -22,6 +22,7 @@
 #include "auto_reset_event.h"
 #include "bridge.h"
 #include "config_builder.h"
+#include "jni_breakpoint_labels_provider.h"
 #include "jni_semaphore.h"
 #include "jvm_class_metadata_reader.h"
 #include "jvm_eval_call_stack.h"
@@ -29,6 +30,7 @@
 #include "jvmti_buffer.h"
 #include "method_locals.h"
 #include "stopwatch.h"
+#include "jni_proxy_breakpointlabelsprovider.h"
 #include "jni_proxy_classpathlookup.h"
 #include "jni_proxy_dynamicloghelper.h"
 #include "jni_proxy_hubclient.h"
@@ -92,11 +94,13 @@ JvmtiAgent::JvmtiAgent(
     std::unique_ptr<EvalCallStack> eval_call_stack,
     std::vector<bool (*)(jobject)> fn_loaders,
     std::unique_ptr<Bridge> bridge,
+    std::function<JniLocalRef()> breakpoint_labels_provider_factory,
     bool enable_capabilities,
     bool enable_jvmti_events)
     : internals_(internals),
       eval_call_stack_(std::move(eval_call_stack)),
       fn_loaders_(std::move(fn_loaders)),
+      breakpoint_labels_provider_factory_(breakpoint_labels_provider_factory),
       enable_capabilities_(enable_capabilities),
       enable_jvmti_events_(enable_jvmti_events),
       scheduler_(Scheduler<>::DefaultClock),
@@ -292,6 +296,7 @@ bool JvmtiAgent::OnWorkerReady() {
   }
 
   std::vector<bool (*)(jobject)> jni_bind_methods = {
+    jniproxy::BindBreakpointLabelsProviderWithClassLoader,
     jniproxy::BindClassPathLookupWithClassLoader,
     jniproxy::BindDynamicLogHelperWithClassLoader,
     jniproxy::BindHubClientWithClassLoader,
@@ -373,6 +378,7 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
           std::unique_ptr<ClassMetadataReader>(
               new JvmClassMetadataReader(this)),
           internals_,
+          std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),
           &format_queue_);
       debugger_->Initialize();
     }
@@ -393,6 +399,14 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
     }
   }
 }
+
+
+std::unique_ptr<BreakpointLabelsProvider>
+JvmtiAgent::BuildBreakpointLabelsProvider() {
+  return std::unique_ptr<BreakpointLabelsProvider>(
+      new JniBreakpointLabelsProvider(breakpoint_labels_provider_factory_));
+}
+
 
 bool JvmtiAgent::IsFieldDebuggerVisible(
     jclass cls,

@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_EVALUATORS_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_EVALUATORS_H_
 
+#include "breakpoint_labels_provider.h"
 #include "config.h"
 #include "method_caller.h"
 
@@ -58,6 +59,13 @@ struct JvmEvaluators {
   // Factory for safe method caller.
   std::function<std::unique_ptr<MethodCaller>(
       Config::MethodCallQuotaType type)> method_caller_factory;
+
+  // Factory for a class capturing breakpoint labels. The interface exposes
+  // two functions: "Collect" and "Format". The instance of
+  // "BreakpointLabelsProvider" keeps the state gathered by "Collect" for
+  // the "Format" call. As a result we need to create a new instance of
+  // "BreakpointLabelsProvider" for each breakpoint. Hence this is a factory.
+  std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory;
 };
 
 

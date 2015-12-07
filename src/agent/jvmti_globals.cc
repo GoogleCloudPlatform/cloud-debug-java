@@ -35,6 +35,7 @@
 #include "jni_bridge.h"
 #include "model_json.h"
 #include "jni_proxy_api_client_datetime.h"
+#include "jni_proxy_gcpbreakpointlabelsprovider.h"
 #include "jni_proxy_gcphubclient.h"
 #endif
 
@@ -359,9 +360,14 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
           new devtools::cdbg::JvmEvalCallStack),
       {
         jniproxy::BindDateTimeWithClassLoader,
+        jniproxy::BindGcpBreakpointLabelsProviderWithClassLoader,
         jniproxy::BindGcpHubClientWithClassLoader,
       },
       std::move(bridge),
+      [] () {
+          return jniproxy::GcpBreakpointLabelsProvider()->NewObject()
+              .Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
+      },
       true,
       true);
   if (!g_instance->OnLoad()) {

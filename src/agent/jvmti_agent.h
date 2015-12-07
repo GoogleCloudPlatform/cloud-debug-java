@@ -54,6 +54,7 @@ class JvmtiAgent
       std::unique_ptr<EvalCallStack> eval_call_stack,
       std::vector<bool (*)(jobject)> fn_loaders,
       std::unique_ptr<Bridge> bridge,
+      std::function<JniLocalRef()> breakpoint_labels_provider_factory,
       bool enable_capabilities,
       bool enable_jvmti_events);
 
@@ -141,6 +142,9 @@ class JvmtiAgent
   // Enables or disables debugger specific JVMTI callbacks.
   void EnableJvmtiDebuggerNotifications(jvmtiEventMode mode);
 
+  // Creates the instance of "BreakpointLabelsProvider" to use for the debugger.
+  std::unique_ptr<BreakpointLabelsProvider> BuildBreakpointLabelsProvider();
+
  private:
   // Proxy class to access Java internals implementation.
   // Not owned by this class.
@@ -155,6 +159,10 @@ class JvmtiAgent
 
   // Vector of function pointers that load Java based classes.
   std::vector<bool (*)(jobject)> fn_loaders_;
+
+  // Factory for a class implementing the Java
+  // com.google.devtools.cdbg.debuglets.java.BreakpointLabelsProvider interface.
+  const std::function<JniLocalRef()> breakpoint_labels_provider_factory_;
 
   // When false, don't enable JVMTI capabilities.
   const bool enable_capabilities_;

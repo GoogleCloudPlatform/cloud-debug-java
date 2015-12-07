@@ -19,6 +19,7 @@
 
 #include <list>
 #include <memory>
+#include "breakpoint_labels_provider.h"
 #include "class_indexer.h"
 #include "class_metadata_reader.h"
 #include "common.h"
@@ -66,6 +67,7 @@ class ClassFilesCache;
 class CaptureDataCollector {
  public:
   explicit CaptureDataCollector(JvmEvaluators* evaluators);
+
   virtual ~CaptureDataCollector();
 
   // Reads the state of the the debugged program.
@@ -198,6 +200,9 @@ class CaptureDataCollector {
   // Not owned by this class.
   JvmEvaluators* const evaluators_;
 
+  // Captures information about local environment into breakpoint labels.
+  std::unique_ptr<BreakpointLabelsProvider> breakpoint_labels_provider_;
+
   // Captured data of call frames that can be formatted into the message
   // for Hub service.
   std::vector<CallFrame> call_frames_;
@@ -214,7 +219,7 @@ class CaptureDataCollector {
 
   // Number of elements in "memory_objects_". We keep track of it to avoid
   // calling "memory_objects_.size()", which has O(n) complexity.
-  int memory_objects_size_ { 0 };
+  int memory_objects_size_ = 0;
 
   // Maps discovered Java objects to index in "memory_objects_". The map
   // does not hold any reference to Java objects and assumes that the global
@@ -227,7 +232,7 @@ class CaptureDataCollector {
   // reached. Both variables name and data are computed. This size is not
   // precise (the formatted message might be smaller or larger). The size does
   // not account for formatting overhead in the actual message.
-  int total_variables_size_ { 0 };
+  int total_variables_size_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(CaptureDataCollector);
 };

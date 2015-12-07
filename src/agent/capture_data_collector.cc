@@ -46,6 +46,11 @@ CaptureDataCollector::~CaptureDataCollector() {
 void CaptureDataCollector::Collect(
     const std::vector<CompiledExpression>& watches,
     jthread thread) {
+  // Collect information about the local environment, but don't format it
+  // at this point.
+  breakpoint_labels_provider_ = evaluators_->labels_factory();
+  breakpoint_labels_provider_->Collect();
+
   std::unique_ptr<MethodCaller> pretty_printers_method_caller =
       evaluators_->method_caller_factory(Config::PRETTY_PRINTERS);
 
@@ -219,6 +224,9 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
 
     breakpoint->variable_table.push_back(std::move(object_variable));
   }
+
+  // Format the breakpoint labels.
+  breakpoint->labels = breakpoint_labels_provider_->Format();
 }
 
 

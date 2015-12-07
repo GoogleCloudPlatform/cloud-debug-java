@@ -39,6 +39,7 @@ Debugger::Debugger(
     std::unique_ptr<MethodLocals> method_locals,
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
     ClassPathLookup* class_path_lookup,
+    std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
     FormatQueue* format_queue)
     : config_(config),
       eval_call_stack_(eval_call_stack),
@@ -59,6 +60,7 @@ Debugger::Debugger(
         &class_indexer_,
         &class_files_cache_));
   };
+  evaluators_.labels_factory = labels_factory;
 
   auto factory = [this, scheduler, format_queue](
       BreakpointsManager* breakpoints_manager,

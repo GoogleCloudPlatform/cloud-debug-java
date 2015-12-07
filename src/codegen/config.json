@@ -195,6 +195,26 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "com.google.devtools.cdbg.debuglets.java.BreakpointLabelsProvider",
+      "methods": [
+        {
+          "methodName": "format",
+          "methodSignature": "()[Ljava/lang/String;"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.GcpBreakpointLabelsProvider",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "()V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "com.google.devtools.cdbg.debuglets.java.GcpHubClient",
       "methods": [
         {

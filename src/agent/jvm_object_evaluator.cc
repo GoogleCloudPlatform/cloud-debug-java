@@ -30,6 +30,26 @@
 namespace devtools {
 namespace cdbg {
 
+// Checks if the result of object evaluator is error.
+static bool HasEvaluatorFailed(const std::vector<NamedJVariant>& members) {
+  if (members.empty()) {
+    return true;
+  }
+
+  if (members.size() > 1) {
+    return false;
+  }
+
+  const NamedJVariant& item = members[0];
+  if (item.status.is_error &&
+      item.status.description.format != MethodCallExceptionOccurred) {
+    return true;
+  }
+
+  return false;
+}
+
+
 JvmObjectEvaluator::JvmObjectEvaluator(
     ClassIndexer* class_indexer,
     ClassMetadataReader* class_metadata_reader)
@@ -138,7 +158,12 @@ void JvmObjectEvaluator::Evaluate(
     return;
   }
 
-  return evaluator->Evaluate(method_caller, metadata, obj, members);
+  evaluator->Evaluate(method_caller, metadata, obj, members);
+
+  if ((evaluator != generic_.get()) && HasEvaluatorFailed(*members)) {
+    members->clear();
+    generic_->Evaluate(method_caller, metadata, obj, members);
+  }
 }
 
 

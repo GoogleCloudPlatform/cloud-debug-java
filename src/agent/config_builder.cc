@@ -385,6 +385,14 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 
   [&classes]() {
       const string collection_classes[] = {
+        "com/google/common/collect/ImmutableMapEntrySet$RegularEntrySet",
+        "com/google/common/collect/RegularImmutableList",
+        "com/google/common/collect/RegularImmutableMap",
+        "com/google/common/collect/RegularImmutableMultiset",
+        "com/google/common/collect/RegularImmutableSet",
+        "com/google/common/collect/RegularImmutableSortedSet",
+        "com/google/common/collect/SingletonImmutableList",
+        "com/google/common/collect/SingletonImmutableSet",
         "java/util/ArrayDeque",
         "java/util/ArrayList",
         "java/util/Arrays$ArrayList",
@@ -440,6 +448,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 
   [&classes]() {
       const string iterator_classes[] = {
+        "com/google/common/collect/ImmutableMultiset$1",
         "java/util/AbstractList$Itr",
         "java/util/ArrayDeque$DeqIterator",
         "java/util/ArrayList$Itr",
@@ -468,14 +477,33 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 
       for (const string& iterator_class : iterator_classes) {
         classes[iterator_class] = ToMethods({
-          Allow("hasNext"),
-          Allow("next")
+          Allow("hasNext").signature("()Z"),
+          Allow("next").signature("()Ljava/lang/Object;")
         });
       }
   }();
 
   [&classes]() {
+    const string iterator_classes[] = {
+        "com/google/common/collect/AbstractIndexedListIterator",
+    };
+
+    for (const string& iterator_class : iterator_classes) {
+      classes[iterator_class] = ToMethods({
+        Allow("hasNext")
+            .signature("()Z")
+            .applies_to_derived_classes(),
+        Allow("next")
+            .signature("()Ljava/lang/Object;")
+            .applies_to_derived_classes()
+      });
+    }
+  }();
+
+  [&classes]() {
       const string map_entry_classes[] = {
+        "com/google/common/collect/ImmutableEntry",
+        "com/google/common/collect/ImmutableMapEntry",
         "java/util/AbstractMap$SimpleImmutableEntry",
         "java/util/HashMap$Entry",  // Java 7.
         "java/util/HashMap$Node",  // Java 8.

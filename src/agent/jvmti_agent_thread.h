@@ -40,6 +40,10 @@ class JvmtiAgentThread : public AgentThread {
 
   void Sleep(int ms) override;
 
+  // Returns true if the current thread is JVMTI agent thread created by
+  // this class.
+  static bool IsInAgentThread();
+
  private:
   // Creates the thread objects and starts the agent thread.
   bool StartAgentThread(

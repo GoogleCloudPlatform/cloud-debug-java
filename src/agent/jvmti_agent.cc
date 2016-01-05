@@ -247,6 +247,12 @@ void JvmtiAgent::JvmtiOnBreakpoint(
     jthread thread,
     jmethodID method,
     jlocation location) {
+  // Ignore breakpoint events from debugger worker threads. Debugging
+  // the debugger may cause deadlock.
+  if (JvmtiAgentThread::IsInAgentThread()) {
+    return;
+  }
+
   std::shared_ptr<Debugger> debugger = debugger_;
 
   if (debugger != nullptr) {

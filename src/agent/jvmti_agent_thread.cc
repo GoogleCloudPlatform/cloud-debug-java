@@ -21,6 +21,11 @@
 namespace devtools {
 namespace cdbg {
 
+// Thread local variable indicating whether the current thread is JVMTI
+// agent thread created by "JvmtiAgentThread".
+static __thread bool g_is_agent_thread = false;
+
+
 JvmtiAgentThread::JvmtiAgentThread() {
 }
 
@@ -85,6 +90,9 @@ bool JvmtiAgentThread::StartAgentThread(
       [] (jvmtiEnv* jvmti, JNIEnv* jni, void* arg) {
         set_thread_jni(jni);
 
+        DCHECK(!g_is_agent_thread);
+        g_is_agent_thread = true;
+
         auto* agent_arg = reinterpret_cast<
             std::pair<string, std::function<bool()>>*>(arg);
 
@@ -93,6 +101,8 @@ bool JvmtiAgentThread::StartAgentThread(
         agent_arg->second();
 
         LOG(INFO) << "Agent thread exited: " << agent_arg->first;
+
+        g_is_agent_thread = false;
 
         delete agent_arg;
       },
@@ -110,6 +120,10 @@ bool JvmtiAgentThread::StartAgentThread(
   return true;
 }
 
+
+bool JvmtiAgentThread::IsInAgentThread() {
+  return g_is_agent_thread;
+}
 
 }  // namespace cdbg
 }  // namespace devtools

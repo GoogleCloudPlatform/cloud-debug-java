@@ -386,6 +386,8 @@ class GcpHubClient implements HubClient {
         response = gson.fromJson(reader, ListActiveBreakpointsResponse.class);
       } catch (IOException e) {
         if (connection.get().getResponseCode() == 409) {
+          // We have to close the error stream. Otherwise the network connection leaks.
+          connection.get().getErrorStream().close();
           return LIST_ACTIVE_BREAKPOINTS_TIMEOUT;
         }
 
@@ -445,6 +447,8 @@ class GcpHubClient implements HubClient {
       try {
         connection.get().getInputStream().close();
       } catch (IOException e) {
+        // We always call readErrorStream to close the error stream to avoid socket leak.
+        String errorResponse = readErrorStream(connection.get());
         int responseCode = connection.get().getResponseCode();
         
         // We consider all application errors (5xx) and timeout (408) to be transient errors
@@ -454,7 +458,7 @@ class GcpHubClient implements HubClient {
           // There is no point in retrying the transmission. It will fail.
           warnfmt(e, "Failed to transmit breakpoint update, debuggee: %s, breakpoint ID: %s, "
               + "response: %s\n%s", debuggeeId, breakpointId,
-              connection.get().getResponseMessage(), readErrorStream(connection.get()));
+              connection.get().getResponseMessage(), errorResponse);
           return;
         }
 

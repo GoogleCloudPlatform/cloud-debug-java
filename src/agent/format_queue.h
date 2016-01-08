@@ -37,8 +37,6 @@ constexpr int kMaxFormatQueueSize = 100;
 // to the message that can be transmitted to the Hub service. The class is
 // thread safe since breakpoints are captured and formatted on different
 // threads.
-// TODO(vlif): this class only supports polling at the moment. Need to get rid
-// of polling in favor of a push model a new breakpoint result is available.
 class FormatQueue {
  public:
   // Event fired when a new breakpoint update is enqueued. This event is fired

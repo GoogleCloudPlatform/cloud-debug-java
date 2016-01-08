@@ -69,10 +69,6 @@ void JvmBreakpointsManager::Cleanup() {
   evaluators_->class_indexer->UnsubscribeOnClassPreparedEvents(
       std::move(on_class_prepared_cookie_));
 
-  // No other threads should be active at this point, but take the lock
-  // just in case.
-  MutexLock lock_data(&mu_data_);
-
   format_queue_->RemoveAll();
 }
 

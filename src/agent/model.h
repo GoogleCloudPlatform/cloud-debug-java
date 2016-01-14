@@ -28,8 +28,8 @@ namespace cdbg {
 
 // See google/protobuf/timestamp.proto for explanation of this structure.
 struct TimestampModel {
-  int64 seconds { 0 };
-  int32 nanos { 0 };
+  int64 seconds = 0;
+  int32 nanos = 0;
 };
 
 struct FormatMessageModel {
@@ -52,14 +52,14 @@ struct StatusMessageModel {
     VARIABLE_VALUE = 6
   };
 
-  bool is_error { false };
-  Context refers_to { Context::UNSPECIFIED };
+  bool is_error = false;
+  Context refers_to = Context::UNSPECIFIED;
   FormatMessageModel description;
 };
 
 struct SourceLocationModel {
   string path;
-  int32 line { -1 };
+  int32 line = -1;
 };
 
 struct VariableModel {
@@ -91,13 +91,14 @@ struct BreakpointModel {
   };
 
   string id;
-  Action action { Action::CAPTURE };
+  bool is_canary = false;
+  Action action = Action::CAPTURE;
   std::unique_ptr<SourceLocationModel> location;
   string condition;
   std::vector<string> expressions;
   string log_message_format;
-  LogLevel log_level { LogLevel::INFO };
-  bool is_final_state { false };
+  LogLevel log_level = LogLevel::INFO;
+  bool is_final_state = false;
   TimestampModel create_time;
   std::unique_ptr<StatusMessageModel> status;
   std::vector<std::unique_ptr<StackFrameModel>> stack;

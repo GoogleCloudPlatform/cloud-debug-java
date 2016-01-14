@@ -350,6 +350,7 @@ class BreakpointBuilder {
 
   explicit BreakpointBuilder(const BreakpointModel& source) {
     set_id(source.id);
+    set_is_canary(source.is_canary);
     set_action(source.action);
 
     if (source.location != nullptr) {
@@ -390,6 +391,11 @@ class BreakpointBuilder {
 
   BreakpointBuilder& set_id(string id) {
     data_->id = std::move(id);
+    return *this;
+  }
+
+  BreakpointBuilder& set_is_canary(bool is_canary) {
+    data_->is_canary = is_canary;
     return *this;
   }
 

@@ -202,7 +202,12 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
         // Special case for Java strings: format single unnamed member as
         // variable value rather than as a member. We don't want to do this
         // collapsing for synthetic member entries like "object has no fields".
-        object_variable = FormatVariable(memory_object.members[0]);
+        //
+        // TODO(vlif): it is possible that the string object is referenced by
+        // a watched expression. In this case we should pass true in
+        // "FormatVariable" to increase the size limit of captured a string
+        // string object.
+        object_variable = FormatVariable(memory_object.members[0], false);
       } else {
         object_variable.reset(new VariableModel);
 
@@ -318,7 +323,7 @@ void CaptureDataCollector::FormatVariablesArray(
     const std::vector<NamedJVariant>& source,
     std::vector<std::unique_ptr<VariableModel>>* target) const {
   for (const NamedJVariant& item : source) {
-    target->push_back(FormatVariable(item));
+    target->push_back(FormatVariable(item, false));
   }
 }
 
@@ -337,14 +342,15 @@ void CaptureDataCollector::FormatWatchedExpressions(
               .set_description(item.compile_error_message))
           .build());
     } else {
-      target->push_back(FormatVariable(item.evaluation_result));
+      target->push_back(FormatVariable(item.evaluation_result, true));
     }
   }
 }
 
 
 std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
-    const NamedJVariant& source) const {
+    const NamedJVariant& source,
+    bool is_watched_expression) const {
   std::unique_ptr<VariableModel> target(new VariableModel);
 
   target->name = source.name;
@@ -353,12 +359,13 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
     target->status = StatusMessageBuilder(source.status).build();
   } else {
     if (ValueFormatter::IsValue(source)) {
+      ValueFormatter::Options options;
+      if (is_watched_expression) {
+        options.max_string_length = kExtendedMaxStringLength;
+      }
+
       string formatted_value;
-      ValueFormatter::Format(
-          source,
-          ValueFormatter::Options(),
-          &formatted_value,
-          &target->type);
+      ValueFormatter::Format(source, options, &formatted_value, &target->type);
       target->value = std::move(formatted_value);
     } else {
       jobject ref = nullptr;

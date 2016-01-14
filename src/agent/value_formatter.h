@@ -24,15 +24,22 @@
 namespace devtools {
 namespace cdbg {
 
-// Maximum number of characters to print. Longer strings are truncated.
-constexpr int kMaxStringLength = 256;
+// Maximum number of characters to print by default. Longer strings are
+// truncated.
+constexpr int kDefaultMaxStringLength = 256;
+
+// Maximum string length to capture in watched expressions.
+constexpr int kExtendedMaxStringLength = 2048;
 
 // Set of methods to format JVariant to a string.
 class ValueFormatter {
  public:
   struct Options {
     // Determines whether a string should be wrapped with double quotes.
-    bool quote_string { true };
+    bool quote_string = true;
+
+    // Maximum string length to capture. Longer strings are truncated.
+    int max_string_length = kDefaultMaxStringLength;
   };
 
   // Determines whether the stored data can be formatted as a string. For

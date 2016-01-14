@@ -64,8 +64,8 @@ static void FormatJavaString(
   }
 
   bool truncated = false;
-  if (len > kMaxStringLength) {
-    len = kMaxStringLength;
+  if (len > options.max_string_length) {
+    len = options.max_string_length;
     truncated = true;
   }
 
@@ -171,10 +171,15 @@ int ValueFormatter::GetTotalDataSize(const NamedJVariant& data) {
   if (data.value.get<jobject>(&ref) && (ref != nullptr)) {
     // 2 characters for the wrapping double quotes + number of characters to
     // take from the Java string.
+    //
+    // We don't account for the fact that Options::max_string_length might
+    // be larger than kDefaultMaxStringLength. We can live with it since
+    // the longer limit is only used in a handful of places and the extra
+    // length has a very small impact on the total size of the captured buffer.
     return name_size +
            2 +
            std::min<int>(
-               kMaxStringLength,
+               kDefaultMaxStringLength,
                jni()->GetStringLength(static_cast<jstring>(ref)));
   }
 

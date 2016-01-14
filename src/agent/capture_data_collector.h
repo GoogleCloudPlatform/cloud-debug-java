@@ -182,7 +182,8 @@ class CaptureDataCollector {
   // Formats a single "JVariant" instance into the corresponding API message
   // structure.
   std::unique_ptr<VariableModel> FormatVariable(
-      const NamedJVariant& source) const;
+      const NamedJVariant& source,
+      bool is_watched_expression) const;
 
  protected:
   // Reads local variables at a particular call frame. The function is marked

@@ -25,7 +25,7 @@
 
 DEFINE_bool(
     enable_safe_caller,
-    false,
+false,
     "Allows any method without side effects in expressions");
 
 DEFINE_string(

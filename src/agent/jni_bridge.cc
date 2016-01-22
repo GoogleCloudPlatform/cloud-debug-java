@@ -204,6 +204,32 @@ bool JniBridge::HasPendingMessages() const {
 }
 
 
+bool JniBridge::RegisterBreakpointCanary(const string& breakpoint_id) {
+  auto rc = jniproxy::HubClient()->registerBreakpointCanary(
+      jni_hub_.get(),
+      breakpoint_id);
+  if (rc.HasException()) {
+    rc.LogException();
+    return false;
+  }
+
+  return true;
+}
+
+
+bool JniBridge::ApproveBreakpointCanary(const string& breakpoint_id) {
+  auto rc = jniproxy::HubClient()->approveBreakpointCanary(
+      jni_hub_.get(),
+      breakpoint_id);
+  if (rc.HasException()) {
+    rc.LogException();
+    return false;
+  }
+
+  return true;
+}
+
+
 void JniBridge::Shutdown() {
   MutexLock lock(&mu_);
 

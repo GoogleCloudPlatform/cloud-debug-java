@@ -70,6 +70,12 @@ class Bridge {
   // Checks whether there are still pending messages to be transmitted to the
   // Hub service.
   virtual bool HasPendingMessages() const = 0;
+
+  // Notifies the backend that a canary agent enabled the breakpoint.
+  virtual bool RegisterBreakpointCanary(const string& breakpoint_id) = 0;
+
+  // Approves the breakpoint for a global rollout.
+  virtual bool ApproveBreakpointCanary(const string& breakpoint_id) = 0;
 };
 
 }  // namespace cdbg

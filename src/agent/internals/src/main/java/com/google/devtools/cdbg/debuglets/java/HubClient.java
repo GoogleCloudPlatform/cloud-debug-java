@@ -117,7 +117,32 @@ public interface HubClient {
    */
   void transmitBreakpointUpdate(String format, String breakpointId, byte[] breakpoint)
       throws Exception;
+  
+  /**
+   * Notifies that a canary agent enabled the breakpoint.
+   * 
+   * <p>This method must be called exactly once for each canary breakpoint. If this call fails
+   * (by throwing an exception), the debuglet must retry before applying the breakpoint.
+   * 
+   * @param breakpointId ID of the canary breakpoint.
+   * 
+   * @throws Exception if the backend could not be notified or on failure on the backend side.
+   */
+  void registerBreakpointCanary(String breakpointId) throws Exception;
 
+  /**
+   * Approves the breakpoint for a global rollout.
+   * 
+   * <p>This method must be called exactly once for each canary breakpoint that was enabled for
+   * a considerable period of time. If this call fails (by throwing an exception), the debuglet
+   * must retry.
+   * 
+   * @param breakpointId ID of the canary breakpoint.
+   * 
+   * @throws Exception if the backend could not be notified or on failure on the backend side.
+   */
+  void approveBreakpointCanary(String breakpointId) throws Exception;
+  
   /**
    * Asynchronously aborts all pending requests and blocks any future network connections.
    */

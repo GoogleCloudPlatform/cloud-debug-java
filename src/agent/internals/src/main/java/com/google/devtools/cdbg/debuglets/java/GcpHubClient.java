@@ -468,6 +468,17 @@ class GcpHubClient implements HubClient {
   }
   
   @Override
+  public void registerBreakpointCanary(String breakpointId) throws Exception {
+    throw new UnsupportedOperationException(
+        "GcpHubClient#registerBreakpointCanary not implemented");
+  }
+  
+  @Override
+  public void approveBreakpointCanary(String breakpointId) throws Exception {
+    throw new UnsupportedOperationException("GcpHubClient#approveBreakpointCanary not implemented");
+  }
+  
+  @Override
   public void shutdown() {
     metadata.shutdown();
     

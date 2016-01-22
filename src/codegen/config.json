@@ -236,6 +236,12 @@
           "methodName": "transmitBreakpointUpdate"
         },
         {
+          "methodName": "registerBreakpointCanary"
+        },
+        {
+          "methodName": "approveBreakpointCanary"
+        },
+        {
           "methodName": "shutdown"
         }
       ],

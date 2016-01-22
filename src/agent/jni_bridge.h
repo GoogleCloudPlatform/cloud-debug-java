@@ -65,6 +65,10 @@ class JniBridge : public Bridge {
 
   bool HasPendingMessages() const override;
 
+  bool RegisterBreakpointCanary(const string& breakpoint_id) override;
+
+  bool ApproveBreakpointCanary(const string& breakpoint_id) override;
+
  private:
   // Callback to create an instance of Java class implementing
   // the com.google.devtools.cdbg.debuglets.java.HubClient interface.

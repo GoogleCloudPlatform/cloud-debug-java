@@ -20,6 +20,13 @@
 namespace devtools {
 namespace cdbg {
 
+// Maximum time we allow the Cloud Debugger to spend inside a callback. Beyond
+// that we declare the agent as unhealthy. This is used for breakpoints canary.
+// The interval of 5 seconds is way longer than anything that the debugger
+// will ever take, but we need to account for potential GC cycles that
+// may interrupt the debugger operation.
+constexpr int MaxCallbackTimeMs = 5000;
+
 // Gets the global instance of JVMTI interface.
 jvmtiEnv* jvmti();
 

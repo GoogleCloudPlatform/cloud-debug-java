@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <memory>
 #include <sstream>
+#include "callbacks_monitor.h"
 #include "common.h"
 #include "jvm_eval_call_stack.h"
 #include "jvm_internals.h"
@@ -294,6 +295,8 @@ static void InitEnvironment(const char* options) {
 #endif  // STANDALONE_BUILD
 
   devtools::cdbg::InitializeStatisticians();
+  devtools::cdbg::CallbacksMonitor::InitializeSingleton(
+      devtools::cdbg::MaxCallbackTimeMs);
 }
 
 
@@ -382,6 +385,7 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
 JNIEXPORT void JNICALL Agent_OnUnload(JavaVM* vm) {
   CleanupAgent();
 
+  devtools::cdbg::CallbacksMonitor::CleanupSingleton();
   devtools::cdbg::CleanupStatisticians();
 }
 

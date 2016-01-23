@@ -17,6 +17,7 @@
 #include "jvm_breakpoints_manager.h"
 
 #include <algorithm>
+#include "callbacks_monitor.h"
 #include "format_queue.h"
 #include "breakpoint.h"
 #include "jvm_evaluators.h"
@@ -86,6 +87,9 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
 
   // Identify deleted and new breakpoints.
   {
+    ScopedMonitoredCall monitored_call(
+        "BreakpointsManager:SetActiveBreakpoints:Scan");
+
     MutexLock lock_data(&mu_data_);
 
     for (int i = 0; i < breakpoints.size(); ++i) {
@@ -119,6 +123,9 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
 
   // Create new breakpoints.
   for (std::unique_ptr<BreakpointModel>& new_breakpoint : new_breakpoints) {
+    ScopedMonitoredCall monitored_call(
+        "BreakpointsManager:SetActiveBreakpoints:SetNewBreakpoint");
+
     LOG(INFO) << "Setting new breakpoint: " << new_breakpoint->id;
 
     std::shared_ptr<Breakpoint> jvm_breakpoint =
@@ -137,6 +144,9 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
 
   // Remove breakpoints that were not listed.
   for (auto& breakpoint : updated_active_breakpoints) {
+    ScopedMonitoredCall monitored_call(
+        "BreakpointsManager:SetActiveBreakpoints:RemoveCompletedBreakpoint");
+
     if (breakpoint.second != nullptr) {
       LOG(INFO) << "Completing breakpoint " << breakpoint.second->id()
                 << " (removed from active list by backend)";

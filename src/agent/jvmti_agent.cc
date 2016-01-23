@@ -19,6 +19,7 @@
 #include <atomic>
 #include <sstream>
 
+#include "callbacks_monitor.h"
 #include "auto_reset_event.h"
 #include "bridge.h"
 #include "config_builder.h"
@@ -120,6 +121,9 @@ JvmtiAgent::JvmtiAgent(
 
 
 JvmtiAgent::~JvmtiAgent() {
+  // Assert no unhealthy callbacks occurred throughout the debuglet lifetime.
+  LOG_IF(WARNING, !CallbacksMonitor::GetInstance()->IsHealthy(0))
+      << "Unhealthy callbacks occurred during debuglet lifetime";
 }
 
 
@@ -167,6 +171,8 @@ bool JvmtiAgent::OnLoad() {
 
 
 void JvmtiAgent::JvmtiOnVMInit(jthread thread) {
+  ScopedMonitoredCall monitored_call("JVMTI:VMInit");
+
   Stopwatch stopwatch;
 
   LOG(INFO) << "Java VM started";
@@ -210,10 +216,13 @@ void JvmtiAgent::JvmtiOnVMDeath() {
 // to it. The class provided in JvmtiOnClassLoad doesn't have methods
 // initialized so it not very useful for debugger.
 void JvmtiAgent::JvmtiOnClassLoad(jthread thread, jclass cls) {
+  // ScopedMonitoredCall monitored_call("JVMTI:ClassLoad");
 }
 
 
 void JvmtiAgent::JvmtiOnClassPrepare(jthread thread, jclass cls) {
+  ScopedMonitoredCall monitored_call("JVMTI:ClassPrepare");
+
   std::shared_ptr<Debugger> debugger = debugger_;
 
   if (debugger != nullptr) {
@@ -229,12 +238,15 @@ void JvmtiAgent::JvmtiOnCompiledMethodLoad(
     jint map_length,
     const jvmtiAddrLocationMap* map,
     const void* compile_info) {
+  // ScopedMonitoredCall monitored_call("JVMTI:CompiledMethodLoad");
 }
 
 
 void JvmtiAgent::JvmtiOnCompiledMethodUnload(
     jmethodID method,
     const void* code_addr) {
+  ScopedMonitoredCall monitored_call("JVMTI:CompiledMethodUnload");
+
   std::shared_ptr<Debugger> debugger = debugger_;
 
   if (debugger != nullptr) {
@@ -247,6 +259,8 @@ void JvmtiAgent::JvmtiOnBreakpoint(
     jthread thread,
     jmethodID method,
     jlocation location) {
+  ScopedMonitoredCall monitored_call("JVMTI:Breakpoint");
+
   // Ignore breakpoint events from debugger worker threads. Debugging
   // the debugger may cause deadlock.
   if (JvmtiAgentThread::IsInAgentThread()) {
@@ -340,6 +354,8 @@ bool JvmtiAgent::OnWorkerReady() {
 
 
 void JvmtiAgent::OnIdle() {
+  ScopedMonitoredCall monitored_call("Agent:Idle");
+
   // Invoke scheduled callbacks.
   // The precision of "scheduler_" has the granularity of "OnIdle" calls. This
   // is typically in the order of minutes. This precision is good enough
@@ -361,6 +377,9 @@ void JvmtiAgent::OnBreakpointsUpdated(
 
 
 void JvmtiAgent::EnableDebugger(bool is_enabled) {
+  ScopedMonitoredCall monitored_call(
+      is_enabled ? "Agent:EnableDebugger" : "Agent:DisableDebugger");
+
   if (is_enabled) {
     // Attach debugger if needed
     if (debugger_ == nullptr) {

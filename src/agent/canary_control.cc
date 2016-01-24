@@ -1,0 +1,130 @@
+/**
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "canary_control.h"
+
+namespace devtools {
+namespace cdbg {
+
+// Number of attempts to register or approve a canary breakpoint before
+// failing the operation.
+static constexpr int kMaxAttempts = 3;
+
+// The "ApproveHealtyBreakpoints" method is called from worker thread every
+// cycle of "ListActiveBreakpoints", which is once every 40 seconds. The
+// constant of 35 seconds is deliberately a bit shorter than that so that the
+// canary period fits in one such cycle.
+DEFINE_int32(
+    min_canary_duration_ms,
+    35000,
+    "Time interval after which an enabled canary breakpoint is considered as "
+    "safe for a global rollout (from this debuglet's perspective)");
+
+
+CanaryControl::CanaryControl(
+    CallbacksMonitor* callbacks_monitor,
+    Bridge* bridge)
+    : callbacks_monitor_(callbacks_monitor),
+      bridge_(bridge) {
+}
+
+
+bool CanaryControl::RegisterBreakpointCanary(const string& breakpoint_id) {
+  int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
+
+  {
+    MutexLock lock(&mu_);
+    // Fail if already in canary.
+    if (canary_breakpoints_.find(breakpoint_id) != canary_breakpoints_.end()) {
+      LOG(ERROR) << "Breakpoint " << breakpoint_id
+                 << " already registered for canary";
+      DCHECK(false);
+      return false;
+    }
+
+    // Optimistically mark the breakpoint as if in canary. We don't want to
+    // keep the mutex locked throughout the call to the backend.
+    canary_breakpoints_[breakpoint_id] = current_timestamp_ms;
+  }
+
+  for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
+    if (bridge_->RegisterBreakpointCanary(breakpoint_id)) {
+      return true;
+    }
+  }
+
+  // Roll back the marking that the breakpoint is in canary.
+  MutexLock lock(&mu_);
+  canary_breakpoints_.erase(breakpoint_id);
+
+  return false;
+}
+
+
+void CanaryControl::BreakpointCompleted(const string& breakpoint_id) {
+  MutexLock lock(&mu_);
+  canary_breakpoints_.erase(breakpoint_id);
+}
+
+
+void CanaryControl::ApproveHealtyBreakpoints() {
+  // Choose breakpoints that can be approved.
+  std::vector<string> healthy_ids;
+  {
+    int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
+
+    MutexLock lock(&mu_);
+    for (const auto& entry : canary_breakpoints_) {
+      if (entry.second > current_timestamp_ms - FLAGS_min_canary_duration_ms) {
+        continue;  // The breakpoint hasn't spent enough time in canary.
+      }
+
+      // Declare the canary breakpoint as benign if there are no stuck
+      // callbacks.
+      if (callbacks_monitor_->IsHealthy(entry.second)) {
+        healthy_ids.push_back(entry.first);
+        continue;
+      }
+
+      LOG(WARNING) << "Long or stuck callbacks detected during canary "
+                      " breakpoint period " << entry.first;
+      // TODO(vlif): complete breakpoint here.
+    }
+  }
+
+  // Try to approve the breakpoints.
+  std::vector<string> approved_ids;
+  approved_ids.reserve(healthy_ids.size());
+
+  for (const string& breakpoint_id : healthy_ids) {
+    for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
+      if (bridge_->ApproveBreakpointCanary(breakpoint_id)) {
+        approved_ids.push_back(breakpoint_id);
+        break;
+      }
+    }
+  }
+
+  // Remove the approved breakpoints from the canary list.
+  MutexLock lock(&mu_);
+  for (const string& breakpoint_id : approved_ids) {
+    canary_breakpoints_.erase(breakpoint_id);
+  }
+}
+
+}  // namespace cdbg
+}  // namespace devtools
+

@@ -25,7 +25,7 @@ namespace cdbg {
 // The interval of 5 seconds is way longer than anything that the debugger
 // will ever take, but we need to account for potential GC cycles that
 // may interrupt the debugger operation.
-constexpr int MaxCallbackTimeMs = 5000;
+constexpr int kDefaultMaxCallbackTimeMs = 5000;
 
 // Gets the global instance of JVMTI interface.
 jvmtiEnv* jvmti();

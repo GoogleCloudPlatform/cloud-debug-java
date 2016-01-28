@@ -16,6 +16,7 @@
 
 #include "worker.h"
 
+#include "callbacks_monitor.h"
 #include "agent_thread.h"
 #include "bridge.h"
 
@@ -50,6 +51,7 @@ Worker::Worker(
       transmission_thread_(agent_thread_factory()),
       class_path_lookup_(class_path_lookup),
       bridge_(std::move(bridge)),
+      canary_control_(CallbacksMonitor::GetInstance(), bridge_.get()),
       format_queue_(format_queue) {
   // Subscribe to receive synchronous notifications every time a breakpoint
   // update is enqueued. In return we get a cookie that must be returned
@@ -147,6 +149,8 @@ void Worker::MainThreadProc() {
       // Issue a hanging get request to list active breakpoints.
       ListActiveBreakpoints();
     }
+
+    canary_control_.ApproveHealtyBreakpoints();
 
     provider_->OnIdle();
   }

@@ -21,6 +21,7 @@
 #include <memory>
 #include <map>
 #include "auto_reset_event.h"
+#include "canary_control.h"
 #include "common.h"
 #include "format_queue.h"
 #include "model.h"
@@ -85,6 +86,9 @@ class Worker {
   // agent gets unloaded.
   void Shutdown();
 
+  // Gets the canary breakpoints manager.
+  CanaryControl* canary_control() { return &canary_control_; }
+
  private:
   // Main debugger worker thread (registration and list active breakpoints).
   void MainThreadProc();
@@ -127,6 +131,9 @@ class Worker {
 
   // Implementation of a protocol client with the Hub service or a test.
   std::unique_ptr<Bridge> bridge_;
+
+  // Manages canary breakpoints.
+  CanaryControl canary_control_;
 
   // Breakpoint hit results that wait to be reported to the hub.
   FormatQueue* const format_queue_;

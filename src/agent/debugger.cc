@@ -40,7 +40,8 @@ Debugger::Debugger(
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
     ClassPathLookup* class_path_lookup,
     std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
-    FormatQueue* format_queue)
+    FormatQueue* format_queue,
+    CanaryControl* canary_control /* = nullptr */)
     : config_(config),
       eval_call_stack_(eval_call_stack),
       method_locals_(std::move(method_locals)),
@@ -74,8 +75,11 @@ Debugger::Debugger(
         std::move(breakpoint_definition));
   };
 
-  breakpoints_manager_.reset(
-      new JvmBreakpointsManager(factory, &evaluators_, format_queue));
+  breakpoints_manager_.reset(new JvmBreakpointsManager(
+      factory,
+      &evaluators_,
+      format_queue,
+      canary_control));
 }
 
 

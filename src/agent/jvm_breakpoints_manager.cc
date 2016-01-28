@@ -33,10 +33,12 @@ JvmBreakpointsManager::JvmBreakpointsManager(
         BreakpointsManager*,
         std::unique_ptr<BreakpointModel>)> breakpoint_factory,
     JvmEvaluators* evaluators,
-    FormatQueue* format_queue)
+    FormatQueue* format_queue,
+    CanaryControl* canary_control)
     : breakpoint_factory_(breakpoint_factory),
       evaluators_(evaluators),
       format_queue_(format_queue),
+      canary_control_(canary_control),
       global_condition_cost_limiter_(
           CreateGlobalCostLimiter(CostLimitType::BreakpointCondition)),
       global_dynamic_log_limiter_(
@@ -123,6 +125,17 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
 
   // Create new breakpoints.
   for (std::unique_ptr<BreakpointModel>& new_breakpoint : new_breakpoints) {
+    if (new_breakpoint->is_canary) {
+      if (canary_control_ != nullptr) {
+        if (!canary_control_->RegisterBreakpointCanary(new_breakpoint->id)) {
+          LOG(WARNING) << "Failed to register canary breakpoint, skipping...";
+          continue;
+        }
+      } else {
+        LOG(ERROR) << "Breakpoint canary ignored";
+      }
+    }
+
     ScopedMonitoredCall monitored_call(
         "BreakpointsManager:SetActiveBreakpoints:SetNewBreakpoint");
 
@@ -231,6 +244,10 @@ void JvmBreakpointsManager::JvmtiOnBreakpoint(
 
 
 void JvmBreakpointsManager::CompleteBreakpoint(string breakpoint_id) {
+  if (canary_control_ != nullptr) {
+    canary_control_->BreakpointCompleted(breakpoint_id);
+  }
+
   MutexLock lock_data(&mu_data_);
 
   // Do nothing if the breakpoint is not in active list. It is possible that

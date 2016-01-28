@@ -60,6 +60,10 @@ class JvmtiAgent
 
   ~JvmtiAgent() override;
 
+  // Loads numeric value from the specified system property. Returns the
+  // "default_value" if the system property was not found.
+  static int32 GetSystemPropertyInt32(const char* name, int32 default_value);
+
   // Very first callback from JVM when the shared library is loaded.
   bool OnLoad();
 

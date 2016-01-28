@@ -127,6 +127,26 @@ JvmtiAgent::~JvmtiAgent() {
 }
 
 
+// Loads numeric value from the specified system property. Returns the
+// "default_value" if the system property was not found.
+int32 JvmtiAgent::GetSystemPropertyInt32(
+    const char* name,
+    int32 default_value) {
+  JvmtiBuffer<char> value;
+  jvmtiError err = jvmti()->GetSystemProperty(name, value.ref());
+  if (err != JVMTI_ERROR_NONE) {
+    if (err != JVMTI_ERROR_NOT_AVAILABLE) {
+      LOG(WARNING) << "GetSystemProperty failed, property = " << name
+                   << ", err = " << err;
+    }
+
+    return default_value;
+  }
+
+  return atoi(value.get());  // NOLINT(runtime/deprecated_fn)
+}
+
+
 bool JvmtiAgent::OnLoad() {
   int err = 0;
 
@@ -404,7 +424,8 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
               new JvmClassMetadataReader(this)),
           internals_,
           std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),
-          &format_queue_);
+          &format_queue_,
+          worker_.canary_control());
       debugger_->Initialize();
     }
   } else {

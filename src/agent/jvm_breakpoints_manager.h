@@ -24,6 +24,7 @@
 #include <vector>
 #include "leaky_bucket.h"
 #include "breakpoints_manager.h"
+#include "canary_control.h"
 #include "class_indexer.h"
 #include "common.h"
 #include "mutex.h"
@@ -45,7 +46,8 @@ class JvmBreakpointsManager : public BreakpointsManager {
         BreakpointsManager*,
         std::unique_ptr<BreakpointModel>)> breakpoint_factory,
     JvmEvaluators* evaluators,
-    FormatQueue* format_queue);
+    FormatQueue* format_queue,
+    CanaryControl* canary_control);
 
   ~JvmBreakpointsManager() override;
 
@@ -108,6 +110,9 @@ class JvmBreakpointsManager : public BreakpointsManager {
   // Breakpoint hit results that wait to be reported to the hub.  Not owned by
   // this class.
   FormatQueue* const format_queue_;
+
+  // Optional manager of canary breakpoints.
+  CanaryControl* const canary_control_;
 
   // Registration of a callbacks when a class has been loaded.
   ClassIndexer::OnClassPreparedEvent::Cookie on_class_prepared_cookie_;

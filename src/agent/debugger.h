@@ -20,6 +20,7 @@
 #include <atomic>
 #include <memory>
 #include "breakpoint_labels_provider.h"
+#include "canary_control.h"
 #include "class_files_cache.h"
 #include "class_metadata_reader.h"
 #include "common.h"
@@ -53,7 +54,8 @@ class Debugger {
       std::unique_ptr<ClassMetadataReader> class_metadata_reader,
       ClassPathLookup* class_path_lookup,
       std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
-      FormatQueue* format_queue);
+      FormatQueue* format_queue,
+      CanaryControl* canary_control = nullptr);
 
   ~Debugger();
 

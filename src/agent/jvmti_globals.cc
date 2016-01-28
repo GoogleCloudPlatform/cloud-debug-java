@@ -296,7 +296,7 @@ static void InitEnvironment(const char* options) {
 
   devtools::cdbg::InitializeStatisticians();
   devtools::cdbg::CallbacksMonitor::InitializeSingleton(
-      devtools::cdbg::MaxCallbackTimeMs);
+      devtools::cdbg::kDefaultMaxCallbackTimeMs);
 }
 
 

@@ -16,6 +16,9 @@
 
 #include "canary_control.h"
 
+#include "messages.h"
+#include "model_util.h"
+
 namespace devtools {
 namespace cdbg {
 
@@ -42,7 +45,9 @@ CanaryControl::CanaryControl(
 }
 
 
-bool CanaryControl::RegisterBreakpointCanary(const string& breakpoint_id) {
+bool CanaryControl::RegisterBreakpointCanary(
+    const string& breakpoint_id,
+    std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete) {
   int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
 
   {
@@ -57,7 +62,7 @@ bool CanaryControl::RegisterBreakpointCanary(const string& breakpoint_id) {
 
     // Optimistically mark the breakpoint as if in canary. We don't want to
     // keep the mutex locked throughout the call to the backend.
-    canary_breakpoints_[breakpoint_id] = current_timestamp_ms;
+    canary_breakpoints_[breakpoint_id] = { current_timestamp_ms, fn_complete };
   }
 
   for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
@@ -83,25 +88,27 @@ void CanaryControl::BreakpointCompleted(const string& breakpoint_id) {
 void CanaryControl::ApproveHealtyBreakpoints() {
   // Choose breakpoints that can be approved.
   std::vector<string> healthy_ids;
+  std::map<string, CanaryBreakpoint> unhealthy_ids;
   {
     int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
+    int64 cutoff = current_timestamp_ms - FLAGS_min_canary_duration_ms;
 
     MutexLock lock(&mu_);
     for (const auto& entry : canary_breakpoints_) {
-      if (entry.second > current_timestamp_ms - FLAGS_min_canary_duration_ms) {
+      if (entry.second.register_time > cutoff) {
         continue;  // The breakpoint hasn't spent enough time in canary.
       }
 
       // Declare the canary breakpoint as benign if there are no stuck
       // callbacks.
-      if (callbacks_monitor_->IsHealthy(entry.second)) {
+      if (callbacks_monitor_->IsHealthy(entry.second.register_time)) {
         healthy_ids.push_back(entry.first);
         continue;
       }
 
       LOG(WARNING) << "Long or stuck callbacks detected during canary "
                       " breakpoint period " << entry.first;
-      // TODO(vlif): complete breakpoint here.
+      unhealthy_ids.emplace(entry);
     }
   }
 
@@ -118,10 +125,27 @@ void CanaryControl::ApproveHealtyBreakpoints() {
     }
   }
 
-  // Remove the approved breakpoints from the canary list.
+  // Complete unhealthy breakpoints.
+  for (const auto& entry : unhealthy_ids) {
+    entry.second.fn_complete(StatusMessageBuilder()
+        .set_error()
+        .set_format(CanaryBreakpointUnhealthy)
+        .build());
+  }
+
   MutexLock lock(&mu_);
+
+  // Remove the approved breakpoints from the canary list.
   for (const string& breakpoint_id : approved_ids) {
     canary_breakpoints_.erase(breakpoint_id);
+  }
+
+  // We may have some unhealthy breakpoints. They have are now completed, and
+  // "JvmBreakpointsManager" will call "BreakpointCompleted", so we don't
+  // really have to erase them from "canary_breakpoints_". We still do it
+  // just to be on the safe side.
+  for (const auto& entry : unhealthy_ids) {
+    canary_breakpoints_.erase(entry.first);
   }
 }
 

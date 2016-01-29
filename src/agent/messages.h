@@ -196,6 +196,11 @@ constexpr char DynamicLogOutOfQuota[] =
     "Dynamic log line is paused due to high log rate "
     "until log quota is restored";
 
+constexpr char CanaryBreakpointUnhealthy[] =
+    "The snapshot canary has failed and the snapshot cancelled. Please try "
+    "again at a later time."
+;
+
 #define INTERNAL_ERROR_MESSAGE (devtools::cdbg::FormatMessageModel { \
       "Internal error at $0:$1", \
       { \

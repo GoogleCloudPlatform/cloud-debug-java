@@ -17,10 +17,12 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_CANARY_CONTROL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_CANARY_CONTROL_H_
 
+#include <functional>
 #include <map>
 #include "callbacks_monitor.h"
 #include "bridge.h"
 #include "common.h"
+#include "model.h"
 #include "mutex.h"
 
 namespace devtools {
@@ -34,7 +36,11 @@ class CanaryControl {
 
   // Tries to register the breakpoint for canary. Returns false on failure.
   // The caller must not activate the breakpoint until this call succeeds.
-  bool RegisterBreakpointCanary(const string& breakpoint_id);
+  // The "fn_complete" argument is a function that will finalize and complete
+  // the breakpoint (used when the breakpoint is determined to be unhealthy).
+  bool RegisterBreakpointCanary(
+      const string& breakpoint_id,
+      std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete);
 
   // Indicates that the breakpoint has been finalized. This automatically
   // takes out the breakpoint from a canary.
@@ -45,6 +51,14 @@ class CanaryControl {
   void ApproveHealtyBreakpoints();
 
  private:
+  struct CanaryBreakpoint {
+    // Time (in milliseconds) when the breakpoint was registered for canary.
+    int64 register_time;
+
+    // Callback to complete the breakpoint with the specified status.
+    std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete;
+  };
+
   // Monitors all callbacks into the agent to detect those that may be stuck.
   CallbacksMonitor* const callbacks_monitor_;
 
@@ -55,10 +69,8 @@ class CanaryControl {
   // Locks access to all breakpoint related data structures.
   Mutex mu_;
 
-  // List of breakpoints currently in canary. The key is the breakpoint ID. The
-  // value is the time (in milliseconds) when the breakpoint was registered for
-  // canary.
-  std::map<string, int64> canary_breakpoints_;
+  // List of breakpoints currently in canary. The key is the breakpoint ID.
+  std::map<string, CanaryBreakpoint> canary_breakpoints_;
 
   DISALLOW_COPY_AND_ASSIGN(CanaryControl);
 };

@@ -128,6 +128,9 @@ class JvmBreakpoint : public Breakpoint,
       jmethodID method,
       jlocation location) override;
 
+  void CompleteBreakpointWithStatus(
+      std::unique_ptr<StatusMessageModel> status) override;
+
  private:
   // Checks whether the resolve location points to a different source line
   // than the one specified in the breakpoint. This will happen when a

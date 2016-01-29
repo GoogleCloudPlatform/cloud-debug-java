@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_BREAKPOINT_H_
 
 #include "common.h"
+#include "model.h"
 
 namespace devtools {
 namespace cdbg {
@@ -72,6 +73,11 @@ class Breakpoint {
       jthread thread,
       jmethodID method,
       jlocation location) = 0;
+
+  // Finalizes the breakpoint with the specified status message and removes
+  // it from the list of active breakpoints.
+  virtual void CompleteBreakpointWithStatus(
+      std::unique_ptr<StatusMessageModel> status) = 0;
 };
 
 }  // namespace cdbg

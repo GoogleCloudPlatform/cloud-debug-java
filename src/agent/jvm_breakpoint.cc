@@ -230,14 +230,12 @@ void JvmBreakpoint::Initialize() {
   if (!rsl->error_message.format.empty()) {
     // The breakpoint location could not be resolved, send final breakpoint
     // update and complete the breakpoint.
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
         .set_refers_to(
             StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
-        .set_description(rsl->error_message));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_description(rsl->error_message)
+        .build());
     return;
   }
 
@@ -374,12 +372,10 @@ void JvmBreakpoint::DoLogAction(
     jthread thread,
     CompiledBreakpoint* state) {
   if (!dynamic_logger_->IsAvailable()) {
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
-        .set_format(DynamicLoggerNotAvailable));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_format(DynamicLoggerNotAvailable)
+        .build());
 
     return;
   }
@@ -430,14 +426,12 @@ bool JvmBreakpoint::EvaluateCondition(
     if (condition_result.error_message().format == MethodNotSafe) {
       LOG(WARNING) << "Breakpoint " << id() << " calls unsafe method: "
                    << condition_result.error_message();
-      BreakpointBuilder builder(*definition_);
-      builder.set_status(StatusMessageBuilder()
+      CompleteBreakpointWithStatus(StatusMessageBuilder()
           .set_error()
           .set_refers_to(
               StatusMessageModel::Context::BREAKPOINT_CONDITION)
-          .set_description(condition_result.error_message()));
-
-      CompleteBreakpoint(&builder, nullptr);
+          .set_description(condition_result.error_message())
+          .build());
     } else {
       VLOG(1) << "Evaluation of breakpoint condition failed, "
                  "breakpoint ID: " << id()
@@ -481,14 +475,12 @@ void JvmBreakpoint::ApplyConditionQuota() {
     LOG(WARNING) << "Cost of condition evaluations exceeded global "
                     "limit, breakpoint ID: " << id();
 
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
         .set_refers_to(
             StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_format(ConditionEvaluationCostExceededGlobalLimit));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_format(ConditionEvaluationCostExceededGlobalLimit)
+        .build());
     return;
   }
 
@@ -497,14 +489,12 @@ void JvmBreakpoint::ApplyConditionQuota() {
     LOG(WARNING) << "Cost of condition evaluations exceeded per-breakpoint "
                     "limit, breakpoint ID: " << id();
 
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
         .set_refers_to(
             StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_format(ConditionEvaluationCostExceededPerBreakpointLimit));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_format(ConditionEvaluationCostExceededPerBreakpointLimit)
+        .build());
     return;
   }
 }
@@ -611,14 +601,12 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
                << ", method: " << rsl->method_name
                << ", adjusted line: " << rsl->adjusted_line_number;
 
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
         .set_refers_to(
             StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
-        .set_description(INTERNAL_ERROR_MESSAGE));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_description(INTERNAL_ERROR_MESSAGE)
+        .build());
 
     return;
   }
@@ -635,14 +623,12 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
     LOG(WARNING) << "Failed to set breakpoint " << id()
                  << " because breakpoint condition could not be compiled";
 
-    BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
+    CompleteBreakpointWithStatus(StatusMessageBuilder()
         .set_error()
         .set_refers_to(
             StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_description(new_state->condition().error_message));
-
-    CompleteBreakpoint(&builder, nullptr);
+        .set_description(new_state->condition().error_message)
+        .build());
 
     return;
   }
@@ -761,6 +747,15 @@ CompiledExpression JvmBreakpoint::CompileCondition(
 }
 
 
+void JvmBreakpoint::CompleteBreakpointWithStatus(
+    std::unique_ptr<StatusMessageModel> status) {
+  BreakpointBuilder builder(*definition_);
+  builder.set_status(std::move(status));
+
+  CompleteBreakpoint(&builder, nullptr);
+}
+
+
 void JvmBreakpoint::CompleteBreakpoint(
     BreakpointBuilder* builder,
     std::unique_ptr<CaptureDataCollector> collector) {
@@ -814,14 +809,12 @@ void JvmBreakpoint::OnBreakpointExpired() {
 
   ResetToPending();
 
-  BreakpointBuilder builder(*definition_);
-  builder.set_status(StatusMessageBuilder()
+  CompleteBreakpointWithStatus(StatusMessageBuilder()
       .set_error()
       .set_refers_to(
           StatusMessageModel::Context::UNSPECIFIED)
-      .set_format(BreakpointExpired));
-
-  CompleteBreakpoint(&builder, nullptr);
+      .set_format(BreakpointExpired)
+      .build());
 }
 
 }  // namespace cdbg

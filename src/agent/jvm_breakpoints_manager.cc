@@ -125,9 +125,17 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
 
   // Create new breakpoints.
   for (std::unique_ptr<BreakpointModel>& new_breakpoint : new_breakpoints) {
-    if (new_breakpoint->is_canary) {
+    bool is_canary = new_breakpoint->is_canary;
+    std::shared_ptr<Breakpoint> jvm_breakpoint =
+        breakpoint_factory_(this, std::move(new_breakpoint));
+
+    if (is_canary) {
       if (canary_control_ != nullptr) {
-        if (!canary_control_->RegisterBreakpointCanary(new_breakpoint->id)) {
+        if (!canary_control_->RegisterBreakpointCanary(
+                jvm_breakpoint->id(),
+                std::bind(&Breakpoint::CompleteBreakpointWithStatus,
+                          jvm_breakpoint,
+                          std::placeholders::_1))) {
           LOG(WARNING) << "Failed to register canary breakpoint, skipping...";
           continue;
         }
@@ -139,10 +147,7 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
     ScopedMonitoredCall monitored_call(
         "BreakpointsManager:SetActiveBreakpoints:SetNewBreakpoint");
 
-    LOG(INFO) << "Setting new breakpoint: " << new_breakpoint->id;
-
-    std::shared_ptr<Breakpoint> jvm_breakpoint =
-        breakpoint_factory_(this, std::move(new_breakpoint));
+    LOG(INFO) << "Setting new breakpoint: " << jvm_breakpoint->id();
 
     {
       MutexLock lock_data(&mu_data_);

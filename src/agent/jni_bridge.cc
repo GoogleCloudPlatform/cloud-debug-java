@@ -144,16 +144,6 @@ Bridge::HangingGetResult JniBridge::ListActiveBreakpoints(
       continue;
     }
 
-    if (model->location->path.empty()) {
-      LOG(ERROR) << "Missing source file path in breakpoint definition";
-      continue;
-    }
-
-    if (model->location->line == 0) {
-      LOG(ERROR) << "Missing line number in breakpoint definition";
-      continue;
-    }
-
     breakpoints->push_back(std::move(model));
   }
 

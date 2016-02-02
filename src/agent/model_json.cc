@@ -413,15 +413,9 @@ std::unique_ptr<SourceLocationModel> DeserializeModel<SourceLocationModel>(
 
   // Path.
   model->path = JsonCppGetString(root, "path");
-  if (model->path.empty()) {
-    return nullptr;
-  }
 
   // Line.
-  model->line = JsonCppGetInt(root, "line", -1);
-  if (model->line < 0) {
-    return nullptr;
-  }
+  model->line = JsonCppGetInt(root, "line", 0);
 
   return model;
 }

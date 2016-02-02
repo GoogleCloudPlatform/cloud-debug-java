@@ -17,11 +17,17 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 final class Messages {
+  public static final String UNDEFINED_BREAKPOINT_LOCATION =
+      "Snapshot location not defined";
+
   public static final String BREAKPOINT_ONLY_SUPPORTS_JAVA_FILES =
       "Only files with .java extension are supported";
 
   public static final String SOURCE_FILE_NOT_FOUND_IN_EXECUTABLE =
       "File was not found in the executable";
+
+  public static final String INVALID_LINE_NUMBER =
+      "Invalid line number $0";
 
   public static final String NO_CODE_FOUND_AT_LINE =
       "No code found at line $0";

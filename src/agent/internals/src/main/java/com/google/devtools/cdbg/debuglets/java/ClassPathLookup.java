@@ -173,7 +173,17 @@ final class ClassPathLookup {
    *         number} tuple if the resolution was successful or an error message otherwise.
    */
   public ResolvedSourceLocation resolveSourceLocation(String sourcePath, int lineNumber) {
-    if ((sourcePath == null) || !sourcePath.endsWith(JAVA_EXTENSION)) {
+    if ((sourcePath == null) || sourcePath.isEmpty()) {
+      return new ResolvedSourceLocation(
+          new FormatMessage(Messages.UNDEFINED_BREAKPOINT_LOCATION));
+    }
+
+    if (lineNumber < 1) {
+      return new ResolvedSourceLocation(
+          new FormatMessage(Messages.INVALID_LINE_NUMBER, Integer.toString(lineNumber)));
+    }
+
+    if (!sourcePath.endsWith(JAVA_EXTENSION)) {
       return new ResolvedSourceLocation(
           new FormatMessage(Messages.BREAKPOINT_ONLY_SUPPORTS_JAVA_FILES));
     }

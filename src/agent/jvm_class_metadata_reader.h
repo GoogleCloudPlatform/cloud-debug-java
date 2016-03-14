@@ -22,6 +22,7 @@
 #include <set>
 #include "common.h"
 #include "class_metadata_reader.h"
+#include "data_visibility_policy.h"
 #include "jobject_map.h"
 #include "jvariant.h"
 #include "mutex.h"
@@ -33,38 +34,8 @@ namespace cdbg {
 // This class is thread safe.
 class JvmClassMetadataReader : public ClassMetadataReader {
  public:
-  // Callback to filter out fields and methods that should not be visible by
-  // the debugger.
-  class MemberVisibilityPolicy {
-   public:
-    virtual ~MemberVisibilityPolicy() {}
-
-    // Returns false if the specified field should be filtered out or true
-    // to display it to the end user.
-    // Possible bit values for "field_modifiers" are defined in
-    // classfile_constants.h (e.g. JVM_ACC_PUBLIC).
-    virtual bool IsFieldDebuggerVisible(
-        jclass cls,
-        const string& class_signature,
-        jint field_modifiers,
-        const string& field_name,
-        const string& field_signature) = 0;
-
-    // Returns false if the specified method should be filtered out or true
-    // to display it to the end user.
-    // Possible bit values for "method_modifiers" are defined in
-    // classfile_constants.h (e.g. JVM_ACC_PUBLIC).
-    virtual bool IsMethodDebuggerVisible(
-        jclass cls,
-        const string& class_signature,
-        jint method_modifiers,
-        const string& method_name,
-        const string& method_signature) = 0;
-  };
-
-  // "field_visibility_policy" is not owned by this class and must outlive it.
-  explicit JvmClassMetadataReader(
-      MemberVisibilityPolicy* member_visibility_policy);
+  // "data_visibility" is not owned by this class and must outlive it.
+  explicit JvmClassMetadataReader(DataVisibilityPolicy* data_visibility_policy);
 
   ~JvmClassMetadataReader() override;
 
@@ -94,6 +65,7 @@ class JvmClassMetadataReader : public ClassMetadataReader {
       jclass cls,
       const string& class_signature,
       jfieldID field_id,
+      DataVisibilityPolicy::Class* class_visibility,
       Entry* metadata);
 
   // Loads metadata of a method. In case of error returns "Method" with empty
@@ -101,15 +73,15 @@ class JvmClassMetadataReader : public ClassMetadataReader {
   Method LoadMethodInfo(
       jclass cls,
       const string& class_signature,
-      jmethodID method_id);
+      jmethodID method_id,
+      DataVisibilityPolicy::Class* class_visibility);
 
  private:
-  // Optional callback to decide whether a particular field or a method should
+  // Callback to decide whether a particular field or a method should
   // be visible. The visibility applies to object exploration in
-  // "variables_table" and to expressions. If nullptr, all fields and methods
-  // are visible.
+  // "variables_table" and to expressions.
   // Not owned by this class.
-  MemberVisibilityPolicy* const member_visibility_policy_;
+  DataVisibilityPolicy* const data_visibility_policy_;
 
   // Locks access to object fields cache.
   Mutex mu_;

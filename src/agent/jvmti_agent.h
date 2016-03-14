@@ -23,7 +23,7 @@
 #include "config.h"
 #include "debugger.h"
 #include "eval_call_stack.h"
-#include "jvm_class_metadata_reader.h"
+#include "file_data_visibility_policy.h"
 #include "jvm_internals.h"
 #include "scheduler.h"
 #include "worker.h"
@@ -39,9 +39,7 @@ class Bridge;
 // threads that take care of background processing.
 // For more details about JVMTI see:
 // http://docs.oracle.com/javase/6/docs/platform/jvmti/jvmti.html
-class JvmtiAgent
-    : public Worker::Provider,
-      public JvmClassMetadataReader::MemberVisibilityPolicy {
+class JvmtiAgent : public Worker::Provider {
  public:
   // "internals" and "logger" are not owned by this class, but this class is
   // responsible for the lifetime of these objects (including initialization
@@ -55,6 +53,8 @@ class JvmtiAgent
       std::vector<bool (*)(jobject)> fn_loaders,
       std::unique_ptr<Bridge> bridge,
       std::function<JniLocalRef()> breakpoint_labels_provider_factory,
+      std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
+          data_visibility_config_reader,
       bool enable_capabilities,
       bool enable_jvmti_events);
 
@@ -123,20 +123,6 @@ class JvmtiAgent
 
   void EnableDebugger(bool is_enabled) override;
 
-  bool IsFieldDebuggerVisible(
-      jclass cls,
-      const string& class_signature,
-      jint field_modifiers,
-      const string& field_name,
-      const string& field_signature) override;
-
-  bool IsMethodDebuggerVisible(
-      jclass cls,
-      const string& class_signature,
-      jint method_modifiers,
-      const string& method_name,
-      const string& method_signature) override { return true; };
-
  private:
   // Enables or disables certain JVMTI callbacks.
   void EnableJvmtiNotifications(
@@ -168,6 +154,10 @@ class JvmtiAgent
   // com.google.devtools.cdbg.debuglets.java.BreakpointLabelsProvider interface.
   const std::function<JniLocalRef()> breakpoint_labels_provider_factory_;
 
+  // Reads data visibility configuration from .JAR files.
+  const std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
+      data_visibility_config_reader_;
+
   // When false, don't enable JVMTI capabilities.
   const bool enable_capabilities_;
 
@@ -182,6 +172,9 @@ class JvmtiAgent
 
   // Worker threads responsible to talk to the backend.
   Worker worker_;
+
+  // Manages data visibility policy based on configuration in .JAR files.
+  std::unique_ptr<DataVisibilityPolicy> data_visibility_policy_;
 
   // Currently attached debugger instance. The use of "shared_ptr" here is
   // making sure that the "Debugger" instance doesn't go away in the middle

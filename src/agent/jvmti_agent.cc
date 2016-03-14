@@ -96,12 +96,15 @@ JvmtiAgent::JvmtiAgent(
     std::vector<bool (*)(jobject)> fn_loaders,
     std::unique_ptr<Bridge> bridge,
     std::function<JniLocalRef()> breakpoint_labels_provider_factory,
+    std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
+        data_visibility_config_reader,
     bool enable_capabilities,
     bool enable_jvmti_events)
     : internals_(internals),
       eval_call_stack_(std::move(eval_call_stack)),
       fn_loaders_(std::move(fn_loaders)),
       breakpoint_labels_provider_factory_(breakpoint_labels_provider_factory),
+      data_visibility_config_reader_(data_visibility_config_reader),
       enable_capabilities_(enable_capabilities),
       enable_jvmti_events_(enable_jvmti_events),
       scheduler_(Scheduler<>::DefaultClock),
@@ -369,6 +372,10 @@ bool JvmtiAgent::OnWorkerReady() {
     return false;
   }
 
+  // Load data visibility configuration.
+  data_visibility_policy_.reset(new FileDataVisibilityPolicy(
+      data_visibility_config_reader_(internals_)));
+
   return true;
 }
 
@@ -419,9 +426,10 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
           &scheduler_,
           config_.get(),
           eval_call_stack_.get(),
-          std::unique_ptr<MethodLocals>(new MethodLocals(nullptr)),
+          std::unique_ptr<MethodLocals>(
+              new MethodLocals(data_visibility_policy_.get())),
           std::unique_ptr<ClassMetadataReader>(
-              new JvmClassMetadataReader(this)),
+              new JvmClassMetadataReader(data_visibility_policy_.get())),
           internals_,
           std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),
           &format_queue_,
@@ -451,16 +459,6 @@ std::unique_ptr<BreakpointLabelsProvider>
 JvmtiAgent::BuildBreakpointLabelsProvider() {
   return std::unique_ptr<BreakpointLabelsProvider>(
       new JniBreakpointLabelsProvider(breakpoint_labels_provider_factory_));
-}
-
-
-bool JvmtiAgent::IsFieldDebuggerVisible(
-    jclass cls,
-    const string& class_signature,
-    jint field_modifiers,
-    const string& field_name,
-    const string& field_signature) {
-  return true;
 }
 
 }  // namespace cdbg

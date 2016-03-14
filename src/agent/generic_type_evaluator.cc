@@ -64,6 +64,7 @@ void GenericTypeEvaluator::Evaluate(
   }
 
   if (class_metadata.instance_fields_omitted) {
+    // TODO(vlif): improve this message for @InvisibleForDebugging case.
     NamedJVariant message;
 
     message.status.is_error = false;

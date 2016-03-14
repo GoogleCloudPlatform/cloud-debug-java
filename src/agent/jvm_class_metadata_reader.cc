@@ -34,8 +34,8 @@ static void ReleaseEntryRefs(jobject cls, ClassMetadataReader::Entry* entry) {
 
 
 JvmClassMetadataReader::JvmClassMetadataReader(
-    MemberVisibilityPolicy* member_visibility_policy)
-    : member_visibility_policy_(member_visibility_policy),
+    DataVisibilityPolicy* data_visibility_policy)
+    : data_visibility_policy_(data_visibility_policy),
       cls_cache_(ReleaseEntryRefs) {
 }
 
@@ -172,6 +172,10 @@ void JvmClassMetadataReader::LoadSingleClassMetadata(
     return;
   }
 
+  // Get the visibility policy for the current class.
+  std::unique_ptr<DataVisibilityPolicy::Class> class_visibility =
+      data_visibility_policy_->GetClassVisibility(cls);
+
   // Load list of all the fields of the class. This includes both member
   // and static fields.
   jint cls_fields_count = 0;
@@ -187,6 +191,7 @@ void JvmClassMetadataReader::LoadSingleClassMetadata(
           cls,
           class_signature,
           cls_fields.get()[i],
+          class_visibility.get(),
           metadata);
     }
   }
@@ -207,7 +212,8 @@ void JvmClassMetadataReader::LoadSingleClassMetadata(
       Method method_metadata = LoadMethodInfo(
           cls,
           class_signature,
-          methods.get()[i]);
+          methods.get()[i],
+          class_visibility.get());
 
       if (method_metadata.name.empty()) {
         continue;
@@ -246,6 +252,7 @@ void JvmClassMetadataReader::LoadFieldInfo(
     jclass cls,
     const string& class_signature,
     jfieldID field_id,
+    DataVisibilityPolicy::Class* class_visibility,
     Entry* metadata) {
   int err = JVMTI_ERROR_NONE;
 
@@ -278,12 +285,8 @@ void JvmClassMetadataReader::LoadFieldInfo(
   string field_name = field_name_buffer.get();
   string field_signature = field_signature_buffer.get();
 
-  if (!member_visibility_policy_->IsFieldDebuggerVisible(
-          cls,
-          class_signature,
-          field_modifiers,
-          field_name,
-          field_signature)) {
+  if ((class_visibility != nullptr) &&
+      !class_visibility->IsFieldVisible(field_name, field_modifiers)) {
     if ((field_modifiers & JVM_ACC_STATIC) == 0) {
       metadata->instance_fields_omitted = true;
     }
@@ -314,7 +317,8 @@ void JvmClassMetadataReader::LoadFieldInfo(
 JvmClassMetadataReader::Method JvmClassMetadataReader::LoadMethodInfo(
     jclass cls,
     const string& class_signature,
-    jmethodID method_id) {
+    jmethodID method_id,
+    DataVisibilityPolicy::Class* class_visibility) {
   int err = JVMTI_ERROR_NONE;
 
   JvmtiBuffer<char> method_name;
@@ -342,12 +346,11 @@ JvmClassMetadataReader::Method JvmClassMetadataReader::LoadMethodInfo(
   method.signature = method_signature.get();
   method.modifiers = method_modifiers;
 
-  if (!member_visibility_policy_->IsMethodDebuggerVisible(
-          cls,
-          class_signature,
-          method_modifiers,
+  if ((class_visibility != nullptr) &&
+      !class_visibility->IsMethodVisible(
           method.name,
-          method.signature)) {
+          method.signature,
+          method_modifiers)) {
     return Method();  // Method is invisible.
   }
 

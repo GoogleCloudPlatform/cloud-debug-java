@@ -23,9 +23,8 @@
 namespace devtools {
 namespace cdbg {
 
-MethodLocals::MethodLocals(
-    LocalVariablesVisibilityPolicy* local_variables_visibility_policy)
-    : local_variables_visibility_policy_(local_variables_visibility_policy) {
+MethodLocals::MethodLocals(DataVisibilityPolicy* data_visibility_policy)
+    : data_visibility_policy_(data_visibility_policy) {
 }
 
 
@@ -70,24 +69,39 @@ std::shared_ptr<MethodLocals::Entry> MethodLocals::LoadEntry(
   std::shared_ptr<Entry> entry(new Entry);
 
   // Fetch the class in which the method is defined.
-  jclass cls = nullptr;
-  err = jvmti()->GetMethodDeclaringClass(method, &cls);
-  if (err != JVMTI_ERROR_NONE) {
-    LOG(ERROR) << "GetMethodDeclaringClass failed, error: " << err;
+  JniLocalRef cls = GetMethodDeclaringClass(method);
+  if (cls == nullptr) {
     return nullptr;  // Retry the operation in the future.
   }
 
-  JniLocalRef auto_cls(cls);
+  // Get visibility policy for the current class.
+  std::unique_ptr<DataVisibilityPolicy::Class> class_visibility =
+      data_visibility_policy_->GetClassVisibility(
+          static_cast<jclass>(cls.get()));
 
   // Load information about local instance (i.e. "this" pointer).
-  entry->local_instance = LoadLocalInstance(cls, method);
+  entry->local_instance =
+      LoadLocalInstance(static_cast<jclass>(cls.get()), method);
 
-  if (local_variables_visibility_policy_ &&
-      !local_variables_visibility_policy_->IsLocalVariablesDebuggerVisible(
-          cls,
-          method)) {
-    // The policy for this method is not to show local variables.
-    return entry;
+  // Get name and signature of the current method. Optimization: we only
+  // need it if we have a non-default visibility policy.
+  string method_name;
+  string method_signature;
+  if (class_visibility != nullptr) {
+    JvmtiBuffer<char> method_name_buffer;
+    JvmtiBuffer<char> method_signature_buffer;
+    err = jvmti()->GetMethodName(
+        method,
+        method_name_buffer.ref(),
+        method_signature_buffer.ref(),
+        nullptr);
+    if (err != JVMTI_ERROR_NONE) {
+      LOG(ERROR) << "GetMethodName failed, error: " << err;
+      return nullptr;  // Retry the operation in the future.
+    }
+
+    method_name = method_name_buffer.get();
+    method_signature = method_signature_buffer.get();
   }
 
   // Load information about local variables.
@@ -125,6 +139,19 @@ std::shared_ptr<MethodLocals::Entry> MethodLocals::LoadEntry(
 
   for (int i = 0; i < num_entries; ++i) {
     const jvmtiLocalVariableEntry& local_variable_entry = table.get()[i];
+
+    if ((class_visibility != nullptr) &&
+        !class_visibility->IsVariableVisible(
+            method_name,
+            method_signature,
+            local_variable_entry.name)) {
+      // The local variable is marked as invisible.
+      // TODO(vlif): instead of just skipping a variable, it would be nice to
+      // define a custom instance of "LocalVariableReader" that would always
+      // return an info status saying something like "redacted".
+      continue;
+    }
+
     entry->locals.push_back(
         std::unique_ptr<LocalVariableReader>(
             new JvmLocalVariableReader(

@@ -26,6 +26,7 @@
 #include "statistician.h"
 #include "version.h"
 
+#include "file_data_visibility_policy.h"
 #include "jvmti_agent.h"
 
 #ifndef STANDALONE_BUILD
@@ -370,6 +371,11 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
       [] () {
           return jniproxy::GcpBreakpointLabelsProvider()->NewObject()
               .Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
+      },
+      [] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
+        // "InvisibleForDebugging" annotation not yet supported on open source
+        // version of Java Cloud Debugger.
+        return devtools::cdbg::FileDataVisibilityPolicy::Config();
       },
       true,
       true);

@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 #include "common.h"
+#include "data_visibility_policy.h"
 #include "mutex.h"
 
 namespace devtools {
@@ -33,19 +34,6 @@ class LocalVariableReader;
 // This class is thread safe.
 class MethodLocals {
  public:
-  // Callback to filter out local variables that should not be visible by the
-  // debugger.
-  class LocalVariablesVisibilityPolicy {
-   public:
-    virtual ~LocalVariablesVisibilityPolicy() {}
-
-    // Returns true if the debugger should show local variables in the specified
-    // method or false to hide the variables.
-    virtual bool IsLocalVariablesDebuggerVisible(
-        jclass cls,
-        jmethodID method) = 0;
-  };
-
   // This structure may be released from CompiledMethodUnload. In this case
   // "JNIEnv*" is not going to be available. Therefore this structure must not
   // contain anything that requires "JNIEnv*" in destructor (e.g. "JVariant").
@@ -57,10 +45,8 @@ class MethodLocals {
     std::unique_ptr<LocalVariableReader> local_instance;
   };
 
-  // "local_variables_visibility_policy" is not owned by this class and must
-  // outlive it.
-  explicit MethodLocals(
-      LocalVariablesVisibilityPolicy* local_variables_visibility_policy);
+  // "data_visibility_policy" is not owned by this class and must outlive it.
+  explicit MethodLocals(DataVisibilityPolicy* data_visibility_policy);
 
   virtual ~MethodLocals() {}
 
@@ -86,9 +72,8 @@ class MethodLocals {
       jmethodID method);
 
  private:
-  // Optional filter of local variables visibility.
-  // If null, all local variables in all methods are made available.
-  LocalVariablesVisibilityPolicy* const local_variables_visibility_policy_;
+  // Filters local variables.
+  DataVisibilityPolicy* const data_visibility_policy_;
 
   // Locks access to local variables cache.
   Mutex mu_;

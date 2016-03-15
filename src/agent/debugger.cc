@@ -39,6 +39,7 @@ Debugger::Debugger(
     std::unique_ptr<MethodLocals> method_locals,
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
     ClassPathLookup* class_path_lookup,
+    std::unique_ptr<DynamicLogger> dynamic_logger,
     std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
     FormatQueue* format_queue,
     CanaryControl* canary_control /* = nullptr */)
@@ -47,7 +48,8 @@ Debugger::Debugger(
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
       object_evaluator_(&class_indexer_, class_metadata_reader_.get()),
-      class_files_cache_(&class_indexer_, FLAGS_cdbg_class_files_cache_size) {
+      class_files_cache_(&class_indexer_, FLAGS_cdbg_class_files_cache_size),
+      dynamic_logger_(std::move(dynamic_logger)) {
   evaluators_.class_path_lookup = class_path_lookup;
   evaluators_.class_indexer = &class_indexer_;
   evaluators_.eval_call_stack = eval_call_stack_;
@@ -70,7 +72,7 @@ Debugger::Debugger(
         scheduler,
         &evaluators_,
         format_queue,
-        &dynamic_logger_,
+        dynamic_logger_.get(),
         breakpoints_manager,
         std::move(breakpoint_definition));
   };
@@ -100,9 +102,6 @@ void Debugger::Initialize() {
 
   // Initialize pretty printers.
   object_evaluator_.Initialize();
-
-  // Create logger for dynamic logging.
-  dynamic_logger_.Initialize();
 
   LOG(INFO) << "Debugger::Initialize initialization time: "
             << stopwatch.GetElapsedMillis() << " ms";

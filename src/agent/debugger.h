@@ -24,8 +24,8 @@
 #include "class_files_cache.h"
 #include "class_metadata_reader.h"
 #include "common.h"
+#include "dynamic_logger.h"
 #include "eval_call_stack.h"
-#include "jvm_dynamic_logger.h"
 #include "jvm_evaluators.h"
 #include "jvm_class_indexer.h"
 #include "jvm_object_evaluator.h"
@@ -53,6 +53,7 @@ class Debugger {
       std::unique_ptr<MethodLocals> method_locals,
       std::unique_ptr<ClassMetadataReader> class_metadata_reader,
       ClassPathLookup* class_path_lookup,
+      std::unique_ptr<DynamicLogger> dynamic_logger,
       std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
       FormatQueue* format_queue,
       CanaryControl* canary_control = nullptr);
@@ -109,7 +110,7 @@ class Debugger {
   JvmEvaluators evaluators_;
 
   // Logger for dynamic logs.
-  JvmDynamicLogger dynamic_logger_;
+  std::unique_ptr<DynamicLogger> dynamic_logger_;
 
   // Manages breakpoints and computes the state of the program on breakpoint
   // hit.

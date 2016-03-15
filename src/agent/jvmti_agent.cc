@@ -26,6 +26,7 @@
 #include "jni_breakpoint_labels_provider.h"
 #include "jni_semaphore.h"
 #include "jvm_class_metadata_reader.h"
+#include "jvm_dynamic_logger.h"
 #include "jvm_eval_call_stack.h"
 #include "jvmti_agent_thread.h"
 #include "jvmti_buffer.h"
@@ -415,6 +416,9 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
       // Enable debugger specific event callbacks.
       EnableJvmtiDebuggerNotifications(JVMTI_ENABLE);
 
+      std::unique_ptr<JvmDynamicLogger> dynamic_logger(new JvmDynamicLogger);
+      dynamic_logger->Initialize();
+
       // Start the debugger. "debugger_" will start receiving JVMTI events
       // right away (not after "Initialize"). Debugger::Initialize initializes
       // JvmClassIndexer. JvmClassIndexer needs to know about all the classes.
@@ -431,6 +435,7 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
           std::unique_ptr<ClassMetadataReader>(
               new JvmClassMetadataReader(data_visibility_policy_.get())),
           internals_,
+          std::move(dynamic_logger),
           std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),
           &format_queue_,
           worker_.canary_control());

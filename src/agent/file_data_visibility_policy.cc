@@ -1,5 +1,6 @@
 #include "file_data_visibility_policy.h"
 
+#include <sstream>
 #include "jni_utils.h"
 
 namespace devtools {

@@ -401,9 +401,11 @@ final class ClassPathLookup {
     addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/lib");
     addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/classes");
 
-    // Jetty.
+    // Jetty: newer Jetty versions renamed ROOT to root.
     addSystemPropertyRelative(paths, "jetty.base", "webapps/ROOT/WEB-INF/lib");
     addSystemPropertyRelative(paths, "jetty.base", "webapps/ROOT/WEB-INF/classes");
+    addSystemPropertyRelative(paths, "jetty.base", "webapps/root/WEB-INF/lib");
+    addSystemPropertyRelative(paths, "jetty.base", "webapps/root/WEB-INF/classes");
 
     return paths.toArray(new String[0]);
   }

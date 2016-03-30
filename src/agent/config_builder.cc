@@ -324,6 +324,19 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }();
 
   [&classes]() {
+      classes["java/util/Date"] = ToMethods({
+        Allow("after"),
+        Allow("before"),
+        Allow("clone"),
+        Allow("compareTo"),
+        Allow("equals"),
+        Allow("getTime"),
+        Allow("hashCode"),
+        Allow("toString"),
+      });
+  }();
+
+  [&classes]() {
       // TODO(vlif): add "pre_call" to string constructors that copy array.
       classes["java/lang/String"] = ToMethods({
         Allow("format").pre_call(StringFormatPre),

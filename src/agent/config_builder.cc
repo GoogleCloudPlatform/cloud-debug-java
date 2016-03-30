@@ -522,6 +522,17 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
       }
   }();
 
+  [&classes]() {
+    classes["java/lang/Thread"] = ToMethods({ Allow("currentThread") });
+
+    // The get() method is not whitelisted for derived methods as the first call
+    // to get() runs initialValue(), and if the user overrides initialValue()
+    // then they would be able to run arbitrary code inside expressions.
+    classes["java/lang/ThreadLocal"] = ToMethods({
+        Allow("get").signature("()Ljava/lang/Object;")
+    });
+  }();
+
   //
   // Additional configuration provided through flags.
   //

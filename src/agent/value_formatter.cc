@@ -45,7 +45,7 @@ static void ScrubEmbeddedZeroCharacters(string* data_ptr) {
   string& data = *data_ptr;
 
   // Make a pass to identify all embedded zeros (2 bytes).
-  vector<int> zeros;
+  std::vector<int> zeros;
   for (int i = 0; i + 1 < data.size(); ++i) {
     // Check if the next two characters represent an embedded zero.
     if (data[i] == 0xC0 && data[i + 1] == 0x80) {
@@ -140,7 +140,7 @@ static void ScrubSupplementaryCharacters(string* data_ptr) {
   string& data = *data_ptr;
 
   // Make a pass to identify all supplementary characters (6 bytes).
-  queue<pair<int, int32>> supplementaries;
+  std::queue<std::pair<int, int32>> supplementaries;
   for (int i = 0; i + 5 < data.size(); ++i) {
     // Check if the next 6 bytes represent a supplementary character.
     // Modified UTF8 encodes a supplementary character as a UTF16 high/low
@@ -192,7 +192,7 @@ static void ScrubSupplementaryCharacters(string* data_ptr) {
       uint16 top_ten_bits = high_surrogate - 0xD800;
       uint16 low_ten_bits = low_surrogate - 0xDC00;
       int32 unicode_value = 0x10000 + ((top_ten_bits << 10) | low_ten_bits);
-      supplementaries.push(pair<int, int32>(i, unicode_value));
+      supplementaries.push(std::pair<int, int32>(i, unicode_value));
       i += 5;  // Skip the next 5 bytes of the supplementary character.
       continue;
     }

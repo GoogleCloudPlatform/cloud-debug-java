@@ -115,6 +115,9 @@ class JvmInternals : public ClassPathLookup {
     // ResolvedSourceLocation.getMethodName method.
     jmethodID get_method_name_method { nullptr };
 
+    // ResolvedSourceLocation.getMethodDescriptor method.
+    jmethodID get_method_descriptor_method { nullptr };
+
     // ResolvedSourceLocation.getAdjustedLineNumber method.
     jmethodID get_adjusted_line_number_method { nullptr };
   } resolved_source_location_;

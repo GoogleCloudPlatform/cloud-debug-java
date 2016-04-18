@@ -23,15 +23,21 @@ final class ResolvedSourceLocation {
   private final FormatMessage errorMessage;
   private final String classSignature;
   private final String methodName;
+  private final String methodDescriptor;
   private final int adjustedLineNumber;
 
   /**
    * Class constructor for successfully resolved source location.
    */
-  public ResolvedSourceLocation(String classSignature, String methodName, int adjustedLineNumber) {
+  public ResolvedSourceLocation(
+      String classSignature,
+      String methodName,
+      String methodDescriptor,
+      int adjustedLineNumber) {
     this.errorMessage = null;
     this.classSignature = classSignature;
     this.methodName = methodName;
+    this.methodDescriptor = methodDescriptor;
     this.adjustedLineNumber = adjustedLineNumber;
   }
 
@@ -42,6 +48,7 @@ final class ResolvedSourceLocation {
     this.errorMessage = errorMessage;
     this.classSignature = null;
     this.methodName = null;
+    this.methodDescriptor = null;
     this.adjustedLineNumber = -1;
   }
 
@@ -69,6 +76,13 @@ final class ResolvedSourceLocation {
    */
   public String getMethodName() {
     return methodName;
+  }
+
+  /**
+   * Descriptor of the method containing code referenced by the source location.
+   */
+  public String getMethodDescriptor() {
+    return methodDescriptor;
   }
 
   /**

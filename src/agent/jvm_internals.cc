@@ -158,6 +158,7 @@ void JvmInternals::ReleaseRefs() {
   class_path_lookup_.read_application_resource_method = nullptr;
   resolved_source_location_.get_class_signature_method = nullptr;
   resolved_source_location_.get_method_name_method = nullptr;
+  resolved_source_location_.get_method_descriptor_method = nullptr;
   resolved_source_location_.get_adjusted_line_number_method = nullptr;
   format_message_.get_format_method = nullptr;
   format_message_.get_parameters_method = nullptr;
@@ -242,6 +243,21 @@ void JvmInternals::ResolveSourceLocation(
   location->method_name = JniToNativeString(jobj.get());
   if (location->method_name.empty()) {
     LOG(ERROR) << "Empty method name returned";
+    return;
+  }
+
+  // rsl.getMethodDescriptor()
+  jobj.reset(jni()->CallObjectMethod(
+      location_local_ref.get(),
+      resolved_source_location_.get_method_descriptor_method));
+
+  if (!JniCheckNoException("ResolvedSourceLocation.getMethodDescriptor")) {
+    return;
+  }
+
+  location->method_signature = JniToNativeString(jobj.get());
+  if (location->method_signature.empty()) {
+    LOG(ERROR) << "Empty method descriptor returned";
     return;
   }
 
@@ -472,6 +488,14 @@ bool JvmInternals::LoadClasses() {
         "getMethodName",
         "()Ljava/lang/String;");
   if (resolved_source_location_.get_method_name_method == nullptr) {
+    return false;
+  }
+
+  resolved_source_location_.get_method_descriptor_method =
+    resolved_source_location_.cls.GetInstanceMethod(
+        "getMethodDescriptor",
+        "()Ljava/lang/String;");
+  if (resolved_source_location_.get_method_descriptor_method == nullptr) {
     return false;
   }
 

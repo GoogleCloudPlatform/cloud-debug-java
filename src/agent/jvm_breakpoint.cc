@@ -50,6 +50,7 @@ namespace cdbg {
 static bool FindMethodLine(
     jclass cls,
     const string& method_name,
+    const string& method_signature,
     int line_number,
     jmethodID* method,
     jlocation* location) {
@@ -73,13 +74,22 @@ static bool FindMethodLine(
 
     // Ignore the method unless it's the one we are looking for.
     JvmtiBuffer<char> name_buf;
-    err = jvmti()->GetMethodName(cur_method, name_buf.ref(), nullptr, nullptr);
+    JvmtiBuffer<char> sig_buf;
+    err = jvmti()->GetMethodName(
+        cur_method,
+        name_buf.ref(),
+        sig_buf.ref(),
+        nullptr);
     if (err != JVMTI_ERROR_NONE) {
       LOG(ERROR) << "GetMethodName failed, error: " << err << ", ignoring...";
       continue;
     }
 
     if ((name_buf.get() == nullptr) || (method_name != name_buf.get())) {
+      continue;
+    }
+
+    if ((sig_buf.get() == nullptr) || (method_signature != sig_buf.get())) {
       continue;
     }
 
@@ -589,6 +599,7 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
   if (!FindMethodLine(
         static_cast<jclass>(cls_local_ref.get()),
         rsl->method_name,
+        rsl->method_signature,
         rsl->adjusted_line_number,
         &method,
         &location)) {

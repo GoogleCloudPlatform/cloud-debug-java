@@ -112,7 +112,9 @@ final class SourceFileMapper {
           // JVMTI defines class signatures as "Lcom/prod/MyClass;".
           String jvmClassSignature = 'L' + currentClass + ';';
 
-          statements.put(line, new ResolvedSourceLocation(jvmClassSignature, name, line));
+          statements.put(
+              line,
+              new ResolvedSourceLocation(jvmClassSignature, name, descriptor, line));
         }
       };
     }

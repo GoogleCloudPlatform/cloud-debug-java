@@ -108,7 +108,7 @@ void CanaryControl::ApproveHealtyBreakpoints() {
 
       LOG(WARNING) << "Long or stuck callbacks detected during canary "
                       " breakpoint period " << entry.first;
-      unhealthy_ids.emplace(entry);
+      unhealthy_ids[entry.first] = entry.second;
     }
   }
 

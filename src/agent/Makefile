@@ -39,14 +39,16 @@ OPT_FLAGS = -O3 -D NDEBUG
 LDFLAGS += -shared
 LDS_FLAGS = -Wl,-z,defs -Wl,--version-script=cdbg_java_agent.lds
 
+ROOT=../../
 THIRD_PARTY_PATH = ../../third_party
 ANTLR_TOOL_PATH = $(THIRD_PARTY_PATH)/antlr
 ANTLR_CPP_LIB = $(THIRD_PARTY_PATH)/antlr/lib/cpp
-ANTLR_CPP_LIB_SRC = $(ANTLR_CPP_LIB)/src/v2_7_2
-ANTLR_CPP_LIB_INCLUDE = $(ANTLR_CPP_LIB)/v2_7_2/
+ANTLR_CPP_LIB_SRC = $(ANTLR_CPP_LIB)/src
+ANTLR_CPP_LIB_INCLUDE = $(ANTLR_CPP_LIB)
 
 INCLUDES = \
 	-I/usr/lib/jvm/java-7-openjdk-amd64/include \
+	-I$(ROOT) \
 	-I$(THIRD_PARTY_INCLUDE_PATH) \
 	-I$(ANTLR_CPP_LIB_INCLUDE) \
 	-I. \

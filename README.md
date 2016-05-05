@@ -50,7 +50,8 @@ package from the Internet:
 
 ```shell
 mkdir /opt/cdbg
-wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | tar xvz -C /opt/cdbg
+wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | \
+    tar xvz -C /opt/cdbg
 ```
 
 Alternatively you can build the debugger agent from source code:
@@ -83,7 +84,7 @@ uses local [metadata service](https://cloud.google.com/compute/docs/metadata) to
 obtain the credentials. You can still use the Java Cloud Debugger outside of
 Google Compute Engine or on a virtual machine that does not allow API access to
 all Google Cloud services. This would require setting up a
-[service account](#Service_Account).
+[service account](#service-account).
 
 ### Web Servers
 
@@ -113,21 +114,22 @@ Add `cdbg.ini` file to `/var/lib/jetty/start.d`:
 -agentpath:/opt/cdbg/cdbg_java_agent.so
 ```
 
-### Versioning
+### Naming and Versioning
 
-Developers normally run multiple versions of the application at the same time
-and multiple applications within the same project. You can tag each such entity
-with Cloud Debugger. This will make it easier to select the right application in
-the Cloud Debugger UI.
+Developers can run multiple applications and versions at the same time within
+the same project. You should tag each app version with the Cloud Debugger to
+uniquely identify it in the Cloud Debugger UI.
 
-To tag the version of the application, please add one or more of these optional
-system properties:
+To tag the application and it's version, please add these system properties:
 
 <pre>
--Dcom.google.cdbg.version=<i>myversion</i>
 -Dcom.google.cdbg.module=<i>mymodule</i>
--Dcom.google.cdbg.minorversion=<i>minor version or build ID</i>
+-Dcom.google.cdbg.version=<i>myversion</i>
 </pre>
+
+Use 'module' to name your application (or service).
+Use 'version' to name the app version (e.g. build id).
+The UI will display the running version as 'module - version'.
 
 ### Logging
 
@@ -152,7 +154,7 @@ machine, including outside of [Google Cloud Platform](https://cloud.google.com).
 The debugger agent authenticates against the backend with the service account
 created in [Google Developers Console](https://console.developers.google.com).
 If your application runs on Google Compute Engine,
-[metadata service authentication](#Setup) is an easier option.
+[metadata service authentication](#setup) is an easier option.
 
 The first step for this setup is to create the service account in .p12 format.
 Please see

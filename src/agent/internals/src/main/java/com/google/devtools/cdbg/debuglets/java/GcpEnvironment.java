@@ -189,13 +189,8 @@ final class GcpEnvironment {
       labels.put(DEBUGGEE_MAJOR_VERSION_LABEL, majorVersion);
     }
 
-    // Read minor version (like deployment ID) from environment variable allowing overrides 
-    // through system property.
-    String minorVersion = System.getProperty("com.google.cdbg.minorversion");
-    if (minorVersion == null) {
-      minorVersion = System.getenv("GAE_MINOR_VERSION");
-    }
-    
+    // Minorversion can not be override, it is dedicated for appengine versioning only.
+    String minorVersion = System.getenv("GAE_MINOR_VERSION");
     if ((minorVersion != null) && !minorVersion.isEmpty()) {
       labels.put(DEBUGGEE_MINOR_VERSION_LABEL, minorVersion);
     }

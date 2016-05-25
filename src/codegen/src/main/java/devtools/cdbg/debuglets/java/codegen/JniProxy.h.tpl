@@ -34,22 +34,22 @@ class ${normalizedClassName}Class {
   static constexpr char TypeName[] = "${cls.getName()}";
   static constexpr char Signature[] = "${classSignature}";
   static constexpr char TypeSignature[] = "L${classSignature};";
-  
+
   virtual ~${normalizedClassName}Class() {}
 
   // C++ equivalent of "${cls.getName()}.class" Java construct.
   virtual jclass GetClass() = 0;
-
 <#list constructors as constructor>
+
   // Creates a new object "${constructor.description}".
   virtual ::devtools::cdbg::ExceptionOr< ::devtools::cdbg::JniLocalRef > ${constructor.methodName}(
 <#list constructor.arguments as argument>
       ${argument.type.nativeArgumentType} ${argument.name}<#if argument_has_next>,</#if>
 </#list>
       ) = 0;
-
 </#list>
 <#list methods as method>
+
   // Invokes "${method.description}".
   virtual ${method.returnType.nativeReturnType} ${method.name}(
 <#if !method.isStatic()>
@@ -60,16 +60,15 @@ class ${normalizedClassName}Class {
 </#list>
       ) = 0;
 <#if method_has_next>
-
 </#if>
 </#list>
 };
 
-// Loads ${cls.getName()} Java class and attaches to its methods. If this is 
+// Loads ${cls.getName()} Java class and attaches to its methods. If this is
 // the first time the class is being used, static constructor will be called.
 bool Bind${normalizedClassName}();
 
-// Loads ${cls.getName()} using the specified class loader. If this is the 
+// Loads ${cls.getName()} using the specified class loader. If this is the
 // first time the class is being used, static constructor will be called.
 bool Bind${normalizedClassName}WithClassLoader(jobject class_loader_obj);
 
@@ -86,4 +85,4 @@ ${normalizedClassName}Class* ${normalizedClassName}();
 }  // namespace ${namespace}
 </#list>
 
-#endif // ${guard}
+#endif  // ${guard}

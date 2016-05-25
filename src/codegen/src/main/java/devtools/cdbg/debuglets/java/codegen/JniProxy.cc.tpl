@@ -33,22 +33,22 @@ static ${normalizedClassName}Class* g_proxy_class = nullptr;
 class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
  public:
   ${normalizedClassName}Impl() {}
- 
+
   bool Bind() {
     if (!cls_.FindWithJNI(Signature)) {
       LOG(ERROR) << "Failed to load Java class ${cls.getName()}";
       return false;
     }
-    
+
     return BindMethods();
   }
-  
+
   bool BindWithClassLoader(jobject class_loader_obj) {
     if (!cls_.LoadWithClassLoader(class_loader_obj, TypeName)) {
       LOG(ERROR) << "Failed to load Java class ${cls.getName()}";
       return false;
     }
-    
+
     return BindMethods();
   }
 
@@ -67,8 +67,8 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
       LOG(ERROR) << "Class is not assignable to ${cls.getName()}";
       return ::devtools::cdbg::ExceptionOr< ::devtools::cdbg::JniLocalRef >(nullptr, nullptr, nullptr);
     }
-    
-    </#if>      
+
+    </#if>
     ::devtools::cdbg::JniLocalRef rc(::devtools::cdbg::jni()->NewObject(
         <#if constructor.subclassConstructor>static_cast<jclass>(cls)<#else>cls_.get()</#if>,
         constructor${constructor.id}_<#if constructor.hasArguments>,</#if>
@@ -76,7 +76,7 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
         ${argument.argumentConversion}<#if argument_has_next>,</#if>
 </#list>
         ));
-    
+
     return ::devtools::cdbg::CatchOr(
         "${normalizedClassName}.<init>",
         std::move(rc));
@@ -107,7 +107,7 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
         ${argument.argumentConversion}<#if argument_has_next>,</#if>
 </#list>
         );
-    
+
     return ::devtools::cdbg::CatchOr(
         "${normalizedClassName}.${method.name}",
         ${method.returnType.getReturnValueConversion("rc")});
@@ -116,21 +116,21 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
 
 </#if>
 </#list>
-  
+
  private:
   // Loads class methods assuming "cls_" is already available.
   bool BindMethods() {
-    <#list constructors as constructor>    
+    <#list constructors as constructor>
       constructor${constructor.id}_ =
           cls_.GetInstanceMethod(
               "<init>",
               "${constructor.signature}");
       if (constructor${constructor.id}_ == nullptr) {
         LOG(ERROR) << "Failed to load Java class ${cls.getName()}"
-                   << ", constructor ${constructor.description} not found"; 
+                   << ", constructor ${constructor.description} not found";
         return false;
       }
-      
+
     </#list>
     <#list methods as method>
       // Load "${method.description}".
@@ -139,19 +139,19 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
           cls_.GetStaticMethod(
     <#else>
           cls_.GetInstanceMethod(
-    </#if>  
+    </#if>
               "${method.name}",
               "${method.signature}");
       if (method_${method.name}_${method.id}_ == nullptr) {
         LOG(ERROR) << "Failed to load Java class ${cls.getName()}"
-                   << ", method ${method.name} not found"; 
+                   << ", method ${method.name} not found";
         return false;
       }
-    
+
     </#list>
       return true;
   }
-  
+
  private:
   // Global reference to Java class object.
   ::devtools::cdbg::JavaClass cls_;
@@ -166,34 +166,34 @@ class ${normalizedClassName}Impl : public ${normalizedClassName}Class {
   jmethodID method_${method.name}_${method.id}_ { nullptr };
 </#list>
 
- DISALLOW_COPY_AND_ASSIGN(${normalizedClassName}Impl);
+  DISALLOW_COPY_AND_ASSIGN(${normalizedClassName}Impl);
 };
 
 
 bool Bind${normalizedClassName}() {
   DCHECK(g_proxy_class == nullptr);
-  
-  std::unique_ptr<${normalizedClassName}Impl> proxy_class(new ${normalizedClassName}Impl); 
+
+  std::unique_ptr<${normalizedClassName}Impl> proxy_class(new ${normalizedClassName}Impl);
   if (!proxy_class->Bind()) {
     return false;
   }
-  
+
   g_proxy_class = proxy_class.release();
-  
+
   return true;
 }
 
 
 bool Bind${normalizedClassName}WithClassLoader(jobject class_loader_obj) {
   DCHECK(g_proxy_class == nullptr);
-  
-  std::unique_ptr<${normalizedClassName}Impl> proxy_class(new ${normalizedClassName}Impl); 
+
+  std::unique_ptr<${normalizedClassName}Impl> proxy_class(new ${normalizedClassName}Impl);
   if (!proxy_class->BindWithClassLoader(class_loader_obj)) {
     return false;
   }
-  
+
   g_proxy_class = proxy_class.release();
-  
+
   return true;
 }
 

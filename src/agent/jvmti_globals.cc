@@ -79,11 +79,7 @@ DEFINE_string(
 #endif
 
 
-#ifdef APPENGINE_CLASSIC
-static devtools::cdbg::GaeJvmtiAgent* g_instance = nullptr;
-#else
 static devtools::cdbg::JvmtiAgent* g_instance = nullptr;
-#endif
 
 static devtools::cdbg::JvmInternals* g_internals = nullptr;
 

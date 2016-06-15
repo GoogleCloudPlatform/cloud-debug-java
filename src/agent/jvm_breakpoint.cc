@@ -46,6 +46,8 @@ DEFINE_int32(
 namespace devtools {
 namespace cdbg {
 
+constexpr char kLogpointPrefix[] = "LOGPOINT: ";
+
 // Resolves method line in a loaded and prepared Java class.
 static bool FindMethodLine(
     jclass cls,
@@ -415,7 +417,7 @@ void JvmBreakpoint::DoLogAction(
   dynamic_logger_->Log(
       definition_->log_level,
       *rsl,
-      collector.Format(*definition_));
+      string(kLogpointPrefix) + collector.Format(*definition_));
 }
 
 
@@ -548,7 +550,7 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
     dynamic_logger_->Log(
         definition_->log_level,
         source_location,
-        DynamicLogOutOfQuota);
+        string(kLogpointPrefix) + DynamicLogOutOfQuota);
   }
 
   return false;

@@ -181,7 +181,7 @@ constexpr char CollectionNotAllItemsCaptured[] =
     "Only first $0 items were captured";
 
 constexpr char DynamicLoggerNotAvailable[] =
-    "Dynamic logging is not available";
+    "Logpoints are not available";
 
 constexpr char ArrayTypeExpected[] =
     "$0 is not an array";
@@ -193,7 +193,7 @@ constexpr char InvalidParameterIndex[] =
     "Invalid parameter $$$0";
 
 constexpr char DynamicLogOutOfQuota[] =
-    "Dynamic log line is paused due to high log rate "
+    "Logpoint is paused due to high log rate "
     "until log quota is restored";
 
 constexpr char CanaryBreakpointUnhealthy[] =

@@ -8,11 +8,11 @@ package com.google.devtools.clouddebugger.v2;
 public final class Labels {
   public static final class Debuggee {
 
+    public static final String MINOR_VERSION = "minorversion";
     public static final String DOMAIN = "domain";
-    public static final String PROJECT_ID = "projectid";
     public static final String VERSION = "version";
     public static final String MODULE = "module";
-    public static final String MINOR_VERSION = "minorversion";
+    public static final String PROJECT_ID = "projectid";
 
     private Debuggee() {}
   }

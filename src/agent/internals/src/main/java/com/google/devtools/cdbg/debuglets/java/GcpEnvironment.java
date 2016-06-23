@@ -16,6 +16,8 @@
 
 package com.google.devtools.cdbg.debuglets.java;
 
+import com.google.devtools.clouddebugger.v2.Labels;
+
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,40 +30,22 @@ final class GcpEnvironment {
    * compatibility only.
    */
   public static final String DEBUGGEE_DESCRIPTION_SUFFIX_LABEL = "description";
-  
-  /**
-   * This application module. This is a native concept in AppEngine and defined artificially
-   * on GCE.
-   */
-  public static final String DEBUGGEE_MODULE_LABEL = "module";
 
-  /**
-   * Major application version. This is a native concept in AppEngine and defined artificially
-   * on GCE.
-   */
-  public static final String DEBUGGEE_MAJOR_VERSION_LABEL = "version";
-
-  /**
-   * Minor application version. This version code is unique to deployment. This is a native
-   * concept in AppEngine and defined artificially on GCE.
-   */
-  public static final String DEBUGGEE_MINOR_VERSION_LABEL = "minorversion";
-  
   /**
    * Cached instance of authentication class.
    */
   private static MetadataQuery metadataQuery = null;
-  
+
   /**
    * Gets the value of a flag defined in the C++ portion of the debuglet.
-   * 
+   *
    * <p>This function logs a warning if flag is not found.
-   * 
+   *
    * @param name flag name
    * @return flag value or null if flag not found by name
    */
   private static native String getAgentFlag(String name);
-  
+
   /**
    * Gets the URL of the Debuglet Controller API.
    */
@@ -176,7 +160,7 @@ final class GcpEnvironment {
     }
     
     if ((module != null) && !module.isEmpty()) {
-      labels.put(DEBUGGEE_MODULE_LABEL, module);
+      labels.put(Labels.Debuggee.MODULE, module);
     }
     
     // Read major version from environment variable allowing overrides through system property.
@@ -186,13 +170,13 @@ final class GcpEnvironment {
     }
     
     if ((majorVersion != null) && !majorVersion.isEmpty()) {
-      labels.put(DEBUGGEE_MAJOR_VERSION_LABEL, majorVersion);
+      labels.put(Labels.Debuggee.VERSION, majorVersion);
     }
 
     // Minorversion can not be override, it is dedicated for appengine versioning only.
     String minorVersion = System.getenv("GAE_MINOR_VERSION");
     if ((minorVersion != null) && !minorVersion.isEmpty()) {
-      labels.put(DEBUGGEE_MINOR_VERSION_LABEL, minorVersion);
+      labels.put(Labels.Debuggee.MINOR_VERSION, minorVersion);
     }
     
     return labels;

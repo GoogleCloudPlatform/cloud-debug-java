@@ -22,6 +22,7 @@ import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severe;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.devtools.clouddebugger.v2.Labels;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -197,11 +198,8 @@ class GcpHubClient implements HubClient {
   /**
    * List of labels that (if defined) go into debuggee description.
    */
-  private static final String[] DESCRIPTION_LABELS = new String[] {
-    GcpEnvironment.DEBUGGEE_MODULE_LABEL,
-    GcpEnvironment.DEBUGGEE_MAJOR_VERSION_LABEL,
-    GcpEnvironment.DEBUGGEE_MINOR_VERSION_LABEL
-  };
+  private static final String[] DESCRIPTION_LABELS =
+      new String[] {Labels.Debuggee.MODULE, Labels.Debuggee.VERSION, Labels.Debuggee.MINOR_VERSION};
   
   /**
    * Name of the source context file placed in the root directory of the package
@@ -548,7 +546,7 @@ class GcpHubClient implements HubClient {
 
       uniquifier = DatatypeConverter.printHexBinary(hash.digest());
 
-      if (!labels.containsKey(GcpEnvironment.DEBUGGEE_MINOR_VERSION_LABEL) && !hasSourceContext) {
+      if (!labels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {
         // There is no source context and minor version. It means that different versions of the
         // application may be running with the same debuggee properties. Hash of application
         // binaries to generate different debuggees in this case.

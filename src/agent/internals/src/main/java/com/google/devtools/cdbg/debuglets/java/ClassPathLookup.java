@@ -188,11 +188,6 @@ final class ClassPathLookup {
           new FormatMessage(Messages.BREAKPOINT_ONLY_SUPPORTS_JAVA_FILES));
     }
 
-    if (lineNumber < 1) {
-      return new ResolvedSourceLocation(
-          new FormatMessage(Messages.NO_CODE_FOUND_AT_LINE, Integer.toString(lineNumber)));
-    }
-
     // Retrieve the class resources matching the source file. There might be several of those
     // if the source file contains inner or static classes or multiple outer classes.
     Collection<InputStream> resources = new ArrayList<>();

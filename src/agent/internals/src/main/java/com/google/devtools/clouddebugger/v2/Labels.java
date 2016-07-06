@@ -22,13 +22,6 @@
 package com.google.devtools.clouddebugger.v2;
 
 public final class Labels {
-  public static final class Breakpoint {
-
-    public static final String REQUEST_LOG_ID = "requestlogid";
-
-    private Breakpoint() {}
-  }
-
   public static final class Debuggee {
 
     public static final String DOMAIN = "domain";
@@ -38,6 +31,13 @@ public final class Labels {
     public static final String VERSION = "version";
 
     private Debuggee() {}
+  }
+
+  public static final class Breakpoint {
+
+    public static final String REQUEST_LOG_ID = "requestlogid";
+
+    private Breakpoint() {}
   }
 
 

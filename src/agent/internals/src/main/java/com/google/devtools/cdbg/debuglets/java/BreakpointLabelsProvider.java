@@ -19,9 +19,13 @@ package com.google.devtools.cdbg.debuglets.java;
 /**
  * Collects information about the local environment at the breakpoint capture time.
  *
- * The class implementing this interface should collect the actual data in constructor. Then it
- * should keep the data to until {@link BreakpointLabelsProvider#format} is called. A new instance
+ * The class implementing this interface MUST collect the actual data in constructor, called by
+ * the thread hitting the brakpoint. The captured data is then formatted later when
+ * {@link BreakpointLabelsProvider#format} is called on anohter thread. A new instance
  * of this class will be created for each breakpoint.
+ *
+ * TODO(gigid): consider changing to avoid doing work in a constructor.
+ *     e.g., introduce a static method to create the object and capture the labels.
  */
 interface BreakpointLabelsProvider {
   /**

@@ -63,6 +63,15 @@ chmod +x build.sh
 ./build.sh
 ```
 
+Note that the build script assumes some dependencies. To install these
+dependencies on Debian, run this command:
+
+```
+sudo apt-get -y -q --no-install-recommends install \
+    curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
+    cmake python maven
+```
+
 ## Setup
 
 The Java Cloud Debugger agent is a

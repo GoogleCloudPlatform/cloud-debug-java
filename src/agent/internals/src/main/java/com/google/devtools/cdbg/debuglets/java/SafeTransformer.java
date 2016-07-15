@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Objects;
+import org.objectweb.asm.Type;
+
 /**
  * Ensures safety of application methods invoked by the debuglet.
  *

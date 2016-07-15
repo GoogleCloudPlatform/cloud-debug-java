@@ -19,19 +19,18 @@ package com.google.devtools.cdbg.debuglets.java;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Loads and queries source information of all the classes defined in the same source file.

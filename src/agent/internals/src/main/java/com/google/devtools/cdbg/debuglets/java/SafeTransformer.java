@@ -18,14 +18,11 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 
-import org.objectweb.asm.Type;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Objects;
-
 /**
  * Ensures safety of application methods invoked by the debuglet.
  *

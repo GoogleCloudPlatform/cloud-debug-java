@@ -20,11 +20,6 @@ import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 
 import com.google.devtools.cdbg.debuglets.java.ResourceIndexer.ResourcesSource;
 import com.google.devtools.cdbg.debuglets.java.ResourcesDatabase.Directory;
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +31,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Builds a list of all available application classes and their source file names.

@@ -414,14 +414,17 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "java/util/Collections$EmptySet",
         "java/util/Collections$SynchronizedSet",
         "java/util/Collections$UnmodifiableMap",
+        "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet",
         "java/util/concurrent/ArrayBlockingQueue",
         "java/util/concurrent/ConcurrentHashMap",
         "java/util/concurrent/ConcurrentHashMap$EntrySet",
         "java/util/concurrent/ConcurrentHashMap$EntrySetView",
         "java/util/concurrent/ConcurrentLinkedDeque",
         "java/util/concurrent/ConcurrentLinkedQueue",
+        "java/util/concurrent/ConcurrentSkipListSet",
         "java/util/concurrent/ConcurrentSkipListMap",
         "java/util/concurrent/ConcurrentSkipListMap$EntrySet",
+        "java/util/concurrent/ConcurrentSkipListMap$KeySet",
         "java/util/concurrent/CopyOnWriteArrayList",
         "java/util/concurrent/CopyOnWriteArraySet",
         "java/util/concurrent/LinkedBlockingDeque",
@@ -444,7 +447,8 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "java/util/TreeMap$EntrySet",
         "java/util/TreeSet",
         "java/util/Vector",
-        "java/util/WeakHashMap"
+        "java/util/WeakHashMap",
+        "java/util/WeakHashMap$EntrySet",
       };
 
       for (const string& collection_class : collection_classes) {
@@ -466,6 +470,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "java/util/ArrayDeque$DeqIterator",
         "java/util/ArrayList$Itr",
         "java/util/Collections$EmptyIterator",
+        "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet$1",
         "java/util/HashMap$EntryIterator",
         "java/util/HashMap$KeyIterator",
         "java/util/Hashtable$Enumerator",
@@ -477,12 +482,14 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "java/util/PriorityQueue$Itr",
         "java/util/TreeMap$EntryIterator",
         "java/util/TreeMap$KeyIterator",
+        "java/util/WeakHashMap$EntryIterator",
         "java/util/Vector$Itr",
         "java/util/concurrent/ArrayBlockingQueue$Itr",
         "java/util/concurrent/ConcurrentHashMap$EntryIterator",
         "java/util/concurrent/ConcurrentLinkedDeque$Itr",
         "java/util/concurrent/ConcurrentLinkedQueue$Itr",
         "java/util/concurrent/ConcurrentSkipListMap$EntryIterator",
+        "java/util/concurrent/ConcurrentSkipListMap$KeyIterator",
         "java/util/concurrent/CopyOnWriteArrayList$COWIterator",
         "java/util/concurrent/LinkedBlockingDeque$Itr",
         "java/util/concurrent/LinkedBlockingQueue$Itr",
@@ -518,11 +525,13 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "com/google/common/collect/ImmutableEntry",
         "com/google/common/collect/ImmutableMapEntry",
         "java/util/AbstractMap$SimpleImmutableEntry",
+        "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntry",
         "java/util/HashMap$Entry",  // Java 7.
         "java/util/HashMap$Node",  // Java 8.
         "java/util/Hashtable$Entry",
         "java/util/LinkedHashMap$Entry",
         "java/util/TreeMap$Entry",
+        "java/util/WeakHashMap$Entry",
         "java/util/concurrent/ConcurrentHashMap$WriteThroughEntry",
         "java/util/concurrent/ConcurrentHashMap$MapEntry"
       };

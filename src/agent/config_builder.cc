@@ -412,7 +412,6 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
         "java/util/Collections$EmptyList",
         "java/util/Collections$EmptyMap",
         "java/util/Collections$EmptySet",
-        "java/util/Collections$SynchronizedSet",
         "java/util/Collections$UnmodifiableMap",
         "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet",
         "java/util/concurrent/ArrayBlockingQueue",

@@ -72,7 +72,12 @@ public final class GceMetadataQuery implements MetadataQuery {
    * Buffer size for reading input streams.
    */
   static final int BUFFER_SIZE = 1024;
-  
+
+  /**
+   * Timeout for reading data from the metadata server.
+   */
+  static final int READ_TIMEOUT_MILLIS = 10000;
+
   /**
    * Base URL for metadata service. Specific attributes are appended to this URL.
    */
@@ -269,6 +274,7 @@ public final class GceMetadataQuery implements MetadataQuery {
    * @throws IOException 
    */
   private static String readResponse(URLConnection connection) throws IOException {
+    connection.setReadTimeout(READ_TIMEOUT_MILLIS);
     try (InputStream inputStream = connection.getInputStream()) {
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       

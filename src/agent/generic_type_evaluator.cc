@@ -29,14 +29,11 @@ void GenericTypeEvaluator::Evaluate(
     const ClassMetadataReader::Entry& class_metadata,
     jobject obj,
     std::vector<NamedJVariant>* result) {
+
   if (class_metadata.instance_fields.empty() &&
       !class_metadata.instance_fields_omitted) {
-    *result = std::vector<NamedJVariant>(1);
-
-    (*result)[0].status.is_error = false;
-    (*result)[0].status.refers_to =
-        StatusMessageModel::Context::VARIABLE_NAME;
-    (*result)[0].status.description = { ObjectHasNoFields };
+    result->clear();
+    result->push_back(NamedJVariant::InfoStatus({ ObjectHasNoFields }));
 
     return;
   }
@@ -65,14 +62,7 @@ void GenericTypeEvaluator::Evaluate(
 
   if (class_metadata.instance_fields_omitted) {
     // TODO(vlif): improve this message for @InvisibleForDebugging case.
-    NamedJVariant message;
-
-    message.status.is_error = false;
-    message.status.refers_to =
-        StatusMessageModel::Context::VARIABLE_NAME;
-    message.status.description = { InstanceFieldsOmitted };
-
-    result->push_back(std::move(message));
+    result->push_back(NamedJVariant::InfoStatus({ InstanceFieldsOmitted }));
   }
 }
 

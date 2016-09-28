@@ -129,12 +129,7 @@ void IterableTypeEvaluator::Evaluate(
   }
 
   if (members->empty()) {
-    members->resize(1);
-
-    (*members)[0].status.is_error = false;
-    (*members)[0].status.refers_to =
-        StatusMessageModel::Context::VARIABLE_NAME;
-    (*members)[0].status.description = { EmptyCollection };
+    members->push_back(NamedJVariant::InfoStatus({ EmptyCollection }));
   }
 }
 

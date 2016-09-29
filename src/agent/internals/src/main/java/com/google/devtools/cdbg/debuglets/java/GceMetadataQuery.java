@@ -33,6 +33,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Reads project and auth token from GCE metadata service.
@@ -76,7 +77,8 @@ public final class GceMetadataQuery implements MetadataQuery {
   /**
    * Timeout for reading data from the metadata server.
    */
-  static final int READ_TIMEOUT_MILLIS = 10000;
+  private static final int READ_TIMEOUT_MILLIS =
+      (int) TimeUnit.MILLISECONDS.convert(10, TimeUnit.SECONDS);
 
   /**
    * Base URL for metadata service. Specific attributes are appended to this URL.

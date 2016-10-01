@@ -138,12 +138,17 @@ class GcpHubClient implements HubClient {
    */
   static class ListActiveBreakpointsResponse {
     private String nextWaitToken;
+    private boolean waitExpired;
     private JsonElement[] breakpoints;
-    
+
     public String getNextWaitToken() {
       return nextWaitToken;
     }
-    
+
+    public boolean getWaitExpired() {
+      return waitExpired;
+    }
+
     public byte[][] serializeBreakpoints() throws IOException {
       if (breakpoints == null) {
         return new byte[0][];
@@ -372,8 +377,9 @@ class GcpHubClient implements HubClient {
     path.append("debuggees/");
     path.append(URLEncoder.encode(debuggeeId, UTF_8.name()));
     path.append("/breakpoints");
+    path.append("?successOnTimeout=true");
     if (lastWaitToken != null) {
-      path.append("?waitToken=");
+      path.append("&waitToken=");
       path.append(URLEncoder.encode(lastWaitToken, UTF_8.name()));
     }
 
@@ -383,12 +389,6 @@ class GcpHubClient implements HubClient {
       try (Reader reader = new InputStreamReader(connection.get().getInputStream(), UTF_8)) {
         response = gson.fromJson(reader, ListActiveBreakpointsResponse.class);
       } catch (IOException e) {
-        if (connection.get().getResponseCode() == 409) {
-          // We have to close the error stream. Otherwise the network connection leaks.
-          connection.get().getErrorStream().close();
-          return LIST_ACTIVE_BREAKPOINTS_TIMEOUT;
-        }
-
         errorResponse = readErrorStream(connection.get());
         throw e;
       }
@@ -396,6 +396,10 @@ class GcpHubClient implements HubClient {
     catch (IOException e) {
       warnfmt(e, "Failed to query the list of active breakpoints: %s", errorResponse);
       throw e;
+    }
+
+    if (response.getWaitExpired()) {
+      return LIST_ACTIVE_BREAKPOINTS_TIMEOUT;
     }
 
     lastWaitToken = response.getNextWaitToken();

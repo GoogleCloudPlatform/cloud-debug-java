@@ -47,6 +47,9 @@ class FormatQueue {
   FormatQueue() { }
   ~FormatQueue();
 
+  // Returns true if FormatQueue has no data, false otherwise.
+  bool IsEmpty() const;
+
   // Removes everything from the queue. This is typically needed when JVM
   // goes down and we want to clean up all the resources.
   void RemoveAll();

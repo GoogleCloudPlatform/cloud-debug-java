@@ -29,6 +29,11 @@ FormatQueue::~FormatQueue() {
 }
 
 
+bool FormatQueue::IsEmpty() const {
+  MutexLock lock(&mu_);
+  return queue_.empty();
+}
+
 void FormatQueue::RemoveAll() {
   MutexLock lock(&mu_);
 

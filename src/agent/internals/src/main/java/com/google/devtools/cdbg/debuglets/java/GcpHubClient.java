@@ -52,6 +52,7 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -153,7 +154,7 @@ class GcpHubClient implements HubClient {
       if (breakpoints == null) {
         return new byte[0][];
       }
-      
+
       byte[][] serializedBreakpoints = new byte[breakpoints.length][];
       for (int i = 0; i < breakpoints.length; ++i) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -529,7 +530,12 @@ class GcpHubClient implements HubClient {
 
     // Read source context files if not done yet.
     if (sourceContextFiles == null) {
-      sourceContextFiles = classPathLookup.readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME);
+      ArrayList<String> resources = new ArrayList<>();
+      resources.addAll(
+          Arrays.asList(classPathLookup.readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME)));
+      resources.addAll(Arrays.asList(
+          new AppPathLookup().readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME)));
+      sourceContextFiles = resources.toArray(new String[0]);
     }
 
     if (uniquifier == null) {

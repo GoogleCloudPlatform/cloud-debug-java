@@ -39,6 +39,7 @@ static const struct StatusContextCode {
   ENUM_CODE_MAP(StatusMessageModel::Context, BREAKPOINT_SOURCE_LOCATION),
   ENUM_CODE_MAP(StatusMessageModel::Context, BREAKPOINT_CONDITION),
   ENUM_CODE_MAP(StatusMessageModel::Context, BREAKPOINT_EXPRESSION),
+  ENUM_CODE_MAP(StatusMessageModel::Context, BREAKPOINT_AGE),
   ENUM_CODE_MAP(StatusMessageModel::Context, VARIABLE_NAME),
   ENUM_CODE_MAP(StatusMessageModel::Context, VARIABLE_VALUE)
 };

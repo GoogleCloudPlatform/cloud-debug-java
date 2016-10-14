@@ -825,8 +825,9 @@ void JvmBreakpoint::OnBreakpointExpired() {
   CompleteBreakpointWithStatus(StatusMessageBuilder()
       .set_error()
       .set_refers_to(
-          StatusMessageModel::Context::UNSPECIFIED)
-      .set_format(BreakpointExpired)
+          StatusMessageModel::Context::BREAKPOINT_AGE)
+      .set_format(definition_->action == BreakpointModel::Action::LOG ?
+                  LogpointExpired : SnapshotExpired)
       .build());
 }
 

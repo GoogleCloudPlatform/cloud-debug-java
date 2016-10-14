@@ -165,8 +165,11 @@ constexpr char DivisionByZero[] =
 constexpr char IntegerDivisionOverflow[] =
     "Integer division overflow";
 
-constexpr char BreakpointExpired[] =
+constexpr char SnapshotExpired[] =
     "The snapshot has expired";
+
+constexpr char LogpointExpired[] =
+    "The logpoint has expired";
 
 constexpr char ConditionEvaluationCostExceededPerBreakpointLimit[] =
     "Snapshot cancelled. The condition evaluation at this location might "

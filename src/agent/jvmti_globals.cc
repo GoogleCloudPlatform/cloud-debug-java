@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <sys/types.h>
 #include <dirent.h>
+#include <sys/types.h>
 #include <memory>
 #include <sstream>
 #include "callbacks_monitor.h"
@@ -31,6 +31,7 @@
 
 #ifndef STANDALONE_BUILD
 #include "base/init_google.h"
+#include "base/process_state.h"
 #endif
 
 #ifdef GCP_HUB_CLIENT

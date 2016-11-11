@@ -33,7 +33,6 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -49,13 +48,15 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.xml.bind.DatatypeConverter;
 
 class GcpHubClient implements HubClient {
@@ -208,14 +209,32 @@ class GcpHubClient implements HubClient {
       new String[] {Labels.Debuggee.MODULE, Labels.Debuggee.VERSION, Labels.Debuggee.MINOR_VERSION};
   
   /**
-   * Name of the source context file placed in the root directory of the package
-   * (either .jar file or directory with .class files).
+   * Name of the source context file.
    */
   private static final String SOURCE_CONTEXT_RESOURCE_NAME = "source-context.json";
-  
+
+  /**
+   * Locations that will be searched to find the source-context.json file.
+   * For each class path entry that represents a directory, these paths will be appended to the
+   * directory when searching. For each class path entry that directly represents a jar file, these
+   * paths will be relative to the root directory inside the jar file.
+   */
+  private static final String[] SOURCE_CONTEXT_RESOURCE_DIRS = new String[] {
+    // The default location for the source context file is anywhere in the class path, or the root
+    // of a jar that is directly in the classpath.
+    ".",
+
+    // In some frameworks, the user might put the source context file to a place not in the class
+    // path or not in the root of the deploy jar. Extending the search of source context to these
+    // additional directories should cover most such cases.
+    "./WEB-INF/classes",
+    "./META-INF/classes",
+    "./BOOT-INF/classes"
+  };
+
   /**
    * JSON serialization and deserialization. We register a special adapter for {@link JsonElement}
-   * to bring whole chunks of JSON we don't bother to define a schema. 
+   * to bring whole chunks of JSON we don't bother to define a schema.
    */
   private static final Gson gson = new GsonBuilder()
       .registerTypeAdapter(JsonElement.class, new JsonDeserializer<JsonElement>() {
@@ -521,7 +540,7 @@ class GcpHubClient implements HubClient {
         return gson.fromJson(reader, RegisterDebuggeeMessage.class);
       }
     }
-    
+
     property = System.getProperty("com.google.cdbg.debuggee.json");
     if ((property != null) && !property.isEmpty()) {
       // If we got bad JSON, GSON will just throw exception that will fail registerDebuggee call.
@@ -530,11 +549,20 @@ class GcpHubClient implements HubClient {
 
     // Read source context files if not done yet.
     if (sourceContextFiles == null) {
-      ArrayList<String> resources = new ArrayList<>();
-      resources.addAll(
-          Arrays.asList(classPathLookup.readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME)));
-      resources.addAll(Arrays.asList(
-          new AppPathLookup().readApplicationResource(SOURCE_CONTEXT_RESOURCE_NAME)));
+      // Using a set eliminates duplicate source context files (i.e., the same file added twice).
+      // As a side effect, adding or removing a source context file with duplicate contents do not
+      // affect the value of the uniquifier.
+      SortedSet<String> resources = new TreeSet<>();
+
+      for (String sourceContextDir : SOURCE_CONTEXT_RESOURCE_DIRS) {
+        String sourceContextFilePath =
+            Paths.get(sourceContextDir, SOURCE_CONTEXT_RESOURCE_NAME).normalize().toString();
+        Collections.addAll(
+            resources, classPathLookup.readApplicationResource(sourceContextFilePath));
+        Collections.addAll(
+            resources, new AppPathLookup().readApplicationResource(sourceContextFilePath));
+      }
+
       sourceContextFiles = resources.toArray(new String[0]);
     }
 

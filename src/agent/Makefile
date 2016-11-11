@@ -33,6 +33,7 @@ ASM_UTIL_JAR_PATH ?= /usr/lib/asm-5.0.4/lib/asm-util-5.0.4.jar
 GOOGLE_API_JAVA_CLIENT_PATH ?= /usr/lib/google-api-java-client
 JARJAR_PATH ?= ../../build/jarjar.jar
 JAVA_BUILD ?= maven
+JAVAC=javac -source 1.7 -target 1.7
 BUILD_TARGET_PATH ?= .
 
 OPT_FLAGS = -O3 -D NDEBUG
@@ -179,7 +180,7 @@ ifeq ($(JAVA_BUILD),maven)
 	java -cp "../codegen/target/jni_proxy_code_gen_tool-SNAPSHOT-jar-with-dependencies.jar" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
 else
 	mkdir -p ../codegen/target
-	cd ../codegen ; javac -g -cp "$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH)" -d target src/main/java/devtools/cdbg/debuglets/java/codegen/*.java
+	cd ../codegen ; $(JAVAC) -g -cp "$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH)" -d target src/main/java/devtools/cdbg/debuglets/java/codegen/*.java
 	cp ../codegen/src/main/java/devtools/cdbg/debuglets/java/codegen/*.tpl ../codegen/target/devtools/cdbg/debuglets/java/codegen
 	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR_FULL)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
 endif
@@ -201,7 +202,7 @@ ifeq ($(JAVA_BUILD),maven)
 	cd internals-class-loader ; mvn clean install
 else
 	mkdir -p internals-class-loader/target
-	cd internals-class-loader ; javac -g:none -d target src/main/java/com/google/devtools/cdbg/*.java
+	cd internals-class-loader ; $(JAVAC) -g:none -d target src/main/java/com/google/devtools/cdbg/*.java
 endif
 	cp internals-class-loader/target/com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $(INTERNALS_CLASS_LOADER)
 
@@ -214,7 +215,7 @@ ifeq ($(JAVA_BUILD),maven)
 	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR_FULL)
 else
 	mkdir -p internals/target
-	cd internals ; javac -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java src/main/java/com/google/devtools/clouddebugger/v2/*.java
+	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java src/main/java/com/google/devtools/clouddebugger/v2/*.java
 	cd internals/target ; jar xf $(ASM_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_COMMONS_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_UTIL_JAR_PATH) ; rm -rf META-INF
@@ -255,7 +256,7 @@ ifeq ($(JAVA_BUILD),maven)
 	cp service-account-auth/target/cdbg_service_account_auth-SNAPSHOT-jar-with-dependencies.jar $(SERVICE_ACCOUNT_AUTH_TOOL)
 else
 	mkdir -p service-account-auth/target
-	cd service-account-auth ; javac -g:none -cp ../$(INTERNALS_JAR_FULL) -d target src/main/java/com/google/devtools/cdbg/*.java
+	cd service-account-auth ; $(JAVAC) -g:none -cp ../$(INTERNALS_JAR_FULL) -d target src/main/java/com/google/devtools/cdbg/*.java
 	cd service-account-auth/target ; jar xf ../../$(INTERNALS_JAR_FULL) ; rm -rf META-INF
 	jar cvfe $(SERVICE_ACCOUNT_AUTH_TOOL) com.google.devtools.cdbg.debuglets.java.ServiceAccountAuthTool -C service-account-auth/target/ .
 endif

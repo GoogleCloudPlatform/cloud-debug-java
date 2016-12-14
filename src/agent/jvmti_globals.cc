@@ -221,6 +221,7 @@ static bool InitializeJvmtiCallbacks() {
       &jvmti_callbacks,
       sizeof(jvmti_callbacks));
   if (err != JVMTI_ERROR_NONE) {
+    LOG(ERROR) << "Failed to set event callbacks: " << err;
     return false;
   }
 

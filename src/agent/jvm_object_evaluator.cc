@@ -20,11 +20,12 @@
 #include "config.h"
 #include "generic_type_evaluator.h"
 #include "iterable_type_evaluator.h"
-#include "map_type_evaluator.h"
 #include "map_entry_type_evaluator.h"
+#include "map_type_evaluator.h"
 #include "messages.h"
 #include "model.h"
 #include "safe_method_caller.h"
+#include "stringable_type_evaluator.h"
 #include "value_formatter.h"
 
 namespace devtools {
@@ -98,6 +99,9 @@ void JvmObjectEvaluator::Initialize() {
   if (!map_->Initialize()) {
     map_ = nullptr;  // This pretty printer will not be available.
   }
+
+  // StringableEvaluator doesn't have Initialize() method
+  stringable_.reset(new StringableTypeEvaluator);
 }
 
 
@@ -201,6 +205,15 @@ TypeEvaluator* JvmObjectEvaluator::SelectEvaluator(
   // Pretty printer for Map.Entry.
   if ((map_entry_ != nullptr) && (map_entry_->IsMapEntry(cls))) {
     return map_entry_.get();
+  }
+
+  // Pretty printer for stringable objects.
+  // Although any class supports 'toString()', not any class is supported by
+  // StringableEvaluator. The reason is that for some classes/objects calling
+  // 'toString' might be too expensive (for example for some exception with
+  // long call stack).
+  if ((stringable_ != nullptr) && (stringable_->IsSupported(cls))) {
+    return stringable_.get();
   }
 
   // We don't have a specialized pretty evaluator for this class. Use generic

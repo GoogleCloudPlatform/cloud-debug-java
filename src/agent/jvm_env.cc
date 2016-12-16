@@ -17,6 +17,8 @@
 #include <map>
 #include "common.h"
 #include "jni_proxy_arithmeticexception.h"
+#include "jni_proxy_bigdecimal.h"
+#include "jni_proxy_biginteger.h"
 #include "jni_proxy_class.h"
 #include "jni_proxy_classcastexception.h"
 #include "jni_proxy_classloader.h"
@@ -64,6 +66,8 @@ JNIEnv* set_thread_jni(JNIEnv* jni) {
 
 bool BindSystemClasses() {
   if (!jniproxy::BindArithmeticException() ||
+      !jniproxy::BindBigDecimal() ||
+      !jniproxy::BindBigInteger() ||
       !jniproxy::BindClass() ||
       !jniproxy::BindClassCastException() ||
       !jniproxy::BindClassLoader() ||
@@ -96,6 +100,8 @@ bool BindSystemClasses() {
 
 void CleanupSystemClasses() {
   jniproxy::CleanupArithmeticException();
+  jniproxy::CleanupBigDecimal();
+  jniproxy::CleanupBigInteger();
   jniproxy::CleanupClass();
   jniproxy::CleanupClassCastException();
   jniproxy::CleanupClassLoader();

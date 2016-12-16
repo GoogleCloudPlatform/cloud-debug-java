@@ -324,6 +324,18 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }();
 
   [&classes]() {
+      classes["java/math/BigDecimal"] = ToMethods({
+        Allow("toString")
+      });
+  }();
+
+  [&classes]() {
+      classes["java/math/BigInteger"] = ToMethods({
+        Allow("toString")
+      });
+  }();
+
+  [&classes]() {
       classes["java/util/Date"] = ToMethods({
         Allow("after"),
         Allow("before"),

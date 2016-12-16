@@ -132,9 +132,14 @@ WellKnownJClass WellKnownJClassFromSignature(const JSignature& signature);
 // 3. { JType::Boolean } => "boolean"
 string TypeNameFromSignature(const JSignature& signature);
 
-// Gets the type name from Java object (non-array) signature. For example
+// Gets the type name from Java object (non-array) type signature. For example
 // calling with "Lcom/MyClass;" will return "com.MyClass".
 string TypeNameFromJObjectSignature(string signature);
+
+// Trims the signature of Java object (non-array) type signature
+// by erasing leading 'L' and trailing ';' characters.
+// For example calling with "Lcom/MyClass;" will return "com/MyClass".
+string TrimJObjectSignature(string signature);
 
 // Converts JVMTI signature (e.g. "Lcom/MyClass;") to a binary name.
 // Binary names are used in all JDK methods (like "Class.forName").

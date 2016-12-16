@@ -32,6 +32,7 @@ class IterableTypeEvaluator;
 class MapEntryTypeEvaluator;
 class MapTypeEvaluator;
 class TypeEvaluator;
+class StringableTypeEvaluator;
 
 class JvmObjectEvaluator : public ObjectEvaluator {
  public:
@@ -66,6 +67,7 @@ class JvmObjectEvaluator : public ObjectEvaluator {
   std::unique_ptr<IterableTypeEvaluator> iterable_;
   std::unique_ptr<MapEntryTypeEvaluator> map_entry_;
   std::unique_ptr<MapTypeEvaluator> map_;
+  std::unique_ptr<StringableTypeEvaluator> stringable_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmObjectEvaluator);
 };

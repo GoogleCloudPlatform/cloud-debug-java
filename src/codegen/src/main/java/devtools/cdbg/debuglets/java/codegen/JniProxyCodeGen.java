@@ -415,6 +415,7 @@ public class JniProxyCodeGen {
     fileNameClass = cls.getName()
         .replace('.', '_')
         .replace('$', '_')
+        .replaceFirst("^java_math_", "")
         .replaceFirst("^java_lang_", "")
         .replaceFirst("^java_io_", "")
         .replaceFirst("^java_util_logging_", "jul_")

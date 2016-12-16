@@ -442,6 +442,25 @@ string TypeNameFromJObjectSignature(string object_signature) {
   return object_signature;
 }
 
+string TrimJObjectSignature(string object_signature) {
+  if (object_signature.empty()) {
+    return object_signature;
+  }
+
+  DCHECK_NE('[', object_signature[0])
+      << "Arrays are not supported in this function";
+
+  if (object_signature[0] == 'L') {
+    object_signature.erase(0, 1);
+  }
+
+  // The string might become empty if we removed leading character
+  if (!object_signature.empty() && (*object_signature.rbegin() == ';')) {
+    object_signature.pop_back();
+  }
+
+  return object_signature;
+}
 
 string BinaryNameFromJObjectSignature(const string& signature) {
   if (signature.size() < 2) {
@@ -461,7 +480,7 @@ string BinaryNameFromJObjectSignature(const string& signature) {
   }
 
   std::replace(binary_name.begin(), binary_name.end(), '/', '.');
-    
+
   return binary_name;
 }
 

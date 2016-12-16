@@ -10,6 +10,18 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "java.math.BigDecimal",
+      "methods": [
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.math.BigInteger",
+      "methods": [
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "java.lang.Class",
       "methods": [
         {

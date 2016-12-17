@@ -21,18 +21,16 @@
 #include "class_metadata_reader.h"
 #include "common.h"
 #include "config.h"
+#include "iterable_type_evaluator.h"
 #include "jvariant.h"
+#include "map_entry_type_evaluator.h"
+#include "map_type_evaluator.h"
 #include "object_evaluator.h"
+#include "stringable_type_evaluator.h"
+#include "type_evaluator.h"
 
 namespace devtools {
 namespace cdbg {
-
-class ClassMetadataReader;
-class IterableTypeEvaluator;
-class MapEntryTypeEvaluator;
-class MapTypeEvaluator;
-class TypeEvaluator;
-class StringableTypeEvaluator;
 
 class JvmObjectEvaluator : public ObjectEvaluator {
  public:

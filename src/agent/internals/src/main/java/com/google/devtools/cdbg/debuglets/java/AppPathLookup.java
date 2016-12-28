@@ -48,6 +48,11 @@ public class AppPathLookup {
       }
 
       Path dirPath = FileSystems.getDefault().getPath(pathElement).getParent();
+      if (dirPath == null) {
+        // No parent directory, skip.
+        continue;
+      }
+
       if (seenDirs.contains(dirPath)) {
         // Already handled.
         continue;

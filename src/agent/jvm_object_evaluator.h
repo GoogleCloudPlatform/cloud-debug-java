@@ -35,7 +35,6 @@ namespace cdbg {
 class JvmObjectEvaluator : public ObjectEvaluator {
  public:
   JvmObjectEvaluator(
-      ClassIndexer* class_indexer,
       ClassMetadataReader* class_metadata_reader);
 
   ~JvmObjectEvaluator() override;
@@ -57,7 +56,6 @@ class JvmObjectEvaluator : public ObjectEvaluator {
       const ClassMetadataReader::Entry& metadata) const;
 
  private:
-  ClassIndexer* const class_indexer_;
   ClassMetadataReader* const class_metadata_reader_;
 
   std::unique_ptr<TypeEvaluator> generic_;

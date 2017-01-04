@@ -52,10 +52,8 @@ static bool HasEvaluatorFailed(const std::vector<NamedJVariant>& members) {
 
 
 JvmObjectEvaluator::JvmObjectEvaluator(
-    ClassIndexer* class_indexer,
     ClassMetadataReader* class_metadata_reader)
-    : class_indexer_(class_indexer),
-      class_metadata_reader_(class_metadata_reader) {
+    : class_metadata_reader_(class_metadata_reader) {
 }
 
 

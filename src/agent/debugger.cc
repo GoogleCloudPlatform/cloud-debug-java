@@ -47,7 +47,7 @@ Debugger::Debugger(
       eval_call_stack_(eval_call_stack),
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
-      object_evaluator_(&class_indexer_, class_metadata_reader_.get()),
+      object_evaluator_(class_metadata_reader_.get()),
       class_files_cache_(&class_indexer_, FLAGS_cdbg_class_files_cache_size),
       dynamic_logger_(std::move(dynamic_logger)) {
   evaluators_.class_path_lookup = class_path_lookup;

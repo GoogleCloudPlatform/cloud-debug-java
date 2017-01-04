@@ -419,6 +419,7 @@ public class JniProxyCodeGen {
         .replaceFirst("^java_lang_", "")
         .replaceFirst("^java_io_", "")
         .replaceFirst("^java_util_logging_", "jul_")
+        .replaceFirst("^java_util_", "ju_")
         .replaceFirst("^com_google_api_client_util_", "api_client_")
         .replaceFirst("^com_google_devtools_cdbg_debuglets_java_", "")
         .toLowerCase();
@@ -509,7 +510,11 @@ public class JniProxyCodeGen {
     data.put("constructors", constructors);
     data.put("methods", methods);
     data.put("classSignature", cls.getName().replace('.', '/'));
-    data.put("normalizedClassName", cls.getSimpleName().replace('$', '_'));
+
+    // cls.getSimpleName() seems to remove enclosing class name but we want to keep it
+    String clsName = cls.getName();
+    data.put("normalizedClassName", clsName.substring(clsName.lastIndexOf(".") + 1)
+        .replace('$', '_'));
 
 data.put("includeDirectory", "");
 

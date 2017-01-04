@@ -16,6 +16,7 @@
 
 #include "map_entry_type_evaluator.h"
 
+#include "jni_proxy_ju_map_entry.h"
 #include "jvmti_buffer.h"
 #include "messages.h"
 #include "model.h"
@@ -37,22 +38,12 @@ MapEntryTypeEvaluator::MapEntryTypeEvaluator()
 }
 
 
-bool MapEntryTypeEvaluator::Initialize() {
-  // TODO(vlif): add Map.Entry to proxy code generator instead.
-  if (!map_entry_.FindWithJNI("java/util/Map$Entry")) {
-    return false;
-  }
-
-  return true;
-}
-
-
 bool MapEntryTypeEvaluator::IsMapEntry(jclass cls) const {
   if (cls == nullptr) {
     return false;
   }
 
-  return jni()->IsAssignableFrom(cls, map_entry_.get());
+  return jni()->IsAssignableFrom(cls, jniproxy::Map_Entry()->GetClass());
 }
 
 

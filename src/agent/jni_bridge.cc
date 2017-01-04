@@ -93,7 +93,7 @@ Bridge::HangingGetResult JniBridge::ListActiveBreakpoints(
   }
 
   ExceptionOr<jboolean> timeout =
-      jniproxy::ListActiveBreakpointsResult()->getIsTimeout(
+      jniproxy::HubClient_ListActiveBreakpointsResult()->getIsTimeout(
           rc.GetData().get());
   if (timeout.HasException()) {
     return HangingGetResult::FAIL;
@@ -104,14 +104,14 @@ Bridge::HangingGetResult JniBridge::ListActiveBreakpoints(
   }
 
   ExceptionOr<string> format =
-      jniproxy::ListActiveBreakpointsResult()->getFormat(
+      jniproxy::HubClient_ListActiveBreakpointsResult()->getFormat(
           rc.GetData().get());
   if (format.HasException()) {
     return HangingGetResult::FAIL;
   }
 
   ExceptionOr<JniLocalRef> blobs =
-      jniproxy::ListActiveBreakpointsResult()->getActiveBreakpoints(
+      jniproxy::HubClient_ListActiveBreakpointsResult()->getActiveBreakpoints(
           rc.GetData().get());
   if (blobs.HasException()) {
     return HangingGetResult::FAIL;

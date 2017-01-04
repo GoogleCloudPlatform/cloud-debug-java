@@ -16,6 +16,7 @@
 
 #include "iterable_type_evaluator.h"
 
+#include "jni_proxy_iterable.h"
 #include "messages.h"
 #include "model.h"
 #include "model_util.h"
@@ -38,22 +39,13 @@ IterableTypeEvaluator::IterableTypeEvaluator()
           "()Ljava/lang/Object;")) {
 }
 
-bool IterableTypeEvaluator::Initialize() {
-  // TODO(vlif): add Iterable to proxy code generator instead.
-  if (!iterable_.FindWithJNI("java/lang/Iterable")) {
-    return false;
-  }
-
-  return true;
-}
-
 
 bool IterableTypeEvaluator::IsIterable(jclass cls) const {
   if (cls == nullptr) {
     return false;
   }
 
-  return jni()->IsAssignableFrom(cls, iterable_.get());
+  return jni()->IsAssignableFrom(cls, jniproxy::Iterable()->GetClass());
 }
 
 

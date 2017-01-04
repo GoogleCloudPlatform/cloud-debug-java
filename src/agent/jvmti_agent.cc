@@ -344,7 +344,7 @@ bool JvmtiAgent::OnWorkerReady() {
     jniproxy::BindClassPathLookupWithClassLoader,
     jniproxy::BindDynamicLogHelperWithClassLoader,
     jniproxy::BindHubClientWithClassLoader,
-    jniproxy::BindListActiveBreakpointsResultWithClassLoader,
+    jniproxy::BindHubClient_ListActiveBreakpointsResultWithClassLoader,
   };
 
   jni_bind_methods.insert(

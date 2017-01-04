@@ -61,6 +61,12 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "java.lang.Iterable",
+      "methods": [
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "java.lang.NegativeArraySizeException",
       "methods": [
         {
@@ -176,6 +182,18 @@
           "methodName": "logp",
           "methodSignature": "(Ljava/util/logging/Level;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"
         }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.util.Map",
+      "methods": [
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.util.Map$Entry",
+      "methods": [
       ],
       "nativeNamespace": "jniproxy"
     },

@@ -86,21 +86,8 @@ void JvmObjectEvaluator::Initialize() {
       new ArrayTypeEvaluator<jobject>);
 
   iterable_.reset(new IterableTypeEvaluator);
-  if (!iterable_->Initialize()) {
-    iterable_ = nullptr;  // This pretty printer will not be available.
-  }
-
   map_entry_.reset(new MapEntryTypeEvaluator);
-  if (!map_entry_->Initialize()) {
-    map_entry_ = nullptr;  // This pretty printer will not be available.
-  }
-
   map_.reset(new MapTypeEvaluator);
-  if (!map_->Initialize()) {
-    map_ = nullptr;  // This pretty printer will not be available.
-  }
-
-  // StringableEvaluator doesn't have Initialize() method
   stringable_.reset(new StringableTypeEvaluator);
 }
 

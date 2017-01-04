@@ -16,6 +16,7 @@
 
 #include "map_type_evaluator.h"
 
+#include "jni_proxy_ju_map.h"
 #include "messages.h"
 #include "model.h"
 #include "model_util.h"
@@ -32,30 +33,12 @@ MapTypeEvaluator::MapTypeEvaluator()
 }
 
 
-bool MapTypeEvaluator::Initialize() {
-  // TODO(vlif): add Map.Entry to proxy code generator instead.
-  if (!map_.FindWithJNI("java/util/Map")) {
-    return false;
-  }
-
-  if (!iterable_evaluator_.Initialize()) {
-    return false;
-  }
-
-  if (!map_entry_evaluator_.Initialize()) {
-    return false;
-  }
-
-  return true;
-}
-
-
 bool MapTypeEvaluator::IsMap(jclass cls) const {
   if (cls == nullptr) {
     return false;
   }
 
-  return jni()->IsAssignableFrom(cls, map_.get());
+  return jni()->IsAssignableFrom(cls, jniproxy::Map()->GetClass());
 }
 
 

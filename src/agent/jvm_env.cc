@@ -15,7 +15,6 @@
  */
 
 #include <map>
-#include "common.h"
 #include "jni_proxy_arithmeticexception.h"
 #include "jni_proxy_bigdecimal.h"
 #include "jni_proxy_biginteger.h"
@@ -23,6 +22,10 @@
 #include "jni_proxy_classcastexception.h"
 #include "jni_proxy_classloader.h"
 #include "jni_proxy_exception.h"
+#include "jni_proxy_iterable.h"
+#include "jni_proxy_ju_map.h"
+#include "jni_proxy_ju_map_entry.h"
+#include "jni_proxy_jul_logger.h"
 #include "jni_proxy_negativearraysizeexception.h"
 #include "jni_proxy_nullpointerexception.h"
 #include "jni_proxy_object.h"
@@ -31,7 +34,7 @@
 #include "jni_proxy_stringwriter.h"
 #include "jni_proxy_thread.h"
 #include "jni_proxy_throwable.h"
-#include "jni_proxy_jul_logger.h"
+#include "common.h"
 
 namespace devtools {
 namespace cdbg {
@@ -72,6 +75,10 @@ bool BindSystemClasses() {
       !jniproxy::BindClassCastException() ||
       !jniproxy::BindClassLoader() ||
       !jniproxy::BindException() ||
+      !jniproxy::BindIterable() ||
+      !jniproxy::BindLogger() ||
+      !jniproxy::BindMap() ||
+      !jniproxy::BindMap_Entry() ||
       !jniproxy::BindNegativeArraySizeException() ||
       !jniproxy::BindNullPointerException() ||
       !jniproxy::BindObject() ||
@@ -79,8 +86,7 @@ bool BindSystemClasses() {
       !jniproxy::BindString() ||
       !jniproxy::BindStringWriter() ||
       !jniproxy::BindThread() ||
-      !jniproxy::BindThrowable() ||
-      !jniproxy::BindLogger()) {
+      !jniproxy::BindThrowable()) {
     return false;
   }
 
@@ -106,6 +112,10 @@ void CleanupSystemClasses() {
   jniproxy::CleanupClassCastException();
   jniproxy::CleanupClassLoader();
   jniproxy::CleanupException();
+  jniproxy::CleanupIterable();
+  jniproxy::CleanupLogger();
+  jniproxy::CleanupMap();
+  jniproxy::CleanupMap_Entry();
   jniproxy::CleanupNegativeArraySizeException();
   jniproxy::CleanupNullPointerException();
   jniproxy::CleanupObject();
@@ -114,7 +124,6 @@ void CleanupSystemClasses() {
   jniproxy::CleanupStringWriter();
   jniproxy::CleanupThread();
   jniproxy::CleanupThrowable();
-  jniproxy::CleanupLogger();
 
   if (g_system_class_loader != nullptr) {
     jni()->DeleteGlobalRef(g_system_class_loader);

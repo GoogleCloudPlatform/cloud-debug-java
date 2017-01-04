@@ -20,7 +20,6 @@
 #include <memory>
 #include "common.h"
 #include "iterable_type_evaluator.h"
-#include "jni_utils.h"
 #include "map_entry_type_evaluator.h"
 #include "type_evaluator.h"
 
@@ -39,9 +38,6 @@ struct NamedJVariant;
 class MapTypeEvaluator : public TypeEvaluator {
  public:
   MapTypeEvaluator();
-
-  // Binds to Java classes.
-  bool Initialize();
 
   // Checks whether the specified class implements "java.lang.Map"
   // interface.
@@ -86,9 +82,6 @@ class MapTypeEvaluator : public TypeEvaluator {
 
   // Used to inline the map.
   MapEntryTypeEvaluator map_entry_evaluator_;
-
-  // "java.lang.Map" class object.
-  JavaClass map_;
 
   // Method metadata for the Java methods this pretty printer is using.
   const ClassMetadataReader::Method map_entry_set_;

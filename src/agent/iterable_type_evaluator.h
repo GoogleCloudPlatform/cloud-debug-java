@@ -19,7 +19,6 @@
 
 #include <memory>
 #include "common.h"
-#include "jni_utils.h"
 #include "type_evaluator.h"
 
 namespace devtools {
@@ -33,9 +32,6 @@ struct NamedJVariant;
 class IterableTypeEvaluator : public TypeEvaluator {
  public:
   IterableTypeEvaluator();
-
-  // Loads the Java methods of "Iterable" interface.
-  bool Initialize();
 
   // Checks whether the specified class implements "java.lang.Iterable"
   // interface.
@@ -59,9 +55,6 @@ class IterableTypeEvaluator : public TypeEvaluator {
       std::vector<NamedJVariant>* members);
 
  private:
-  // "java.lang.Iterable" class object.
-  JavaClass iterable_;
-
   // Method metadata for the Java methods this pretty printer is using.
   const ClassMetadataReader::Method iterable_iterator_;
   const ClassMetadataReader::Method iterator_has_next_;

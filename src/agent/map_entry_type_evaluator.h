@@ -19,7 +19,6 @@
 
 #include <memory>
 #include "common.h"
-#include "jni_utils.h"
 #include "type_evaluator.h"
 
 namespace devtools {
@@ -29,9 +28,6 @@ namespace cdbg {
 class MapEntryTypeEvaluator : public TypeEvaluator {
  public:
   MapEntryTypeEvaluator();
-
-  // Binds to Java classes.
-  bool Initialize();
 
   // Checks whether the specified class implements "java.lang.Map.Entry"
   // interface.
@@ -68,9 +64,6 @@ class MapEntryTypeEvaluator : public TypeEvaluator {
       jobject obj);
 
  private:
-  // "java.util.Map.Entry" class object.
-  JavaClass map_entry_;
-
   // Method metadata for the Java methods this pretty printer is using.
   const ClassMetadataReader::Method map_entry_get_key_;
   const ClassMetadataReader::Method map_entry_get_value_;

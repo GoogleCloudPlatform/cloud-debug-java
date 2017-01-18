@@ -49,7 +49,16 @@ class CallbacksMonitor {
   }
 
   ~CallbacksMonitor() {
-    DCHECK(ongoing_calls_.empty());
+    if (!ongoing_calls_.empty()) {
+      // As a part of the debugger's exit routine, we disable JVMTI event
+      // delivery. However, SetEventNotificationMode(JVMTI_DISABLE) does not
+      // wait for the pending events, and therefore, we might end up with some
+      // ongoing calls while destructing this class. This race condition rarely
+      // happens, and we use a simple sleep-based optimistic workaround rather
+      // than a more complex synchronization-based solution.
+      LOG(WARNING) << "Waiting for 10 seconds for ongoing calls to finish";
+      usleep(10*1000);
+    }
   }
 
   // One time initialization of the global instance.

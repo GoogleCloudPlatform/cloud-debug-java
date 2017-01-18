@@ -51,14 +51,14 @@ bool ASTNULLType::equalsTreePartial(RefAST t) const
 	return false;
 }
 
-vector<RefAST> ASTNULLType::findAll(RefAST tree)
+std::vector<RefAST> ASTNULLType::findAll(RefAST tree)
 {
-	return vector<RefAST>();
+	return std::vector<RefAST>();
 }
 
-vector<RefAST> ASTNULLType::findAllPartial(RefAST subtree)
+std::vector<RefAST> ASTNULLType::findAllPartial(RefAST subtree)
 {
-	return vector<RefAST>();
+	return std::vector<RefAST>();
 }
 
 RefAST ASTNULLType::getFirstChild() const

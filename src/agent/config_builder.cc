@@ -535,6 +535,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
       const string map_entry_classes[] = {
         "com/google/common/collect/ImmutableEntry",
         "com/google/common/collect/ImmutableMapEntry",
+        "com/google/common/collect/ImmutableMapEntry$NonTerminalImmutableMapEntry",
         "java/util/AbstractMap$SimpleImmutableEntry",
         "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntry",
         "java/util/HashMap$Entry",  // Java 7.

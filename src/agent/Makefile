@@ -164,17 +164,17 @@ GOOGLE_API_CLIENT_JARS_CLASS_PATH := $(subst $(SPACE),:,$(GOOGLE_API_CLIENT_JARS
 
 all: \
 	packages \
-	$(SERVICE_ACCOUNT_AUTH_TOOL) \
-	$(TARGET_VERSION_TXT) \
+	service_account_auth_tool \
+	target_version_txt \
 
 antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
 	mkdir antlrgen
-	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE) 
+	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE)
 
 $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen
 
 
-jni_proxies_src: $(INTERNALS_JAR_FULL)
+jni_proxies_src: internals_jar_full
 ifeq ($(JAVA_BUILD),maven)
 	cd ../codegen && mvn clean install
 	java -cp "../codegen/target/jni_proxy_code_gen_tool-SNAPSHOT-jar-with-dependencies.jar" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
@@ -188,16 +188,16 @@ endif
 %.o: %.cpp antlrgen
 	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $< -o $@
 
-%.o: %.cc $(HEADERS) antlrgen jni_proxies_src $(INTERNALS_CLASS_LOADER_STATIC_DEFS)
+%.o: %.cc $(HEADERS) antlrgen jni_proxies_src internals_class_loader_static_defs
 	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $< -o $@
 
 jni_proxies_obj: jni_proxies_src
 	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) -c $(JNI_PROXIES_GENERATED_SOURCES)
 
-$(TARGET_AGENT): $(OBJECTS) jni_proxies_obj
+target_agent: $(OBJECTS) jni_proxies_obj
 	$(CC) $(INCLUDES) $(CFLAGS) $(OPT_FLAGS) $(LDFLAGS) $(OBJECTS) $(JNI_PROXIES_GENERATED_OBJECTS) $(LIBS) -o $(TARGET_AGENT) $(LDS_FLAGS)
 
-$(INTERNALS_CLASS_LOADER):
+internals_class_loader:
 ifeq ($(JAVA_BUILD),maven)
 	cd internals-class-loader ; mvn clean install
 else
@@ -206,10 +206,10 @@ else
 endif
 	cp internals-class-loader/target/com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $(INTERNALS_CLASS_LOADER)
 
-$(INTERNALS_CLASS_LOADER_STATIC_DEFS): $(INTERNALS_CLASS_LOADER)
-	python ../codegen/static_def_gen.py $@ .:^$(INTERNALS_CLASS_LOADER)$
+internals_class_loader_static_defs: internals_class_loader
+	python ../codegen/static_def_gen.py $(INTERNALS_CLASS_LOADER_STATIC_DEFS) .:^$(INTERNALS_CLASS_LOADER)$
 
-$(INTERNALS_JAR_FULL):
+internals_jar_full:
 ifeq ($(JAVA_BUILD),maven)
 	cd internals ; mvn clean install
 	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR_FULL)
@@ -229,7 +229,7 @@ endif
 # cases when service account authentication is not used.
 # We remove classes with jarjar and then remove non class files that we don't
 # need with zip utility.
-$(INTERNALS_JAR_STRIPPED): $(INTERNALS_JAR_FULL)
+internals_jar_stripped: internals_jar_full
 	java -jar $(JARJAR_PATH) process strip_service_account_auth_jarjar_rules.txt $(INTERNALS_JAR_FULL) $(INTERNALS_JAR_STRIPPED)
 
 # Generate packages:
@@ -239,7 +239,7 @@ $(INTERNALS_JAR_STRIPPED): $(INTERNALS_JAR_FULL)
 # 3. Java Cloud Debugger package used on GCE with service account authentication
 #    (fallback solution used when metadata service authentication can't be
 #    used).
-packages: $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(INTERNALS_JAR_FULL) $(APPENGINE_FORMAT_SCRIPT)
+packages: target_agent internals_jar_stripped internals_jar_full $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
 	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
 	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
@@ -250,7 +250,7 @@ packages: $(TARGET_AGENT) $(INTERNALS_JAR_STRIPPED) $(INTERNALS_JAR_FULL) $(APPE
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account
 # authentication is enabled.
-$(SERVICE_ACCOUNT_AUTH_TOOL): $(INTERNALS_JAR_FULL)
+service_account_auth_tool: internals_jar_full
 ifeq ($(JAVA_BUILD),maven)
 	cd service-account-auth ; mvn clean install
 	cp service-account-auth/target/cdbg_service_account_auth-SNAPSHOT-jar-with-dependencies.jar $(SERVICE_ACCOUNT_AUTH_TOOL)
@@ -261,5 +261,5 @@ else
 	jar cvfe $(SERVICE_ACCOUNT_AUTH_TOOL) com.google.devtools.cdbg.debuglets.java.ServiceAccountAuthTool -C service-account-auth/target/ .
 endif
 
-$(TARGET_VERSION_TXT): $(INTERNALS_JAR_STRIPPED)
-	java -cp $(INTERNALS_JAR_STRIPPED) com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion > $@
+target_version_txt: internals_jar_stripped
+	java -cp $(INTERNALS_JAR_STRIPPED) com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion > $(TARGET_VERSION_TXT)

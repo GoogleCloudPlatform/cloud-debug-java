@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_AUTO_RESET_EVENT_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_AUTO_RESET_EVENT_H_
 
+#include <memory>
 #include "common.h"
 #include "semaphore.h"
 

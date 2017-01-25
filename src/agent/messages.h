@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MESSAGES_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MESSAGES_H_
 
+#include <cstring>
+
 namespace devtools {
 namespace cdbg {
 
@@ -230,4 +232,3 @@ inline const char* ShortFileName(const char* long_file_name) {
 }  // namespace devtools
 
 #endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MESSAGES_H_
-

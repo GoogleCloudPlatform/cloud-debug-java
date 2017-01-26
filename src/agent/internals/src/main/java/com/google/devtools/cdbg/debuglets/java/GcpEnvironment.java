@@ -47,6 +47,28 @@ final class GcpEnvironment {
   private static native String getAgentFlag(String name);
 
   /**
+   * Wrapper interface for getEnv to facilitate testing.
+   */
+  public static interface EnvironmentStore {
+    public String get(String name);
+  }
+
+  /**
+   * Default system environmentStore implementation
+   */
+  private static class SystemEnvironmentStore implements EnvironmentStore {
+    @Override
+    public String get(String name) {
+      return System.getenv(name);
+    }
+  }
+
+  /**
+   * The environment variable store. Public for testing.
+   */
+  public static EnvironmentStore environmentStore = new SystemEnvironmentStore();
+
+  /**
    * Gets the URL of the Debuglet Controller API.
    */
   static URL getControllerBaseUrl() {
@@ -153,7 +175,10 @@ final class GcpEnvironment {
     // Read module from environment variable allowing overrides through system property.
     String module = System.getProperty("com.google.cdbg.module");
     if (module == null) {
-      module = System.getenv("GAE_MODULE_NAME");
+      module = environmentStore.get("GAE_SERVICE");
+      if (module == null || module.isEmpty()) {
+        module = environmentStore.get("GAE_MODULE_NAME");
+      }
       if ((module != null) && module.equals("default")) {
         module = null;
       }
@@ -166,15 +191,22 @@ final class GcpEnvironment {
     // Read major version from environment variable allowing overrides through system property.
     String majorVersion = System.getProperty("com.google.cdbg.version");
     if (majorVersion == null) {
-      majorVersion = System.getenv("GAE_MODULE_VERSION");
+      majorVersion = environmentStore.get("GAE_VERSION");
+      if (majorVersion == null || majorVersion.isEmpty()) {
+        majorVersion = environmentStore.get("GAE_MODULE_VERSION");
+      }
     }
     
     if ((majorVersion != null) && !majorVersion.isEmpty()) {
       labels.put(Labels.Debuggee.VERSION, majorVersion);
     }
 
-    // Minorversion can not be override, it is dedicated for appengine versioning only.
-    String minorVersion = System.getenv("GAE_MINOR_VERSION");
+    // Minorversion/deployment ID can not be overridden. It is currently dedicated for appengine
+    // versioning only.
+    String minorVersion = environmentStore.get("GAE_DEPLOYMENT_ID");
+    if (minorVersion == null || minorVersion.isEmpty()) {
+      minorVersion = environmentStore.get("GAE_MINOR_VERSION");
+    }
     if ((minorVersion != null) && !minorVersion.isEmpty()) {
       labels.put(Labels.Debuggee.MINOR_VERSION, minorVersion);
     }

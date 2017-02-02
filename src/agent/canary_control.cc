@@ -30,7 +30,8 @@ static constexpr int kMaxAttempts = 3;
 // cycle of "ListActiveBreakpoints", which is once every 40 seconds. The
 // constant of 35 seconds is deliberately a bit shorter than that so that the
 // canary period fits in one such cycle.
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     min_canary_duration_ms,
     35000,
     "Time interval after which an enabled canary breakpoint is considered as "
@@ -91,7 +92,8 @@ void CanaryControl::ApproveHealtyBreakpoints() {
   std::map<string, CanaryBreakpoint> unhealthy_ids;
   {
     int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
-    int64 cutoff = current_timestamp_ms - FLAGS_min_canary_duration_ms;
+    int64 cutoff =
+        current_timestamp_ms - base::GetFlag(FLAGS_min_canary_duration_ms);
 
     MutexLock lock(&mu_);
     for (const auto& entry : canary_breakpoints_) {

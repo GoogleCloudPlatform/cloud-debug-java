@@ -33,12 +33,14 @@
 #include "resolved_source_location.h"
 #include "statistician.h"
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     breakpoint_expiration_sec,
     60 * 60 * 24,  // 24 hours
     "breakpoint expiration time in seconds");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     dynamic_log_quota_recovery_ms,
     500,  // ms
     "time to pause dynamic logs after it runs out of quota");
@@ -220,7 +222,7 @@ void JvmBreakpoint::Initialize() {
   }
 
   scheduler_id_ = scheduler_->Schedule(
-      expiration_time_base + FLAGS_breakpoint_expiration_sec,
+      expiration_time_base + base::GetFlag(FLAGS_breakpoint_expiration_sec),
       std::weak_ptr<JvmBreakpoint>(shared_from_this()),
       &JvmBreakpoint::OnBreakpointExpired);
 
@@ -521,7 +523,7 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
     MutexLock lock(&dynamic_log_pause_.mu);
     if (dynamic_log_pause_.is_skipping &&
         (dynamic_log_pause_.cooldown_stopwatch.GetElapsedMillis() <=
-          FLAGS_dynamic_log_quota_recovery_ms)) {
+          base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms))) {
       // We are in "out of quota" period for this breakpoint.
       return false;
     }

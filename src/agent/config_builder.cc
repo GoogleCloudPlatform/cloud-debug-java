@@ -23,70 +23,82 @@
 // Multiple items in flags like "extra_allowed_methods" are separated with
 // a colon. Method names are specified as "class#method".
 
-DEFINE_bool(
+DEFINE_FLAG(
+    bool,
     enable_safe_caller,
 false,
     "Allows any method without side effects in expressions");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     extra_blocked_methods,
     "",
     "Additional methods to block for testing purposes");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     extra_allowed_methods,
     "",
     "Additional methods to allowed for testing purposes");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     extra_whitelisted_classes,
     "",
     "Internal names of additional classes to allow for testing purposes");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     expression_max_classes_load_quota,
     5,
     "Maximum number of methods that the code is allowed to load during "
     "evaluation of a single expression");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     expression_max_interpreter_instructions_quota,
     1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while evaluating a single expression");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     pretty_printers_max_classes_load_quota,
     0,  // Safe method caller disabled for pretty printers by default.
     "Maximum number of methods that the code is allowed to load while "
     "formatting some well known data structures");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     pretty_printers_max_interpreter_instructions_quota,
     0,  // Safe method caller disabled for pretty printers by default.
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while formatting some well known data structures");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     dynamic_log_max_classes_load_quota,
     0,  // Safe method caller disabled for dynamic logging by default.
     "Maximum number of methods that the code is allowed to load during "
     "printout of a single dynamic log statement");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     dynamic_log_max_interpreter_instructions_quota,
     0,  // Safe method caller disabled for dynamic logging by default.
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while printing a single dynamic log statement");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     safe_caller_max_array_elements,
     65536,
     "Maximum allowed size of the array to copy or allocate in safe caller"
     "(copying or allocating larger arrays is considered to be too expensive "
     "and will be blocked)");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     safe_caller_max_interpreter_stack_depth,
     20,
     "Maximum stack depth that safe caller will allow");
@@ -180,7 +192,7 @@ static MethodRuleBuilder Block(string method_name) {
 
 static MethodRuleBuilder InterpretAll() {
   Config::Method rule;
-  rule.action = FLAGS_enable_safe_caller
+  rule.action = base::GetFlag(FLAGS_enable_safe_caller)
       ? Config::Method::CallAction::Interpret
       : Config::Method::CallAction::Block;
   return MethodRuleBuilder(rule);
@@ -189,7 +201,7 @@ static MethodRuleBuilder InterpretAll() {
 
 static MethodRuleBuilder Interpret(string method_name) {
   Config::Method rule;
-  rule.action = FLAGS_enable_safe_caller
+  rule.action = base::GetFlag(FLAGS_enable_safe_caller)
       ? Config::Method::CallAction::Interpret
       : Config::Method::CallAction::Block;
   rule.name = std::move(method_name);
@@ -571,21 +583,24 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   // Additional configuration provided through flags.
   //
 
-  for (const string& item : SplitString(FLAGS_extra_allowed_methods)) {
+  for (const string& item :
+       SplitString(base::GetFlag(FLAGS_extra_allowed_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding block rule for class " << method.first
             << ", method " << method.second;
     classes[method.first].push_back(Allow(method.second).build());
   }
 
-  for (const string& item : SplitString(FLAGS_extra_blocked_methods)) {
+  for (const string& item :
+       SplitString(base::GetFlag(FLAGS_extra_blocked_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding allow rule for class " << method.first
             << ", method " << method.second;
     classes[method.first].push_back(Block(method.second).build());
   }
 
-  for (const string& cls : SplitString(FLAGS_extra_whitelisted_classes)) {
+  for (const string& cls :
+       SplitString(base::GetFlag(FLAGS_extra_whitelisted_classes))) {
     VLOG(1) << "Adding allow-all rule for class " << cls;
     classes[cls].push_back(AllowAll().build());
   }
@@ -597,24 +612,24 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 std::unique_ptr<Config> DefaultConfig() {
   Config::Builder builder;
 
-  if (FLAGS_enable_safe_caller) {
+  if (base::GetFlag(FLAGS_enable_safe_caller)) {
     Config::MethodCallQuota expression_method_call_quota;
     expression_method_call_quota.max_classes_load =
-        FLAGS_expression_max_classes_load_quota;
+        base::GetFlag(FLAGS_expression_max_classes_load_quota);
     expression_method_call_quota.max_interpreter_instructions =
-        FLAGS_expression_max_interpreter_instructions_quota;
+        base::GetFlag(FLAGS_expression_max_interpreter_instructions_quota);
 
     Config::MethodCallQuota pretty_printers_method_call_quota;
     pretty_printers_method_call_quota.max_classes_load =
-        FLAGS_pretty_printers_max_classes_load_quota;
+        base::GetFlag(FLAGS_pretty_printers_max_classes_load_quota);
     pretty_printers_method_call_quota.max_interpreter_instructions =
-        FLAGS_pretty_printers_max_interpreter_instructions_quota;
+        base::GetFlag(FLAGS_pretty_printers_max_interpreter_instructions_quota);
 
     Config::MethodCallQuota dynamic_log_method_call_quota;
     dynamic_log_method_call_quota.max_classes_load =
-        FLAGS_dynamic_log_max_classes_load_quota;
+        base::GetFlag(FLAGS_dynamic_log_max_classes_load_quota);
     dynamic_log_method_call_quota.max_interpreter_instructions =
-        FLAGS_dynamic_log_max_interpreter_instructions_quota;
+        base::GetFlag(FLAGS_dynamic_log_max_interpreter_instructions_quota);
 
     builder.SetDefaultMethodRule(InterpretAll().build());
     builder.SetQuota(

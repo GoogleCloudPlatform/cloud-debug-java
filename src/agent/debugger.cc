@@ -24,7 +24,8 @@
 #include "statistician.h"
 #include "stopwatch.h"
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     cdbg_class_files_cache_size,
     1024 * 1024,  // 1 MB.
     "Cache size for class files used in safe method caller");
@@ -48,7 +49,9 @@ Debugger::Debugger(
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
       object_evaluator_(class_metadata_reader_.get()),
-      class_files_cache_(&class_indexer_, FLAGS_cdbg_class_files_cache_size),
+      class_files_cache_(
+          &class_indexer_,
+          base::GetFlag(FLAGS_cdbg_class_files_cache_size)),
       dynamic_logger_(std::move(dynamic_logger)) {
   evaluators_.class_path_lookup = class_path_lookup;
   evaluators_.class_indexer = &class_indexer_;

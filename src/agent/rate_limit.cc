@@ -24,14 +24,16 @@
 // they are used.
 //
 
-DEFINE_double(
+DEFINE_FLAG(
+    double,
     max_condition_cost,
     0.01,  // 1% of CPU time
     "maximum cost in percentage of CPU consumption of condition evaluation");
 
 // This constant defines the fill rate for the leaky bucket. The capacity is
 // computed as "FLAGS_max_dynamic_log_rate * kDynamicLogCapacityFactor".
-DEFINE_double(
+DEFINE_FLAG(
+    double,
     max_dynamic_log_rate,
     50,  // maximum of 50 log entries per second on average
     "maximum rate of dynamic log entries in this process; short bursts are "
@@ -132,10 +134,10 @@ static int GetCpuCount() {
 static int64 GetBaseFillRate(CostLimitType type) {
   switch (type) {
     case CostLimitType::BreakpointCondition:
-      return FLAGS_max_condition_cost * 1000000000L;
+      return base::GetFlag(FLAGS_max_condition_cost) * 1000000000L;
 
     case CostLimitType::DynamicLog:
-      return FLAGS_max_dynamic_log_rate;
+      return base::GetFlag(FLAGS_max_dynamic_log_rate);
   }
 
   return 0;

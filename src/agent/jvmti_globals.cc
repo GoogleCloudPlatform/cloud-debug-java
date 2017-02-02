@@ -45,35 +45,41 @@
 #ifdef GCP_HUB_CLIENT
 // TODO(vlif): retire this flag in favor of debuggee labels
 // set through system properties.
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     cdbg_description_suffix,
     "",
     "additional text to be appended to debuggee description");
 
-DEFINE_bool(
+DEFINE_FLAG(
+    bool,
     enable_service_account_auth,
     false,
     "Enables service account authentication instead of relying on "
     "a local metadata service");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     project_id,
     "",
     "Explicitly set GCP project ID used when service account authentication"
     "is enabled");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     project_number,
     "",
     "Explicitly set GCP project number used when service account "
     "authentication is enabled");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     service_account_email,
     "",
     "Identifier of the service account");
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     service_account_p12_file,
     "",
     "Path to .p12 file containing private key of the service account");

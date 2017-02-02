@@ -20,13 +20,15 @@
 #include "agent_thread.h"
 #include "bridge.h"
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     hub_retry_delay_ms,
     10000,  // 10 seconds
     "amount of time in milliseconds to sleep before retrying failed "
     "requests to Cloud Debugger backend");
 
-DEFINE_int32(
+DEFINE_FLAG(
+    int32,
     debuggee_disabled_delay_ms,
     600000,  // 10 minutes
     "amount of time in milliseconds to sleep before checking whether "
@@ -171,7 +173,7 @@ void Worker::TransmissionThreadProc() {
     // 3. Previously failed transmissions and we are past the retry interval.
     transmission_thread_event_->Wait(
         bridge_->HasPendingMessages()
-        ? FLAGS_hub_retry_delay_ms
+        ? base::GetFlag(FLAGS_hub_retry_delay_ms)
         : 100000000);  // arbitrary long delay.
 
     // Enqueue new breakpoint updates for transmission.
@@ -203,11 +205,11 @@ void Worker::RegisterDebuggee() {
 
     if (!new_is_enabled) {
       is_registered_ = false;
-      main_thread_event_->Wait(FLAGS_debuggee_disabled_delay_ms);
+      main_thread_event_->Wait(base::GetFlag(FLAGS_debuggee_disabled_delay_ms));
     }
   } else {
     // Delay before attempting to retry.
-    main_thread_event_->Wait(FLAGS_hub_retry_delay_ms);
+    main_thread_event_->Wait(base::GetFlag(FLAGS_hub_retry_delay_ms));
   }
 }
 

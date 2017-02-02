@@ -38,7 +38,8 @@
 #include "jni_proxy_hubclient.h"
 #include "jni_proxy_hubclient_listactivebreakpointsresult.h"
 
-DEFINE_string(
+DEFINE_FLAG(
+    string,
     cdbg_extra_class_path,
     "",
     "additional directories and files containing resolvable binaries");
@@ -360,7 +361,8 @@ bool JvmtiAgent::OnWorkerReady() {
 
   // Split the extra class path into individual components.
   std::vector<string> extra_class_path;
-  std::stringstream extra_class_path_stream(FLAGS_cdbg_extra_class_path);
+  std::stringstream extra_class_path_stream(
+      base::GetFlag(FLAGS_cdbg_extra_class_path));
   std::string item;
   while (std::getline(extra_class_path_stream, item, ':')) {
       extra_class_path.push_back(item);

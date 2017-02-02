@@ -23,4 +23,4 @@
 //
 
 // Deprecated as of 11/2015.
-DEFINE_string(cdbg_agentdir, "", "deprecated");
+DEFINE_FLAG(string, cdbg_agentdir, "", "deprecated");

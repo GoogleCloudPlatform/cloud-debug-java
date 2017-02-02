@@ -157,6 +157,7 @@ bool JvmtiAgent::OnLoad() {
 
   LOG(INFO) << "Java debuglet initialization started";
 
+
   // Initialize flags from system properties. This way the user can set
   // flags without messing up with JVMTI agent options.
   InitializeFlagsFromSystemProperties();

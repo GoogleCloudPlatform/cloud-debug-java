@@ -40,7 +40,7 @@ const char* BaseAST::typeName( void ) const
 
 RefAST BaseAST::clone( void ) const
 {
-	cerr << "BaseAST::clone()" << endl;
+	std::cerr << "BaseAST::clone()" << std::endl;
 	return nullAST;
 }
 

@@ -68,7 +68,12 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
   const int count =
       std::min<int>(kMaxCaptureObjectElements, array_len);
 
-  *members = std::vector<NamedJVariant>(count + 1);
+  const bool is_trimmed = count < array_len;
+
+  // We reserve 1st element for array length, and last element for
+  // status message of trimmed array. If array is not trimmed, we don't
+  // need the message.
+  *members = std::vector<NamedJVariant>(is_trimmed ? count + 2 : count + 1);
 
   (*members)[0].name = kArrayLengthName;
   (*members)[0].value = JVariant::Int(array_len);
@@ -84,7 +89,13 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
     (*members)[i + 1].well_known_jclass = element_well_known_jclass;
   }
 
-  // TODO(vlif): add status message if the array was trimmed.
+  // For trimmed array we reserved one extra space for status message
+  if (is_trimmed) {
+    (*members)[count + 1] = NamedJVariant::InfoStatus({
+      CollectionNotAllItemsCaptured,
+      { std::to_string(count) }
+    });
+  }
 }
 
 
@@ -110,12 +121,26 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
     if (array_data != nullptr) {
       const int count =
           std::min<int>(kMaxCapturePrimitiveElements, array_len);
-      *members = std::vector<NamedJVariant>(count + 1);
+
+      const bool is_trimmed = count < array_len;
+
+      // We reserve 1st element for array name, and last element for
+      // status message of trimmed array. If array is not trimmed, we don't
+      // need the message.
+      *members = std::vector<NamedJVariant>(is_trimmed ? count + 2 : count + 1);
 
       for (int i = 0; i < count; ++i) {
         (*members)[i + 1].name = FormatArrayIndexName(i);
         (*members)[i + 1].value =
             JVariant::Primitive<TArrayType>(array_data[i]);
+      }
+
+      // For trimmed array we reserved one extra space for status message
+      if (is_trimmed) {
+        (*members)[count + 1] = NamedJVariant::InfoStatus({
+          CollectionNotAllItemsCaptured,
+          { std::to_string(count) }
+        });
       }
 
       jni()->ReleasePrimitiveArrayCritical(
@@ -129,8 +154,6 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
 
   (*members)[0].name = kArrayLengthName;
   (*members)[0].value = JVariant::Int(array_len);
-
-  // TODO(vlif): add status message if the array was trimmed.
 }
 
 

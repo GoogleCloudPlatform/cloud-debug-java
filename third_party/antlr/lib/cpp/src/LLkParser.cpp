@@ -42,14 +42,14 @@ void LLkParser::trace(const char* ee, const char* rname)
 {
 	traceIndent();
 
-	cout << ee << rname << ((inputState->guessing>0)?"; [guessing]":"; ");
+	std::cout << ee << rname << ((inputState->guessing>0)?"; [guessing]":"; ");
 
 	for (int i = 1; i <= k; i++)
 	{
 		if (i != 1) {
-			cout << ", ";
+			std::cout << ", ";
 		}
-		cout << "LA(" << i << ")==";
+		std::cout << "LA(" << i << ")==";
 
 		string temp;
 
@@ -62,10 +62,10 @@ void LLkParser::trace(const char* ee, const char* rname)
 //			temp += ae.toString();
 //			temp += ']';
 //		}
-		cout << temp;
+		std::cout << temp;
 	}
 
-	cout << endl;
+	std::cout << std::endl;
 }
 
 void LLkParser::traceIn(const char* rname)

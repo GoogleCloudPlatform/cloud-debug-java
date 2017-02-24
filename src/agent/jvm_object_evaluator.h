@@ -44,6 +44,7 @@ class JvmObjectEvaluator : public ObjectEvaluator {
   void Evaluate(
       MethodCaller* method_caller,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) override;
 
   // Selects the most appropriate pretty printer given the class metadata. If

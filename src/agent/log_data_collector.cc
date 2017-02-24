@@ -202,7 +202,7 @@ void LogDataCollector::Collect(
     result.value.get<jobject>(&obj);
 
     std::vector<NamedJVariant> members;
-    object_evaluator->Evaluate(method_caller, obj, &members);
+    object_evaluator->Evaluate(method_caller, obj, false, &members);
 
     watch_results_.push_back(FormatMembers(members));
   }

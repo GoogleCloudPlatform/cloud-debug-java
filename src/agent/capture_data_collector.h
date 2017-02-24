@@ -56,7 +56,7 @@ class ClassFilesCache;
 // (to keep impact on the debugged service minimal).
 // The "CaptureDataCollector" class is supposed to be created for each
 // breakpoint hit and should not be reused. Therefore the actual data collection
-// happens in the constructor.
+// shoud happen immediately after construction of the object.
 // The collection process has two phases:
 // 1. Actual reading variables from JVM. This phase happens while the thread
 //    that hit the breakpoint is paused. The collection phase should be
@@ -76,7 +76,7 @@ class CaptureDataCollector {
       jthread thread);
 
   // Releases the all global reference to Java objects. This function must be
-  // called before the object is destroyed. After "Release" has been called,
+  // called before the object is destroyed. After "ReleaseRefs" has been called,
   // "Format" should not be called.
   void ReleaseRefs();
 
@@ -145,7 +145,7 @@ class CaptureDataCollector {
 
   // Evaluates a single watched expression and appends the result to
   // "watch_results_". If "watch" is nullptr or evaluation fails, the function
-  // returns sets an error message in "result".
+  // sets an error message in "result".
   void EvaluateWatchedExpression(
       const EvaluationContext& evaluation_context,
       const ExpressionEvaluator& watch_evaluator,

@@ -41,6 +41,7 @@ class MapEntryTypeEvaluator : public TypeEvaluator {
       MethodCaller* method_caller,
       const ClassMetadataReader::Entry& class_metadata,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) override {
     Evaluate(method_caller, obj, members);
   }

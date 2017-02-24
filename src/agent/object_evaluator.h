@@ -22,7 +22,6 @@
 namespace devtools {
 namespace cdbg {
 
-class StatusMessageModel;
 class MethodCaller;
 struct NamedJVariant;
 
@@ -41,6 +40,7 @@ class ObjectEvaluator {
   virtual void Evaluate(
       MethodCaller* method_caller,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) = 0;
 };
 

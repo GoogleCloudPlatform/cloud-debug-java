@@ -44,6 +44,7 @@ class ArrayTypeEvaluator : public TypeEvaluator {
       MethodCaller* method_caller,
       const ClassMetadataReader::Entry& class_metadata,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) override;
 
  private:
@@ -56,6 +57,7 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
     MethodCaller* method_caller,
     const ClassMetadataReader::Entry& class_metadata,
     jobject obj,
+    bool isWatchExpression,
     std::vector<NamedJVariant>* members) {
   DCHECK(IsArrayObjectType(class_metadata.signature));
 
@@ -65,7 +67,9 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
 
   // Evaluate the array.
   const jsize array_len = jni()->GetArrayLength(static_cast<jarray>(obj));
-  const int count =
+  // We do not apply max capture limitation for watch expressions
+  const int count = isWatchExpression ?
+      array_len :
       std::min<int>(kMaxCaptureObjectElements, array_len);
 
   const bool is_trimmed = count < array_len;
@@ -104,6 +108,7 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
     MethodCaller* method_caller,
     const ClassMetadataReader::Entry& class_metadata,
     jobject obj,
+    bool isWatchExpression,
     std::vector<NamedJVariant>* members) {
   DCHECK(IsArrayObjectType(class_metadata.signature));
 
@@ -119,7 +124,9 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
         jni()->GetPrimitiveArrayCritical(static_cast<jarray>(obj), nullptr));
 
     if (array_data != nullptr) {
-      const int count =
+      // We do not apply max capture limitation for watch expressions
+      const int count = isWatchExpression ?
+          array_len :
           std::min<int>(kMaxCapturePrimitiveElements, array_len);
 
       const bool is_trimmed = count < array_len;

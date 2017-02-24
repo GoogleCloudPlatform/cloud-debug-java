@@ -45,13 +45,15 @@ class IterableTypeEvaluator : public TypeEvaluator {
       MethodCaller* method_caller,
       const ClassMetadataReader::Entry& class_metadata,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) override {
-    Evaluate(method_caller, obj, members);
+    Evaluate(method_caller, obj, isWatchExpression, members);
   }
 
   void Evaluate(
       MethodCaller* method_caller,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members);
 
  private:

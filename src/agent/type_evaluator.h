@@ -24,7 +24,6 @@
 namespace devtools {
 namespace cdbg {
 
-class StatusMessageModel;
 struct NamedJVariant;
 
 // Default settings limiting the amount of data we capture for collection.
@@ -55,6 +54,7 @@ class TypeEvaluator {
       MethodCaller* method_caller,
       const ClassMetadataReader::Entry& class_metadata,
       jobject obj,
+      bool isWatchExpression,
       std::vector<NamedJVariant>* members) = 0;
 };
 

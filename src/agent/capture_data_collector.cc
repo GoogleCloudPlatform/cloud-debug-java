@@ -132,6 +132,7 @@ void CaptureDataCollector::Collect(
     evaluators_->object_evaluator->Evaluate(
         pretty_printers_method_caller.get(),
         it_pending_object->object_ref,
+        false,
         &it_pending_object->members);
 
     // If members of the current object contain references to other memory

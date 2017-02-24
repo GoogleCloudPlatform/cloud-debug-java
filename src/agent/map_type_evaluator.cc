@@ -46,6 +46,7 @@ void MapTypeEvaluator::Evaluate(
     MethodCaller* method_caller,
     const ClassMetadataReader::Entry& class_metadata,
     jobject obj,
+    bool isWatchExpression,
     std::vector<NamedJVariant>* members) {
   std::unique_ptr<FormatMessageModel> error_message;
 
@@ -69,7 +70,8 @@ void MapTypeEvaluator::Evaluate(
     return;
   }
 
-  iterable_evaluator_.Evaluate(method_caller, entries_obj, members);
+  iterable_evaluator_.Evaluate(
+      method_caller, entries_obj, isWatchExpression, members);
 
   TryInlineMap(method_caller, members);
 }

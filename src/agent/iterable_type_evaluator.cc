@@ -52,6 +52,7 @@ bool IterableTypeEvaluator::IsIterable(jclass cls) const {
 void IterableTypeEvaluator::Evaluate(
     MethodCaller* method_caller,
     jobject obj,
+    bool isWatchExpression,
     std::vector<NamedJVariant>* members) {
   members->clear();
 
@@ -77,7 +78,8 @@ void IterableTypeEvaluator::Evaluate(
 
   // while (iterator.hasNext()) ...
   for (;;) {
-    if (members->size() >= kMaxCaptureObjectElements) {
+    // We do not apply max capture limitation for watch expressions
+    if (!isWatchExpression && members->size() >= kMaxCaptureObjectElements) {
       members->push_back(NamedJVariant::InfoStatus({
         CollectionNotAllItemsCaptured,
         { std::to_string(members->size()) }

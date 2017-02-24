@@ -35,7 +35,17 @@ struct NamedJVariant;
 template <typename TArrayType>
 class ArrayTypeEvaluator : public TypeEvaluator {
  public:
-  ArrayTypeEvaluator() {}
+  ArrayTypeEvaluator()
+    :max_capture_object_elements_(kMaxCaptureObjectElements),
+     max_capture_primitive_elements_(kMaxCapturePrimitiveElements) {}
+
+  // This constructor is for testing only, it is never used in production code
+  ArrayTypeEvaluator(int max_capture_object_elements,
+                     int max_capture_primitive_elements)
+    :max_capture_object_elements_(max_capture_object_elements),
+     max_capture_primitive_elements_(max_capture_primitive_elements) {}
+
+~ArrayTypeEvaluator() override {}
 
   string GetEvaluatorName() override;
 
@@ -48,6 +58,9 @@ class ArrayTypeEvaluator : public TypeEvaluator {
       std::vector<NamedJVariant>* members) override;
 
  private:
+  const int max_capture_object_elements_;
+  const int max_capture_primitive_elements_;
+
   DISALLOW_COPY_AND_ASSIGN(ArrayTypeEvaluator);
 };
 
@@ -70,7 +83,7 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
   // We do not apply max capture limitation for watch expressions
   const int count = isWatchExpression ?
       array_len :
-      std::min<int>(kMaxCaptureObjectElements, array_len);
+      std::min<int>(max_capture_object_elements_, array_len);
 
   const bool is_trimmed = count < array_len;
 
@@ -127,11 +140,11 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
       // We do not apply max capture limitation for watch expressions
       const int count = isWatchExpression ?
           array_len :
-          std::min<int>(kMaxCapturePrimitiveElements, array_len);
+          std::min<int>(max_capture_primitive_elements_, array_len);
 
       const bool is_trimmed = count < array_len;
 
-      // We reserve 1st element for array name, and last element for
+      // We reserve 1st element for array length, and last element for
       // status message of trimmed array. If array is not trimmed, we don't
       // need the message.
       *members = std::vector<NamedJVariant>(is_trimmed ? count + 2 : count + 1);

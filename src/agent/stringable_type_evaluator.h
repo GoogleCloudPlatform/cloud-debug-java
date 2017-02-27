@@ -43,7 +43,7 @@ class StringableTypeEvaluator : public TypeEvaluator {
   void Evaluate(MethodCaller* method_caller,
                 const ClassMetadataReader::Entry& class_metadata,
                 jobject obj,
-                bool isWatchExpression,
+                bool is_watch_expression,
                 std::vector<NamedJVariant>* members) override;
 
  private:

@@ -40,7 +40,7 @@ class ObjectEvaluator {
   virtual void Evaluate(
       MethodCaller* method_caller,
       jobject obj,
-      bool isWatchExpression,
+      bool is_watch_expression,
       std::vector<NamedJVariant>* members) = 0;
 };
 

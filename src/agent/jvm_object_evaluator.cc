@@ -93,7 +93,7 @@ void JvmObjectEvaluator::Initialize() {
 void JvmObjectEvaluator::Evaluate(
     MethodCaller* method_caller,
     jobject obj,
-    bool isWatchExpression,
+    bool is_watch_expression,
     std::vector<NamedJVariant>* members) {
   members->clear();
 
@@ -148,12 +148,17 @@ void JvmObjectEvaluator::Evaluate(
     return;
   }
 
-  evaluator->Evaluate(method_caller, metadata, obj, isWatchExpression, members);
+  evaluator->Evaluate(
+      method_caller,
+      metadata,
+      obj,
+      is_watch_expression,
+      members);
 
   if ((evaluator != generic_.get()) && HasEvaluatorFailed(*members)) {
     members->clear();
     generic_->Evaluate(
-        method_caller, metadata, obj, isWatchExpression, members);
+        method_caller, metadata, obj, is_watch_expression, members);
   }
 }
 

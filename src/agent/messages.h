@@ -183,7 +183,7 @@ constexpr char ConditionEvaluationCostExceededGlobalLimit[] =
     "snapshots might affect the application performance.";
 
 constexpr char CollectionNotAllItemsCaptured[] =
-    "Only first $0 items were captured";
+    "Only first $0 items were captured. Use in an expression to see all items.";
 
 constexpr char DynamicLoggerNotAvailable[] =
     "Logpoints are not available";

@@ -31,7 +31,7 @@ public final class GcpDebugletVersion {
   /**
    * Minor version of the agent.
    */
-  public static final int MINOR_VERSION = 8;
+  public static final int MINOR_VERSION = 9;
 
   /**
    * Debugger agent version string in the format of MAJOR.MINOR.

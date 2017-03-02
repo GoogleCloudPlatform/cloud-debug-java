@@ -510,11 +510,6 @@ void CaptureDataCollector::EnqueueRef(const NamedJVariant& var) {
   // Try to insert a ref for the Java object into the map. If this object
   // has already been encountered, it will be in unique_objects_ and "Insert"
   // will return false. In this case no further action is necessary.
-  // TODO(maxgold): If an object is captured as an expression, and then we try
-  // to re-capture it as a local, this will reuse the prior result. The side
-  // effect: if the var is a large size array, it won't get truncated in the
-  // locals. This is a good side effect that can even improve user experience.
-  // But we should add some unit tests to verify this behavior.
   const bool is_new_object = unique_objects_.Insert(ref, 0);
   if (!is_new_object) {
     return;

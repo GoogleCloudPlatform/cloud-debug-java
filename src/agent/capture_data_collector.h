@@ -23,6 +23,7 @@
 #include "class_indexer.h"
 #include "class_metadata_reader.h"
 #include "common.h"
+#include "eval_call_stack.h"
 #include "jobject_map.h"
 #include "jvm_evaluators.h"
 #include "model.h"
@@ -42,7 +43,6 @@ constexpr int kMethodLocalsFrames = 5;
 constexpr int kBreakpointMaxCaptureSize = 65536;
 
 class CompiledExpression;
-class EvalCallStack;
 class ExpressionEvaluator;
 class MethodLocals;
 class ObjectEvaluator;
@@ -196,6 +196,27 @@ class CaptureDataCollector {
       std::vector<NamedJVariant>* local_variables);
 
  private:
+  // Collects and evaluates watch expressions, adding pending memory objects
+  // to "unexplored_memory_objects_".
+  void CollectWatchExpressions(
+      const std::vector<CompiledExpression>& watches,
+      jthread thread,
+      const std::vector<EvalCallStack::JvmFrame>& jvm_frames);
+
+  // Collects and evaluates call frames, adding pending memory objects
+  // to "unexplored_memory_objects_".
+  void CollectCallStack(
+      jthread thread,
+      const std::vector<EvalCallStack::JvmFrame>& jvm_frames,
+      MethodCaller* pretty_printers_method_caller);
+
+  // Evaluates objects enqueued into "unexplored_memory_objects_". Moves them
+  // into "explored_memory_objects_". Updates map of indexes for object
+  // references in "explored_memory_objects_".
+  void EvaluateEnqueuedObjects(
+      bool is_watch_expression,
+      MethodCaller* pretty_printers_method_caller);
+
   // Bundles all the evaluation classes together. Evaluators are guaranteed
   // to be valid throughout the lifetime of "CaptureDataCollector".
   // Not owned by this class.
@@ -211,22 +232,30 @@ class CaptureDataCollector {
   // Evaluated watched expressions.
   std::vector<EvaluatedExpression> watch_results_;
 
-  // Set of pending and collected memory objects. Newly discovered memory
-  // objects are appended to the end of the list. Objects in the list are
-  // identified by index. This scheme enables BFS-like exporation of the
-  // object tree. Use linked list here (rather than vector) so that we
+  // This map is used to make sure an object that is referenced from multiple
+  // locals/expressions is evaluated only once, and all subsequent references
+  // reuse the evaluation result.
+  JobjectMap<JObject_NoRef, int> unique_objects_;
+
+  // Set of pending memory objects. Newly discovered unique memory objects are
+  // appended to the end of the list. This scheme enables BFS-like exporation
+  // of the object tree. Use linked list here (rather than vector) so that we
   // can add new elements without relocating existing elements.
-  std::list<MemoryObject> memory_objects_;
+  std::list<MemoryObject> unexplored_memory_objects_;
 
-  // Number of elements in "memory_objects_". We keep track of it to avoid
-  // calling "memory_objects_.size()", which has O(n) complexity.
-  int memory_objects_size_ = 0;
+  // Set of collected memory objects. Objects in the list are
+  // identified by index. Use linked list here (rather than vector) so that we
+  // can add new elements without relocating existing elements.
+  // Since C++11, list.size() is no longer O(n). It is now O(1) so we can use
+  // directly instead of keeping a separate counter for the list size.
+  // http://www.cplusplus.com/reference/list/list/size/
+  std::list<MemoryObject> explored_memory_objects_;
 
-  // Maps discovered Java objects to index in "memory_objects_". The map
-  // does not hold any reference to Java objects and assumes that the global
-  // reference is maintained by "VariableFormatter" instances somewhere in this
-  // class.
-  JobjectMap<JObject_NoRef, int> object_index_map_;
+  // Maps discovered Java objects to index in "explored_memory_objects_".
+  // The map does not hold any reference to Java objects and assumes that the
+  // global reference is maintained by "VariableFormatter" instances somewhere
+  // in this class.
+  JobjectMap<JObject_NoRef, int> explored_object_index_map_;
 
   // Total approximated size of collected variables. This size is compared
   // against a quota. The data collection will stop once the threshold has been

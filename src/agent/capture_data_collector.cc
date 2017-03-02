@@ -34,8 +34,7 @@ CaptureDataCollector::CaptureDataCollector(JvmEvaluators* evaluators)
     : evaluators_(evaluators) {
   // Reserve "var_table_index" 0 for memory objects that we didn't capture
   // because collector ran out of quota.
-  memory_objects_.push_back(MemoryObject());
-  ++memory_objects_size_;
+  explored_memory_objects_.push_back(MemoryObject());
 }
 
 
@@ -54,36 +53,33 @@ void CaptureDataCollector::Collect(
   std::unique_ptr<MethodCaller> pretty_printers_method_caller =
       evaluators_->method_caller_factory(Config::PRETTY_PRINTERS);
 
-  // Walk the call stack.
+  // Get the call stack frames.
   std::vector<EvalCallStack::JvmFrame> jvm_frames;
   evaluators_->eval_call_stack->Read(thread, &jvm_frames);
 
-  const int call_frames_count = jvm_frames.size();
-  call_frames_.resize(call_frames_count);
-  for (int depth = 0; depth < call_frames_count; ++depth) {
-    call_frames_[depth].frame_info_key = jvm_frames[depth].frame_info_key;
+  // Collect and evaluate watched expressions.
+  // We fill our buffer with all watched expression before we process
+  // call stack frames, arguments and local variables. The rationale is that we
+  // don't trim iterable and array values for expressions (users want them in
+  // full since they added them manually). Therefore we use our buffer space
+  // for expresssion first, and proceed to frames with rest of it.
+  CollectWatchExpressions(watches, thread, jvm_frames);
 
-    // Collect local variables.
-    if ((depth < kMethodLocalsFrames) &&
-        (jvm_frames[depth].code_location.method != nullptr)) {
-      EvaluationContext evaluation_context;
-      evaluation_context.thread = thread;
-      evaluation_context.frame_depth = depth;
-      evaluation_context.method_caller = pretty_printers_method_caller.get();
+  // Collect referenced objects of watched expressions in BFS fashion.
+  EvaluateEnqueuedObjects(true, pretty_printers_method_caller.get());
 
-      ReadLocalVariables(
-          evaluation_context,
-          jvm_frames[depth].code_location.method,
-          jvm_frames[depth].code_location.location,
-          &call_frames_[depth].arguments,
-          &call_frames_[depth].local_variables);
+  // Walk the call stack.
+  CollectCallStack(thread, jvm_frames, pretty_printers_method_caller.get());
 
-      PostProcessVariables(call_frames_[depth].arguments);
-      PostProcessVariables(call_frames_[depth].local_variables);
-    }
-  }
+  // Collect referenced objects of call stack in BFS fashion.
+  EvaluateEnqueuedObjects(false, pretty_printers_method_caller.get());
+}
 
-  // Evaluate watched expressions.
+
+void CaptureDataCollector::CollectWatchExpressions(
+    const std::vector<CompiledExpression>& watches,
+    jthread thread,
+    const std::vector<EvalCallStack::JvmFrame>& jvm_frames) {
   watch_results_ = std::vector<EvaluatedExpression>(watches.size());
   for (int i = 0; i < watches.size(); ++i) {
     // Keep the original expression around so that we can populate variable
@@ -118,50 +114,96 @@ void CaptureDataCollector::Collect(
              "watched expression that failed to compile";
     }
   }
-
-  // Collect referenced objects in BFS fashion.
-  auto it_pending_object = memory_objects_.begin();
-  int captured_variable_table_size = 0;
-  DCHECK(it_pending_object != memory_objects_.end());
-
-  ++it_pending_object;  // First entry has a special meaning of "buffer full".
-  ++captured_variable_table_size;
-
-  while ((it_pending_object != memory_objects_.end()) &&
-         CanCollectMoreMemoryObjects()) {
-    evaluators_->object_evaluator->Evaluate(
-        pretty_printers_method_caller.get(),
-        it_pending_object->object_ref,
-        false,
-        &it_pending_object->members);
-
-    // If members of the current object contain references to other memory
-    // objects, "memory_objects_" will grow inside "PostProcessVariables".
-    PostProcessVariables(it_pending_object->members);
-
-    ++it_pending_object;
-    ++captured_variable_table_size;
-  }
-
-  // Remove all memory objects that were enqueued, but were not explored.
-  DCHECK_EQ(memory_objects_size_, memory_objects_.size());
-
-  memory_objects_.erase(it_pending_object, memory_objects_.end());
-  memory_objects_size_ = captured_variable_table_size;
-
-  DCHECK_EQ(memory_objects_size_, memory_objects_.size());
 }
 
 
+void CaptureDataCollector::CollectCallStack(
+    jthread thread,
+    const std::vector<EvalCallStack::JvmFrame>& jvm_frames,
+    MethodCaller* pretty_printers_method_caller) {
+  const int call_frames_count = jvm_frames.size();
+  call_frames_.resize(call_frames_count);
+  for (int depth = 0; depth < call_frames_count; ++depth) {
+    call_frames_[depth].frame_info_key = jvm_frames[depth].frame_info_key;
+
+    // Collect local variables.
+    if ((depth < kMethodLocalsFrames) &&
+        (jvm_frames[depth].code_location.method != nullptr)) {
+      EvaluationContext evaluation_context;
+      evaluation_context.thread = thread;
+      evaluation_context.frame_depth = depth;
+      evaluation_context.method_caller = pretty_printers_method_caller;
+
+      ReadLocalVariables(
+          evaluation_context,
+          jvm_frames[depth].code_location.method,
+          jvm_frames[depth].code_location.location,
+          &call_frames_[depth].arguments,
+          &call_frames_[depth].local_variables);
+
+      PostProcessVariables(call_frames_[depth].arguments);
+      PostProcessVariables(call_frames_[depth].local_variables);
+    }
+  }
+}
+
+
+// Collect referenced objects in BFS fashion.
+void CaptureDataCollector::EvaluateEnqueuedObjects(
+    bool is_watch_expression,
+    MethodCaller* pretty_printers_method_caller) {
+  while (!unexplored_memory_objects_.empty() &&
+         CanCollectMoreMemoryObjects()) {
+    // We promote objects from "unexplored_memory_objects_" to
+    // "explored_memory_objects_" as long as space permits
+    // When our buffer is full and we cannot collect
+    // more memory objects, we drop them and have no indexes to those
+    // references in "explored_object_index_map_". We later handle this case
+    // in FormatVariable() by redirecting not found indexes to special index 0.
+    auto pending_object = *unexplored_memory_objects_.begin();
+    unexplored_memory_objects_.pop_front();
+
+    evaluators_->object_evaluator->Evaluate(
+        pretty_printers_method_caller,
+        pending_object.object_ref,
+        is_watch_expression,
+        &pending_object.members);
+
+    // If members of the current object contain references to other unique
+    // memory objects, "unexplored_memory_objects_" will grow inside
+    // "PostProcessVariables"
+    PostProcessVariables(pending_object.members);
+
+    // Insert the next index of Java object into the map.
+    // Since "unexplored_memory_objects_" contains only objects with unique
+    // reference, it should not be encountered in "explored_object_index_map_"
+    // and "Insert" should always succeed.
+    const bool is_new_object = explored_object_index_map_.Insert(
+        pending_object.object_ref, explored_memory_objects_.size());
+    DCHECK(is_new_object);
+
+    // Now that the index is in the map, create the actual entry in
+    // "explored_memory_objects_"
+    explored_memory_objects_.push_back(std::move(pending_object));
+  }
+
+  // At this point we either moved all pending objects into
+  // "explored_memory_objects_", or we run out of quota (buffer full).
+  unexplored_memory_objects_.clear();
+}
+
 void CaptureDataCollector::ReleaseRefs() {
-  object_index_map_.RemoveAll();
+  explored_object_index_map_.RemoveAll();
+
+  unique_objects_.RemoveAll();
 
   watch_results_.clear();
 
   call_frames_.clear();
 
-  memory_objects_.clear();
-  memory_objects_size_ = 0;
+  unexplored_memory_objects_.clear();
+
+  explored_memory_objects_.clear();
 }
 
 
@@ -190,11 +232,11 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
 
   // Format referenced memory objects (within the quota).
   breakpoint->variable_table.clear();
-  for (const MemoryObject& memory_object : memory_objects_) {
+  for (const MemoryObject& memory_object : explored_memory_objects_) {
     std::unique_ptr<VariableModel> object_variable;
 
     if (breakpoint->variable_table.empty()) {
-      // First entry in "memory_objects_" has a special meaning.
+      // First entry in "explored_memory_objects_" has a special meaning.
       object_variable = VariableBuilder::build_capture_buffer_full_variable();
     } else {
       if ((memory_object.members.size() == 1) &&
@@ -372,23 +414,28 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
       jobject ref = nullptr;
       const int* var_table_index = nullptr;
       if (source.value.get<jobject>(&ref)) {
-        var_table_index = object_index_map_.Find(ref);
+        var_table_index = explored_object_index_map_.Find(ref);
       }
 
       if (var_table_index == nullptr) {
-        target->status = StatusMessageBuilder()
-            .set_error()
-            .set_refers_to(StatusMessageModel::Context::VARIABLE_VALUE)
-            .set_description(INTERNAL_ERROR_MESSAGE)
-            .build();
+        // Index not found.
+        // Collector ran out of quota before the current object was explored.
+        // Set "var_table_index" to 0, which is an empty object (with no
+        // fields) and has a special meaning ("buffer full").
+        target->var_table_index.set_value(0);
       } else {
-        if (*var_table_index < memory_objects_size_) {
+        if (*var_table_index < explored_memory_objects_.size()) {
           target->var_table_index = *var_table_index;
         } else {
-          // Collector ran out of quota before the current object was explored.
-          // Set "var_table_index" to 0, which is an empty object (with no
-          // fields) and has a special meaning ("buffer full").
-          target->var_table_index.set_value(0);
+          // We are not supposed to have index larger than
+          // explored_memory_objects_.size() as indexes match objects that we
+          // promote from "unexplored_memory_objects_" to
+          // "explored_memory_objects_" in EvaluateEnqueuedObjects()
+          target->status = StatusMessageBuilder()
+              .set_error()
+              .set_refers_to(StatusMessageModel::Context::VARIABLE_VALUE)
+              .set_description(INTERNAL_ERROR_MESSAGE)
+              .build();
         }
       }
     }
@@ -460,22 +507,25 @@ void CaptureDataCollector::EnqueueRef(const NamedJVariant& var) {
     return;
   }
 
-  // Try to insert the next index of Java object into the map. If this object
-  // has already been encountered, it will be in memory_objects_ and "Insert"
+  // Try to insert a ref for the Java object into the map. If this object
+  // has already been encountered, it will be in unique_objects_ and "Insert"
   // will return false. In this case no further action is necessary.
-  const bool is_new_object =
-      object_index_map_.Insert(ref, memory_objects_size_);
+  // TODO(maxgold): If an object is captured as an expression, and then we try
+  // to re-capture it as a local, this will reuse the prior result. The side
+  // effect: if the var is a large size array, it won't get truncated in the
+  // locals. This is a good side effect that can even improve user experience.
+  // But we should add some unit tests to verify this behavior.
+  const bool is_new_object = unique_objects_.Insert(ref, 0);
   if (!is_new_object) {
     return;
   }
 
   // Now that the index is in the map, create the actual entry in
-  // "memory_objects_".
+  // "unexplored_memory_objects_".
   MemoryObject new_memory_object;
   new_memory_object.object_ref = ref;
 
-  memory_objects_.push_back(std::move(new_memory_object));
-  ++memory_objects_size_;
+  unexplored_memory_objects_.push_back(std::move(new_memory_object));
 }
 
 

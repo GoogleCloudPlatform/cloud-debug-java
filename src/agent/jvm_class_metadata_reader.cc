@@ -32,6 +32,34 @@ static void ReleaseEntryRefs(jobject cls, ClassMetadataReader::Entry* entry) {
   }
 }
 
+// Adjusts the names of auto-generated fields by removing the "val$" prefix.
+//
+// The most important use case is when a local variable "foo" in an outer scope
+// is captured in an inner scope. When using Java 8, the variable is added to
+// the inner class as a "val$foo" field, but the user expects to see/use it as
+// "foo". Therefore, we remove the "val$" prefix. In Java 7, the debugger
+// doesn't know about foo at all, so we cannot do anything about it.
+//
+// Example:
+//    String foo;
+//    new SomeClass() {
+//      @Override
+//      String getFoo () {
+//        return foo;  // In Java 8, variable foo becomes SomeClass.this.val$foo
+//                     // but here we convert it to SomeClass.this.foo
+//      }
+//    }
+static string ProcessFieldName(string name) {
+  constexpr char kPrefix[] = "val$";
+  constexpr int kPrefixLength = sizeof(kPrefix) / sizeof(kPrefix[0]) - 1;
+
+  if (name.compare(0, kPrefixLength, kPrefix) == 0) {
+    return name.substr(kPrefixLength);
+  }
+
+  return name;
+}
+
 
 JvmClassMetadataReader::JvmClassMetadataReader(
     DataVisibilityPolicy* data_visibility_policy)
@@ -128,8 +156,8 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
     current_class_ref = std::move(next);
   }
 
-  // Reverse the the lists to accomodate for LoadFieldInfo appending new
-  // elements to the end of the list.
+  // Reverse the lists to accomodate for LoadFieldInfo appending new elements to
+  // the end of the list.
   std::reverse(
       metadata->instance_fields.begin(),
       metadata->instance_fields.end());
@@ -282,7 +310,7 @@ void JvmClassMetadataReader::LoadFieldInfo(
     return;
   }
 
-  string field_name = field_name_buffer.get();
+  string field_name = ProcessFieldName(field_name_buffer.get());
   string field_signature = field_signature_buffer.get();
 
   if ((class_visibility != nullptr) &&

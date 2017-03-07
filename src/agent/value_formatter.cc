@@ -19,6 +19,7 @@
 #include <numeric>
 #include <queue>
 #include "jni_utils.h"
+#include "model_util.h"
 
 namespace devtools {
 namespace cdbg {
@@ -275,7 +276,7 @@ static void ScrubModifiedUtf8(string* data_ptr) {
 }
 
 
-static void FormatJavaString(
+static std::unique_ptr<StatusMessageModel> FormatJavaString(
     const NamedJVariant& source,
     const ValueFormatter::Options& options,
     string* formatted_value) {
@@ -283,33 +284,34 @@ static void FormatJavaString(
   if (!source.value.get<jobject>(&ref)) {
     DCHECK(false);
     *formatted_value = "<unavailable>";
-    return;
+    return nullptr;
   }
 
   jstring jstr = static_cast<jstring>(ref);
 
   if (jstr == nullptr) {
     *formatted_value = kNull;
-    return;
+    return nullptr;
   }
 
-  jint len = jni()->GetStringLength(jstr);
+  const jint full_len = jni()->GetStringLength(jstr);
+  int len = full_len;
   if (len < 0) {
     LOG(ERROR) << "Bad string length: " << len;
     *formatted_value = "<malformed string>";
-    return;
+    return nullptr;
   }
 
-  bool truncated = false;
+  bool is_truncated = false;
   if (len > options.max_string_length) {
     len = options.max_string_length;
-    truncated = true;
+    is_truncated = true;
   }
 
   const char* suffix = nullptr;
   int suffix_length = 0;  // Does not include '\0'.
   if (options.quote_string) {
-    if (truncated) {
+    if (is_truncated) {
       suffix = kTruncatedStringSuffix;
       suffix_length = arraysize(kTruncatedStringSuffix) - 1;
     } else {
@@ -317,7 +319,7 @@ static void FormatJavaString(
       suffix_length = arraysize(kNormalStringSuffix) - 1;
     }
   } else {
-    if (truncated) {
+    if (is_truncated) {
       suffix = kTruncatedStringSuffixNoQuotes;
       suffix_length = arraysize(kTruncatedStringSuffixNoQuotes) - 1;
     } else {
@@ -351,6 +353,25 @@ static void FormatJavaString(
   // Copy the suffix onto the allocated space and resize back to the full size.
   std::copy(suffix, suffix + suffix_length, formatted_value->begin() + len);
   formatted_value->resize(len + suffix_length);
+
+  if (!is_truncated) {
+    return nullptr;
+  }
+
+  // If strings are truncated, we report this through a status message.
+  // We can detect watch expressions string by checking
+  // options.max_string_length that is set to kExtendedMaxStringLength
+  // in CaptureDataCollector::FormatVariable().
+  bool is_watch_expression =
+      (options.max_string_length == kExtendedMaxStringLength);
+  return StatusMessageBuilder()
+          .set_info()
+          .set_refers_to(StatusMessageModel::Context::VARIABLE_VALUE)
+          .set_description({
+            is_watch_expression ?
+                FormatTrimmedExpressionString : FormatTrimmedLocalString,
+            { std::to_string(full_len) }})
+          .build();
 }
 
 
@@ -425,14 +446,15 @@ int ValueFormatter::GetTotalDataSize(const NamedJVariant& data) {
 }
 
 
-void ValueFormatter::Format(
+std::unique_ptr<StatusMessageModel> ValueFormatter::Format(
     const NamedJVariant& source,
     const Options& options,
     string* formatted_value,
     string* type) {
   // Format Java string.
   if (IsJavaString(source)) {
-    FormatJavaString(source, options, formatted_value);
+    std::unique_ptr<StatusMessageModel> status_message =
+        FormatJavaString(source, options, formatted_value);
     if (type != nullptr) {
       if (source.value.has_non_null_object()) {
         *type = "String";
@@ -440,7 +462,7 @@ void ValueFormatter::Format(
         type->clear();
       }
     }
-    return;
+    return status_message;
   }
 
   // Format primitive value (or null).
@@ -452,6 +474,7 @@ void ValueFormatter::Format(
       type->clear();
     }
   }
+  return nullptr;
 }
 
 

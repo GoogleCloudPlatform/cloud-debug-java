@@ -408,7 +408,8 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
       }
 
       string formatted_value;
-      ValueFormatter::Format(source, options, &formatted_value, &target->type);
+      target->status = ValueFormatter::Format(
+          source, options, &formatted_value, &target->type);
       target->value = std::move(formatted_value);
     } else {
       jobject ref = nullptr;

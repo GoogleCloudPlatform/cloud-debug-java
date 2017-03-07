@@ -55,11 +55,12 @@ class ValueFormatter {
   // overhead.
   static int GetTotalDataSize(const NamedJVariant& data);
 
-  // Formats variable value to a string format. "FormatValue" can be called
-  // even if this is a reference. In this case the function will return
+  // Formats variable value to a string format. "Format" can be called
+  // even if this is a reference. In this case the function will set
   // something like "<Object>". The optional "type" is set to the type
   // name of "source" (e.g. "int"). If type not needed, "type" can be nullptr.
-  static void Format(
+  // Returns status message of "Format" operation (can be nullptr).
+  static std::unique_ptr<StatusMessageModel> Format(
       const NamedJVariant& source,
       const Options& options,
       string* formatted_value,

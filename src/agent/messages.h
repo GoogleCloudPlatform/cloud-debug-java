@@ -185,6 +185,12 @@ constexpr char ConditionEvaluationCostExceededGlobalLimit[] =
 constexpr char CollectionNotAllItemsCaptured[] =
     "Only first $0 items were captured. Use in an expression to see all items.";
 
+constexpr char FormatTrimmedLocalString[] =
+    "length=$0; Use in an expression to see more data";
+
+constexpr char FormatTrimmedExpressionString[] =
+    "length=$0";
+
 constexpr char DynamicLoggerNotAvailable[] =
     "Logpoints are not available";
 

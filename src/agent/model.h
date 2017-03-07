@@ -56,6 +56,12 @@ struct StatusMessageModel {
   bool is_error = false;
   Context refers_to = Context::UNSPECIFIED;
   FormatMessageModel description;
+
+  bool operator== (const StatusMessageModel& other) const {
+    return (is_error == other.is_error) &&
+           (refers_to == other.refers_to) &&
+           (description == other.description);
+  }
 };
 
 struct SourceLocationModel {

@@ -516,8 +516,7 @@ void CaptureDataCollector::EnqueueRef(const NamedJVariant& var) {
     return;
   }
 
-  // Now that the index is in the map, create the actual entry in
-  // "unexplored_memory_objects_".
+  // Now create the actual entry in "unexplored_memory_objects_".
   MemoryObject new_memory_object;
   new_memory_object.object_ref = ref;
 

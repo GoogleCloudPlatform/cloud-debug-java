@@ -36,14 +36,18 @@ template <typename TArrayType>
 class ArrayTypeEvaluator : public TypeEvaluator {
  public:
   ArrayTypeEvaluator()
-    :max_capture_object_elements_(kMaxCaptureObjectElements),
-     max_capture_primitive_elements_(kMaxCapturePrimitiveElements) {}
+    :max_capture_expression_elements_(kMaxCaptureExpressionElements),
+     max_capture_local_object_elements_(kMaxCaptureObjectElements),
+     max_capture_local_primitive_elements_(kMaxCapturePrimitiveElements) {}
 
   // This constructor is for testing only, it is never used in production code
-  ArrayTypeEvaluator(int max_capture_object_elements,
-                     int max_capture_primitive_elements)
-    :max_capture_object_elements_(max_capture_object_elements),
-     max_capture_primitive_elements_(max_capture_primitive_elements) {}
+  ArrayTypeEvaluator(int max_capture_expression_elements,
+                     int max_capture_local_object_elements,
+                     int max_capture_local_primitive_elements)
+    :max_capture_expression_elements_(max_capture_expression_elements),
+     max_capture_local_object_elements_(max_capture_local_object_elements),
+     max_capture_local_primitive_elements_(max_capture_local_primitive_elements)
+     {}
 
 ~ArrayTypeEvaluator() override {}
 
@@ -58,8 +62,9 @@ class ArrayTypeEvaluator : public TypeEvaluator {
       std::vector<NamedJVariant>* members) override;
 
  private:
-  const int max_capture_object_elements_;
-  const int max_capture_primitive_elements_;
+  const int max_capture_expression_elements_;
+  const int max_capture_local_object_elements_;
+  const int max_capture_local_primitive_elements_;
 
   DISALLOW_COPY_AND_ASSIGN(ArrayTypeEvaluator);
 };
@@ -80,10 +85,9 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
 
   // Evaluate the array.
   const jsize array_len = jni()->GetArrayLength(static_cast<jarray>(obj));
-  // We do not apply max capture limitation for watch expressions
   const int count = is_watch_expression ?
-      array_len :
-      std::min<int>(max_capture_object_elements_, array_len);
+      std::min<int>(max_capture_expression_elements_, array_len) :
+      std::min<int>(max_capture_local_object_elements_, array_len);
 
   const bool is_trimmed = count < array_len;
 
@@ -109,7 +113,9 @@ void ArrayTypeEvaluator<jobject>::Evaluate(
   // For trimmed array we reserved one extra space for status message
   if (is_trimmed) {
     (*members)[count + 1] = NamedJVariant::InfoStatus({
-      CollectionNotAllItemsCaptured,
+      is_watch_expression ?
+          ExpressionCollectionNotAllItemsCaptured :
+          LocalCollectionNotAllItemsCaptured,
       { std::to_string(count) }
     });
   }
@@ -137,10 +143,9 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
         jni()->GetPrimitiveArrayCritical(static_cast<jarray>(obj), nullptr));
 
     if (array_data != nullptr) {
-      // We do not apply max capture limitation for watch expressions
       const int count = is_watch_expression ?
-          array_len :
-          std::min<int>(max_capture_primitive_elements_, array_len);
+          std::min<int>(max_capture_expression_elements_, array_len) :
+          std::min<int>(max_capture_local_primitive_elements_, array_len);
 
       const bool is_trimmed = count < array_len;
 
@@ -158,7 +163,9 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
       // For trimmed array we reserved one extra space for status message
       if (is_trimmed) {
         (*members)[count + 1] = NamedJVariant::InfoStatus({
-          CollectionNotAllItemsCaptured,
+          is_watch_expression ?
+              ExpressionCollectionNotAllItemsCaptured :
+              LocalCollectionNotAllItemsCaptured,
           { std::to_string(count) }
         });
       }

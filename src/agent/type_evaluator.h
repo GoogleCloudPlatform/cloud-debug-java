@@ -27,6 +27,7 @@ namespace cdbg {
 struct NamedJVariant;
 
 // Default settings limiting the amount of data we capture for collection.
+constexpr int kMaxCaptureExpressionElements = 200;
 constexpr int kMaxCapturePrimitiveElements = 100;
 constexpr int kMaxCaptureObjectElements = 10;
 

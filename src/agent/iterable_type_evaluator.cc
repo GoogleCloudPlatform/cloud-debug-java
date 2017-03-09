@@ -78,10 +78,13 @@ void IterableTypeEvaluator::Evaluate(
 
   // while (iterator.hasNext()) ...
   for (;;) {
-    // We do not apply max capture limitation for watch expressions
-    if (!is_watch_expression && members->size() >= kMaxCaptureObjectElements) {
+    const int limit = is_watch_expression ?
+        kMaxCaptureExpressionElements : kMaxCaptureObjectElements;
+    if (members->size() >= limit) {
       members->push_back(NamedJVariant::InfoStatus({
-        CollectionNotAllItemsCaptured,
+        is_watch_expression ?
+            ExpressionCollectionNotAllItemsCaptured :
+            LocalCollectionNotAllItemsCaptured,
         { std::to_string(members->size()) }
       }));
       break;

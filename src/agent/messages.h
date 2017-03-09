@@ -182,8 +182,12 @@ constexpr char ConditionEvaluationCostExceededGlobalLimit[] =
     "Snapshot cancelled. The condition evaluation cost for all active "
     "snapshots might affect the application performance.";
 
-constexpr char CollectionNotAllItemsCaptured[] =
-    "Only first $0 items were captured. Use in an expression to see all items.";
+constexpr char LocalCollectionNotAllItemsCaptured[] =
+    "Only first $0 items were captured. "
+    "Use in an expression to see more items.";
+
+constexpr char ExpressionCollectionNotAllItemsCaptured[] =
+    "Only first $0 items were captured.";
 
 constexpr char FormatTrimmedLocalString[] =
     "length=$0; Use in an expression to see more data";

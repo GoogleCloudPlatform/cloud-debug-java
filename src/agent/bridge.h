@@ -76,6 +76,9 @@ class Bridge {
 
   // Approves the breakpoint for a global rollout.
   virtual bool ApproveBreakpointCanary(const string& breakpoint_id) = 0;
+
+  // Returns false if this agent should be disabled
+  virtual bool IsEnabled() = 0;
 };
 
 }  // namespace cdbg

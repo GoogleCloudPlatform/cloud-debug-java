@@ -146,6 +146,11 @@ void Worker::MainThreadProc() {
     return;  // Signal to stop the main debugger thread.
   }
 
+  if (!bridge_->IsEnabled()) {
+    LOG(WARNING) << "HubClient is disabled.";
+    return;  // Signal to stop the main debugger thread.
+  }
+
   while (!is_unloading_) {
     // Register debuggee if not registered or if previous call to list active
     // breakpoints failed.

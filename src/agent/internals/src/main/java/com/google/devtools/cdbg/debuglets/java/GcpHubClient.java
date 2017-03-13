@@ -508,6 +508,14 @@ class GcpHubClient implements HubClient {
     throw new UnsupportedOperationException("GcpHubClient#approveBreakpointCanary not implemented");
   }
   
+  /**
+   * If there is any reason to not enable the debugger, return false here.
+   */
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
+
   @Override
   public void shutdown() {
     metadata.shutdown();

@@ -30,14 +30,26 @@ DEFINE_FLAG(
     0.01,  // 1% of CPU time
     "maximum cost in percentage of CPU consumption of condition evaluation");
 
-// This constant defines the fill rate for the leaky bucket. The capacity is
-// computed as "FLAGS_max_dynamic_log_rate * kDynamicLogCapacityFactor".
+// This constant defines the fill rate for the leaky bucket for logs per second
+// limit. The capacity is computed as
+//   "FLAGS_max_dynamic_log_rate * kDynamicLogCapacityFactor".
 DEFINE_FLAG(
     double,
     max_dynamic_log_rate,
     50,  // maximum of 50 log entries per second on average
     "maximum rate of dynamic log entries in this process; short bursts are "
     "allowed to exceed this limit");
+
+// This constant defines the fill rate for the leaky bucket for log bytes per
+// second. The capacity is computed as
+//   "FLAGS_max_dynamic_log_rate_bytes * kDynamicLogBytesCapacityFactor".
+DEFINE_FLAG(
+    double,
+    max_dynamic_log_bytes_rate,
+    20480,  // maximum of 20K bytes per second on average
+    "maximum rate of dynamic log bytes in this process; short bursts are "
+    "allowed to exceed this limit");
+
 
 namespace devtools {
 namespace cdbg {
@@ -64,6 +76,7 @@ namespace cdbg {
 
 constexpr double kConditionCostCapacityFactor = 0.1;
 constexpr double kDynamicLogCapacityFactor = 5;  // allow short bursts.
+constexpr double kDynamicLogBytesCapacityFactor = 2;  // allow very short burst.
 
 
 void MovingAverage::Add(int64 value) {
@@ -138,6 +151,9 @@ static int64 GetBaseFillRate(CostLimitType type) {
 
     case CostLimitType::DynamicLog:
       return base::GetFlag(FLAGS_max_dynamic_log_rate);
+
+    case CostLimitType::DynamicLogBytes:
+      return base::GetFlag(FLAGS_max_dynamic_log_bytes_rate);
   }
 
   return 0;
@@ -151,6 +167,9 @@ static int64 GetBaseCapacity(CostLimitType type) {
 
     case CostLimitType::DynamicLog:
       return GetBaseFillRate(type) * kDynamicLogCapacityFactor;
+
+    case CostLimitType::DynamicLogBytes:
+      return GetBaseFillRate(type) * kDynamicLogBytesCapacityFactor;
   }
 
   return 0;
@@ -159,7 +178,8 @@ static int64 GetBaseCapacity(CostLimitType type) {
 
 std::unique_ptr<LeakyBucket> CreateGlobalCostLimiter(CostLimitType type) {
   // Logs are I/O bound, not CPU bound.
-  int cpu_factor = ((type == CostLimitType::DynamicLog) ? 1 : GetCpuCount());
+  int cpu_factor =
+      ((type == CostLimitType::BreakpointCondition) ? GetCpuCount() : 1);
 
   int64 capacity = GetBaseCapacity(type) * cpu_factor;
   int64 fill_rate = GetBaseFillRate(type) * cpu_factor;

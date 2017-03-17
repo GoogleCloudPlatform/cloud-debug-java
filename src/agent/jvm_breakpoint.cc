@@ -196,7 +196,10 @@ JvmBreakpoint::JvmBreakpoint(
 
   if (definition_->action == BreakpointModel::Action::LOG) {
     breakpoint_dynamic_log_limiter_ =
-      CreatePerBreakpointCostLimiter(CostLimitType::DynamicLog);
+        CreatePerBreakpointCostLimiter(CostLimitType::DynamicLog);
+
+    breakpoint_dynamic_log_bytes_limiter_ =
+        CreatePerBreakpointCostLimiter(CostLimitType::DynamicLogBytes);
   }
 }
 
@@ -401,10 +404,6 @@ void JvmBreakpoint::DoLogAction(
     return;
   }
 
-  if (!ApplyDynamicLogsQuota(*rsl)) {
-    return;
-  }
-
   std::unique_ptr<MethodCaller> method_caller =
       evaluators_->method_caller_factory(Config::DYNAMIC_LOG);
 
@@ -416,10 +415,13 @@ void JvmBreakpoint::DoLogAction(
       state->watches(),
       thread);
 
-  dynamic_logger_->Log(
-      definition_->log_level,
-      *rsl,
-      string(kLogpointPrefix) + collector.Format(*definition_));
+  string log_message = string(kLogpointPrefix) + collector.Format(*definition_);
+
+  if (!ApplyDynamicLogsQuota(*rsl, log_message.length())) {
+    return;
+  }
+
+  dynamic_logger_->Log(definition_->log_level, *rsl, log_message);
 }
 
 
@@ -515,9 +517,14 @@ void JvmBreakpoint::ApplyConditionQuota() {
 
 
 bool JvmBreakpoint::ApplyDynamicLogsQuota(
-    const ResolvedSourceLocation& source_location) {
+    const ResolvedSourceLocation& source_location,
+    int log_message_bytes) {
+  // TODO(emrekultursay): Move these get calls after the next block.
   LeakyBucket* global_dynamic_log_limiter =
       breakpoints_manager_->GetGlobalDynamicLogLimiter();
+
+  LeakyBucket* global_dynamic_log_bytes_limiter =
+      breakpoints_manager_->GetGlobalDynamicLogBytesLimiter();
 
   {
     MutexLock lock(&dynamic_log_pause_.mu);
@@ -530,7 +537,9 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
   }
 
   if (breakpoint_dynamic_log_limiter_->RequestTokens(1) &&
-      global_dynamic_log_limiter->RequestTokens(1)) {
+      breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_message_bytes) &&
+      global_dynamic_log_limiter->RequestTokens(1) &&
+      global_dynamic_log_bytes_limiter->RequestTokens(log_message_bytes)) {
     MutexLock lock(&dynamic_log_pause_.mu);
     dynamic_log_pause_.is_skipping = false;
     return true;

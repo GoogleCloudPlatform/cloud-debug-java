@@ -174,7 +174,9 @@ class JvmBreakpoint : public Breakpoint,
   // already produced too many logs. In such cases the caller should abandon
   // the log entry. Once the quota replenishes, future hits on this breakpoint
   // will be able to proceed.
-  bool ApplyDynamicLogsQuota(const ResolvedSourceLocation& source_location);
+  bool ApplyDynamicLogsQuota(
+      const ResolvedSourceLocation& source_location,
+      int log_message_bytes);
 
   // Captures the application state for data capturing breakpoints on
   // breakpoint hit.
@@ -240,6 +242,10 @@ class JvmBreakpoint : public Breakpoint,
   // Per breakpoint limit of dynamic logs. Only initialized for dynamic log
   // breakpoints.
   std::unique_ptr<LeakyBucket> breakpoint_dynamic_log_limiter_;
+
+  // Per breakpoint limit of dynamic log bytes. Only initialized for dynamic log
+  // breakpoints.
+  std::unique_ptr<LeakyBucket> breakpoint_dynamic_log_bytes_limiter_;
 
   // Manages the pause in logger when quota is exceeded.
   struct {

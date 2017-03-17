@@ -42,7 +42,9 @@ JvmBreakpointsManager::JvmBreakpointsManager(
       global_condition_cost_limiter_(
           CreateGlobalCostLimiter(CostLimitType::BreakpointCondition)),
       global_dynamic_log_limiter_(
-          CreateGlobalCostLimiter(CostLimitType::DynamicLog)) {
+          CreateGlobalCostLimiter(CostLimitType::DynamicLog)),
+      global_dynamic_log_bytes_limiter_(
+          CreateGlobalCostLimiter(CostLimitType::DynamicLogBytes)) {
   on_class_prepared_cookie_ =
       evaluators_->class_indexer->SubscribeOnClassPreparedEvents(
           std::bind(

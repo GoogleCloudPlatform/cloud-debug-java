@@ -98,6 +98,11 @@ class BreakpointsManager {
   // breakpoints. The purpose of this counter is to prevent many breakpoints
   // from logging too much (while each logging breakpoint logs within limits).
   virtual LeakyBucket* GetGlobalDynamicLogLimiter() = 0;
+
+  // Gets the counter for total dynamic log bytes spawn by all logging
+  // breakpoints. The purpose of this counter is to prevent many breakpoints
+  // from logging too much (while each logging breakpoint logs within limits).
+  virtual LeakyBucket* GetGlobalDynamicLogBytesLimiter() = 0;
 };
 
 }  // namespace cdbg

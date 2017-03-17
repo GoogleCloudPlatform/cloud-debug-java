@@ -85,6 +85,10 @@ class JvmBreakpointsManager : public BreakpointsManager {
     return global_dynamic_log_limiter_.get();
   }
 
+  LeakyBucket* GetGlobalDynamicLogBytesLimiter() override {
+    return global_dynamic_log_bytes_limiter_.get();
+  }
+
  private:
   // Copies current list of active breakpoints (under "mu_data_" lock) into
   // a temporary list. The motivation to copy is to avoid lock while iterating
@@ -149,6 +153,9 @@ class JvmBreakpointsManager : public BreakpointsManager {
 
   // Global limit on total number of dynamic logs.
   const std::unique_ptr<LeakyBucket> global_dynamic_log_limiter_;
+
+  // Global limit on total number of dynamic log bytes.
+  const std::unique_ptr<LeakyBucket> global_dynamic_log_bytes_limiter_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmBreakpointsManager);
 };

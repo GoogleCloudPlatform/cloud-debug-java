@@ -57,7 +57,8 @@ class LeakyBucket;
 // Types of cost limits we have in the debuglet.
 enum class CostLimitType {
   BreakpointCondition,
-  DynamicLog
+  DynamicLog,
+  DynamicLogBytes,
 };
 
 // Creates instance of "LeakyBucket" to enforce global cost.

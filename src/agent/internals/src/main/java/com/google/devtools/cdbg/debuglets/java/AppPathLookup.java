@@ -13,16 +13,16 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Lookup class for finding file in application directories.
+ * Lookup class for finding files in application directories.
  *
  * <p>This class performs an additional search for resources in the case where the normal
- * ClassPathLookup has failed to find any. It looks in all of the directories containing jar files;
- * and also in any directory which is a parent of a directory containing a jar file, and which
- * contains an app.yaml file.
+ * ClassPathLookup has failed to find any. It looks in all of the directories containing jar files
+ * in the classpath, and also in any directory which is a parent of a directory containing a jar
+ * file, and which contains a source-context.json file.
  *
  * <p>For example, if the class path includes the element /a/b/c/foo.jar, and there exists a file
- * named /a/b/app.yaml, it would search /a/b for source context because /a/b is a parent directory
- * of /a/b/c which contains an app.yaml file.
+ * named /a/b/source-context.json, it would search /a/b for resources because /a/b is a parent
+ * directory of /a/b/c which contains a source-context.json file.
  *
  * <p>This logic is separate from ClassPathLookup because we only want to search for source contexts
  * in these additional locations (we don't want to search for all classes in these locations).
@@ -30,55 +30,59 @@ import java.util.Set;
 public class AppPathLookup {
   private static final String JAVA_CLASS_PATH = "java.class.path";
   private static final String JAR_EXTENSION = ".jar";
-  private static final String APP_YAML_NAME = "app.yaml";
+  private static final String SOURCE_CONTEXT_NAME = "source-context.json";
 
   /** The list of directories to search. */
   private final String[] appDirs;
 
   public AppPathLookup() {
-    Set<Path> seenDirs = new LinkedHashSet<>();
-    ArrayList<String> allDirs = new ArrayList<>();
-    ArrayList<String> appYamlDirs = new ArrayList<>();
+    this(System.getProperty(JAVA_CLASS_PATH));
+  }
 
-    String jvmClassPath = System.getProperty(JAVA_CLASS_PATH);
+  public AppPathLookup(String jvmClassPath) {
+    Set<Path> jarDirs = new LinkedHashSet<>();
+    ArrayList<String> allDirNames = new ArrayList<>();
+
     for (String pathElement : jvmClassPath.split(File.pathSeparator)) {
       if (!pathElement.endsWith(JAR_EXTENSION)) {
         // Not a jar file.
         continue;
       }
 
-      Path dirPath = FileSystems.getDefault().getPath(pathElement).getParent();
-      if (dirPath == null) {
-        // No parent directory, skip.
+      Path jarDir = FileSystems.getDefault().getPath(pathElement).toAbsolutePath().getParent();
+      if (jarDir == null) {
+        // No containing directory, skip.
         continue;
       }
 
-      if (seenDirs.contains(dirPath)) {
+      if (jarDirs.contains(jarDir)) {
         // Already handled.
         continue;
       }
 
-      seenDirs.add(dirPath);
-      allDirs.add(dirPath.toString());
-
-      // Find the parent app.yaml directory, if any.
-      while (dirPath != null && !new File(dirPath.toString(), APP_YAML_NAME).exists()) {
-        dirPath = dirPath.getParent();
-      }
-
-      if (dirPath != null && !seenDirs.contains(dirPath)) {
-        seenDirs.add(dirPath);
-        appYamlDirs.add(dirPath.toString());
-      }
+      // Add the containing directory
+      jarDirs.add(jarDir);
+      allDirNames.add(jarDir.toString());
     }
 
-    // Put the app.yaml directories after the jar directories, so that files in the jar directory
-    // will be returned before files in the app yaml directories. Source context files get created
-    // in the app.yaml directory during deployment. A file next to a jar file was likely generated
-    // earlier in the build, and is therefore likely to be more accurate.
-    allDirs.addAll(appYamlDirs);
+    // Add the source-context.json directories after the classpath directories.
+    for (Path jarDir : jarDirs) {
 
-    appDirs = allDirs.toArray(new String[0]);
+      Path parentDir = jarDir.getParent();
+      // Find the nearest parent directory containing a source-context.json, if any.
+      while (parentDir != null && !new File(parentDir.toString(), SOURCE_CONTEXT_NAME).exists()) {
+        parentDir = parentDir.getParent();
+      }
+
+      if (parentDir != null && !jarDirs.contains(parentDir)) {
+        // There was a directory containing a source-context.json, and we haven't seen it directly
+        // yet.
+        allDirNames.add(parentDir.toString());
+      }
+
+    }
+
+    appDirs = allDirNames.toArray(new String[0]);
   }
 
   /*
@@ -86,8 +90,9 @@ public class AppPathLookup {
    * UTF-8 encoded string and returns the string. If no matches are found, returns an empty array.
    *
    * <p>Application resource files are retrieved the directories containing .jar files or their
-   * nearest parent directory containing an app.yaml file. The app.yaml directory is searched
-   * because gcloud app deploy will place source context files in the app.yaml directory
+   * nearest parent directory containing a source-context.json file. The source-context.json
+   * directory is searched because gcloud app deploy will place source context files in the
+   * deployment root directory.
    *
    * <p>A resource with the same name may appear in multiple directories. While it is not too
    * interesting for .class resource files, this is an important scenario for source context

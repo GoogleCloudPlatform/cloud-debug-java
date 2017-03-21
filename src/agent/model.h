@@ -62,6 +62,20 @@ struct StatusMessageModel {
            (refers_to == other.refers_to) &&
            (description == other.description);
   }
+
+  string ContextToString() const {
+    switch (refers_to) {
+      case Context::UNSPECIFIED : return "UNSPECIFIED";
+      case Context::BREAKPOINT_SOURCE_LOCATION :
+        return "BREAKPOINT_SOURCE_LOCATION";
+      case Context::BREAKPOINT_CONDITION : return "BREAKPOINT_CONDITION";
+      case Context::BREAKPOINT_EXPRESSION : return "BREAKPOINT_EXPRESSION";
+      case Context::BREAKPOINT_AGE : return "BREAKPOINT_AGE";
+      case Context::VARIABLE_NAME : return "VARIABLE_NAME";
+      case Context::VARIABLE_VALUE : return "VARIABLE_VALUE";
+      default : return "UNKNOWN";
+    }
+  }
 };
 
 struct SourceLocationModel {
@@ -96,6 +110,14 @@ struct BreakpointModel {
     WARNING = 1,
     ERROR = 2
   };
+
+  string ActionToString() const {
+    switch (action) {
+      case Action::CAPTURE : return "CAPTURE";
+      case Action::LOG : return "LOG";
+      default : return "UNKNOWN";
+    }
+  }
 
   string id;
   bool is_canary = false;

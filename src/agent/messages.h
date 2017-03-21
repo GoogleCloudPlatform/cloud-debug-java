@@ -174,13 +174,13 @@ constexpr char LogpointExpired[] =
     "The logpoint has expired";
 
 constexpr char ConditionEvaluationCostExceededPerBreakpointLimit[] =
-    "Snapshot cancelled. The condition evaluation at this location might "
+    "Cancelled. The condition evaluation at this location might "
     "affect application performance. Please simplify the condition or move the "
-    "snapshot to a less frequently called statement.";
+    "location to a less frequently called statement.";
 
 constexpr char ConditionEvaluationCostExceededGlobalLimit[] =
-    "Snapshot cancelled. The condition evaluation cost for all active "
-    "snapshots might affect the application performance.";
+    "Cancelled. The condition evaluation cost for all active "
+    "snapshots and logpoints might affect the application performance.";
 
 constexpr char LocalCollectionNotAllItemsCaptured[] =
     "Only first $0 items were captured. "

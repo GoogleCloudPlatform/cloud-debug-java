@@ -220,16 +220,6 @@ bool JniBridge::ApproveBreakpointCanary(const string& breakpoint_id) {
 }
 
 
-bool JniBridge::IsEnabled() {
-  auto rc = jniproxy::HubClient()->isEnabled(jni_hub_.get());
-  if (rc.HasException()) {
-    return false;
-  }
-
-  return rc.GetData();
-}
-
-
 void JniBridge::Shutdown() {
   MutexLock lock(&mu_);
 

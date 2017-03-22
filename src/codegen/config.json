@@ -273,9 +273,6 @@
         },
         {
           "methodName": "shutdown"
-        },
-        {
-          "methodName": "isEnabled"
         }
       ],
       "nativeNamespace": "jniproxy"

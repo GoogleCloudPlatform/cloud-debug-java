@@ -30,9 +30,6 @@
 namespace devtools {
 namespace cdbg {
 
-// Maximum number of supported arguments for a method call.
-constexpr int MaxMethodCallArguments = 10;
-
 MethodCallEvaluator::MethodCallEvaluator(
     string method_name,
     std::unique_ptr<ExpressionEvaluator> instance_source,

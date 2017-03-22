@@ -32,7 +32,7 @@
 namespace devtools {
 namespace cdbg {
 
-class JvmEvaluators;
+struct JvmEvaluators;
 class FormatQueue;
 
 // Manages list of active breakpoints and processes breakpoint hit events.

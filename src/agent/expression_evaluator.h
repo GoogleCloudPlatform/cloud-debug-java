@@ -27,7 +27,7 @@ namespace devtools {
 namespace cdbg {
 
 class ReadersFactory;
-class FormatMessageModel;
+struct FormatMessageModel;
 struct EvaluationContext;
 
 // Interface representing compiled expression or subexpression.

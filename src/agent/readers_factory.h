@@ -31,7 +31,7 @@ class ClassIndexer;
 class LocalVariableReader;
 class InstanceFieldReader;
 class StaticFieldReader;
-class FormatMessageModel;
+struct FormatMessageModel;
 
 // Exposes JVM to expression evaluation through set of mockable interfaces.
 //

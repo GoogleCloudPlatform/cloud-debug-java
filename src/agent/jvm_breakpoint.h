@@ -36,8 +36,8 @@ class BreakpointsManager;
 class CaptureDataCollector;
 class DynamicLogger;
 class FormatQueue;
-class JvmEvaluators;
-class ResolvedSourceLocation;
+struct JvmEvaluators;
+struct ResolvedSourceLocation;
 
 // Immutable state of a compiled breakpoint.
 //

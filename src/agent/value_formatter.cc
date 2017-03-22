@@ -49,7 +49,8 @@ static void ScrubEmbeddedZeroCharacters(string* data_ptr) {
   std::vector<int> zeros;
   for (int i = 0; i + 1 < data.size(); ++i) {
     // Check if the next two characters represent an embedded zero.
-    if (data[i] == 0xC0 && data[i + 1] == 0x80) {
+    if (static_cast<uint8>(data[i]) == 0xC0 &&
+        static_cast<uint8>(data[i + 1]) == 0x80) {
       zeros.push_back(i);
       ++i;  // Skip the next byte (0x80).
       continue;

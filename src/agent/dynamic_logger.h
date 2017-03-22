@@ -23,7 +23,7 @@
 namespace devtools {
 namespace cdbg {
 
-class ResolvedSourceLocation;
+struct ResolvedSourceLocation;
 
 // Writes dynamic log entries to application log.
 class DynamicLogger {

@@ -25,7 +25,7 @@ namespace devtools {
 namespace cdbg {
 
 class JVariant;
-class FormatMessageModel;
+struct FormatMessageModel;
 
 // Reads array element.
 class ArrayReader {

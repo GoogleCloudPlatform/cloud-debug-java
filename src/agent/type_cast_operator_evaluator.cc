@@ -28,8 +28,6 @@
 namespace devtools {
 namespace cdbg {
 
-static constexpr int KMaxPathLength = 4096;
-
 TypeCastOperatorEvaluator::TypeCastOperatorEvaluator(
     std::unique_ptr<ExpressionEvaluator> source,
     const string& target_type)

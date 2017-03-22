@@ -26,7 +26,7 @@ namespace devtools {
 namespace cdbg {
 
 class ExpressionEvaluator;
-class FormatMessageModel;
+struct FormatMessageModel;
 
 // Interface representing a node in parsed expression tree.
 class JavaExpression {

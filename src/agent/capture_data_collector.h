@@ -42,7 +42,7 @@ constexpr int kMethodLocalsFrames = 5;
 // limit the time we pause the service on a breakpoint event.
 constexpr int kBreakpointMaxCaptureSize = 65536;
 
-class CompiledExpression;
+struct CompiledExpression;
 class ExpressionEvaluator;
 class MethodLocals;
 class ObjectEvaluator;

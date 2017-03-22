@@ -25,7 +25,7 @@
 namespace devtools {
 namespace cdbg {
 
-class BreakpointModel;
+struct BreakpointModel;
 class Breakpoint;
 
 // Manages list of active breakpoints and processes breakpoint hit events.

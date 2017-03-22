@@ -122,6 +122,11 @@ static int GetCpuCount() {
   static int cpu_count_cache = -1;
 
   if (cpu_count_cache == -1) {
+#ifdef __APPLE__
+    // OS X does not export interfaces for thread placement, so there's no need
+    // to check affinity.
+    int cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
+#else
     cpu_set_t cpus_allowed_mask;
     memset(&cpus_allowed_mask, 0, sizeof(cpus_allowed_mask));
 
@@ -133,6 +138,7 @@ static int GetCpuCount() {
         ++cpu_count;
       }
     }
+#endif
 
     LOG(INFO) << "CPU count: " << cpu_count;
 

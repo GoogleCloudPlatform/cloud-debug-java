@@ -1,6 +1,12 @@
-# Disable this warning for ANTLR source code. Bring this warning back
-# once ANTLR runtime is compiled separately.
+# Operating Systems: Linux or Darwin
+# Darwin build is not officially supported, it is maintained at best effort.
+# This Makefile assumes Linux build uses GCC and Darwin build uses clang.
+OS = $(shell uname)
+
+ifneq ($(OS),Darwin)
+# Pass this flag only when building with gcc (does not exist on clang).
 ANTLR_DISABLED_WARNINGS = -Wno-unused-but-set-variable
+endif
 
 # Ignore warning produced by glog
 GLOG_DISABLED_WARNINGS = -Wno-strict-aliasing
@@ -38,7 +44,11 @@ BUILD_TARGET_PATH ?= .
 
 OPT_FLAGS = -O3 -D NDEBUG
 LDFLAGS += -shared
+
+ifneq ($(OS),Darwin)
+# Pass these linker flags only when building with gcc (i.e., not with clang).
 LDS_FLAGS = -Wl,-z,defs -Wl,--version-script=cdbg_java_agent.lds
+endif
 
 ROOT=../../
 THIRD_PARTY_PATH = ../../third_party
@@ -55,6 +65,17 @@ INCLUDES = \
 	-I. \
 	-I../codegen \
 	-Iantlrgen \
+
+ifeq ($(OS),Darwin)
+JDK ?= $(shell /usr/libexec/java_home)
+INCLUDES += \
+	-I$(JDK)/include \
+	-I$(JDK)/include/darwin
+else
+JDK ?= /usr/lib/jvm/java-7-openjdk-amd64
+INCLUDES += \
+	-I$(JDK)/include
+endif
 
 TARGET_AGENT = cdbg_java_agent.so
 INTERNALS_CLASS_LOADER = cdbg_java_agent_internals_loader.class
@@ -144,11 +165,16 @@ HEADERS := \
 
 LIBS= \
 	-ldl \
-	-lrt \
-	-pthread \
 	$(THIRD_PARTY_LIB_PATH)/libjsoncpp.a \
 	$(THIRD_PARTY_LIB_PATH)/libgflags.a \
 	$(THIRD_PARTY_LIB_PATH)/libglog.a \
+
+ifndef ($(OS),Darwin)
+# Pass these flags only when building with gcc (i.e., not clang).
+LIBS += \
+	-pthread \
+	-lrt
+endif
 
 GOOGLE_API_CLIENT_JARS = \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/commons-logging-1.1.1.jar \

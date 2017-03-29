@@ -169,7 +169,7 @@ LIBS= \
 	$(THIRD_PARTY_LIB_PATH)/libgflags.a \
 	$(THIRD_PARTY_LIB_PATH)/libglog.a \
 
-ifndef ($(OS),Darwin)
+ifneq ($(OS),Darwin)
 # Pass these flags only when building with gcc (i.e., not clang).
 LIBS += \
 	-pthread \

@@ -17,7 +17,13 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_BYTE_SOURCE_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_BYTE_SOURCE_H_
 
+
+#ifdef __APPLE__
+#include <libkern/OSByteOrder.h>
+#else
 #include <endian.h>
+#endif
+
 #include "common.h"
 
 namespace devtools {
@@ -86,25 +92,45 @@ class ByteSource {
   // Reads signed 16 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
   int16 ReadInt16BE(int offset) {
-    return be16toh(ReadRaw<int16>(offset));
+    int16 raw_data = ReadRaw<int16>(offset);
+#ifdef __APPLE__
+    return OSSwapBigToHostInt16(raw_data);
+#else
+    return be16toh(raw_data);
+#endif
   }
 
   // Reads unsigned 16 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
   uint16 ReadUInt16BE(int offset) {
-    return be16toh(ReadRaw<uint16>(offset));
+    uint16 raw_data = ReadRaw<uint16>(offset);
+#ifdef __APPLE__
+    return OSSwapBigToHostInt16(raw_data);
+#else
+    return be16toh(raw_data);
+#endif
   }
 
   // Reads signed 32 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
   int32 ReadInt32BE(int offset) {
-    return be32toh(ReadRaw<int32>(offset));
+    int32 raw_data = ReadRaw<int32>(offset);
+#ifdef __APPLE__
+    return OSSwapBigToHostInt32(raw_data);
+#else
+    return be32toh(raw_data);
+#endif
   }
 
   // Reads signed 64 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
   int64 ReadInt64BE(int offset) {
-    return be64toh(ReadRaw<int64>(offset));
+    int64 raw_data = ReadRaw<int64>(offset);
+#ifdef __APPLE__
+    return OSSwapBigToHostInt64(raw_data);
+#else
+    return be64toh(raw_data);
+#endif
   }
 
  private:

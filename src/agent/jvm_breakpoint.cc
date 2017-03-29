@@ -33,7 +33,6 @@
 #include "resolved_source_location.h"
 #include "statistician.h"
 
-
 DEFINE_FLAG(
     int32,
     breakpoint_expiration_sec,
@@ -785,8 +784,7 @@ void JvmBreakpoint::CompleteBreakpoint(
     BreakpointBuilder* builder,
     std::unique_ptr<CaptureDataCollector> collector) {
   builder->set_is_final_state(true);
-  std::unique_ptr<BreakpointModel> model = builder->build();
-  format_queue_->Enqueue(std::move(model), std::move(collector));
+  format_queue_->Enqueue(builder->build(), std::move(collector));
 
   breakpoints_manager_->CompleteBreakpoint(id());
 

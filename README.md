@@ -165,7 +165,7 @@ created in [Google Developers Console](https://console.developers.google.com).
 If your application runs on Google Compute Engine,
 [metadata service authentication](#setup) is an easier option.
 
-The first step for this setup is to create the service account in .p12 format.
+The first step for this setup is to create the service account in JSON format.
 Please see
 [OAuth](https://cloud.google.com/storage/docs/authentication?hl=en#generating-a-private-key)
 page for detailed instructions. If you don't have a Google Cloud Platform
@@ -174,7 +174,7 @@ project, you can create one for free on
 
 Once you have the service account, please note the service account e-mail,
 [project ID and project number](https://developers.google.com/console/help/new/#projectnumber).
-Then copy the .p12 file to all the machines that run your application.
+Then copy the .json file to all the machines that run your application.
 
 You will need to install the debugger agent that supports the service account.
 The URL is: https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz.
@@ -188,5 +188,8 @@ launcher command (same way as with `-agentpath`):
 -Dcom.google.cdbg.auth.serviceaccount.projectid=<i>myprojectid</i>
 -Dcom.google.cdbg.auth.serviceaccount.projectnumber=<i>123456789</i>
 -Dcom.google.cdbg.auth.serviceaccount.email=<i>email@something.com</i>
--Dcom.google.cdbg.auth.serviceaccount.p12file=<i>/opt/cdbg/svc.p12</i>
+-Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/svc.json</i>
 </pre>
+
+You can set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+to the JSON file instead of setting the `auth.serviceaccount.jsonfile` argument.

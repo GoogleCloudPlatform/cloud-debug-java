@@ -103,7 +103,7 @@ final class GcpEnvironment {
               "Project ID not specified for service account authentication. Please set "
               + "either auth.serviceaccount.projectid system property or project_id agent option");
         }
-        
+
         String projectNumber = getFlag("auth.serviceaccount.projectnumber", "project_number");
         if (projectNumber.isEmpty()) {
           throw new RuntimeException(
@@ -111,7 +111,7 @@ final class GcpEnvironment {
               + "either auth.serviceaccount.projectnumber system property or "
               + "project_number agent option");
         }
-        
+
         String email = getFlag("auth.serviceaccount.email", "service_account_email");
         if (email.isEmpty()) {
           throw new RuntimeException(
@@ -119,15 +119,21 @@ final class GcpEnvironment {
               + "either auth.serviceaccount.email system property or "
               + "service_account_email agent option");
         }
-        
+
         String p12File = getFlag("auth.serviceaccount.p12file", "service_account_p12_file");
-        if (p12File.isEmpty()) {
-          throw new RuntimeException(
-              "Private key file not specified for service account authentication. Please set "
-              + "either auth.serviceaccount.p12file system property or "
-              + "service_account_p12_file agent option");
+        String jsonFile = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
+        if (jsonFile == null) {
+          jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
         }
-        
+
+        if (p12File.isEmpty() && jsonFile.isEmpty()) {
+          throw new RuntimeException(
+              "Service account JSON file not specified for service account authentication. "
+              + "Please set auth.serviceaccount.jsonfile system property, "
+              + "service_account_json_file agent option, or the "
+              + "GOOGLE_APPLICATION_CREDENTIALS environment variable");
+        }
+
         try {
           // Use reflection to create a new instance of "ServiceAccountAuth" class. This way this
           // class has no explicit dependency on "com.google.api.client" package that can be
@@ -137,14 +143,14 @@ final class GcpEnvironment {
               true,
               GcpEnvironment.class.getClassLoader()).asSubclass(MetadataQuery.class);
           Constructor<? extends MetadataQuery> constructor = serviceAccountAuthClass.getConstructor(
-              String.class, String.class, String.class, String.class);
+              String.class, String.class, String.class, String.class, String.class);
           metadataQuery = constructor.newInstance(
-              new Object[] { projectId, projectNumber, email, p12File });
+              new Object[] { projectId, projectNumber, email, p12File, jsonFile });
         } catch (ReflectiveOperationException e) {
           // The constructor of ServiceAccountAuth doesn't do any IO. It can fail if something
           // in the environment is broken (for example no trusted root certificates). If such
           // a problem happens, there is no point retrying.
-          throw new RuntimeException("Failed to initialize service account authentication", e); 
+          throw new RuntimeException("Failed to initialize service account authentication", e);
         }
       } else {
         try {
@@ -154,10 +160,10 @@ final class GcpEnvironment {
         }
       }
     }
-    
+
     return metadataQuery;
   }
-  
+
   /**
    * Gets map of debuggee labels.
    * 

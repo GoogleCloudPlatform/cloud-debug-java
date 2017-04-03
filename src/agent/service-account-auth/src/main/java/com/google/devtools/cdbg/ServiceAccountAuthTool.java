@@ -17,17 +17,28 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 /**
- * Command line utility to print OAuth access token exchanged for service account private key.
+ * Command line utility to print OAuth access token exchanged for service account p12 private key.
  *
- * <p>Syntax: ServiceAccountAuthTool <email> <p12file>
+ * <p>Syntax: ServiceAccountAuthTool <email> <file>
  */
 public final class ServiceAccountAuthTool {
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Require 2 arguments");
     }
 
-    ServiceAccountAuth auth = new ServiceAccountAuth("", "", args[0], args[1]);
+    String p12File = "";
+    String jsonFile = "";
+
+    if (args[1].endsWith(".p12")) {
+      p12File = args[1];
+    } else if (args[1].endsWith(".json")) {
+      jsonFile = args[1];
+    } else {
+      throw new IllegalArgumentException("Unsupported file extension: " + args[1]);
+    }
+
+    ServiceAccountAuth auth = new ServiceAccountAuth("", "", args[0], p12File, jsonFile);
     System.out.println(auth.getAccessToken());
   }
 }

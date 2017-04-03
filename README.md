@@ -173,7 +173,7 @@ project, you can create one for free on
 [Google Developers Console](https://console.developers.google.com).
 
 Once you have the service account, please note the service account e-mail,
-[project ID and project number](https://developers.google.com/console/help/new/#projectnumber).
+[project ID]((https://support.google.com/cloud/answer/6158840).
 Then copy the .json file to all the machines that run your application.
 
 You will need to install the debugger agent that supports the service account.
@@ -186,7 +186,6 @@ launcher command (same way as with `-agentpath`):
 <pre>
 -Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
 -Dcom.google.cdbg.auth.serviceaccount.projectid=<i>myprojectid</i>
--Dcom.google.cdbg.auth.serviceaccount.projectnumber=<i>123456789</i>
 -Dcom.google.cdbg.auth.serviceaccount.email=<i>email@something.com</i>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/svc.json</i>
 </pre>

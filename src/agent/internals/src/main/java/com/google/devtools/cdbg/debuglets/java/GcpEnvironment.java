@@ -104,14 +104,6 @@ final class GcpEnvironment {
               + "either auth.serviceaccount.projectid system property or project_id agent option");
         }
 
-        String projectNumber = getFlag("auth.serviceaccount.projectnumber", "project_number");
-        if (projectNumber.isEmpty()) {
-          throw new RuntimeException(
-              "Project number not specified for service account authentication. Please set "
-              + "either auth.serviceaccount.projectnumber system property or "
-              + "project_number agent option");
-        }
-
         String email = getFlag("auth.serviceaccount.email", "service_account_email");
         if (email.isEmpty()) {
           throw new RuntimeException(
@@ -144,8 +136,10 @@ final class GcpEnvironment {
               GcpEnvironment.class.getClassLoader()).asSubclass(MetadataQuery.class);
           Constructor<? extends MetadataQuery> constructor = serviceAccountAuthClass.getConstructor(
               String.class, String.class, String.class, String.class, String.class);
+          // Note that we are passing projectId instead of projectNumber here, as the Cloud Debugger
+          // service is able to translate projectId into projectNumber.
           metadataQuery = constructor.newInstance(
-              new Object[] { projectId, projectNumber, email, p12File, jsonFile });
+              new Object[] { projectId, projectId, email, p12File, jsonFile });
         } catch (ReflectiveOperationException e) {
           // The constructor of ServiceAccountAuth doesn't do any IO. It can fail if something
           // in the environment is broken (for example no trusted root certificates). If such

@@ -69,7 +69,7 @@ DEFINE_FLAG(
     string,
     project_number,
     "",
-    "Explicitly set GCP project number used when service account "
+    "(Deprecated) Explicitly set GCP project number used when service account "
     "authentication is enabled");
 
 DEFINE_FLAG(

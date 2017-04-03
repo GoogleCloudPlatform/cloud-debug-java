@@ -95,9 +95,9 @@ Google Compute Engine or on a virtual machine that does not allow API access to
 all Google Cloud services. This would require setting up a
 [service account](#service-account).
 
-### Web Servers
+### Application Servers
 
-Java web servers usually start through a bootstrap process, and each web server
+Java application servers usually start through a bootstrap process, and each web server
 has its own way of customizing Java options.
 
 #### Tomcat
@@ -121,6 +121,26 @@ Add `cdbg.ini` file to `/var/lib/jetty/start.d`:
 ```ini
 --exec
 -agentpath:/opt/cdbg/cdbg_java_agent.so
+```
+
+### Configuring Extra Classpath
+The agent needs to be able to find your application classes when it's running in an application server
+like Tomcat or Jetty. By default, the agent looks for the exploded ROOT war directory. I.e., if you
+deployed a ROOT.war in Tomcat, the agent can find it without additional configuration.
+
+However, if you deployed your WAR file with a different name (e.g., `myapp.war`), or that the exploded
+WAR directory is not under the default exploded ROOT WAR directory (e.g., `/opt/tomcat/webapps/myapp`),
+then you must let the agent know the full path to your application's classes using the `cdbg_extra_class_path`
+parameter.
+
+```
+-agentpath:/opt/cdbg/cdbg_java_agent.so=--cdbg_extra_class_path=/opt/tomcat/webapps/myapp/WEB-INF/classes
+```
+
+You can specify multiple paths by using a "`:`" (colon) as the path delimiter.
+
+```
+-agentpath:/opt/cdbg/cdbg_java_agent.so=--cdbg_extra_class_path=/opt/tomcat/webapps/myapp/WEB-INF/classes:/another/path/with/classes
 ```
 
 ### Naming and Versioning

@@ -208,10 +208,9 @@ launcher command (same way as with `-agentpath`):
 
 <pre>
 -Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
--Dcom.google.cdbg.auth.serviceaccount.projectid=<i>myprojectid</i>
--Dcom.google.cdbg.auth.serviceaccount.email=<i>email@something.com</i>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/svc.json</i>
 </pre>
 
-You can set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+You can also set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable
 to the JSON file instead of setting the `auth.serviceaccount.jsonfile` argument.
+

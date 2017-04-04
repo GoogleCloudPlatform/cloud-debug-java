@@ -16,6 +16,8 @@
 
 package com.google.devtools.cdbg.debuglets.java;
 
+import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warn;
+
 import com.google.devtools.clouddebugger.v2.Labels;
 
 import java.lang.reflect.Constructor;
@@ -87,9 +89,9 @@ final class GcpEnvironment {
    */
   static boolean getIsServiceAccountEnabled() {
     String value = getFlag("auth.serviceaccount.enable", "enable_service_account_auth");
-    return value.equals("1") || value.equalsIgnoreCase("true"); 
+    return value.equals("1") || value.equalsIgnoreCase("true");
   }
-  
+
   /**
    * Lazily creates and returns the class to get access token and project information.
    */
@@ -97,33 +99,46 @@ final class GcpEnvironment {
     // Lazy initialization.
     if (metadataQuery == null) {
       if (getIsServiceAccountEnabled()) {
-        String projectId = getFlag("auth.serviceaccount.projectid", "project_id");
-        if (projectId.isEmpty()) {
-          throw new RuntimeException(
-              "Project ID not specified for service account authentication. Please set "
-              + "either auth.serviceaccount.projectid system property or project_id agent option");
-        }
-
-        String email = getFlag("auth.serviceaccount.email", "service_account_email");
-        if (email.isEmpty()) {
-          throw new RuntimeException(
-              "Service account e-mail not specified for service account authentication. Please set "
-              + "either auth.serviceaccount.email system property or "
-              + "service_account_email agent option");
-        }
-
-        String p12File = getFlag("auth.serviceaccount.p12file", "service_account_p12_file");
         String jsonFile = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
         if (jsonFile == null) {
           jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
         }
 
+        // TODO(emrekultursay): Remove support for p12 file.
+        String p12File = getFlag("auth.serviceaccount.p12file", "service_account_p12_file");
         if (p12File.isEmpty() && jsonFile.isEmpty()) {
           throw new RuntimeException(
               "Service account JSON file not specified for service account authentication. "
               + "Please set auth.serviceaccount.jsonfile system property, "
               + "service_account_json_file agent option, or the "
               + "GOOGLE_APPLICATION_CREDENTIALS environment variable");
+        }
+
+        String projectId;
+        String email;
+
+        if (!p12File.isEmpty()) {
+          warn("p12 file based service account authentication is deprecated and will be removed. "
+              + "Please use JSON file based service account authentication.");
+
+          projectId = getFlag("auth.serviceaccount.projectid", "project_id");
+          if (projectId.isEmpty()) {
+            throw new RuntimeException(
+                "Project ID not specified for service account authentication. Please set either"
+                + "auth.serviceaccount.projectid system property or project_id agent option");
+          }
+
+          email = getFlag("auth.serviceaccount.email", "service_account_email");
+          if (email.isEmpty()) {
+            throw new RuntimeException(
+                "Service account e-mail not specified for service account authentication. Please "
+                + "set either auth.serviceaccount.email system property or "
+                + "service_account_email agent option");
+          }
+        } else {
+          // These will be read from the JSON file.
+          projectId = "";
+          email = "";
         }
 
         try {

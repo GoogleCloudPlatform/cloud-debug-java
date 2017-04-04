@@ -18,7 +18,9 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.Key;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,14 +34,26 @@ import java.util.Objects;
  * Exchanges service account private key for OAuth access token.
  */
 final class ServiceAccountAuth implements MetadataQuery {
+
+  /** The JSON Service Account file gets parsed into an object of this type. */
+  public static class ServiceAccountAuthJsonFile {
+    /** The only field we are interested in is project_id, the rest will be ignored. */
+    @Key("project_id")
+    private String projectId = null;
+
+    String getProjectId() {
+      return projectId;
+    }
+  }
+
   /**
    * OAuth scope requested.
    */
   private static final String CLOUD_PLATFORM_SCOPE =
       "https://www.googleapis.com/auth/cloud-platform";
-  
+
   /**
-   * Time to refresh the token before it expires. 
+   * Time to refresh the token before it expires.
    */
   private static final int TOKEN_EXPIRATION_BUFFER_SEC = 60;
 
@@ -47,12 +61,12 @@ final class ServiceAccountAuth implements MetadataQuery {
    * GCP project ID that created the service account.
    */
   private final String projectId;
-  
+
   /**
    * GCP project number corresponding to projectId.
    */
   private final String projectNumber;
-  
+
   /**
    * Runs OAuth flow to obtain the access token.
    */
@@ -79,10 +93,10 @@ final class ServiceAccountAuth implements MetadataQuery {
     Objects.requireNonNull(serviceAccountP12File);
     Objects.requireNonNull(serviceAccountJsonFile);
 
-    this.projectId = projectId;
-    this.projectNumber = projectNumber;
-
     if (!serviceAccountP12File.isEmpty()) {
+      this.projectId = projectId;
+      this.projectNumber = projectNumber;
+
       this.credential = new GoogleCredential.Builder()
           .setTransport(GoogleNetHttpTransport.newTrustedTransport())
           .setJsonFactory(JacksonFactory.getDefaultInstance())
@@ -91,7 +105,10 @@ final class ServiceAccountAuth implements MetadataQuery {
           .setServiceAccountScopes(Collections.singleton(CLOUD_PLATFORM_SCOPE))
           .build();
     } else if (!serviceAccountJsonFile.isEmpty()) {
-      InputStream serviceAccountJsonStream = new FileInputStream(new File(serviceAccountJsonFile));
+      this.projectId = parseServiceAccountAuthJsonFile(serviceAccountJsonFile).getProjectId();
+      this.projectNumber = this.projectId;
+
+      InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
       this.credential = GoogleCredential.fromStream(serviceAccountJsonStream)
           .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
     } else {
@@ -109,10 +126,10 @@ final class ServiceAccountAuth implements MetadataQuery {
   public String getProjectNumber() {
     return projectNumber;
   }
-  
+
   /**
    * Gets the cached OAuth access token refreshing it as needed.
-   * 
+   *
    * <p> Access token refresh is done synchronously delaying the call.
    */
   @Override
@@ -134,5 +151,22 @@ final class ServiceAccountAuth implements MetadataQuery {
   @Override
   public void shutdown() {
     // TODO(vlif): implement if not handled properly by JVM shutdown.
+  }
+
+
+  /** Parses the given JSON auth file.
+   * <p> TODO(emrekultursay): Remove this method when a new version of the google-api-java-client
+   * library is released (newer than v22), and replace it with the new
+   * GoogleCredential.getServiceAccountProjectId() method. */
+  private static ServiceAccountAuthJsonFile parseServiceAccountAuthJsonFile(
+      String serviceAccountJsonFile) throws IOException {
+    JsonParser parser = JacksonFactory.getDefaultInstance().createJsonParser(
+        new FileInputStream(serviceAccountJsonFile));
+    ServiceAccountAuthJsonFile parsedFile = parser.parse(ServiceAccountAuthJsonFile.class);
+    if (parsedFile.getProjectId() == null) {
+      throw new IllegalArgumentException("Service account JSON file is missing project_id field");
+    }
+
+    return parsedFile;
   }
 }

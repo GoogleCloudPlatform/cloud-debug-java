@@ -30,6 +30,7 @@
 #include "jvmti_agent.h"
 
 #ifndef STANDALONE_BUILD
+#include "base/commandlineflags.h"
 #include "base/init_google.h"
 #include "base/process_state.h"
 #endif
@@ -293,8 +294,9 @@ static void InitEnvironment(const char* options) {
 
   // Change default options to never log to stderr (since it may impact the
   // application we are debugging).
-  FLAGS_logtostderr = false;
-  FLAGS_stderrthreshold = 3;  // By default only fatal errors go to stderr.
+  base::SetFlag(&FLAGS_logtostderr, false);
+  base::SetFlag(&FLAGS_stderrthreshold,
+                3);  // By default only fatal errors go to stderr.
   TrySetDefaultLogDirectory();
 
   int argc = argv_vector.size();

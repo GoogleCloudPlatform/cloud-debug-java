@@ -168,35 +168,35 @@ class GcpHubClient implements HubClient {
       return serializedBreakpoints;
     }
   }
-  
+
   /**
-   * Helper class to automatically insert and remove connection from 
+   * Helper class to automatically insert and remove connection from
    * {@link GcpHubClient#activeConnections}.
    */
   private final class ActiveConnection implements AutoCloseable {
     private final HttpURLConnection connection;
-    
+
     public ActiveConnection(HttpURLConnection connection) {
       this.connection = connection;
-      
+
       synchronized (activeConnections) {
         if (isShutdown) {
           // We don't need to call "disconnect" here. "URL.openConnection" doesn't actually
           // establish the connection, so calling "disconnect" will have no effect.
           throw new RuntimeException("Shutdown in progress");
         }
-        
-        activeConnections.add(this.connection);
+
+        activeConnections.add(this);
       }
     }
 
     @Override
     public void close() {
       synchronized (activeConnections) {
-        activeConnections.remove(connection);
+        activeConnections.remove(this);
       }
     }
-    
+
     public HttpURLConnection get() {
       return connection;
     }
@@ -283,12 +283,12 @@ class GcpHubClient implements HubClient {
    * Shutdown flag blocking all outgoing HTTP calls to metadata service.
    */
   private boolean isShutdown = false;
-  
+
   /**
    * List of active HTTP connections to be closed during shutdown.
    */
-  private final List<HttpURLConnection> activeConnections = new ArrayList<>(); 
-  
+  private final List<ActiveConnection> activeConnections = new ArrayList<>();
+
   /**
    * Cache of unique identifier of the application resources. Computing uniquifier is
    * an expensive operation and we don't want to repeat it on every
@@ -512,14 +512,14 @@ class GcpHubClient implements HubClient {
   public void shutdown() {
     metadata.shutdown();
     
-    List<HttpURLConnection> connections = new ArrayList<>(); 
+    List<ActiveConnection> connections = new ArrayList<>(); 
     synchronized (activeConnections) {
       isShutdown = true;
       connections.addAll(activeConnections);
     }
     
-    for (HttpURLConnection connection : connections) {
-      connection.disconnect();
+    for (ActiveConnection connection : connections) {
+      connection.get().disconnect();
     }
   }
   

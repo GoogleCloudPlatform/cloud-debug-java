@@ -26,7 +26,7 @@
 DEFINE_FLAG(
     bool,
     enable_safe_caller,
-false,
+    true,
     "Allows any method without side effects in expressions");
 
 DEFINE_FLAG(

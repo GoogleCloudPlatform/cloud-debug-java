@@ -23,7 +23,7 @@
 #include "config.h"
 #include "debugger.h"
 #include "eval_call_stack.h"
-#include "file_data_visibility_policy.h"
+#include "data_visibility_policy.h"
 #include "jvm_internals.h"
 #include "scheduler.h"
 #include "worker.h"
@@ -53,8 +53,8 @@ class JvmtiAgent : public Worker::Provider {
       std::vector<bool (*)(jobject)> fn_loaders,
       std::unique_ptr<Bridge> bridge,
       std::function<JniLocalRef()> breakpoint_labels_provider_factory,
-      std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
-          data_visibility_config_reader,
+      std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
+          data_visibility_policy_fn,
       bool enable_capabilities,
       bool enable_jvmti_events);
 
@@ -155,8 +155,8 @@ class JvmtiAgent : public Worker::Provider {
   const std::function<JniLocalRef()> breakpoint_labels_provider_factory_;
 
   // Reads data visibility configuration from .JAR files.
-  const std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
-      data_visibility_config_reader_;
+  const std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
+      data_visibility_policy_fn_;
 
   // When false, don't enable JVMTI capabilities.
   const bool enable_capabilities_;

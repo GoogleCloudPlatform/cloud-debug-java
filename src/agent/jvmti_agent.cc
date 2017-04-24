@@ -98,15 +98,15 @@ JvmtiAgent::JvmtiAgent(
     std::vector<bool (*)(jobject)> fn_loaders,
     std::unique_ptr<Bridge> bridge,
     std::function<JniLocalRef()> breakpoint_labels_provider_factory,
-    std::function<FileDataVisibilityPolicy::Config(ClassPathLookup*)>
-        data_visibility_config_reader,
+    std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
+        data_visibility_policy_fn,
     bool enable_capabilities,
     bool enable_jvmti_events)
     : internals_(internals),
       eval_call_stack_(std::move(eval_call_stack)),
       fn_loaders_(std::move(fn_loaders)),
       breakpoint_labels_provider_factory_(breakpoint_labels_provider_factory),
-      data_visibility_config_reader_(data_visibility_config_reader),
+      data_visibility_policy_fn_(std::move(data_visibility_policy_fn)),
       enable_capabilities_(enable_capabilities),
       enable_jvmti_events_(enable_jvmti_events),
       scheduler_(Scheduler<>::DefaultClock),
@@ -376,8 +376,7 @@ bool JvmtiAgent::OnWorkerReady() {
   }
 
   // Load data visibility configuration.
-  data_visibility_policy_.reset(new FileDataVisibilityPolicy(
-      data_visibility_config_reader_(internals_)));
+  data_visibility_policy_ = data_visibility_policy_fn_(internals_);
 
   return true;
 }

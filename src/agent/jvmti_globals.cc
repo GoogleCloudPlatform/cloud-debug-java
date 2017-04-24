@@ -388,7 +388,9 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
       [] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
         // "InvisibleForDebugging" annotation not yet supported on open source
         // version of Java Cloud Debugger.
-        return devtools::cdbg::FileDataVisibilityPolicy::Config();
+        return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
+            new devtools::cdbg::FileDataVisibilityPolicy(
+                devtools::cdbg::FileDataVisibilityPolicy::Config()));
       },
       true,
       true);

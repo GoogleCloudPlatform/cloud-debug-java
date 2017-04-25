@@ -20,8 +20,8 @@ final class Messages {
   public static final String UNDEFINED_BREAKPOINT_LOCATION =
       "Snapshot location not defined";
 
-  public static final String BREAKPOINT_ONLY_SUPPORTS_JAVA_FILES =
-      "Only files with .java extension are supported";
+  public static final String UNSUPPORTED_SOURCE_FILE_EXTENSION =
+      "Unsupported file extension";
 
   public static final String SOURCE_FILE_NOT_FOUND_IN_EXECUTABLE =
       "File was not found in the executable";

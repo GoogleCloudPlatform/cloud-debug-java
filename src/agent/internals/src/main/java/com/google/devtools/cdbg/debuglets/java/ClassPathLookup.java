@@ -50,6 +50,7 @@ import java.util.TreeSet;
 final class ClassPathLookup {
   private static final String JAVA_CLASS_PATH = "java.class.path";
   private static final String JAVA_EXTENSION = ".java";
+  private static final String SCALA_EXTENSION = ".scala";
 
   /**
    * Enables indexing of classes specified in Java class path.
@@ -183,9 +184,9 @@ final class ClassPathLookup {
           new FormatMessage(Messages.INVALID_LINE_NUMBER, Integer.toString(lineNumber)));
     }
 
-    if (!sourcePath.endsWith(JAVA_EXTENSION)) {
+    if (!sourcePath.endsWith(JAVA_EXTENSION) && !sourcePath.endsWith(SCALA_EXTENSION)) {
       return new ResolvedSourceLocation(
-          new FormatMessage(Messages.BREAKPOINT_ONLY_SUPPORTS_JAVA_FILES));
+          new FormatMessage(Messages.UNSUPPORTED_SOURCE_FILE_EXTENSION));
     }
 
     // Retrieve the class resources matching the source file. There might be several of those

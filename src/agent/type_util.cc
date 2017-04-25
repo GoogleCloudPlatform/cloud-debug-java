@@ -415,18 +415,30 @@ string TypeNameFromJObjectSignature(string object_signature) {
     // The signature of anonymous classes looks as following:
     //     "Lcom/prod/MyClass$1"
     // while the signature of inner and static classes is:
-    //     "Lcom/prod/MyClass$InnerOrStaticClass".
+    //     "Lcom/prod/MyClass$InnerOrStaticClass"
     // Similar to the user experience of Eclipse, we want to translate
     // anonymous class signature to "com.prod.MyClass$1", and inner or
     // static class to "com.prod.MyClass.InnerOrStaticClass". To achieve this
     // figure out whether the name following the '$' sign starts with a digit.
+    //
+    // In Scala, the signature of a singleton object looks like this:
+    //     "Lcom/prod/MyClassObject$;"
+    // And we want to display it as "com.prod.MyClassObject$" rather than
+    // "com.prod.MyClassObject.", i.e., without replacing the final '$' that
+    // comes just before a semicolon. Note that nested singletons do not cause
+    // trouble, as they are put inside the corresponding class, and hence,
+    // we don't get "MyOuterClassObject$$MyInnerClassObject$", but instead, we
+    // just get "MyOuterClassObject$MyInnerClassObject$".
 
     char ch = *source;
 
-    if ((ch != '$') ||
-        (source + 1 == object_signature.end()) ||
-        !isdigit(*(source + 1))) {
-      if ((ch == '/') || (ch == '$')) {
+    if (ch == '/') {
+      ch = '.';
+    } else if (ch == '$') {
+      if (source + 1 == object_signature.end()) {
+        ch = '.';
+      } else if (!isdigit(*(source + 1)) && *(source + 1) != ';') {
+        // Neither an anonymous class, nor a Scala singleton.
         ch = '.';
       }
     }

@@ -274,6 +274,33 @@ class JVariant {
   jvalue u_;
 };
 
+template <>
+bool JVariant::get<jboolean>(jboolean* value) const;
+
+template <>
+bool JVariant::get<jbyte>(jbyte* value) const;
+
+template <>
+bool JVariant::get<jchar>(jchar* value) const;
+
+template <>
+bool JVariant::get<jshort>(jshort* value) const;
+
+template <>
+bool JVariant::get<jint>(jint* value) const;
+
+template <>
+bool JVariant::get<jlong>(jlong* value) const;
+
+template <>
+bool JVariant::get<jfloat>(jfloat* value) const;
+
+template <>
+bool JVariant::get<jdouble>(jdouble* value) const;
+
+template <>
+bool JVariant::get<jobject>(jobject* value) const;
+
 
 template <>
 inline JVariant JVariant::Primitive<jboolean>(jboolean value) {

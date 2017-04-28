@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_FILE_DATA_VISIBILITY_POLICY_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_FILE_DATA_VISIBILITY_POLICY_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_STRUCTURED_DATA_VISIBILITY_POLICY_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_STRUCTURED_DATA_VISIBILITY_POLICY_H_
 
 #include <map>
 #include <memory>
@@ -30,7 +30,7 @@ namespace cdbg {
 // Such elements are methods, local variables, arguments and fields.
 //
 // This class has only immutable data structures, so it is thread safe.
-class FileDataVisibilityPolicy : public DataVisibilityPolicy {
+class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
  public:
   // Raw configuration of visibility rules for classes, variables, etc. The
   // agent would read this configuration from the .JAR file in an
@@ -96,7 +96,7 @@ class FileDataVisibilityPolicy : public DataVisibilityPolicy {
     std::map<string, Package> packages;
   };
 
-  explicit FileDataVisibilityPolicy(Config config)
+  explicit StructuredDataVisibilityPolicy(Config config)
       : config_(config) {
   }
 
@@ -108,10 +108,10 @@ class FileDataVisibilityPolicy : public DataVisibilityPolicy {
   // is relatively slow for lookup.
   const Config config_;
 
-  DISALLOW_COPY_AND_ASSIGN(FileDataVisibilityPolicy);
+  DISALLOW_COPY_AND_ASSIGN(StructuredDataVisibilityPolicy);
 };
 
 }  // namespace cdbg
 }  // namespace devtools
 
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_FILE_DATA_VISIBILITY_POLICY_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_STRUCTURED_DATA_VISIBILITY_POLICY_H_

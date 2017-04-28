@@ -1,4 +1,4 @@
-#include "file_data_visibility_policy.h"
+#include "structured_data_visibility_policy.h"
 
 #include <sstream>
 #include "jni_utils.h"
@@ -14,7 +14,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   // instance.
   ClassImpl(
       bool parent_invisible,
-      const FileDataVisibilityPolicy::Config::Class* class_config)
+      const StructuredDataVisibilityPolicy::Config::Class* class_config)
       : class_invisible_(parent_invisible || class_config->invisible),
         class_config_(class_config) {
   }
@@ -89,18 +89,18 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   const bool class_invisible_;
 
   // Visibility configuration of a single Java class. Not owned by this class.
-  const FileDataVisibilityPolicy::Config::Class* const class_config_;
+  const StructuredDataVisibilityPolicy::Config::Class* const class_config_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassImpl);
 };
 
 }  // namespace
 
-const FileDataVisibilityPolicy::Config::Class g_default_class_config = {};
+const StructuredDataVisibilityPolicy::Config::Class g_default_class_config = {};
 
 
 std::unique_ptr<DataVisibilityPolicy::Class>
-FileDataVisibilityPolicy::GetClassVisibility(jclass cls) {
+StructuredDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   string signature = GetClassSignature(cls);
   if ((signature.size() < 3) ||
       (signature.front() != 'L') || (signature.back() != ';')) {

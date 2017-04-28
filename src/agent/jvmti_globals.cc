@@ -26,8 +26,8 @@
 #include "statistician.h"
 #include "version.h"
 
-#include "file_data_visibility_policy.h"
 #include "jvmti_agent.h"
+#include "structured_data_visibility_policy.h"
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
@@ -389,8 +389,8 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
         // "InvisibleForDebugging" annotation not yet supported on open source
         // version of Java Cloud Debugger.
         return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
-            new devtools::cdbg::FileDataVisibilityPolicy(
-                devtools::cdbg::FileDataVisibilityPolicy::Config()));
+            new devtools::cdbg::StructuredDataVisibilityPolicy(
+                devtools::cdbg::StructuredDataVisibilityPolicy::Config()));
       },
       true,
       true);

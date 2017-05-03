@@ -38,10 +38,10 @@ ARGS="-agentpath:${CDBG_ROOT}/cdbg_java_agent.so="
 ARGS+="--log_dir=/var/log/app_engine"
 ARGS+=",--logtostderr=false"
 
-# When using the Jetty image, the debugger should also read the WEB-INF/classes
-# and WEB-INF/lib directories. When using the OpenJDK image (which deploys a
-# JAR), this is not necessary.
-if [[ "$GAE_IMAGE_NAME" == "jetty" ]]; then
+# When using Jetty/Tomcat images, the debugger should also read the
+# WEB-INF/classes and WEB-INF/lib directories. When using the OpenJDK
+# image (which deploys a JAR), this is not necessary.
+if [[ ! -z "${RUNTIME_DIR}" ]]; then
   ARGS+=",--cdbg_extra_class_path=${APP_WEB_INF_DIR}/classes:${APP_WEB_INF_DIR}/lib"
 fi
 

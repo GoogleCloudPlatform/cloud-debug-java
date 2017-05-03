@@ -37,7 +37,13 @@ CDBG_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARGS="-agentpath:${CDBG_ROOT}/cdbg_java_agent.so="
 ARGS+="--log_dir=/var/log/app_engine"
 ARGS+=",--logtostderr=false"
-ARGS+=",--cdbg_extra_class_path=${APP_WEB_INF_DIR}/classes:${APP_WEB_INF_DIR}/lib"
+
+# When using the Jetty image, the debugger should also read the WEB-INF/classes
+# and WEB-INF/lib directories. When using the OpenJDK image (which deploys a
+# JAR), this is not necessary.
+if [[ "$GAE_IMAGE_NAME" == "jetty" ]]; then
+  ARGS+=",--cdbg_extra_class_path=${APP_WEB_INF_DIR}/classes:${APP_WEB_INF_DIR}/lib"
+fi
 
 echo "${ARGS}"
 

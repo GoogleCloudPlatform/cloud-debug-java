@@ -31,7 +31,6 @@ if [[ -n "${CDBG_DISABLE}" ]]; then
   exit
 fi
 
-APP_WEB_INF_DIR="${RUNTIME_DIR}/webapps/root/WEB-INF"
 CDBG_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ARGS="-agentpath:${CDBG_ROOT}/cdbg_java_agent.so="
@@ -41,8 +40,11 @@ ARGS+=",--alsologtostderr=true"
 # When using Jetty/Tomcat images, the debugger should also read the
 # WEB-INF/classes and WEB-INF/lib directories. When using the OpenJDK
 # image (which deploys a JAR), this is not necessary.
-if [[ ! -z "${RUNTIME_DIR}" ]]; then
-  ARGS+=",--cdbg_extra_class_path=${APP_WEB_INF_DIR}/classes:${APP_WEB_INF_DIR}/lib"
+if [[ -n "${RUNTIME_DIR}" && -z "${CDBG_APP_WEB_INF_DIR}" ]]; then
+  CDBG_APP_WEB_INF_DIR="${RUNTIME_DIR}/webapps/root/WEB-INF"
+fi
+if [[ -n "${CDBG_APP_WEB_INF_DIR}" ]]; then
+  ARGS+=",--cdbg_extra_class_path=${CDBG_APP_WEB_INF_DIR}/classes:${CDBG_APP_WEB_INF_DIR}/lib"
 fi
 
 echo "${ARGS}"

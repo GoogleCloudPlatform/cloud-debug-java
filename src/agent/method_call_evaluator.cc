@@ -297,10 +297,15 @@ void MethodCallEvaluator::MatchInstanceSourceMethod(
     return;
   }
 
-  std::vector<ClassMetadataReader::Method> instance_methods =
-      readers_factory->FindInstanceMethods(
+  std::vector<ClassMetadataReader::Method> instance_methods;
+  if (!readers_factory->FindInstanceMethods(
           instance_source_->GetStaticType().object_signature,
-          method_name_);
+          method_name_,
+          &instance_methods,
+          error_message)) {
+    *matched = true;
+    return;
+  }
 
   MatchMethods(
       readers_factory,
@@ -327,8 +332,15 @@ void MethodCallEvaluator::MatchExplicitStaticMethod(
     ReadersFactory* readers_factory,
     bool* matched,
     FormatMessageModel* error_message) {
-  std::vector<ClassMetadataReader::Method> static_methods =
-      readers_factory->FindStaticMethods(possible_class_name_, method_name_);
+  std::vector<ClassMetadataReader::Method> static_methods;
+  if (!readers_factory->FindStaticMethods(
+      possible_class_name_,
+      method_name_,
+      &static_methods,
+      error_message)) {
+    *matched = true;
+    return;
+  }
 
   MatchMethods(
       readers_factory,

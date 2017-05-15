@@ -112,9 +112,13 @@ class ReadersFactory {
 
   // Finds signatures of all instance methods named "method_name" in the
   // specified class.
-  virtual std::vector<ClassMetadataReader::Method> FindInstanceMethods(
+  // Returns false if the class for class_signature is not loaded, true
+  // otherwise.
+  virtual bool FindInstanceMethods(
       const string& class_signature,
-      const string& method_name) = 0;
+      const string& method_name,
+      std::vector<ClassMetadataReader::Method>* methods,
+      FormatMessageModel* error_message) = 0;
 
   // Finds signatures of all static methods named "method_name" in the current
   // class.
@@ -122,10 +126,13 @@ class ReadersFactory {
       const string& method_name) = 0;
 
   // Finds signatures of all static methods named "method_name" in the current
-  // class. Returns "MethodCaller" instances for each such method.
-  virtual std::vector<ClassMetadataReader::Method> FindStaticMethods(
+  // class. Populates "MethodCaller" instances for each such method.
+  // Returns false if the class for class_name is not loaded, true otherwise.
+  virtual bool FindStaticMethods(
       const string& class_name,
-      const string& method_name) = 0;
+      const string& method_name,
+      std::vector<ClassMetadataReader::Method>* methods,
+      FormatMessageModel* error_message) = 0;
 
   // Creates an object to read native array in expression evaluation. Returns
   // nullptr if "array_signature" doesn't correspond to an array.

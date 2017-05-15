@@ -75,16 +75,20 @@ class JvmReadersFactory : public ReadersFactory {
   std::vector<ClassMetadataReader::Method> FindLocalInstanceMethods(
       const string& method_name) override;
 
-  std::vector<ClassMetadataReader::Method> FindInstanceMethods(
+  bool FindInstanceMethods(
       const string& class_signature,
-      const string& method_name) override;
+      const string& method_name,
+      std::vector<ClassMetadataReader::Method>* methods,
+      FormatMessageModel* error_message) override;
 
   std::vector<ClassMetadataReader::Method> FindStaticMethods(
       const string& method_name) override;
 
-  std::vector<ClassMetadataReader::Method> FindStaticMethods(
+  bool FindStaticMethods(
       const string& class_name,
-      const string& method_name) override;
+      const string& method_name,
+      std::vector<ClassMetadataReader::Method>* methods,
+      FormatMessageModel* error_message) override;
 
   std::unique_ptr<ArrayReader> CreateArrayReader(
       const JSignature& array_signature) override;

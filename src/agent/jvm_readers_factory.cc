@@ -330,27 +330,43 @@ JvmReadersFactory::FindLocalInstanceMethods(
       evaluators_->method_locals->GetLocalVariables(method_);
 
   if (method->local_instance == nullptr) {
-    return {};  // This is a static method, no matches.
-  }
-
-  return FindInstanceMethods(
-      method->local_instance->GetStaticType().object_signature,
-      method_name);
-}
-
-
-std::vector<ClassMetadataReader::Method>
-JvmReadersFactory::FindInstanceMethods(
-    const string& class_signature,
-    const string& method_name) {
-  JniLocalRef cls =
-      evaluators_->class_indexer->FindClassBySignature(class_signature);
-  if (cls == nullptr) {
-    LOG(ERROR) << "Local instance class not found: " << class_signature;
+    // The current class is expected to be loaded. So, we must be in a
+    // static method with no instance methods.
     return {};
   }
 
-  return FindClassMethods(static_cast<jclass>(cls.get()), false, method_name);
+  std::vector<ClassMetadataReader::Method> methods;
+  FormatMessageModel unused_error_message;
+  bool unused_success = FindInstanceMethods(
+      method->local_instance->GetStaticType().object_signature,
+      method_name,
+      &methods,
+      &unused_error_message);
+  DCHECK(unused_success);
+
+  return methods;
+}
+
+
+bool JvmReadersFactory::FindInstanceMethods(
+    const string& class_signature,
+    const string& method_name,
+    std::vector<ClassMetadataReader::Method>* methods,
+    FormatMessageModel* error_message) {
+  JniLocalRef cls =
+      evaluators_->class_indexer->FindClassBySignature(class_signature);
+  if (cls == nullptr) {
+    LOG(ERROR) << "Instance class not found: " << class_signature;
+    *error_message = {
+      ClassNotLoaded,
+      { TypeNameFromJObjectSignature(class_signature) }
+    };
+    return false;
+  }
+
+  *methods =
+      FindClassMethods(static_cast<jclass>(cls.get()), false, method_name);
+  return true;
 }
 
 
@@ -359,6 +375,7 @@ JvmReadersFactory::FindStaticMethods(
     const string& method_name) {
   JniLocalRef cls = GetMethodDeclaringClass(method_);
   if (cls == nullptr) {
+    // This should not happen. The current class should always be loaded.
     return {};
   }
 
@@ -366,17 +383,20 @@ JvmReadersFactory::FindStaticMethods(
 }
 
 
-std::vector<ClassMetadataReader::Method>
-JvmReadersFactory::FindStaticMethods(
+bool JvmReadersFactory::FindStaticMethods(
     const string& class_name,
-    const string& method_name) {
-  FormatMessageModel error_message;  // TODO(vlif): propagate this error.
-  JniLocalRef cls = FindClassByName(class_name, &error_message);
+    const string& method_name,
+    std::vector<ClassMetadataReader::Method>* methods,
+    FormatMessageModel* error_message) {
+  JniLocalRef cls = FindClassByName(class_name, error_message);
   if (cls == nullptr) {
-    return {};
+    *error_message = { ClassNotLoaded, { class_name } };
+    return false;
   }
 
-  return FindClassMethods(static_cast<jclass>(cls.get()), true, method_name);
+  *methods =
+      FindClassMethods(static_cast<jclass>(cls.get()), true, method_name);
+  return true;
 }
 
 

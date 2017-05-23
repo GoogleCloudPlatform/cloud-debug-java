@@ -100,6 +100,7 @@ public:
 
 	/// Types of tokens
 #ifndef NO_STATIC_CONSTS
+	static const int UNSPECIFIED = 0;
 	static const int TOKEN = 1;
 	static const int NOT_TOKEN = 2;
 	static const int RANGE = 3;
@@ -108,6 +109,7 @@ public:
 	static const int NOT_SET = 6;
 #else
 	enum {
+    UNSPECIFIED = 0,
 		TOKEN = 1,
 		NOT_TOKEN = 2,
 		RANGE = 3,

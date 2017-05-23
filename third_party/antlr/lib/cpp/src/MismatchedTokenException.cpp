@@ -19,6 +19,7 @@ MismatchedTokenException::MismatchedTokenException()
   : RecognitionException("Mismatched Token: expecting any AST node","<AST>",-1,-1)
   , token(0)
   , node(nullASTptr)
+  , mismatchType(UNSPECIFIED)
   , tokenNames(0)
   , numTokens(0)
 {
@@ -186,6 +187,7 @@ string MismatchedTokenException::tokenName(int tokenType) const
 }
 
 #ifndef NO_STATIC_CONSTS
+const int MismatchedTokenException::UNSPECIFIED;
 const int MismatchedTokenException::TOKEN;
 const int MismatchedTokenException::NOT_TOKEN;
 const int MismatchedTokenException::RANGE;

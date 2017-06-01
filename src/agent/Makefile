@@ -241,11 +241,12 @@ ifeq ($(JAVA_BUILD),maven)
 	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR_FULL)
 else
 	mkdir -p internals/target
-	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java src/main/java/com/google/devtools/clouddebugger/v2/*.java
+	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH):$(SNAKE_YAML_JAR_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java src/main/java/com/google/devtools/clouddebugger/v2/*.java
 	cd internals/target ; jar xf $(ASM_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_COMMONS_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_UTIL_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GSON_JAR_PATH) ; rm -rf META-INF
+	cd internals/target ; jar xf $(SNAKE_YAML_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; echo "$(GOOGLE_API_CLIENT_JARS)" | xargs -n 1 jar xf
 	jar cvf $(INTERNALS_JAR_FULL) -C internals/target/ .
 endif

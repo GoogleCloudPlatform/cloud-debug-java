@@ -253,6 +253,21 @@
       ],
       "nativeNamespace": "jniproxy"
     },
+        {
+            "className": "com.google.devtools.cdbg.debuglets.java.YamlConfigParser",
+            "methods": [
+                {
+                    "methodName": "<init>"
+                },
+                {
+                    "methodName": "getBlacklistPatterns"
+                },
+                {
+                    "methodName": "getWhitelistPatterns"
+                }
+            ],
+            "nativeNamespace": "jniproxy"
+        },
     {
       "className": "com.google.devtools.cdbg.debuglets.java.HubClient",
       "methods": [

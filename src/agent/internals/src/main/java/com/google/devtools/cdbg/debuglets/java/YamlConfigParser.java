@@ -19,7 +19,10 @@ package com.google.devtools.cdbg.debuglets.java;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,17 +60,23 @@ public class YamlConfigParser {
    *
    * An empty config is also legal.
    */
-  public YamlConfigParser(InputStream yamlConfig) throws YamlConfigParserException {
+  public YamlConfigParser(String yamlConfig) throws YamlConfigParserException {
     blacklistPatterns = new String[0];
     whitelistPatterns = new String[0];
 
-    try {
-      parseYaml(yamlConfig);
+    try (InputStream inputStream =
+         new ByteArrayInputStream(yamlConfig.getBytes(StandardCharsets.UTF_8))) {
+      parseYaml(inputStream);
     } catch (YamlConfigParserException e) {
       warnfmt("%s", e.toString());
       throw e;
+    } catch (IOException e) {
+      // IOException is not expected on a string reader, but the API contract
+      // requires we catch it anyway.
+      warnfmt("%s", e.toString());
+      throw new YamlConfigParserException("IOException: " + e.toString());
     }
-    
+
     infofmt("Config Load OK. Added %d blacklist and %d whitelist patterns",
             blacklistPatterns.length,
             whitelistPatterns.length);

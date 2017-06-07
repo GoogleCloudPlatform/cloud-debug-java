@@ -156,7 +156,7 @@ constexpr char EmptyCollection[] =
     "Empty collection";
 
 constexpr char OutOfBufferSpace[] =
-    "Buffer full";
+    "Buffer full. Use an expression to see more data";
 
 constexpr char NullPointerDereference[] =
     "Null pointer dereference";

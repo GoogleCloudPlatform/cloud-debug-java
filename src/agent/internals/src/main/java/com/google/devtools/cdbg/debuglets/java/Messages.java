@@ -31,5 +31,8 @@ final class Messages {
 
   public static final String NO_CODE_FOUND_AT_LINE =
       "No code found at line $0";
+
+  public static final String BREAKPOINT_INSIDE_UNSAFE_CLASS =
+      "Enclosing class contains unsafe Java code";
 }
 

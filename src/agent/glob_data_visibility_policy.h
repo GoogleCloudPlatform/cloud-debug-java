@@ -59,6 +59,13 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     // java.util.*
     bool PrefixCanMatch(const string& prefix) const;
 
+    // Returns true if this GlobSet contains zero patterns.
+    bool Empty() const {
+      return exact_patterns_.empty() &&
+          prefix_patterns_.empty() &&
+          generic_patterns_.empty();
+    }
+
    private:
     // Patterns that do not contain a *.  These can be resolved with a direct
     // lookup.

@@ -38,7 +38,7 @@ DEFINE_FLAG(
 namespace devtools {
 namespace cdbg {
 
-int g_register_debuggee_attempts = 0;
+int g_is_enabled_attempts = 0;
 
 Worker::Worker(
     Provider* provider,
@@ -146,6 +146,19 @@ void Worker::MainThreadProc() {
     return;  // Signal to stop the main debugger thread.
   }
 
+  bool is_enabled = false;
+  while (!is_unloading_ && !bridge_->IsEnabled(&is_enabled)) {
+    // Wait for classes to load.
+    ++g_is_enabled_attempts;
+    provider_->OnIdle();
+    main_thread_event_->Wait(100);  // Wait for 100ms to lower CPU usage
+  }
+
+  if (!is_enabled) {
+    LOG(WARNING) << "The debugger is disabled on this process.";
+    return;
+  }
+
   while (!is_unloading_) {
     // Register debuggee if not registered or if previous call to list active
     // breakpoints failed.
@@ -202,7 +215,6 @@ void Worker::TransmissionThreadProc() {
 void Worker::RegisterDebuggee() {
   bool new_is_enabled = false;
   is_registered_ = bridge_->RegisterDebuggee(&new_is_enabled);
-  ++g_register_debuggee_attempts;
 
   if (is_registered_) {
     provider_->EnableDebugger(new_is_enabled);

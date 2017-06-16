@@ -142,7 +142,12 @@ public interface HubClient {
    * @throws Exception if the backend could not be notified or on failure on the backend side.
    */
   void approveBreakpointCanary(String breakpointId) throws Exception;
-  
+
+  /**
+   * Returns false if this agent should not be enabled.
+   */
+  boolean isEnabled() throws Exception;
+
   /**
    * Asynchronously aborts all pending requests and blocks any future network connections.
    */

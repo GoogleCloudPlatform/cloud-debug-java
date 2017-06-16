@@ -76,6 +76,12 @@ class Bridge {
 
   // Approves the breakpoint for a global rollout.
   virtual bool ApproveBreakpointCanary(const string& breakpoint_id) = 0;
+
+  // Tries to determine if the debugger is enabled.  If the debugger is enabled,
+  // sets is_enabled to true and returns true.  If the debugger is disabled,
+  // sets is_enabled to false and returns true.  If the method can not determine
+  // status, sets is_enabled to false and returns false.
+  virtual bool IsEnabled(bool* is_enabled) = 0;
 };
 
 }  // namespace cdbg

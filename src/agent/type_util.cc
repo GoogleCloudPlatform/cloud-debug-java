@@ -437,8 +437,16 @@ string TypeNameFromJObjectSignature(string object_signature) {
     } else if (ch == '$') {
       if (source + 1 == object_signature.end()) {
         ch = '.';
-      } else if (!isdigit(*(source + 1)) && *(source + 1) != ';') {
-        // Neither an anonymous class, nor a Scala singleton.
+      } else if (*(source + 1) == '$') {
+        // Inner class inside Scala singleton. Pass the $ character as is.
+        // E.g., "Lcom/prod/MyClassObject$$anonfun$1"
+      } else if (isdigit(*(source + 1))) {
+        // Anonymous class. Pass the $ character as is.
+        // E.g., "Lcom/prod/MyClass$1;"
+      } else if (*(source + 1) == ';') {
+        // Scala singleton object. Pass the $ character as is.
+        // E.g., "Lcom/prod/MyClassObject$;"
+      } else {
         ch = '.';
       }
     }

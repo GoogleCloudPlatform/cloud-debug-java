@@ -27,7 +27,8 @@
 #include "version.h"
 
 #include "jvmti_agent.h"
-#include "structured_data_visibility_policy.h"
+#include "glob_data_visibility_policy.h"
+#include "yaml_data_visibility_config_reader.h"
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
@@ -386,11 +387,10 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
               .Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
       },
       [] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
-        // "InvisibleForDebugging" annotation not yet supported on open source
-        // version of Java Cloud Debugger.
         return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
-            new devtools::cdbg::StructuredDataVisibilityPolicy(
-                devtools::cdbg::StructuredDataVisibilityPolicy::Config()));
+            new devtools::cdbg::GlobDataVisibilityPolicy(
+                devtools::cdbg::ReadYamlDataVisibilityConfiguration(
+                    class_path_lookup)));
       },
       true,
       true);

@@ -42,6 +42,7 @@
 #include "jni_proxy_api_client_datetime.h"
 #include "jni_proxy_gcpbreakpointlabelsprovider.h"
 #include "jni_proxy_gcphubclient.h"
+#include "jni_proxy_yamlconfigparser.h"
 #endif
 
 #ifdef GCP_HUB_CLIENT
@@ -380,6 +381,7 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
         jniproxy::BindDateTimeWithClassLoader,
         jniproxy::BindGcpBreakpointLabelsProviderWithClassLoader,
         jniproxy::BindGcpHubClientWithClassLoader,
+        jniproxy::BindYamlConfigParserWithClassLoader,
       },
       std::move(bridge),
       [] () {

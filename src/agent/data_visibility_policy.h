@@ -36,6 +36,15 @@ class DataVisibilityPolicy {
     // for debugging.
     virtual bool IsFieldVisible(const string& name, int32 field_modifiers) = 0;
 
+    // Returns false if the field data is invisible.
+    //
+    // If IsFieldVisible() == false, then the return value from this method can
+    // not be trusted as we assume that it will never be called in that case.
+    virtual bool IsFieldDataVisible(
+        const string& name,
+        int32 field_modifiers,
+        string* reason) = 0;
+
     // Returns false if calling the specified method must not be allowed, even
     // if the method is immutable (e.g. simple getter).
     virtual bool IsMethodVisible(
@@ -49,6 +58,17 @@ class DataVisibilityPolicy {
         const string& method_name,
         const string& method_signature,
         const string& variable_name) = 0;
+
+    // Returns false if the local variable or an argument data is invisible.
+    //
+    // If IsVariableVisible() == false, then the return value from this method
+    // can not be trusted as we assume that it will never be called in that
+    // case.
+    virtual bool IsVariableDataVisible(
+        const string& method_name,
+        const string& method_signature,
+        const string& variable_name,
+        string* reason) = 0;
   };
 
   virtual ~DataVisibilityPolicy() {}

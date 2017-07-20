@@ -23,6 +23,19 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
+  bool IsFieldDataVisible(
+      const string& name,
+      int32 field_modifiers,
+      string* reason) override {
+    for (const auto& policy : class_list_) {
+      if (!policy->IsFieldDataVisible(name, field_modifiers, reason)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   bool IsMethodVisible(
       const string& method_name,
       const string& method_signature,
@@ -48,6 +61,24 @@ class ClassImpl : public DataVisibilityPolicy::Class {
           method_name,
           method_signature,
           variable_name)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool IsVariableDataVisible(
+      const string& method_name,
+      const string& method_signature,
+      const string& variable_name,
+      string* reason) override {
+    for (const auto& policy : class_list_) {
+      if (!policy->IsVariableDataVisible(
+          method_name,
+          method_signature,
+          variable_name,
+          reason)) {
         return false;
       }
     }

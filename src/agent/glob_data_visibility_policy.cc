@@ -7,6 +7,9 @@
 namespace devtools {
 namespace cdbg {
 
+static constexpr char kReasonIsBlacklisted[] = "blacklisted by config";
+static constexpr char kReasonIsNotWhiteListed[] = "not whitelisted by config";
+
 namespace {
 
 class ClassImpl : public DataVisibilityPolicy::Class {
@@ -23,21 +26,45 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   bool IsFieldVisible(
       const string& field_name,
       int32 field_modifiers) override {
-    return IsVisible(field_name);
+    // TODO(mattwach): Return true after client handling logic is added.
+    string unused_reason;
+    return IsFieldDataVisible(field_name, field_modifiers, &unused_reason);
+  }
+
+  bool IsFieldDataVisible(
+      const string& field_name,
+      int32 field_modifiers,
+      string* reason) override {
+    return IsVisible(field_name, reason);
   }
 
   bool IsMethodVisible(
       const string& method_name,
       const string& method_signature,
       int32 method_modifiers) override {
-    return IsVisible(method_name);
+    string unused_reason;
+    return IsVisible(method_name, &unused_reason);
   }
 
   bool IsVariableVisible(
       const string& method_name,
       const string& method_signature,
       const string& variable_name) override {
-    return IsVisible(method_name + "." + variable_name);
+    // TODO(mattwach): Return true after client handling logic is added.
+    string unused_reason;
+    return IsVariableDataVisible(
+        method_name,
+        method_signature,
+        variable_name,
+        &unused_reason);
+  }
+
+  bool IsVariableDataVisible(
+      const string& method_name,
+      const string& method_signature,
+      const string& variable_name,
+      string* reason) override {
+    return IsVisible(method_name + "." + variable_name, reason);
   }
 
  private:
@@ -46,10 +73,21 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   //   class_name_ = com.foo.MyClass
   //   suffix = myMethod
   //   checks: com.foo.MyClass.myMethod
-  bool IsVisible(const string& suffix) {
+  //
+  // TODO(mattwach): Update reason appropriately when config_ failed to parse.
+  bool IsVisible(const string& suffix, string* reason) {
     string path = class_name_ + "." + suffix;
-    return config_->whitelists.Matches(path) &&
-        !config_->blacklists.Matches(path);
+    if (config_->blacklists.Matches(path)) {
+      *reason = kReasonIsBlacklisted;
+      return false;
+    }
+
+    if (!config_->whitelists.Matches(path)) {
+      *reason = kReasonIsNotWhiteListed;
+      return false;
+    }
+
+    return true;
   }
 
  private:
@@ -66,6 +104,15 @@ class ClassImpl : public DataVisibilityPolicy::Class {
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
   bool IsFieldVisible(const string& name, int32 field_modifiers) override {
+    // TODO(mattwach): Return true after client handling logic is added.
+    return false;
+  }
+
+  bool IsFieldDataVisible(
+      const string& name,
+      int32 field_modifiers,
+      string* reason) override {
+    *reason = kReasonIsBlacklisted;
     return false;
   }
 
@@ -80,6 +127,16 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
       const string& method_name,
       const string& method_signature,
       const string& variable_name) override {
+    // TODO(mattwach): Return true after client handling logic is added.
+    return false;
+  }
+
+  bool IsVariableDataVisible(
+      const string& method_name,
+      const string& method_signature,
+      const string& variable_name,
+      string* reason) override {
+    *reason = kReasonIsBlacklisted;
     return false;
   }
 };

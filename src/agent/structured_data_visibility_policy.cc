@@ -38,6 +38,14 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
+  bool IsFieldDataVisible(
+      const string& name,
+      int32 field_modifiers,
+      string* reason) override {
+    // TODO(emrekultursay): InvisibleForDebugging should block data, not fields.
+    return true;
+  }
+
   bool IsMethodVisible(
       const string& method_name,
       const string& method_signature,
@@ -79,6 +87,15 @@ class ClassImpl : public DataVisibilityPolicy::Class {
 
     // Variables not explicitly mentioned in the configuration are visible
     // by default.
+    return true;
+  }
+
+  bool IsVariableDataVisible(
+      const string& method_name,
+      const string& method_signature,
+      const string& variable_name,
+      string* reason) override {
+    // TODO(emrekultursay): InvisibleForDebugging should block data, not fields.
     return true;
   }
 

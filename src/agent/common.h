@@ -51,14 +51,6 @@ using google::LogSeverity;  // NOLINT
 using google::AddLogSink;  // NOLINT
 using google::RemoveLogSink;  // NOLINT
 
-// MOE: begin_strip
-// The open source build uses gflags, which uses the traditional (v1) flags APIs
-// to define/declare/access command line flags. The internal build has upgraded
-// to use v2 flags API (DEFINE_FLAG/DECLARE_FLAG/GetFlag/SetFlag), which is not
-// supported by gflags yet (and absl is not released to open source yet).
-// Here, we use simple, dummy v2 flags wrappers around v1 flags implementation.
-// This allows us to use the same flags APIs both internally and externally.
-// MOE: end_strip
 
 #define DEFINE_FLAG(type, name, default_value, help) \
     DEFINE_##type(name, default_value, help)

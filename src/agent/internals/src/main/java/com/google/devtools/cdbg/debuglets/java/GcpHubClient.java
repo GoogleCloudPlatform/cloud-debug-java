@@ -566,8 +566,6 @@ class GcpHubClient implements HubClient {
     // Read source context files if not done yet.
     if (sourceContextFiles == null) {
       // Using a set eliminates duplicate source context files (i.e., the same file added twice).
-      // As a side effect, adding or removing a source context file with duplicate contents do not
-      // affect the value of the uniquifier.
       SortedSet<String> resources = new TreeSet<>();
 
       for (String sourceContextDir : SOURCE_CONTEXT_RESOURCE_DIRS) {
@@ -599,17 +597,6 @@ class GcpHubClient implements HubClient {
 
       // Compute uniquifier of debuggee properties.
       MessageDigest hash = MessageDigest.getInstance("SHA1");
-      hash.update(metadata.getProjectId().getBytes(UTF_8));
-      hash.update(new byte[] { 0 });
-      hash.update(labels.toString().getBytes(UTF_8));
-      hash.update(new byte[] { 0, GcpDebugletVersion.MAJOR_VERSION });
-      if (hasSourceContext) {
-        for (String sourceContextFile : sourceContextFiles) {
-          hash.update(sourceContextFile.getBytes(UTF_8));
-          hash.update(new byte[] { 0 });
-        }
-      }
-
       uniquifier = DatatypeConverter.printHexBinary(hash.digest());
 
       if (!labels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {

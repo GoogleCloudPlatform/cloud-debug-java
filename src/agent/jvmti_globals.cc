@@ -24,7 +24,6 @@
 #include "jvm_internals.h"
 #include "jvmti_buffer.h"
 #include "statistician.h"
-#include "version.h"
 
 #include "jvmti_agent.h"
 #include "glob_data_visibility_policy.h"

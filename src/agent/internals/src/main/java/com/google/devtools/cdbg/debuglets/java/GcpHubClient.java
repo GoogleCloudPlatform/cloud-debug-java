@@ -18,7 +18,6 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
-import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severe;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -303,10 +302,10 @@ class GcpHubClient implements HubClient {
   private String[] sourceContextFiles = null;
   
   /**
-   * Registered debuggee ID. Once set never changes.
+   * Registered debuggee ID. Use getter/setter to access.
    */
-  private String debuggeeId = null;
-  
+  private String debuggeeId = "not-registered-yet";
+
   /**
    * The last wait_token returned in the ListActiveBreakpoints response.
    */
@@ -377,25 +376,15 @@ class GcpHubClient implements HubClient {
       throw new Exception("Bad debuggee");
     }
     
-    if ((debuggeeId != null) && !debuggeeId.equals(response.getDebuggeeId())) {
-      String message = String.format(
-          "Debuggee ID is expected to be immutable, current: %s, new: %s",
-          debuggeeId, response.getDebuggeeId());
-      severe(message);
-      throw new Exception(message);
-    }
-    
     if (response.getIsDisabled()) {
       info("Debuggee is marked as disabled");
       return false;
     }
     
-    if (debuggeeId == null) {
-      debuggeeId = response.getDebuggeeId();
-      infofmt("Debuggee %s registered: %s, agent version: %s",
-          debuggeeId, responseJson, GcpDebugletVersion.VERSION);
-    }
-    
+    setDebuggeeId(response.getDebuggeeId());
+    infofmt("Debuggee %s registered: %s, agent version: %s",
+        getDebuggeeId(), responseJson, GcpDebugletVersion.VERSION);
+
     return true;
   }
 
@@ -403,7 +392,7 @@ class GcpHubClient implements HubClient {
   public ListActiveBreakpointsResult listActiveBreakpoints() throws Exception {
     StringBuilder path = new StringBuilder();
     path.append("debuggees/");
-    path.append(URLEncoder.encode(debuggeeId, UTF_8.name()));
+    path.append(URLEncoder.encode(getDebuggeeId(), UTF_8.name()));
     path.append("/breakpoints");
     path.append("?successOnTimeout=true");
     if (lastWaitToken != null) {
@@ -458,8 +447,9 @@ class GcpHubClient implements HubClient {
       throw new UnsupportedOperationException("GcpHubClient only supports protobuf format");
     }
 
+    String theDebuggeeId = getDebuggeeId();
     String path = String.format("debuggees/%s/breakpoints/%s",
-        URLEncoder.encode(debuggeeId, UTF_8.name()),
+        URLEncoder.encode(theDebuggeeId, UTF_8.name()),
         URLEncoder.encode(breakpointId, UTF_8.name()));
     try (ActiveConnection connection = openConnection(path)) {
       // We could parse breakpoint back to JsonObject, then embed it as in the request element
@@ -487,7 +477,7 @@ class GcpHubClient implements HubClient {
         if (!isTransientError) {
           // There is no point in retrying the transmission. It will fail.
           warnfmt(e, "Failed to transmit breakpoint update, debuggee: %s, breakpoint ID: %s, "
-              + "response: %s\n%s", debuggeeId, breakpointId,
+              + "response: %s\n%s", theDebuggeeId, breakpointId,
               connection.get().getResponseMessage(), errorResponse);
           return;
         }
@@ -531,11 +521,12 @@ class GcpHubClient implements HubClient {
     }
   }
   
-  /**
-   * Gets the registered debuggee ID or null if not registered yet.
-   */
   public String getDebuggeeId() {
     return debuggeeId;
+  }
+
+  private void setDebuggeeId(String id) {
+    debuggeeId = id;
   }
 
   /**

@@ -139,7 +139,8 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
     jobject source) {
   JniLocalRef object_cls;
   JniLocalRef method_cls;
-  if (metadata.is_static() || nonvirtual) {
+
+  if (metadata.is_static()) {
     std::shared_ptr<ClassIndexer::Type> type = class_indexer_->GetReference(
         metadata.class_signature.object_signature);
 
@@ -154,6 +155,64 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
     }
 
     method_cls = JniNewLocalRef(object_cls.get());
+  } else if (nonvirtual) {
+    // Invokespecial (i.e., nonvirtual=true) instruction is used when an
+    // instance method must be invoked based on the type of the reference, not
+    // on the class of the object. In other words, invokespecial requires
+    // static binding (compile-time type), rather than dynamic binding (i.e.,
+    // runtime type).
+    //
+    // There are three particular cases where invokespecial instruction is used:
+    //   1. Invocation of <init> methods.
+    //   2. Invocation of private methods.
+    //   3. Invocation of methods using the super keyword.
+    //
+    // In cases (1) and (2), searching the given method name/signature in the
+    // given reference type (similar to the is_static case above) is sufficient,
+    // but the third case requires special class/method resolution. When a
+    // method is invoked with the 'super' keyword, the provided super class
+    // (i.e., the static type) may not implement the given method, and we must
+    // search for the closest super class with the given method name and
+    // signature. Note that this search is different from the regular virtual
+    // method case, because the search does not start with the type of the
+    // object, but instead, starts with the type of the reference.
+    //
+    // Note:
+    // The JVM specification for the invokespecial instruction further explains
+    // a split-behavior based on the existence of the ACC_SUPER flag for the
+    // target class. However, all Java versions starting with Java 1.1 are
+    // guaranteed to always have the ACC_SUPER flag set, and we do not support
+    // Java 1.0. Therefore, we do not check the class flags here, and just
+    // assume ACC_SUPER is always set.
+
+    std::shared_ptr<ClassIndexer::Type> type = class_indexer_->GetReference(
+        metadata.class_signature.object_signature);
+
+    object_cls = JniNewLocalRef(type->FindClass());
+    if (object_cls == nullptr) {
+      DLOG(INFO) << "Class " << type->GetSignature()
+                 << " not loaded, call stack:\n" << CurrentCallStack();
+      return FormatMessageModel {
+          ClassNotLoaded,
+          { TypeNameFromSignature(metadata.class_signature) }
+      };
+    }
+
+    jmethodID method_id = jni()->GetMethodID(
+        static_cast<jclass>(object_cls.get()),
+        metadata.name.c_str(),
+        metadata.signature.c_str());
+    if (jni()->ExceptionCheck()) {
+      DLOG(INFO) << "Method not found: " << metadata.name << ", "
+                << metadata.signature;
+      return MethodCallResult::PendingJniException().format_exception();
+    }
+
+    if (method_id == nullptr) {
+      return INTERNAL_ERROR_MESSAGE;
+    }
+
+    method_cls = GetMethodDeclaringClass(method_id);
   } else {
     object_cls = GetObjectClass(source);
     if (object_cls == nullptr) {
@@ -167,6 +226,7 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
     if (jni()->ExceptionCheck()) {
       return MethodCallResult::PendingJniException().format_exception();
     }
+
     if (method_id == nullptr) {
       return INTERNAL_ERROR_MESSAGE;
     }

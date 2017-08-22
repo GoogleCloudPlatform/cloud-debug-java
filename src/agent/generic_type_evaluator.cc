@@ -48,11 +48,12 @@ void GenericTypeEvaluator::Evaluate(
 
     field_data.name = field_reader.GetName();
 
-    if (!field_reader.ReadValue(obj, &field_data.value)) {
+    FormatMessageModel error;
+    if (!field_reader.ReadValue(obj, &field_data.value, &error)) {
       field_data.status.is_error = false;
       field_data.status.refers_to =
           StatusMessageModel::Context::VARIABLE_VALUE;
-      field_data.status.description = INTERNAL_ERROR_MESSAGE;
+      field_data.status.description = error;
     } else {
       field_data.well_known_jclass =
           WellKnownJClassFromSignature(field_reader.GetStaticType());

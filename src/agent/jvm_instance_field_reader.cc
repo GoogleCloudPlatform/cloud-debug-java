@@ -17,6 +17,7 @@
 #include "jvm_instance_field_reader.h"
 
 #include "jvariant.h"
+#include "messages.h"
 
 namespace devtools {
 namespace cdbg {
@@ -41,9 +42,11 @@ JvmInstanceFieldReader::JvmInstanceFieldReader(
 
 bool JvmInstanceFieldReader::ReadValue(
     jobject source_object,
-    JVariant* result) const {
+    JVariant* result,
+    FormatMessageModel* error) const {
   switch (signature_.type) {
     case JType::Void:
+      *error = INTERNAL_ERROR_MESSAGE;
       LOG(ERROR) << "'void' type is unexpected";
       return false;
 
@@ -95,6 +98,8 @@ bool JvmInstanceFieldReader::ReadValue(
     }
   }
 
+  // Logic flow should not reach this point.
+  *error = INTERNAL_ERROR_MESSAGE;
   return false;
 }
 

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_INSTANCE_FIELD_READER_H_
 
 #include "common.h"
+#include "model.h"
 #include "type_util.h"
 
 namespace devtools {
@@ -43,7 +44,13 @@ class InstanceFieldReader {
   // Reads the value of the member variable from "source_object". If the
   // instance field is of an object type, "result" will contain a local
   // reference.
-  virtual bool ReadValue(jobject source_object, JVariant* result) const = 0;
+  //
+  // If there is an error, false is returned and the error field is populated
+  // with an error message.
+  virtual bool ReadValue(
+      jobject source_object,
+      JVariant* result,
+      FormatMessageModel* error) const = 0;
 };
 
 }  // namespace cdbg

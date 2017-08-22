@@ -45,7 +45,8 @@ class JvmInstanceFieldReader : public InstanceFieldReader {
 
   bool ReadValue(
       jobject source_object,
-      JVariant* result) const override;
+      JVariant* result,
+      FormatMessageModel* error) const override;
 
  private:
   // Name of the member variable.

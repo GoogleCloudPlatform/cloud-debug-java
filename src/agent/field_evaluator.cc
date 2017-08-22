@@ -267,8 +267,9 @@ ErrorOr<JVariant> FieldEvaluator::InstanceFieldComputer(
     }
 
     JVariant next;
-    if (!reader->ReadValue(source_jobject, &next)) {
-      return INTERNAL_ERROR_MESSAGE;
+    FormatMessageModel error;
+    if (!reader->ReadValue(source_jobject, &next, &error)) {
+      return error;
     }
 
     result = std::move(next);

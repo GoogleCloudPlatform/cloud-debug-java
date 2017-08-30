@@ -8,7 +8,7 @@ namespace cdbg {
 
 // Config file to search for via ClassLookupPath.readApplicationResource, which
 // is currently documented in ClassPathLookup.java
-static constexpr char kResourcePath[] = "debugger-config.yaml";
+static constexpr char kResourcePath[] = "debugger-blacklist.yaml";
 
 // Reads the debugger yaml config.
 //
@@ -26,7 +26,7 @@ static bool ReadYamlConfig(
   if (files.size() > 1) {
     LOG(ERROR) << "Multiple " << kResourcePath << " files found." << "  Found "
                << files.size() << " files.";
-    *error = "Multiple debugger-config.yaml files found";
+    *error = "Multiple debugger-blacklist.yaml files found";
     return false;
   }
 
@@ -59,7 +59,7 @@ static bool ParseYamlConfig(
   if (config_parser.HasException()) {
     LOG(ERROR) << "Exception creating YAML config parser object: "
                << FormatException(config_parser.GetException());
-    *error = "Errors parsing debugger-config.yaml";
+    *error = "Errors parsing debugger-blacklist.yaml";
     return false;
   }
 

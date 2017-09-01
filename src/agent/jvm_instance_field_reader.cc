@@ -25,10 +25,14 @@ namespace cdbg {
 JvmInstanceFieldReader::JvmInstanceFieldReader(
     const string& name,
     jfieldID field_id,
-    const JSignature& signature)
+    const JSignature& signature,
+    bool is_read_error,
+    const FormatMessageModel& read_error)
     : name_(name),
       signature_(signature),
-      field_id_(field_id) {
+      field_id_(field_id),
+      is_read_error_(is_read_error),
+      read_error_(read_error) {
 }
 
 
@@ -36,7 +40,9 @@ JvmInstanceFieldReader::JvmInstanceFieldReader(
     const JvmInstanceFieldReader& jvm_instance_field_reader)
     : name_(jvm_instance_field_reader.name_),
       signature_(jvm_instance_field_reader.signature_),
-      field_id_(jvm_instance_field_reader.field_id_) {
+      field_id_(jvm_instance_field_reader.field_id_),
+      is_read_error_(jvm_instance_field_reader.is_read_error_),
+      read_error_(jvm_instance_field_reader.read_error_) {
 }
 
 
@@ -44,6 +50,11 @@ bool JvmInstanceFieldReader::ReadValue(
     jobject source_object,
     JVariant* result,
     FormatMessageModel* error) const {
+  if (is_read_error_) {
+    *error = read_error_;
+    return false;
+  }
+
   switch (signature_.type) {
     case JType::Void:
       *error = INTERNAL_ERROR_MESSAGE;

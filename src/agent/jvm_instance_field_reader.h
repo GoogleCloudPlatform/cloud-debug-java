@@ -26,10 +26,16 @@ namespace cdbg {
 // Reads specific instance field from Java object.
 class JvmInstanceFieldReader : public InstanceFieldReader {
  public:
+  // Construct a field reader for the given field_id.
+  //
+  // If is_read_error == true, then read_error will be returned
+  // on any calls to ReadValue()
   JvmInstanceFieldReader(
       const string& name,
       jfieldID field_id,
-      const JSignature& signature);
+      const JSignature& signature,
+      bool is_read_error,
+      const FormatMessageModel& read_error);
 
   JvmInstanceFieldReader(
       const JvmInstanceFieldReader& jvm_instance_field_reader);
@@ -58,6 +64,11 @@ class JvmInstanceFieldReader : public InstanceFieldReader {
   // JVMTI specific field ID. The value of "jfieldID" remains valid as long as
   // the class containing this field is loaded.
   const jfieldID field_id_;
+
+  // If is_read_error_ is true, read_error_ is returned whenever ReadValue is
+  // called.
+  const bool is_read_error_;
+  const FormatMessageModel read_error_;
 };
 
 }  // namespace cdbg

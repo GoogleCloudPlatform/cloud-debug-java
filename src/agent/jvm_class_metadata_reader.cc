@@ -321,16 +321,29 @@ void JvmClassMetadataReader::LoadFieldInfo(
     return;  // Field is invisible.
   }
 
+  // Determine if the data for this field is visible.  If not,
+  // populate data_invisible with the appropriate error message
+  FormatMessageModel data_invisible_message;
+  const bool is_data_visible = class_visibility != nullptr ?
+      class_visibility->IsFieldDataVisible(
+          field_name,
+          field_modifiers,
+          &data_invisible_message.format) :
+      true;
+
   if ((field_modifiers & JVM_ACC_STATIC) == 0) {
     // Instance field.
     std::unique_ptr<InstanceFieldReader> reader(
         new JvmInstanceFieldReader(
             field_name,
             field_id,
-            JSignatureFromSignature(field_signature)));
+            JSignatureFromSignature(field_signature),
+            !is_data_visible,
+            data_invisible_message));
     metadata->instance_fields.push_back(std::move(reader));
   } else {
     // Static field.
+    // TODO(mattwach): Add data_invisible here too.
     std::unique_ptr<StaticFieldReader> reader(
         new JvmStaticFieldReader(
             cls,

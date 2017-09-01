@@ -26,11 +26,17 @@ namespace cdbg {
 // Reads specific static field from Java object.
 class JvmStaticFieldReader : public StaticFieldReader {
  public:
+  // Construct a static field reader for the given field_id.
+  //
+  // If is_read_error == true, then read_error will be returned on any calls to
+  // ReadValue().
   JvmStaticFieldReader(
       jclass cls,
       const string& name,
       jfieldID field_id,
-      const JSignature& signature);
+      const JSignature& signature,
+      bool is_read_error,
+      const FormatMessageModel& read_error);
 
   JvmStaticFieldReader(
       const JvmStaticFieldReader& jvm_static_field_reader);
@@ -45,7 +51,7 @@ class JvmStaticFieldReader : public StaticFieldReader {
 
   const JSignature& GetStaticType() const override { return signature_; }
 
-  bool ReadValue(JVariant* result) const override;
+  bool ReadValue(JVariant* result, FormatMessageModel* error) const override;
 
  private:
   // Global reference to Java class object to which the static field belongs.
@@ -60,6 +66,11 @@ class JvmStaticFieldReader : public StaticFieldReader {
   // JVMTI specific field ID. The value of "jfieldID" remains valid as long as
   // the class containing this field is loaded.
   const jfieldID field_id_;
+
+  // If is_read_error_ is true, read_error_ is returned whenever ReadValue is
+  // called.
+  const bool is_read_error_;
+  const FormatMessageModel read_error_;
 };
 
 }  // namespace cdbg

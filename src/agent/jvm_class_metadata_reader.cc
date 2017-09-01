@@ -343,13 +343,14 @@ void JvmClassMetadataReader::LoadFieldInfo(
     metadata->instance_fields.push_back(std::move(reader));
   } else {
     // Static field.
-    // TODO(mattwach): Add data_invisible here too.
     std::unique_ptr<StaticFieldReader> reader(
         new JvmStaticFieldReader(
             cls,
             field_name,
             field_id,
-            JSignatureFromSignature(field_signature)));
+            JSignatureFromSignature(field_signature),
+            !is_data_visible,
+            data_invisible_message));
     metadata->static_fields.push_back(std::move(reader));
   }
 }

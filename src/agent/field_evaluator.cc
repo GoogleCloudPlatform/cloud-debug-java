@@ -304,8 +304,9 @@ ErrorOr<JVariant> FieldEvaluator::ArrayLengthComputer(
 ErrorOr<JVariant> FieldEvaluator::StaticFieldComputer(
     const EvaluationContext& evaluation_context) const {
   JVariant result;
-  if (!static_field_reader_->ReadValue(&result)) {
-    return INTERNAL_ERROR_MESSAGE;
+  FormatMessageModel error;
+  if (!static_field_reader_->ReadValue(&result, &error)) {
+    return error;
   }
 
   return std::move(result);

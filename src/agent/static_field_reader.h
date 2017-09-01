@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_STATIC_FIELD_READER_H_
 
 #include "common.h"
+#include "model.h"
 #include "type_util.h"
 
 namespace devtools {
@@ -45,7 +46,10 @@ class StaticFieldReader {
   // Reads the value of the static variable. If the static field is of an
   // object type, "result" will contain a local reference (which the caller
   // is responsible to release).
-  virtual bool ReadValue(JVariant* result) const = 0;
+  //
+  // If there is an error, false is returned and the error field is populated
+  // with an error message.
+  virtual bool ReadValue(JVariant* result, FormatMessageModel* error) const = 0;
 };
 
 }  // namespace cdbg

@@ -17,6 +17,7 @@
 #include "jvm_static_field_reader.h"
 
 #include "jvariant.h"
+#include "messages.h"
 
 namespace devtools {
 namespace cdbg {
@@ -25,11 +26,15 @@ JvmStaticFieldReader::JvmStaticFieldReader(
     jclass cls,
     const string& name,
     jfieldID field_id,
-    const JSignature& signature)
+    const JSignature& signature,
+    bool is_read_error,
+    const FormatMessageModel& read_error)
     : cls_(static_cast<jclass>(jni()->NewGlobalRef(cls))),
       name_(name),
       signature_(signature),
-      field_id_(field_id) {
+      field_id_(field_id),
+      is_read_error_(is_read_error),
+      read_error_(read_error) {
 }
 
 
@@ -39,7 +44,9 @@ JvmStaticFieldReader::JvmStaticFieldReader(
           jni()->NewGlobalRef(jvm_static_field_reader.cls_))),
       name_(jvm_static_field_reader.name_),
       signature_(jvm_static_field_reader.signature_),
-      field_id_(jvm_static_field_reader.field_id_) {
+      field_id_(jvm_static_field_reader.field_id_),
+      is_read_error_(jvm_static_field_reader.is_read_error_),
+      read_error_(jvm_static_field_reader.read_error_) {
 }
 
 
@@ -62,14 +69,23 @@ std::unique_ptr<StaticFieldReader> JvmStaticFieldReader::Clone() const {
 }
 
 
-bool JvmStaticFieldReader::ReadValue(JVariant* result) const {
+bool JvmStaticFieldReader::ReadValue(
+    JVariant* result,
+    FormatMessageModel* error) const {
+  if (is_read_error_) {
+    *error = read_error_;
+    return false;
+  }
+
   if (cls_ == nullptr) {
+    *error = INTERNAL_ERROR_MESSAGE;
     LOG(WARNING) << "Java class not available to read static field";
     return false;
   }
 
   switch (signature_.type) {
     case JType::Void:
+      *error = INTERNAL_ERROR_MESSAGE;
       LOG(ERROR) << "'void' type is unexpected";
       return false;
 
@@ -121,6 +137,8 @@ bool JvmStaticFieldReader::ReadValue(JVariant* result) const {
     }
   }
 
+  // Logic flow should not reach this point.
+  *error = INTERNAL_ERROR_MESSAGE;
   return false;
 }
 

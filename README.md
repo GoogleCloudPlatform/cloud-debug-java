@@ -214,3 +214,11 @@ launcher command (same way as with `-agentpath`):
 You can also set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable
 to the JSON file instead of setting the `auth.serviceaccount.jsonfile` argument.
 
+
+### Other JVM Languages
+
+Starting with version 2.13, you can use the Java Cloud Debugger to debug Scala
+applications. You can take snapshots in both `.scala` and `.java` source files,
+however snapshot expressions and conditions must be always be written using the
+Java programming language syntax.
+

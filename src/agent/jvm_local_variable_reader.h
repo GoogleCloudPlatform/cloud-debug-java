@@ -33,9 +33,14 @@ class JvmLocalVariableReader : public LocalVariableReader {
   // Constructs local variable reader from the appropriate JVMTI structure. If
   // "entry.length" is -1, the local variable is assumed to be available in all
   // function locations.
+  //
+  // If is_read_error == true, then read_error will be returned on any calls to
+  // ReadValue().
   JvmLocalVariableReader(
       const jvmtiLocalVariableEntry& entry,
-      bool is_argument);
+      bool is_argument,
+      bool is_read_error,
+      const FormatMessageModel& read_error);
 
   JvmLocalVariableReader(const JvmLocalVariableReader& source);
 
@@ -49,7 +54,8 @@ class JvmLocalVariableReader : public LocalVariableReader {
 
   bool ReadValue(
       const EvaluationContext& evaluation_context,
-      JVariant* result) const override;
+      JVariant* result,
+      FormatMessageModel* error) const override;
 
   bool IsDefinedAtLocation(jlocation location) const override;
 
@@ -73,6 +79,11 @@ class JvmLocalVariableReader : public LocalVariableReader {
 
   // Local variable slot (runtime identifier of the local variable).
   const jint slot_;
+
+  // If is_read_error_ is true, read_error_ is returned whenever ReadValue is
+  // called.
+  const bool is_read_error_;
+  const FormatMessageModel read_error_;
 };
 
 }  // namespace cdbg

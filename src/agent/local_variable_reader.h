@@ -19,6 +19,7 @@
 
 #include <memory>
 #include "common.h"
+#include "model.h"
 #include "type_util.h"
 
 namespace devtools {
@@ -57,9 +58,13 @@ class LocalVariableReader {
   virtual bool IsDefinedAtLocation(jlocation location) const = 0;
 
   // Reads the value of a variable.
+  //
+  // If there is an error, false is returned and the error field is populated
+  // with an error message.
   virtual bool ReadValue(
       const EvaluationContext& evaluation_context,
-      JVariant* result) const = 0;
+      JVariant* result,
+      FormatMessageModel* error) const = 0;
 };
 
 }  // namespace cdbg

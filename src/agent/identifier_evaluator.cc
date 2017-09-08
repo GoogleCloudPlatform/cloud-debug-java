@@ -132,8 +132,9 @@ ErrorOr<JVariant> IdentifierEvaluator::Evaluate(
 ErrorOr<JVariant> IdentifierEvaluator::LocalVariableComputer(
     const EvaluationContext& evaluation_context) const {
   JVariant result;
-  if (!variable_reader_->ReadValue(evaluation_context, &result)) {
-    return INTERNAL_ERROR_MESSAGE;
+  FormatMessageModel error;
+  if (!variable_reader_->ReadValue(evaluation_context, &result, &error)) {
+    return error;
   }
 
   return std::move(result);
@@ -143,8 +144,9 @@ ErrorOr<JVariant> IdentifierEvaluator::LocalVariableComputer(
 ErrorOr<JVariant> IdentifierEvaluator::ImplicitInstanceFieldComputer(
     const EvaluationContext& evaluation_context) const {
   JVariant result;
-  if (!variable_reader_->ReadValue(evaluation_context, &result)) {
-    return INTERNAL_ERROR_MESSAGE;
+  FormatMessageModel error;
+  if (!variable_reader_->ReadValue(evaluation_context, &result, &error)) {
+    return error;
   }
 
   for (const auto& reader : instance_fields_chain_) {

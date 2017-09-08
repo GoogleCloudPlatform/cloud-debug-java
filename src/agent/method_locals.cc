@@ -145,18 +145,27 @@ std::shared_ptr<MethodLocals::Entry> MethodLocals::LoadEntry(
             method_name,
             method_signature,
             local_variable_entry.name)) {
-      // The local variable is marked as invisible.
-      // TODO(vlif): instead of just skipping a variable, it would be nice to
-      // define a custom instance of "LocalVariableReader" that would always
-      // return an info status saying something like "redacted".
       continue;
     }
+
+    // Determine if the data for this variable is visible.  If not,
+    // populate data_invisible with the appropriate error message.
+    FormatMessageModel data_invisible_message;
+    const bool is_data_visible = class_visibility != nullptr ?
+        class_visibility->IsVariableDataVisible(
+            method_name,
+            method_signature,
+            local_variable_entry.name,
+            &data_invisible_message.format) :
+        true;
 
     entry->locals.push_back(
         std::unique_ptr<LocalVariableReader>(
             new JvmLocalVariableReader(
                 local_variable_entry,
-                local_variable_entry.slot < arguments_size)));
+                local_variable_entry.slot < arguments_size,
+                !is_data_visible,
+                data_invisible_message)));
   }
 
   return entry;
@@ -211,8 +220,9 @@ std::unique_ptr<LocalVariableReader> MethodLocals::LoadLocalInstance(
   localInstance.slot = 0;
 
   // Marking local instance as an argument (rather than a local variable).
+  FormatMessageModel unused_message;
   return std::unique_ptr<LocalVariableReader>(
-      new JvmLocalVariableReader(localInstance, true));
+      new JvmLocalVariableReader(localInstance, true, false, unused_message));
 }
 
 

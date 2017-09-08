@@ -362,11 +362,15 @@ ErrorOr<JVariant> MethodCallEvaluator::EvaluateSourceObject(
 
   if (local_instance_reader_ != nullptr) {
     JVariant source;
-    if (local_instance_reader_->ReadValue(evaluation_context, &source)) {
+    FormatMessageModel error;
+    if (local_instance_reader_->ReadValue(
+        evaluation_context,
+        &source,
+        &error)) {
       return std::move(source);
     }
 
-    return INTERNAL_ERROR_MESSAGE;
+    return error;
   }
 
   return INTERNAL_ERROR_MESSAGE;

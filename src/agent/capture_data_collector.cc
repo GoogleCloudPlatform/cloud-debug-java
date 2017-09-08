@@ -324,10 +324,11 @@ void CaptureDataCollector::ReadLocalVariables(
         : (*local_variables)[local_variables_index++];
 
     item.name = reader->GetName();
-    if (!reader->ReadValue(evaluation_context, &item.value)) {
+    FormatMessageModel error;
+    if (!reader->ReadValue(evaluation_context, &item.value, &error)) {
       item.status.is_error = false;
       item.status.refers_to = StatusMessageModel::Context::VARIABLE_VALUE;
-      item.status.description = INTERNAL_ERROR_MESSAGE;
+      item.status.description = error;
     } else {
       item.well_known_jclass =
           WellKnownJClassFromSignature(reader->GetStaticType());

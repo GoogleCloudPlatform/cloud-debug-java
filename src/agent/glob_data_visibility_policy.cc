@@ -26,9 +26,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   bool IsFieldVisible(
       const string& field_name,
       int32 field_modifiers) override {
-    // TODO(mattwach): Return true after client handling logic is added.
-    string unused_reason;
-    return IsFieldDataVisible(field_name, field_modifiers, &unused_reason);
+    return true;
   }
 
   bool IsFieldDataVisible(
@@ -50,13 +48,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
       const string& method_name,
       const string& method_signature,
       const string& variable_name) override {
-    // TODO(mattwach): Return true after client handling logic is added.
-    string unused_reason;
-    return IsVariableDataVisible(
-        method_name,
-        method_signature,
-        variable_name,
-        &unused_reason);
+    return true;
   }
 
   bool IsVariableDataVisible(
@@ -100,12 +92,11 @@ class ClassImpl : public DataVisibilityPolicy::Class {
 
 
 // A simple implementation of DataVisibilityPolicy::Class which always
-// reports that methods and fields are invisible.
+// reports that methods and fields have their data hidden.
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
   bool IsFieldVisible(const string& name, int32 field_modifiers) override {
-    // TODO(mattwach): Return true after client handling logic is added.
-    return false;
+    return true;
   }
 
   bool IsFieldDataVisible(
@@ -127,8 +118,7 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
       const string& method_name,
       const string& method_signature,
       const string& variable_name) override {
-    // TODO(mattwach): Return true after client handling logic is added.
-    return false;
+    return true;
   }
 
   bool IsVariableDataVisible(

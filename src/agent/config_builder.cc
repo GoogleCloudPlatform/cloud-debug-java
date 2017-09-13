@@ -51,43 +51,45 @@ DEFINE_FLAG(
     int32,
     expression_max_classes_load_quota,
     5,
-    "Maximum number of methods that the code is allowed to load during "
-    "evaluation of a single expression");
+    "Maximum number of classes that the NanoJava interpreter is allowed "
+    "to load while evaluating a single breakpoint expression");
 
 DEFINE_FLAG(
     int32,
     expression_max_interpreter_instructions_quota,
     1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
-    "to execute while evaluating a single expression");
+    "to execute while evaluating a single breakpoint expression");
 
 DEFINE_FLAG(
     int32,
     pretty_printers_max_classes_load_quota,
-    0,  // Safe method caller disabled for pretty printers by default.
-    "Maximum number of methods that the code is allowed to load while "
-    "formatting some well known data structures");
+    0,  // NanoJava interpreter is disabled for pretty printers.
+    "Maximum number of classes that the NanoJava interpreter is allowed "
+    "to load while formatting some well known data structures");
 
 DEFINE_FLAG(
     int32,
     pretty_printers_max_interpreter_instructions_quota,
-    0,  // Safe method caller disabled for pretty printers by default.
+    0,  // NanoJava interpreter is disabled for pretty printers.
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while formatting some well known data structures");
 
 DEFINE_FLAG(
     int32,
     dynamic_log_max_classes_load_quota,
-    0,  // Safe method caller disabled for dynamic logging by default.
-    "Maximum number of methods that the code is allowed to load during "
-    "printout of a single dynamic log statement");
+    5,
+    "Maximum number of classes that the NanoJava interpreter is allowed "
+    "to load while evaluating all expressions in a single dynamic log "
+    "statement");
 
 DEFINE_FLAG(
     int32,
     dynamic_log_max_interpreter_instructions_quota,
-    0,  // Safe method caller disabled for dynamic logging by default.
+    1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
-    "to execute while printing a single dynamic log statement");
+    "to execute while evaluating all expressions in a single dynamic log "
+    "statement");
 
 DEFINE_FLAG(
     int32,

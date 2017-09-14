@@ -18,13 +18,15 @@ static constexpr char kResourcePath[] = "debugger-config.yaml";
 // Returns false (error) if there were multiple configurations found.
 static bool ReadYamlConfig(
     ClassPathLookup* class_path_lookup,
-    string* config) {
+    string* config,
+    string* error) {
   std::set<string> files =
       class_path_lookup->ReadApplicationResource(kResourcePath);
 
   if (files.size() > 1) {
     LOG(ERROR) << "Multiple " << kResourcePath << " files found." << "  Found "
                << files.size() << " files.";
+    *error = "Multiple debugger-config.yaml files found";
     return false;
   }
 
@@ -48,7 +50,8 @@ static bool ReadYamlConfig(
 // Returns true if parse was sucessful, false otherwise.
 static bool ParseYamlConfig(
     const string& yaml_config,
-    GlobDataVisibilityPolicy::Config* config) {
+    GlobDataVisibilityPolicy::Config* config,
+    string* error) {
   // Gather all needed data here.  Do not alter config until all data has been
   // collected without error.
   ExceptionOr<JniLocalRef> config_parser =
@@ -56,6 +59,7 @@ static bool ParseYamlConfig(
   if (config_parser.HasException()) {
     LOG(ERROR) << "Exception creating YAML config parser object: "
                << FormatException(config_parser.GetException());
+    *error = "Errors parsing debugger-config.yaml";
     return false;
   }
 
@@ -66,6 +70,7 @@ static bool ParseYamlConfig(
   if (blacklist_patterns.HasException()) {
     LOG(ERROR) << "Exception getting blacklist patterns: "
                << FormatException(blacklist_patterns.GetException());
+    *error = "Error building blacklist patterns";
     return false;
   }
 
@@ -76,6 +81,7 @@ static bool ParseYamlConfig(
   if (whitelist_patterns.HasException()) {
     LOG(ERROR) << "Exception getting whitelist patterns: "
                << FormatException(whitelist_patterns.GetException());
+    *error = "Error building whitelist patterns";
     return false;
   }
 
@@ -105,15 +111,21 @@ GlobDataVisibilityPolicy::Config ReadYamlDataVisibilityConfiguration(
   GlobDataVisibilityPolicy::Config config;
 
   string yaml_config;
-  bool ok = ReadYamlConfig(class_path_lookup, &yaml_config);
-
-  if (ok && !yaml_config.empty()) {
-    ok = ParseYamlConfig(yaml_config, &config);
+  string error;
+  if (!ReadYamlConfig(class_path_lookup, &yaml_config, &error)) {
+    config.parse_error = error;
+    return config;
   }
 
-  if (ok && config.whitelists.Empty()) {
-    // If there are no errors and no whitelist was provided,
-    // whitelist everything by default.
+  if (!yaml_config.empty()) {
+    if (!ParseYamlConfig(yaml_config, &config, &error)) {
+      config.parse_error = error;
+      return config;
+    }
+  }
+
+  if (config.whitelists.Empty()) {
+    // Whitelist everything by default.
     config.whitelists.Add("*");
   }
 

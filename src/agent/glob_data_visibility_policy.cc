@@ -95,6 +95,9 @@ class ClassImpl : public DataVisibilityPolicy::Class {
 // reports that methods and fields have their data hidden.
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
+  BlacklistedClassImpl(const string& reason) :
+    reason_(reason) { }
+
   bool IsFieldVisible(const string& name, int32 field_modifiers) override {
     return true;
   }
@@ -103,7 +106,7 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
       const string& name,
       int32 field_modifiers,
       string* reason) override {
-    *reason = kReasonIsBlacklisted;
+    *reason = reason_;
     return false;
   }
 
@@ -126,15 +129,24 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
       const string& method_signature,
       const string& variable_name,
       string* reason) override {
-    *reason = kReasonIsBlacklisted;
+    *reason = reason_;
     return false;
   }
+
+ private:
+  const string reason_;
 };
 
 }  // namespace
 
 std::unique_ptr<DataVisibilityPolicy::Class>
 GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
+  if (!config_.parse_error.empty()) {
+    // There was a parsing error while trying to load the debugger config.
+    return std::unique_ptr<Class>(
+        new BlacklistedClassImpl(config_.parse_error));
+  }
+
   string signature = GetClassSignature(cls);
   if ((signature.size() < 3) ||
       (signature.front() != 'L') || (signature.back() != ';')) {
@@ -169,7 +181,8 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   // class.
   if (config_.blacklists.Matches(path) ||
       !config_.whitelists.PrefixCanMatch(path)) {
-    return std::unique_ptr<Class>(new BlacklistedClassImpl());
+    return std::unique_ptr<Class>(
+        new BlacklistedClassImpl(kReasonIsBlacklisted));
   }
 
   return std::unique_ptr<Class>(new ClassImpl(path, &config_));

@@ -93,6 +93,8 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
   struct Config {
     GlobSet blacklists;
     GlobSet whitelists;
+    // This string is left empty if there was no parsing error.
+    string parse_error;
   };
 
   explicit GlobDataVisibilityPolicy(Config config)

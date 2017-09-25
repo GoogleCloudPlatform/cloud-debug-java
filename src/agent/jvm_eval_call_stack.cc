@@ -17,15 +17,8 @@
 #include "jvm_eval_call_stack.h"
 
 #include <algorithm>
-#include "common.h"
 #include "jni_utils.h"
 #include "jvmti_buffer.h"
-
-DEFINE_FLAG(
-    int32,
-    max_stack_depth,
-    20,
-    "Maximum number of stack frames to unwind");
 
 namespace devtools {
 namespace cdbg {
@@ -42,13 +35,12 @@ void JvmEvalCallStack::Read(jthread thread, std::vector<JvmFrame>* result) {
 
   // Load call stack through JVMTI.
   jint frames_count = 0;
-  std::unique_ptr<jvmtiFrameInfo[]> frames(
-      new jvmtiFrameInfo[base::GetFlag(FLAGS_max_stack_depth)]);
+  jvmtiFrameInfo frames[kMaxStackDepth];
   err = jvmti()->GetStackTrace(
       thread,
       0,
-      base::GetFlag(FLAGS_max_stack_depth),
-      frames.get(),
+      arraysize(frames),
+      frames,
       &frames_count);
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "Failed to get stack trace, error: " << err;

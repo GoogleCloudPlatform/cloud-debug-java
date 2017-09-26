@@ -27,10 +27,6 @@
 namespace devtools {
 namespace cdbg {
 
-// Maximum number of call frames to read from stack trace. Call frames beyond
-// that will be ignored.
-constexpr int kMaxStackDepth = 20;
-
 // Reads call stack using JVMTI methods.
 class JvmEvalCallStack : public EvalCallStack {
  public:

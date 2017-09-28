@@ -649,9 +649,16 @@ std::unique_ptr<BreakpointModel> DeserializeModel<BreakpointModel>(
     return nullptr;
   }
 
+  // Breakpoint labels.
   if (!DeserializeModel(root["labels"], &model->labels)) {
     return nullptr;
   }
+
+  // evaluated_user_id field is output-only, and hence, it does not need
+  // translation.
+  // TODO(emrekultursay): There are various other output-only fields that also
+  // don't need translation. We should either remove them too, or add
+  // evaluated_user_id here, in order to be symmetric.
 
   return model;
 }

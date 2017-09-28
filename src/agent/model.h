@@ -99,6 +99,11 @@ struct StackFrameModel {
   std::vector<std::unique_ptr<VariableModel>> locals;
 };
 
+struct UserIdModel {
+  string kind;
+  string id;
+};
+
 struct BreakpointModel {
   enum class Action {
     CAPTURE = 0,
@@ -134,6 +139,7 @@ struct BreakpointModel {
   std::vector<std::unique_ptr<VariableModel>> evaluated_expressions;
   std::vector<std::unique_ptr<VariableModel>> variable_table;
   std::map<string, string> labels;
+  std::unique_ptr<UserIdModel> evaluated_user_id;
 };
 
 // BreakpointModel in serialized form that we send to the Java code. The

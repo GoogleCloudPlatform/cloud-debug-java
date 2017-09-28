@@ -342,6 +342,38 @@ class StackFrameBuilder {
 };
 
 
+class UserIdBuilder {
+ public:
+  typedef UserIdModel ResultType;
+
+  UserIdBuilder() { }
+
+  explicit UserIdBuilder(const UserIdModel& source) {
+    data_->kind = source.kind;
+    data_->id = source.id;
+  }
+
+  UserIdBuilder& set_kind(string kind) {
+    data_->kind = std::move(kind);
+    return *this;
+  }
+
+  UserIdBuilder& set_id(string id) {
+    data_->id = std::move(id);
+    return *this;
+  }
+
+  std::unique_ptr<UserIdModel> build() {
+    return std::move(data_);
+  }
+
+ private:
+  std::unique_ptr<UserIdModel> data_ { new UserIdModel };
+
+  DISALLOW_COPY_AND_ASSIGN(UserIdBuilder);
+};
+
+
 class BreakpointBuilder {
  public:
   typedef BreakpointModel ResultType;
@@ -528,6 +560,17 @@ class BreakpointBuilder {
     return *this;
   }
 
+  BreakpointBuilder& set_evaluated_user_id(
+      std::unique_ptr<UserIdModel> evaluated_user_id) {
+    data_->evaluated_user_id = std::move(evaluated_user_id);
+    return *this;
+  }
+
+  BreakpointBuilder& set_evaluated_user_id(
+      UserIdBuilder& evaluated_user_id) {  // NOLINT
+    return set_evaluated_user_id(evaluated_user_id.build());
+  }
+
   std::unique_ptr<BreakpointModel> build() {
     return std::move(data_);
   }
@@ -647,6 +690,27 @@ inline std::ostream& operator<< (
   return os;
 }
 
+
+// Debug printer for user id.
+inline std::ostream& operator<< (
+    std::ostream& os,
+    const UserIdModel& message) {
+  os << message.kind << ":" << message.id;
+  return os;
+}
+
+
+inline std::ostream& operator<< (
+    std::ostream& os,
+    const std::unique_ptr<UserIdModel>& message) {
+  if (message == nullptr) {
+    os << "null";
+    return os;
+  }
+
+  os << *message;
+  return os;
+}
 
 }  // namespace cdbg
 }  // namespace devtools

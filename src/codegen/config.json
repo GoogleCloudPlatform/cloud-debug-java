@@ -225,6 +225,15 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "com.google.devtools.cdbg.debuglets.java.UserIdProvider",
+      "methods": [
+        {
+          "methodName": "format"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "com.google.devtools.cdbg.debuglets.java.BreakpointLabelsProvider",
       "methods": [
         {

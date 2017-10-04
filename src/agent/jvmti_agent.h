@@ -53,6 +53,7 @@ class JvmtiAgent : public Worker::Provider {
       std::vector<bool (*)(jobject)> fn_loaders,
       std::unique_ptr<Bridge> bridge,
       std::function<JniLocalRef()> breakpoint_labels_provider_factory,
+      std::function<JniLocalRef()> user_id_provider_factory,
       std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
           data_visibility_policy_fn,
       bool enable_capabilities,
@@ -153,6 +154,10 @@ class JvmtiAgent : public Worker::Provider {
   // Factory for a class implementing the Java
   // com.google.devtools.cdbg.debuglets.java.BreakpointLabelsProvider interface.
   const std::function<JniLocalRef()> breakpoint_labels_provider_factory_;
+
+  // Factory for a class implementing the Java
+  // com.google.devtools.cdbg.debuglets.java.UserIdProvider interface.
+  const std::function<JniLocalRef()> user_id_provider_factory_;
 
   // Reads data visibility configuration from .JAR files.
   const std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>

@@ -387,6 +387,10 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
           return jniproxy::GcpBreakpointLabelsProvider()->NewObject()
               .Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
       },
+      [] () {
+        // There is no user id provider in GCE environment.
+        return nullptr;
+      },
       [] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
         return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
             new devtools::cdbg::GlobDataVisibilityPolicy(

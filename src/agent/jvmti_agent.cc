@@ -98,6 +98,7 @@ JvmtiAgent::JvmtiAgent(
     std::vector<bool (*)(jobject)> fn_loaders,
     std::unique_ptr<Bridge> bridge,
     std::function<JniLocalRef()> breakpoint_labels_provider_factory,
+    std::function<JniLocalRef()> user_id_provider_factory,
     std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
         data_visibility_policy_fn,
     bool enable_capabilities,
@@ -106,6 +107,7 @@ JvmtiAgent::JvmtiAgent(
       eval_call_stack_(std::move(eval_call_stack)),
       fn_loaders_(std::move(fn_loaders)),
       breakpoint_labels_provider_factory_(breakpoint_labels_provider_factory),
+      user_id_provider_factory_(std::move(user_id_provider_factory)),
       data_visibility_policy_fn_(std::move(data_visibility_policy_fn)),
       enable_capabilities_(enable_capabilities),
       enable_jvmti_events_(enable_jvmti_events),

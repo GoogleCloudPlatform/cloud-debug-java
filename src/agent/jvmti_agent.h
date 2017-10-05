@@ -26,6 +26,7 @@
 #include "data_visibility_policy.h"
 #include "jvm_internals.h"
 #include "scheduler.h"
+#include "user_id_provider.h"
 #include "worker.h"
 
 namespace devtools {
@@ -135,6 +136,9 @@ class JvmtiAgent : public Worker::Provider {
 
   // Creates the instance of "BreakpointLabelsProvider" to use for the debugger.
   std::unique_ptr<BreakpointLabelsProvider> BuildBreakpointLabelsProvider();
+
+  // Creates the instance of "UserIdProvider" to use in the Debugger.
+  std::unique_ptr<UserIdProvider> BuildUserIdProvider();
 
  private:
   // Proxy class to access Java internals implementation.

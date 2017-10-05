@@ -31,6 +31,7 @@
 #include "jvm_object_evaluator.h"
 #include "method_locals.h"
 #include "scheduler.h"
+#include "user_id_provider.h"
 
 namespace devtools {
 namespace cdbg {
@@ -55,6 +56,7 @@ class Debugger {
       ClassPathLookup* class_path_lookup,
       std::unique_ptr<DynamicLogger> dynamic_logger,
       std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
+      std::function<std::unique_ptr<UserIdProvider>()> user_id_provider_factory,
       FormatQueue* format_queue,
       CanaryControl* canary_control = nullptr);
 

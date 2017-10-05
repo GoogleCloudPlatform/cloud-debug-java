@@ -20,6 +20,7 @@
 #include "breakpoint_labels_provider.h"
 #include "config.h"
 #include "method_caller.h"
+#include "user_id_provider.h"
 
 namespace devtools {
 namespace cdbg {
@@ -66,6 +67,9 @@ struct JvmEvaluators {
   // the "Format" call. As a result we need to create a new instance of
   // "BreakpointLabelsProvider" for each breakpoint. Hence this is a factory.
   std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory;
+
+  // Factory for a class that captures end user identity.
+  std::function<std::unique_ptr<UserIdProvider>()> user_id_provider_factory;
 };
 
 

@@ -27,6 +27,12 @@
 #include "object_evaluator.h"
 #include "value_formatter.h"
 
+DEFINE_FLAG(
+    bool,
+    cdbg_capture_user_id,
+    false,
+    "If true, the agent also captures the end user identity for audit logging");
+
 namespace devtools {
 namespace cdbg {
 
@@ -45,10 +51,19 @@ CaptureDataCollector::~CaptureDataCollector() {
 void CaptureDataCollector::Collect(
     const std::vector<CompiledExpression>& watches,
     jthread thread) {
-  // Collect information about the local environment, but don't format it
-  // at this point.
+  // Collect information about the local environment, but don't format it yet.
+  DCHECK(evaluators_->labels_factory);
   breakpoint_labels_provider_ = evaluators_->labels_factory();
+  DCHECK(breakpoint_labels_provider_);
   breakpoint_labels_provider_->Collect();
+
+  // Collect current end user identity, but don't format it yet.
+  if (base::GetFlag(FLAGS_cdbg_capture_user_id)) {
+    DCHECK(evaluators_->user_id_provider_factory);
+    user_id_provider_ = evaluators_->user_id_provider_factory();
+    DCHECK(user_id_provider_);
+    user_id_provider_->Collect();
+  }
 
   std::unique_ptr<MethodCaller> pretty_printers_method_caller =
       evaluators_->method_caller_factory(Config::PRETTY_PRINTERS);
@@ -275,6 +290,17 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
 
   // Format the breakpoint labels.
   breakpoint->labels = breakpoint_labels_provider_->Format();
+
+  // Format the end user identity.
+  if (base::GetFlag(FLAGS_cdbg_capture_user_id)) {
+    string kind;
+    string id;
+    if (user_id_provider_->Format(&kind, &id)) {
+      breakpoint->evaluated_user_id.reset(new UserIdModel());
+      breakpoint->evaluated_user_id->kind = kind;
+      breakpoint->evaluated_user_id->id = id;
+    }
+  }
 }
 
 

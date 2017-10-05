@@ -42,6 +42,7 @@ Debugger::Debugger(
     ClassPathLookup* class_path_lookup,
     std::unique_ptr<DynamicLogger> dynamic_logger,
     std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
+    std::function<std::unique_ptr<UserIdProvider>()> user_id_provider_factory,
     FormatQueue* format_queue,
     CanaryControl* canary_control /* = nullptr */)
     : config_(config),
@@ -66,7 +67,8 @@ Debugger::Debugger(
         &class_indexer_,
         &class_files_cache_));
   };
-  evaluators_.labels_factory = labels_factory;
+  evaluators_.labels_factory = std::move(labels_factory);
+  evaluators_.user_id_provider_factory = std::move(user_id_provider_factory);
 
   auto factory = [this, scheduler, format_queue](
       BreakpointsManager* breakpoints_manager,

@@ -29,6 +29,7 @@
 #include "model.h"
 #include "readers_factory.h"
 #include "type_util.h"
+#include "user_id_provider.h"
 
 namespace devtools {
 namespace cdbg {
@@ -224,6 +225,9 @@ class CaptureDataCollector {
 
   // Captures information about local environment into breakpoint labels.
   std::unique_ptr<BreakpointLabelsProvider> breakpoint_labels_provider_;
+
+  // Captures information about end user identity.
+  std::unique_ptr<UserIdProvider> user_id_provider_;
 
   // Captured data of call frames that can be formatted into the message
   // for Hub service.

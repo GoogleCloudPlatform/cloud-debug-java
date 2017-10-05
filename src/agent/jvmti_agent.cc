@@ -25,6 +25,7 @@
 #include "config_builder.h"
 #include "jni_breakpoint_labels_provider.h"
 #include "jni_semaphore.h"
+#include "jni_user_id_provider.h"
 #include "jvm_class_metadata_reader.h"
 #include "jvm_dynamic_logger.h"
 #include "jvm_eval_call_stack.h"
@@ -37,6 +38,7 @@
 #include "jni_proxy_dynamicloghelper.h"
 #include "jni_proxy_hubclient.h"
 #include "jni_proxy_hubclient_listactivebreakpointsresult.h"
+#include "jni_proxy_useridprovider.h"
 
 DEFINE_FLAG(
     string,
@@ -348,6 +350,7 @@ bool JvmtiAgent::OnWorkerReady() {
     jniproxy::BindDynamicLogHelperWithClassLoader,
     jniproxy::BindHubClientWithClassLoader,
     jniproxy::BindHubClient_ListActiveBreakpointsResultWithClassLoader,
+    jniproxy::BindUserIdProviderWithClassLoader,
   };
 
   jni_bind_methods.insert(
@@ -440,6 +443,7 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
           internals_,
           std::move(dynamic_logger),
           std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),
+          std::bind(&JvmtiAgent::BuildUserIdProvider, this),
           &format_queue_,
           worker_.canary_control());
       debugger_->Initialize();
@@ -467,6 +471,12 @@ std::unique_ptr<BreakpointLabelsProvider>
 JvmtiAgent::BuildBreakpointLabelsProvider() {
   return std::unique_ptr<BreakpointLabelsProvider>(
       new JniBreakpointLabelsProvider(breakpoint_labels_provider_factory_));
+}
+
+
+std::unique_ptr<UserIdProvider> JvmtiAgent::BuildUserIdProvider() {
+  return std::unique_ptr<UserIdProvider>(
+      new JniUserIdProvider(user_id_provider_factory_));
 }
 
 }  // namespace cdbg

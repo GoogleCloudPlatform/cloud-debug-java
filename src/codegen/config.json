@@ -25,7 +25,12 @@
       "className": "java.lang.Class",
       "methods": [
         {
-          "methodName": "forName"
+          "methodName": "forName",
+          "methodSignature": "(Ljava/lang/String;)Ljava/lang/Class;"
+        },
+        {
+          "methodName": "forName",
+          "methodSignature": "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"
         }
       ],
       "nativeNamespace": "jniproxy"
@@ -46,7 +51,12 @@
           "methodName": "getSystemClassLoader"
         },
         {
-          "methodName": "loadClass"
+          "methodName": "loadClass",
+          "methodSignature": "(Ljava/lang/String;)Ljava/lang/Class;"
+        },
+        {
+          "methodName": "loadClass",
+          "methodSignature": "(Ljava/lang/String;Z)Ljava/lang/Class;"
         }
       ],
       "nativeNamespace": "jniproxy"

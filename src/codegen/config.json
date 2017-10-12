@@ -52,11 +52,11 @@
         },
         {
           "methodName": "loadClass",
-          "methodSignature": "(Ljava/lang/String;)Ljava/lang/Class;"
+          "methodSignature": "(Ljava/lang/String;Z)Ljava/lang/Class;"
         },
         {
           "methodName": "loadClass",
-          "methodSignature": "(Ljava/lang/String;Z)Ljava/lang/Class;"
+          "methodSignature": "(Ljava/lang/String;)Ljava/lang/Class;"
         }
       ],
       "nativeNamespace": "jniproxy"

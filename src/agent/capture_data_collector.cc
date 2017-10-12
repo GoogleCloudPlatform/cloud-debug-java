@@ -30,7 +30,7 @@
 DEFINE_FLAG(
     bool,
     cdbg_capture_user_id,
-    false,
+    true,
     "If true, the agent also captures the end user identity for audit logging");
 
 namespace devtools {

@@ -1,52 +1,53 @@
-# Java Cloud Debugger
+# Java Cloud Debugger Agent
 
-Google [Cloud Debugger](https://cloud.google.com/tools/cloud-debugger/) for
-Java.
+Google [Cloud Debugger](https://cloud.google.com/debugger/) for Java.
 
 ## Overview
 
-The Cloud Debugger lets you inspect the state of a Java application at any code
-location without stopping or slowing it down. The debugger makes it easier to
-view the application state without adding logging statements.
+Cloud Debugger (also known as Stackdriver Debugger) lets you inspect the state
+of a running cloud application, at any code location, without stopping or
+slowing it down. It is not your traditional process debugger but rather an
+always on, whole app debugger taking snapshots from any instance of the app.
 
-You can use the Cloud Debugger on both production and staging instances of your
-application. The debugger adds less than 10ms to the request latency only when
-the application state is captured. In most cases, this is not noticeable by
-users. The Cloud Debugger gives a read-only experience. Application variables
-can't be changed through the debugger.
+Cloud Debugger is safe for use with production apps or during development.
+The Java debugger agent adds less than 10ms to the request latency when a
+debug snapshot is captured. In most cases, this is not noticeable to users.
+Furthermore, the Java debugger agent does not allow modification of application
+state in any way, and has close to zero impact on the app instances.
 
-The Cloud Debugger attaches to all instances of the application. The call stack
-and the variables come from the first instance to take the snapshot.
+Cloud Debugger attaches to all instances of the app providing the ability to
+take debug snapshots and add logpoints. A snapshot captures the call-stack and
+variables from any one instance that executes the snapshot location. A logpoint
+writes a formatted message to the application log whenever any instance of the
+app executes the logpoint location.
 
-The Java Cloud Debugger is only supported on Linux at the moment. It was tested
+The Java debugger agent is only supported on Linux at the moment. It was tested
 on Debian Linux, but it should work on other distributions as well.
 
-The Cloud Debugger consists of 3 primary components:
+Cloud Debugger consists of 3 primary components:
 
-1.  The debugger agent (requires Java 7 and above).
-2.  Cloud Debugger backend that stores the list of snapshots for each
-    application. You can explore the API using the
+1.  The Java debugger agent (requires Java 7 and above).
+2.  Cloud Debugger service storing and managing snapshots/logpoints.
+    Explore the API's using
     [APIs Explorer](https://developers.google.com/apis-explorer/#p/clouddebugger/v2/).
-3.  User interface for the debugger implemented using the Cloud Debugger API.
-    Currently the only option for Java is the
-    [Google Developers Console](https://console.developers.google.com). The
-    UI requires that the source code is submitted to
-    [Google Cloud Repo](https://cloud.google.com/tools/repo/cloud-repositories/).
-    More options (including browsing local source files) are coming soon.
+3.  User interface, including a command line interface
+    [`gcloud debug`](https://cloud.google.com/sdk/gcloud/reference/debug/) and a
+    Web interface on
+    [Google Cloud Console](https://console.developers.google.com/debug/).
+    See the [online help](https://cloud.google.com/debugger/docs/debugging) on
+    how to use Google Cloud Console Debug page.
 
-This document only focuses on the Java debugger agent. Please see the
-this [page](https://cloud.google.com/tools/cloud-debugger/debugging) for
-explanation how to debug an application with the Cloud Debugger.
-
-## Options for Getting Help
+## Getting Help
 
 1.  StackOverflow: http://stackoverflow.com/questions/tagged/google-cloud-debugger
-2.  Google Group: cdbg-feedback@google.com
+2.  Send email to: [Cloud Debugger Feedback](mailto:cdbg-feedback@google.com)
+3.  Send Feedback from Google Cloud Console
 
 ## Installation
 
-The easiest way to install the debugger agent is to download the pre-built
-package from the Internet:
+The easiest way to install the Java debugger agent for
+[Google Cloud Platform](https://cloud.google.com) is to download the pre-built
+package from the Internet. (the package is updated periodically):
 
 ```shell
 mkdir /opt/cdbg
@@ -54,13 +55,14 @@ wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-whee
     tar xvz -C /opt/cdbg
 ```
 
-Alternatively you can build the debugger agent from source code:
+Alternatively you can build the Java debugger agent from source code:
 
 ```shell
 git clone https://github.com/GoogleCloudPlatform/cloud-debug-java.git
 cd cloud-debug-java
 chmod +x build.sh
 ./build.sh
+ls cdbg_java_agent_gce.tar.gz
 ```
 
 Note that the build script assumes some dependencies. To install these
@@ -74,12 +76,11 @@ sudo apt-get -y -q --no-install-recommends install \
 
 ## Setup
 
-The Java Cloud Debugger agent is a
+The Java debugger agent is a
 [JVMTI](http://docs.oracle.com/javase/7/docs/technotes/guides/jvmti/)
-agent that needs to be enabled when JVM starts. The agent is enabled by
-using `-agentpath`
+agent that needs to be enabled when JVM starts with the `-agentpath`
 [option](http://docs.oracle.com/javase/8/docs/platform/jvmti/jvmti.html#starting)
-with Java launcher. Most debugger options are configured through system
+of the Java launcher. Most of the debugger options are configured through system
 properties.
 
 For example:
@@ -88,11 +89,10 @@ For example:
 java <b>-agentpath:/opt/cdbg/cdbg_java_agent.so</b> -jar ~/myapp.jar
 </pre>
 
-By default the debugger agent assumes that it runs on Google Compute Engine and
-uses local [metadata service](https://cloud.google.com/compute/docs/metadata) to
-obtain the credentials. You can still use the Java Cloud Debugger outside of
-Google Compute Engine or on a virtual machine that does not allow API access to
-all Google Cloud services. This would require setting up a
+By default the Java debugger agent assumes that it runs on Google Cloud Platform
+and obtain the credentials from the local
+[metadata service](https://cloud.google.com/compute/docs/metadata). To use the
+Java debugger agent outside Google Cloud Platform  requires setting up a
 [service account](#service-account).
 
 ### Application Servers
@@ -123,11 +123,12 @@ Add `cdbg.ini` file to `/var/lib/jetty/start.d`:
 -agentpath:/opt/cdbg/cdbg_java_agent.so
 ```
 
-### Configuring Extra Classpath
-The agent needs to be able to find your application classes when it's running
-in an application server like Tomcat or Jetty. By default, the agent looks for
-the exploded root war directory. In other words, if you deployed a `ROOT.war`
-in Tomcat, the agent can find it without additional configuration.
+#### Extra Classpath
+
+The Java debugger agent needs to be able to find the application classes when
+it's running in an application server like Tomcat or Jetty. By default, it
+looks for the exploded root war directory. In other words, if you deployed a
+`ROOT.war` in Tomcat, the agent can find it without additional configuration.
 
 However, if you deployed your WAR file with a different name (e.g.,
 `myapp.war`), or that the exploded WAR directory is not under the default
@@ -140,7 +141,7 @@ let the agent know the full path to your application's classes using the
 -agentpath:/opt/cdbg/cdbg_java_agent.so=--cdbg_extra_class_path=/opt/tomcat/webapps/myapp/WEB-INF/classes
 ```
 
-You can specify multiple paths by using a "`:`" (colon) as the path delimiter.
+You can specify multiple paths by using a `:` (colon) as the path delimiter.
 
 ```none
 -agentpath:/opt/cdbg/cdbg_java_agent.so=--cdbg_extra_class_path=/opt/tomcat/webapps/myapp/WEB-INF/classes:/another/path/with/classes
@@ -149,23 +150,23 @@ You can specify multiple paths by using a "`:`" (colon) as the path delimiter.
 ### Naming and Versioning
 
 Developers can run multiple applications and versions at the same time within
-the same project. You should tag each app version with the Cloud Debugger to
-uniquely identify it in the Cloud Debugger UI.
+the same Google Cloud Platform project. You should tag each app version with
+the Cloud Debugger to uniquely identify it in the Cloud Debugger user interface.
 
 To tag the application and it's version, please add these system properties:
 
 <pre>
--Dcom.google.cdbg.module=<i>mymodule</i>
--Dcom.google.cdbg.version=<i>myversion</i>
+-Dcom.google.cdbg.module=<i>my-app-name</i>
+-Dcom.google.cdbg.version=<i>my-app-version</i>
 </pre>
 
-Use 'module' to name your application (or service).
-Use 'version' to name the app version (e.g. build id).
-The UI will display the running version as 'module - version'.
+Use `module` to name your application (or service).
+Use `version` to name the app version (e.g. build version).
+The UI will display the running version as `module - version`.
 
 ### Logging
 
-By default the Java Cloud Debugger write its logs to `cdbg_java_agent.INFO` file
+By default the Java debugger aget writes its logs to `cdbg_java_agent.INFO` file
 in the default logging directory. It is possible to change the log directory
 as following:
 
@@ -181,44 +182,41 @@ Alternatively you can make the Java Cloud Debugger log to *stderr*:
 
 ### Service Account
 
-Service account authentication lets you run the debugger agent on any Linux
-machine, including outside of [Google Cloud Platform](https://cloud.google.com).
-The debugger agent authenticates against the backend with the service account
-created in [Google Developers Console](https://console.developers.google.com).
-If your application runs on Google Compute Engine,
-[metadata service authentication](#setup) is an easier option.
+To use the Java debugger agent on machines <i>not</i> hosted by Google Cloud
+Platform, the agent must use a Google Cloud Platform service-account credentials
+to authenticate with the Cloud Debugger Service.
 
-The first step for this setup is to create the service account in JSON format.
-Please see
-[OAuth](https://cloud.google.com/storage/docs/authentication?hl=en#generating-a-private-key)
-page for detailed instructions. If you don't have a Google Cloud Platform
-project, you can create one for free on
-[Google Developers Console](https://console.developers.google.com).
+Use the Google Cloud Console Service Accounts
+[page](https://console.cloud.google.com/iam-admin/serviceaccounts/project) to
+create a credentials file for an existing or new service-account. The
+service-account must have at least the `Cloud Debugger Agent` role to be
+accepted by the Cloud Debugger Service.
+If you don't have a Google Cloud Platform project, you can create one for free
+on [Google Cloud Console](https://console.cloud.google.com).
 
-Once you have the service account, please note the service account e-mail,
-[project ID]((https://support.google.com/cloud/answer/6158840).
-Then copy the .json file to all the machines that run your application.
+Once you have the service-account JSON file, deploy it alongside the Java
+debugger agent.
 
-You will need to install the debugger agent that supports the service account.
-The URL is: https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz.
+Using the service-account option requires the Java debugger agent version that
+supports it. Either download the pre-packaged agent from
+https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz
+or the locally built `cdbg_java_agent_service_account.tar.gz`
 
-
-To enable the service account authentication add these arguments to Java
-launcher command (same way as with `-agentpath`):
-
+To use the service-account credentials add these system properties:
 <pre>
 -Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
--Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/svc.json</i>
+-Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/gcp-svc.json</i>
 </pre>
 
-You can also set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable
-to the JSON file instead of setting the `auth.serviceaccount.jsonfile` argument.
+Alternatively, you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment
+variable to the JSON file path instead of adding the
+`auth.serviceaccount.jsonfile` system property.
 
 
 ### Other JVM Languages
 
 Starting with version 2.13, you can use the Java Cloud Debugger to debug Scala
 applications. You can take snapshots in both `.scala` and `.java` source files,
-however snapshot expressions and conditions must be always be written using the
+however snapshot expressions and conditions must always be written using the
 Java programming language syntax.
 

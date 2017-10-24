@@ -16,8 +16,6 @@
 
 package com.google.devtools.cdbg.debuglets.java;
 
-import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warn;
-
 import com.google.devtools.clouddebugger.v2.Labels;
 
 import java.lang.reflect.Constructor;
@@ -83,7 +81,7 @@ final class GcpEnvironment {
       throw new RuntimeException(e);
     }
   }
-  
+
   /**
    * Returns true if the debuglet is configured to authenticate to the backend with service account.
    */
@@ -104,43 +102,6 @@ final class GcpEnvironment {
           jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
         }
 
-        // TODO(emrekultursay): Remove support for p12 file.
-        String p12File = getFlag("auth.serviceaccount.p12file", "service_account_p12_file");
-        if (p12File.isEmpty() && jsonFile.isEmpty()) {
-          throw new RuntimeException(
-              "Service account JSON file not specified for service account authentication. "
-              + "Please set auth.serviceaccount.jsonfile system property, "
-              + "service_account_json_file agent option, or the "
-              + "GOOGLE_APPLICATION_CREDENTIALS environment variable");
-        }
-
-        String projectId;
-        String email;
-
-        if (!p12File.isEmpty()) {
-          warn("p12 file based service account authentication is deprecated and will be removed. "
-              + "Please use JSON file based service account authentication.");
-
-          projectId = getFlag("auth.serviceaccount.projectid", "project_id");
-          if (projectId.isEmpty()) {
-            throw new RuntimeException(
-                "Project ID not specified for service account authentication. Please set either"
-                + "auth.serviceaccount.projectid system property or project_id agent option");
-          }
-
-          email = getFlag("auth.serviceaccount.email", "service_account_email");
-          if (email.isEmpty()) {
-            throw new RuntimeException(
-                "Service account e-mail not specified for service account authentication. Please "
-                + "set either auth.serviceaccount.email system property or "
-                + "service_account_email agent option");
-          }
-        } else {
-          // These will be read from the JSON file.
-          projectId = "";
-          email = "";
-        }
-
         try {
           // Use reflection to create a new instance of "ServiceAccountAuth" class. This way this
           // class has no explicit dependency on "com.google.api.client" package that can be
@@ -149,12 +110,11 @@ final class GcpEnvironment {
               GcpEnvironment.class.getPackage().getName() + ".ServiceAccountAuth",
               true,
               GcpEnvironment.class.getClassLoader()).asSubclass(MetadataQuery.class);
-          Constructor<? extends MetadataQuery> constructor = serviceAccountAuthClass.getConstructor(
-              String.class, String.class, String.class, String.class, String.class);
+          Constructor<? extends MetadataQuery> constructor =
+              serviceAccountAuthClass.getConstructor(String.class);
           // Note that we are passing projectId instead of projectNumber here, as the Cloud Debugger
           // service is able to translate projectId into projectNumber.
-          metadataQuery = constructor.newInstance(
-              new Object[] { projectId, projectId, email, p12File, jsonFile });
+          metadataQuery = constructor.newInstance(new Object[] {jsonFile});
         } catch (ReflectiveOperationException e) {
           // The constructor of ServiceAccountAuth doesn't do any IO. It can fail if something
           // in the environment is broken (for example no trusted root certificates). If such

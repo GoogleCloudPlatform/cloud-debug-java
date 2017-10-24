@@ -17,12 +17,10 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Key;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,47 +72,18 @@ final class ServiceAccountAuth implements MetadataQuery {
 
   /**
    * Class constructor
-   * @param projectId the non-numeric project identifier
-   * @param projectNumber the numeric project identifier
-   * @param serviceAccountEmail service account identifier (pass empty for Json file)
-   * @param serviceAccountP12File p12 file with the private key of the service account
    * @param serviceAccountJsonFile json file with the private key of the service account
    */
-  public ServiceAccountAuth(
-      String projectId,
-      String projectNumber,
-      String serviceAccountEmail,
-      String serviceAccountP12File,
-      String serviceAccountJsonFile)
+  public ServiceAccountAuth(String serviceAccountJsonFile)
       throws GeneralSecurityException, IOException {
-    Objects.requireNonNull(projectId);
-    Objects.requireNonNull(projectNumber);
-    Objects.requireNonNull(serviceAccountEmail);
-    Objects.requireNonNull(serviceAccountP12File);
     Objects.requireNonNull(serviceAccountJsonFile);
 
-    if (!serviceAccountP12File.isEmpty()) {
-      this.projectId = projectId;
-      this.projectNumber = projectNumber;
+    this.projectId = parseServiceAccountAuthJsonFile(serviceAccountJsonFile).getProjectId();
+    this.projectNumber = this.projectId;
 
-      this.credential = new GoogleCredential.Builder()
-          .setTransport(GoogleNetHttpTransport.newTrustedTransport())
-          .setJsonFactory(JacksonFactory.getDefaultInstance())
-          .setServiceAccountId(serviceAccountEmail)
-          .setServiceAccountPrivateKeyFromP12File(new File(serviceAccountP12File))
-          .setServiceAccountScopes(Collections.singleton(CLOUD_PLATFORM_SCOPE))
-          .build();
-    } else if (!serviceAccountJsonFile.isEmpty()) {
-      this.projectId = parseServiceAccountAuthJsonFile(serviceAccountJsonFile).getProjectId();
-      this.projectNumber = this.projectId;
-
-      InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
-      this.credential = GoogleCredential.fromStream(serviceAccountJsonStream)
-          .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
-    } else {
-      throw new NullPointerException(
-          "Both serviceAccountP12File and serviceAccountJsonFile parameters are null");
-    }
+    InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
+    this.credential = GoogleCredential.fromStream(serviceAccountJsonStream)
+        .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
   }
 
   @Override

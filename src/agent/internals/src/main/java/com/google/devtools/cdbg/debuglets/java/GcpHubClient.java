@@ -48,7 +48,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.xml.bind.DatatypeConverter;
 
 class GcpHubClient implements HubClient {
   /**
@@ -586,9 +584,8 @@ class GcpHubClient implements HubClient {
     if (uniquifier == null) {
       boolean hasSourceContext = ((sourceContextFiles != null) && (sourceContextFiles.length > 0));
 
-      // Compute uniquifier of debuggee properties.
-      MessageDigest hash = MessageDigest.getInstance("SHA1");
-      uniquifier = DatatypeConverter.printHexBinary(hash.digest());
+      // Compute uniquifier of debuggee properties. Start with an initial 20B sha-1 hash value.
+      uniquifier = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
 
       if (!labels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {
         // There is no source context and minor version. It means that different versions of the

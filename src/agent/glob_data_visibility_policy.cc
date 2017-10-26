@@ -8,7 +8,6 @@ namespace devtools {
 namespace cdbg {
 
 static constexpr char kReasonIsBlacklisted[] = "blacklisted by config";
-static constexpr char kReasonIsNotWhiteListed[] = "not whitelisted by config";
 
 namespace {
 
@@ -65,17 +64,11 @@ class ClassImpl : public DataVisibilityPolicy::Class {
   //   class_name_ = com.foo.MyClass
   //   suffix = myMethod
   //   checks: com.foo.MyClass.myMethod
-  //
-  // TODO(mattwach): Update reason appropriately when config_ failed to parse.
   bool IsVisible(const string& suffix, string* reason) {
     string path = class_name_ + "." + suffix;
-    if (config_->blacklists.Matches(path)) {
+    if (config_->blacklists.Matches(path) &&
+        !config_->blacklist_exceptions.Matches(path)) {
       *reason = kReasonIsBlacklisted;
-      return false;
-    }
-
-    if (!config_->whitelists.Matches(path)) {
-      *reason = kReasonIsNotWhiteListed;
       return false;
     }
 
@@ -166,21 +159,20 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
 
   // If neither this class nor it's members can ever be blacklisted,
   // return nullptr as an optimization.
-  //
-  // Note that checking via whitelists.Matches here is only valid because
-  // we presume downward heirarchy inheritance (i.e. whitelisting a class
-  // also whitelists it's fields and members).  See GlobSet::Add
-  // for further details.
-  if (config_.whitelists.Matches(path) &&
-      !config_.blacklists.PrefixCanMatch(path)) {
+  if (!config_.blacklists.PrefixCanMatch(path)) {
+    return nullptr;
+  }
+
+  // If this class matches an exception, return null as an optimization
+  if (config_.blacklist_exceptions.Matches(path)) {
     return nullptr;
   }
 
   // If the class will always be blacklisted, return a BlacklistedClassImpl,
   // which skips checks, saving time and memory for visibility checks on this
   // class.
-  if (config_.blacklists.Matches(path) ||
-      !config_.whitelists.PrefixCanMatch(path)) {
+  if (config_.blacklists.Matches(path) &&
+      !config_.blacklist_exceptions.PrefixCanMatch(path)) {
     return std::unique_ptr<Class>(
         new BlacklistedClassImpl(kReasonIsBlacklisted));
   }

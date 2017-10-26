@@ -23,7 +23,8 @@
 namespace devtools {
 namespace cdbg {
 
-// Specifies lists of glob patterns that can act as whitelists and blacklists.
+// Specifies lists of glob patterns that can act as blacklists and blacklist
+// exceptions.
 class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
  public:
   class GlobSet {
@@ -92,7 +93,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
   // Configuration
   struct Config {
     GlobSet blacklists;
-    GlobSet whitelists;
+    GlobSet blacklist_exceptions;
     // This string is left empty if there was no parsing error.
     string parse_error;
   };

@@ -40,9 +40,9 @@ public class YamlConfigParser {
   private String[] blacklistPatterns;
 
   /**
-   * A set of whitelist patterns found in the parsed config.
+   * A set of blacklist pattern exceptions.
    */
-  private String[] whitelistPatterns;
+  private String[] blacklistExceptionPatterns;
 
   /**
    * Parses the given InputStream as YAML with an expected structure.
@@ -55,14 +55,14 @@ public class YamlConfigParser {
    * blacklist:
    *   - com.secure.*
    *   - com.foo.MyClass
-   * whitelist:
-   *   - *
+   * blacklist_exception:
+   *   - com.secure.testing.*
    *
    * An empty config is also legal.
    */
   public YamlConfigParser(String yamlConfig) throws YamlConfigParserException {
     blacklistPatterns = new String[0];
-    whitelistPatterns = new String[0];
+    blacklistExceptionPatterns = new String[0];
 
     try (InputStream inputStream =
          new ByteArrayInputStream(yamlConfig.getBytes(StandardCharsets.UTF_8))) {
@@ -77,9 +77,10 @@ public class YamlConfigParser {
       throw new YamlConfigParserException("IOException: " + e.toString());
     }
 
-    infofmt("Config Load OK. Added %d blacklist and %d whitelist patterns",
-            blacklistPatterns.length,
-            whitelistPatterns.length);
+    infofmt(
+        "Config Load OK. Added %d blacklist and %d blacklist exception patterns",
+        blacklistPatterns.length,
+        blacklistExceptionPatterns.length);
   }
 
   /**
@@ -90,10 +91,10 @@ public class YamlConfigParser {
   }
 
   /**
-   * Returns whitelists found in config.
+   * Returns blacklist exceptions found in config.
    */
-  public String[] getWhitelistPatterns() {
-    return whitelistPatterns;
+  public String[] getBlacklistExceptionPatterns() {
+    return blacklistExceptionPatterns;
   }
 
   /**
@@ -144,7 +145,7 @@ public class YamlConfigParser {
   private void parseYaml(InputStream yamlConfig) throws YamlConfigParserException {
     Yaml yaml = new Yaml();
     Set<String> blacklistPatternSet = new HashSet<>();
-    Set<String> whitelistPatternSet = new HashSet<>();
+    Set<String> blacklistExceptionPatternSet = new HashSet<>();
 
     try {
       // Note that the cast below could be unsafe, but the code that follows
@@ -169,8 +170,8 @@ public class YamlConfigParser {
           case "blacklist":
             addPatternsToSet(blacklistPatternSet, value);
             break;
-          case "whitelist":
-            addPatternsToSet(whitelistPatternSet, value);
+          case "blacklist_exception":
+            addPatternsToSet(blacklistExceptionPatternSet, value);
             break;
           default:
             throw new YamlConfigParserException(
@@ -183,6 +184,6 @@ public class YamlConfigParser {
     }
 
     blacklistPatterns = blacklistPatternSet.toArray(new String[0]);
-    whitelistPatterns = whitelistPatternSet.toArray(new String[0]);
+    blacklistExceptionPatterns = blacklistExceptionPatternSet.toArray(new String[0]);
   }
 }

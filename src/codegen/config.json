@@ -282,7 +282,7 @@
                     "methodName": "getBlacklistPatterns"
                 },
                 {
-                    "methodName": "getWhitelistPatterns"
+                    "methodName": "getBlacklistExceptionPatterns"
                 }
             ],
             "nativeNamespace": "jniproxy"

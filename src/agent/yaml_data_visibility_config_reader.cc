@@ -74,14 +74,14 @@ static bool ParseYamlConfig(
     return false;
   }
 
-  ExceptionOr<JniLocalRef>
-      whitelist_patterns = jniproxy::YamlConfigParser()->getWhitelistPatterns(
+  ExceptionOr<JniLocalRef> blacklist_exception_patterns =
+      jniproxy::YamlConfigParser()->getBlacklistExceptionPatterns(
           config_parser.GetData().get());
 
-  if (whitelist_patterns.HasException()) {
-    LOG(ERROR) << "Exception getting whitelist patterns: "
-               << FormatException(whitelist_patterns.GetException());
-    *error = "Error building whitelist patterns";
+  if (blacklist_exception_patterns.HasException()) {
+    LOG(ERROR) << "Exception getting blacklist exception patterns: "
+               << FormatException(blacklist_exception_patterns.GetException());
+    *error = "Error building blacklist exception patterns";
     return false;
   }
 
@@ -95,11 +95,11 @@ static bool ParseYamlConfig(
     config->blacklists.Add(glob_pattern);
   }
 
-  std::vector<string> whitelist_patterns_cpp =
-      JniToNativeStringArray(whitelist_patterns.GetData().get());
+  std::vector<string> blacklist_exception_patterns_cpp =
+      JniToNativeStringArray(blacklist_exception_patterns.GetData().get());
 
-  for (const string& glob_pattern : whitelist_patterns_cpp) {
-    config->whitelists.Add(glob_pattern);
+  for (const string& glob_pattern : blacklist_exception_patterns_cpp) {
+    config->blacklist_exceptions.Add(glob_pattern);
   }
 
   return true;
@@ -124,14 +124,9 @@ GlobDataVisibilityPolicy::Config ReadYamlDataVisibilityConfiguration(
     }
   }
 
-  if (config.whitelists.Empty()) {
-    // Whitelist everything by default.
-    config.whitelists.Add("*");
-  }
-
-  // Prepare both blacklists and whitelist for lookup processing.
+  // Prepare both blacklists and blacklist_exceptions for lookup processing.
   config.blacklists.Prepare();
-  config.whitelists.Prepare();
+  config.blacklist_exceptions.Prepare();
   return config;
 }
 

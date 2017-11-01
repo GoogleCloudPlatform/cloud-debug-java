@@ -104,11 +104,33 @@ public class YamlConfigParser {
    * characters, such as "+".
    */
   private boolean isLegalPattern(String pattern) {
+    int bangCount = 0;
     for (char c : pattern.toCharArray()) {
-      if (c != '*' && c != '.' && !Character.isJavaIdentifierPart(c)) {
+      if (c != '!' && c != '*' && c != '.' && !Character.isJavaIdentifierPart(c)) {
+        // Not a legal character
         return false;
       }
+      if (c == '!') {
+        // Track the number of ! characters for later assertions
+        ++bangCount;
+      }
     }
+
+    if (bangCount > 1) {
+      // multiple ! characters are not allowed
+      return false;
+    }
+
+    if (bangCount == 1 && pattern.charAt(0) != '!') {
+      // ! is only allowed at the start of the pattern
+      return false;
+    }
+
+    if (bangCount == 1 && pattern.length() == 1) {
+      // ! is not allowed alone
+      return false;
+    }
+
     return true;
   }
 

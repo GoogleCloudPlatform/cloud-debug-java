@@ -202,6 +202,21 @@ static bool GenericMatches(
   return false;
 }
 
+// Returns true if a path does not match anything is exact_inverse_patterns or
+// inverse_patterns.
+static bool InverseMatches(
+    const string& path,
+    const std::set<string>& exact_inverse_patterns,
+    const std::set<string>& inverse_patterns) {
+  if (inverse_patterns.empty() && exact_inverse_patterns.empty()) {
+    // inverse matches are not being used
+    return false;
+  }
+
+  return exact_inverse_patterns.find(path) == exact_inverse_patterns.end() &&
+      !GenericMatches(path, inverse_patterns);
+}
+
 
 // PrefixMatches uses a fast O(log n) algorithm to match globs that
 // end with *.
@@ -289,6 +304,10 @@ bool GlobDataVisibilityPolicy::GlobSet::Matches(const string& path) const {
     return true;
   }
 
+  if (InverseMatches(path, exact_inverse_patterns_, inverse_patterns_)) {
+    return true;
+  }
+
   return GenericMatches(path, generic_patterns_);
 }
 
@@ -301,6 +320,27 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
   }
 
   const size_t index = glob_pattern.find('*');
+
+  // Check for an inverted pattern (patterns that start with a !)
+  if (glob_pattern[0] == '!') {
+    // Drop the leading ! character
+    const string inverse_pattern = glob_pattern.substr(1);
+
+    if (index == string::npos) {
+      // For exact match, also add the path extension.  This allows a user
+      // to say
+      //
+      // !com.package
+      //
+      // without the * and refer to an entire package path.
+      exact_inverse_patterns_.insert(inverse_pattern);
+      inverse_patterns_.insert(inverse_pattern + ".*");
+    } else {
+      inverse_patterns_.insert(inverse_pattern);
+    }
+
+    return;
+  }
 
   if (index == string::npos) {
     exact_patterns_.insert(glob_pattern);
@@ -371,6 +411,15 @@ bool GlobDataVisibilityPolicy::GlobSet::PrefixCanMatch(
       return true;
     }
   }
+
+  // For inverse patterns.  If a prefix does not match any inverse
+  // pattern then it's a prefix that can match
+  for (const string& pattern : inverse_patterns_) {
+    if (!PrefixCanMatchPattern(prefix, pattern)) {
+      return true;
+    }
+  }
+
   return false;
 }
 

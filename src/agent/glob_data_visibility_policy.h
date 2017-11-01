@@ -64,7 +64,9 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     bool Empty() const {
       return exact_patterns_.empty() &&
           prefix_patterns_.empty() &&
-          generic_patterns_.empty();
+          generic_patterns_.empty() &&
+          inverse_patterns_.empty() &&
+          exact_inverse_patterns_.empty();
     }
 
    private:
@@ -85,6 +87,18 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     // possible, but seeminly in trade for additional complexity.  These
     // patterns are also expected to be more rarely used than the other cases.
     std::set<string> generic_patterns_;
+
+    // Patterns that are inverted.  e.g. while all other patterns
+    // would consider a* matching apple and b* not matching apple, these
+    // inverse patterns are the opposite (a* does not "inverse match" apple,
+    // b* does "inverse match" apple).
+    //
+    // exact_inverse_patterns_ do not contain any glob characters.
+    // inverse_patterns_ contain at least one *.  For a symbol to be considered
+    // a match, it has to not be found in exact_inverse_patterns_ and not match
+    // anything in inverse_patterns_.
+    std::set<string> exact_inverse_patterns_;
+    std::set<string> inverse_patterns_;
 
     // Set to true if the GlobSet is ready for calls to Match().
     bool prepared_ = true;

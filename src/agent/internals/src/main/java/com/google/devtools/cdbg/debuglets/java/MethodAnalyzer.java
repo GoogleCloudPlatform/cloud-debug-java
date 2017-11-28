@@ -20,7 +20,7 @@ import static org.objectweb.asm.Opcodes.AASTORE;
 import static org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_SYNCHRONIZED;
-import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM6;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
 import static org.objectweb.asm.Opcodes.CASTORE;
@@ -132,7 +132,7 @@ public class MethodAnalyzer {
     private boolean methodIsImmutable = true;
 
     public ValidatorMethodVisitor(final MethodsFilter methodsFilter, final String currentClass) {
-      super(ASM5);
+      super(ASM6);
       this.currentClass = currentClass;
       this.methodsFilter = methodsFilter;
     }
@@ -271,7 +271,7 @@ public class MethodAnalyzer {
      */
     public AnalyzerClassVisitor(final MethodsFilter methodsFilter, final String methodName,
         final String methodSignature) {
-      super(ASM5);
+      super(ASM6);
       this.methodName = Objects.requireNonNull(methodName, "Method name can't be null");
       this.methodSignature =
           Objects.requireNonNull(methodSignature, "Method signature can't be null");

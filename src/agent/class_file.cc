@@ -16,6 +16,7 @@
 
 #include "class_file.h"
 #include "jni_proxy_classpathlookup.h"
+#include "jvmti_buffer.h"
 
 namespace devtools {
 namespace cdbg {
@@ -87,6 +88,94 @@ static ClassFile::InstructionType* BuildInstructionTypeMap() {
   map[JVM_OPC_wide] = ClassFile::InstructionType::WIDE;
 
   return map;
+}
+
+
+// Returns true if input method is a Signature Polymorphic method.
+//
+// A method is Signature Polymorphic if:
+//  1. It is a method of class Varhandle or MethodHandle,
+//  2. It takes one argument of type Object[] and can return any type.
+//  3. It has the access modifiers: ACC_NATIVE and ACC_VARARGS.
+//
+// The caller of the Java method does not know that it is making a call to a
+// signature polymorphic method (the JVM bridges the gap and transforms the
+// signatures). Therefore, we also need to make a similar transformation. Here,
+// we search the target class to see if there is a signature polymorphic method
+// that matches the Java method being called.
+static bool IsPolymorphicMethod(
+    jclass owner_cls,
+    const string& owner_cls_signature,
+    const string& method_name,
+    string* polymorphic_method_signature,
+    jmethodID* polymorphic_instance_method_id,
+    jmethodID* polymorphic_static_method_id) {
+  if (owner_cls_signature != "Ljava/lang/invoke/VarHandle;" &&
+      owner_cls_signature != "Ljava/lang/invoke/MethodHandle;") {
+    return false;
+  }
+
+  // Since signature polymorphic methods can have any return type,
+  // we cannot search by method signature. Instead, we have to iterate
+  // over all methods in the target class and find the one that
+  // satisfies the above criteria for being 'polymorphic'.
+  jint methods_count = 0;
+  JvmtiBuffer<jmethodID> methods_buf;
+  jvmtiError err = jvmti()->GetClassMethods(
+      owner_cls,
+      &methods_count,
+      methods_buf.ref());
+  if (err != JVMTI_ERROR_NONE) {
+    return false;  // Failed to get class methods.
+  }
+
+  for (int method_index = 0; method_index < methods_count; ++method_index) {
+    jmethodID cur_method = methods_buf.get()[method_index];
+
+    JvmtiBuffer<char> name_buf;
+    JvmtiBuffer<char> sig_buf;
+    err = jvmti()->GetMethodName(
+        cur_method,
+        name_buf.ref(),
+        sig_buf.ref(),
+        nullptr);
+    if (err != JVMTI_ERROR_NONE) {
+      continue;  // Failed to get method name.
+    }
+
+    if ((name_buf.get() == nullptr) ||
+        (method_name != name_buf.get())) {
+      continue;  // Mismatch in method name.
+    }
+
+    if (TrimReturnType(sig_buf.get()) == "[Ljava/lang/Object;") {
+      continue;  // Mismatch in args type.
+    }
+
+    jint method_modifiers = 0;
+    jvmtiError err =
+        jvmti()->GetMethodModifiers(cur_method, &method_modifiers);
+    if (err != JVMTI_ERROR_NONE) {
+      continue;  // Failed to get method modifiers.
+    }
+
+    if ((method_modifiers & JVM_ACC_NATIVE) == 0 ||
+        (method_modifiers & JVM_ACC_VARARGS) == 0) {
+      continue;
+    }
+
+    // Match found.
+    if ((method_modifiers & JVM_ACC_STATIC) != 0) {
+      *polymorphic_static_method_id = cur_method;
+    } else {
+      *polymorphic_instance_method_id = cur_method;
+    }
+
+    *polymorphic_method_signature = sig_buf.get();
+    return true;
+  }
+
+  return false;  // Not found.
 }
 
 
@@ -734,63 +823,80 @@ const ConstantPool::MethodRef* ConstantPool::GetMethod(int index) {
 
         // Find the class that defined the method. If the class is not
         // available, we don't fail and keep "is_found" false. This is a valid
-        // situation when the needs to be handled gracefully (as opposed to
+        // situation that needs to be handled gracefully (as opposed to
         // internal error).
         method->owner_cls = JniNewGlobalRef(method->owner->type->FindClass());
-        if (method->owner_cls != nullptr) {
-          // Obtain the JVM method ID. Use "c_str()" to append the NULL
-          // terminator. We can't tell at this point if the method is static or
-          // instance, so we try to load both.
-          jmethodID instance_method_id = jni()->GetMethodID(
-              static_cast<jclass>(method->owner_cls.get()),
-              names->name.str().c_str(),
-              names->type.str().c_str());
-          if (CatchOr("GetMethodID", nullptr).HasException()) {
-            instance_method_id = nullptr;
-          }
+        if (method->owner_cls == nullptr) {
+          return method;
+        }
 
-          jmethodID static_method_id = jni()->GetStaticMethodID(
-              static_cast<jclass>(method->owner_cls.get()),
-              names->name.str().c_str(),
-              names->type.str().c_str());
-          if (CatchOr("GetStaticMethodID", nullptr).HasException()) {
-            static_method_id = nullptr;
-          }
+        // The name and signature of the method to search for.
+        string method_name = names->name.str();
+        string method_signature = names->type.str();
 
-          if ((instance_method_id == nullptr) &&
-              (static_method_id == nullptr)) {
+        // Search for the JVM method ID using name and signature. Use "c_str()"
+        // to append the NULL terminator. We can't tell at this point if the
+        // method is static or instance, so we try to load both.
+        jmethodID instance_method_id = jni()->GetMethodID(
+            static_cast<jclass>(method->owner_cls.get()),
+            method_name.c_str(),
+            method_signature.c_str());
+        if (CatchOr("GetMethodID", nullptr).HasException()) {
+          instance_method_id = nullptr;
+        }
+
+        jmethodID static_method_id = jni()->GetStaticMethodID(
+            static_cast<jclass>(method->owner_cls.get()),
+            method_name.c_str(),
+            method_signature.c_str());
+        if (CatchOr("GetStaticMethodID", nullptr).HasException()) {
+          static_method_id = nullptr;
+        }
+
+        // Java doesn't allow static and instance method with the same name
+        // in the same class. If we got it, there is some sort of an error.
+        if ((instance_method_id != nullptr) &&
+            (static_method_id != nullptr)) {
+          LOG(ERROR) << "Both static and instance method found";
+          return nullptr;
+        }
+
+        if (instance_method_id == nullptr && static_method_id == nullptr) {
+          // The method with the given signature is not found in the target
+          // class. Typically, this means an internal error.
+          //
+          // This can also happen if the target method is signature polymorphic.
+          // In this case, the signature at the call site will not match the
+          // signature of the actual method.
+          if (!IsPolymorphicMethod(
+              static_cast<jclass>(method->owner_cls.get()),
+              method->owner->type->GetSignature(),
+              method_name,
+              &method_signature,
+              &instance_method_id,
+              &static_method_id)) {
             LOG(ERROR) << "Method not available, class = "
                        << method->owner->type->GetSignature()
-                       << ", method name = " << names->name.str()
-                       << ", method signature = " << names->type.str();
+                       << ", method name = " << method_name
+                       << ", method signature = " << method_signature;
             return nullptr;
           }
 
-          // Java doesn't allow static and instance method with the same name
-          // in the same class. If we got it, there is some sort of an error.
-          if ((instance_method_id != nullptr) &&
-              (static_method_id != nullptr)) {
-            LOG(ERROR) << "Both static and instance method found";
-            return nullptr;
-          }
-
-          ClassMetadataReader::Method metadata;
-          metadata.class_signature = {
-              method->owner->type->GetType(),
-              method->owner->type->GetSignature()
-          };
-          metadata.name = names->name.str();
-          metadata.signature = names->type.str();
-          metadata.modifiers =
-              (static_method_id == nullptr) ? 0 : JVM_ACC_STATIC;
-
-          method->metadata = std::move(metadata);
-          method->method_id = metadata.is_static()
-              ? static_method_id
-              : instance_method_id;
-
-          method->is_found = true;
+          // Use the adjusted (polymorphic) method signature and method ids.
         }
+
+        ClassMetadataReader::Method metadata;
+        metadata.class_signature = {
+          method->owner->type->GetType(),
+          method->owner->type->GetSignature()
+        };
+        metadata.name = method_name;
+        metadata.signature = method_signature;
+        metadata.modifiers = (static_method_id == nullptr) ? 0 : JVM_ACC_STATIC;
+        method->metadata = std::move(metadata);
+        method->method_id = static_method_id ? : instance_method_id;
+
+        method->is_found = true;
 
         return method;
       });

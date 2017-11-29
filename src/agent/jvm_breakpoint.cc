@@ -440,24 +440,18 @@ bool JvmBreakpoint::EvaluateCondition(
   ErrorOr<JVariant> condition_result =
       condition.evaluator->Evaluate(evaluation_context);
   if (condition_result.is_error()) {
-    if (condition_result.error_message().format == MethodNotSafe) {
-      LOG(WARNING) << "Breakpoint " << id() << " calls unsafe method: "
-                   << condition_result.error_message();
-      CompleteBreakpointWithStatus(StatusMessageBuilder()
-          .set_error()
-          .set_refers_to(
-              StatusMessageModel::Context::BREAKPOINT_CONDITION)
-          .set_description(condition_result.error_message())
-          .build());
-    } else {
-      VLOG(1) << "Evaluation of breakpoint condition failed, "
-                 "breakpoint ID: " << id()
-              << ", evaluation error message: "
-              << condition_result.error_message();
+    LOG(WARNING) << "Evaluation of breakpoint condition failed, breakpoint ID: "
+            << id()
+            << ", evaluation error message: "
+            << condition_result.error_message();
 
-      // TODO(jmozzino): Return error so there is a way to notify the user that
-      // the condition failed, instead of silently returning false.
-    }
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+        .set_error()
+        .set_refers_to(
+            StatusMessageModel::Context::BREAKPOINT_CONDITION)
+        .set_description(condition_result.error_message())
+        .build());
 
     return false;
   }

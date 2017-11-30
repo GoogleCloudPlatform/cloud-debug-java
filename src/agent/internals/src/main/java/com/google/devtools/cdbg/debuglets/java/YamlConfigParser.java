@@ -116,12 +116,29 @@ public class YamlConfigParser {
       }
     }
 
+    if (pattern.length() < 1) {
+      // Pattern must have at least one character
+      return false;
+    }
+
+    char firstCharacter = pattern.charAt(0);
+
+    if (firstCharacter == '.') {
+      // . can not be the first character
+      return false;
+    }
+
+    if (Character.isDigit(firstCharacter)) {
+      // Can not start with a number
+      return false;
+    }
+
     if (bangCount > 1) {
       // multiple ! characters are not allowed
       return false;
     }
 
-    if (bangCount == 1 && pattern.charAt(0) != '!') {
+    if (bangCount == 1 && firstCharacter != '!') {
       // ! is only allowed at the start of the pattern
       return false;
     }

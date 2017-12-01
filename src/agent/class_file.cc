@@ -274,7 +274,7 @@ bool ClassFile::CheckClassFileVersion() {
 
   // Check class file version.
   int16 version = reader.ReadInt16BE(6);
-  if (version > 52) {
+  if (version > 53) {
     LOG(ERROR) << "Unsupported class file version " << version;
     return false;
   }

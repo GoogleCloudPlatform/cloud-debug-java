@@ -7,7 +7,7 @@
 namespace devtools {
 namespace cdbg {
 
-static constexpr char kReasonIsBlacklisted[] = "blacklisted by config";
+static constexpr char kReasonIsBlacklisted[] = "blocked by admin";
 
 namespace {
 

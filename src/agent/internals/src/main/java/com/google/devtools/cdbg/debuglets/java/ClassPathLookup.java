@@ -128,17 +128,6 @@ final class ClassPathLookup {
       warnfmt(e, "Debugger configuration file could not be loaded");
     }
 
-    // Optional secondary configuration (used primarily in tests).
-    String secondaryConfigLocation = System.getProperty("com.google.cdbg.secondaryconfig");
-    if ((secondaryConfigLocation != null) && !secondaryConfigLocation.isEmpty()) {
-      try {
-        configBuilder.add(getClass().getResourceAsStream(secondaryConfigLocation));
-      } catch (Exception e) {
-        warnfmt(e, "Secondary configuration file could not be loaded from %s",
-            secondaryConfigLocation);
-      }
-    }
-
     this.methodsFilter = configBuilder.build();
 
     indexApplicationResources();

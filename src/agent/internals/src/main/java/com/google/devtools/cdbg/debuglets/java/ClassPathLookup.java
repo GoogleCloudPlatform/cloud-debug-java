@@ -24,7 +24,6 @@ import com.google.devtools.cdbg.debuglets.java.ResourceIndexer.FileSystemResourc
 import com.google.devtools.cdbg.debuglets.java.ResourceIndexer.ResourcesSource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -93,12 +92,10 @@ final class ClassPathLookup {
    * @param extraClassPath optional file system locations to search for .class and .jar files beyond
    *        what's normally specified in Java class path
    */
-  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath,
-      String configLocation) {
-    infofmt("Initializing ClassPathLookup, default classpath: %b, extra classpath: %s, config: %s",
+  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath) {
+    infofmt("Initializing ClassPathLookup, default classpath: %b, extra classpath: %s",
         useDefaultClassPath,
-        ((extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath)),
-        configLocation);
+        (extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath));
 
     // Try to guess where application classes might be besides class path. We only do it if the
     // debugger uses default configuration. If the user sets additional directories, we use that and
@@ -112,22 +109,8 @@ final class ClassPathLookup {
 
     MethodsFilter.Builder configBuilder = new MethodsFilter.Builder();
 
-    // Primary configuration (either in file or resource).
     // TODO(vlif): XML based configuration is deprecated. Remove this code when native agent
     // doesn't need it anymore.
-    try {
-      if ((configLocation == null) || configLocation.isEmpty()) {
-        InputStream inputStream = getClass().getResourceAsStream("cdbg_config.xml");
-        if (inputStream != null) {
-          configBuilder.add(inputStream);
-        }
-      } else {
-        configBuilder.add(new FileInputStream(configLocation));
-      }
-    } catch (Exception e) {
-      warnfmt(e, "Debugger configuration file could not be loaded");
-    }
-
     this.methodsFilter = configBuilder.build();
 
     indexApplicationResources();

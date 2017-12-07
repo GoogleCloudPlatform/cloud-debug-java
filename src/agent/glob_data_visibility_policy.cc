@@ -11,79 +11,6 @@ static constexpr char kReasonIsBlacklisted[] = "blocked by admin";
 
 namespace {
 
-class ClassImpl : public DataVisibilityPolicy::Class {
- public:
-  // Does not take ownership over "class_config", which must outlive this
-  // instance.
-  ClassImpl(
-      const string& class_name,
-      const GlobDataVisibilityPolicy::Config* config)
-      : class_name_(class_name),
-        config_(config) {
-  }
-
-  bool IsFieldVisible(
-      const string& field_name,
-      int32 field_modifiers) override {
-    return true;
-  }
-
-  bool IsFieldDataVisible(
-      const string& field_name,
-      int32 field_modifiers,
-      string* reason) override {
-    return IsVisible(field_name, reason);
-  }
-
-  bool IsMethodVisible(
-      const string& method_name,
-      const string& method_signature,
-      int32 method_modifiers) override {
-    string unused_reason;
-    return IsVisible(method_name, &unused_reason);
-  }
-
-  bool IsVariableVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name) override {
-    return true;
-  }
-
-  bool IsVariableDataVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name,
-      string* reason) override {
-    return IsVisible(method_name + "." + variable_name, reason);
-  }
-
- private:
-  // Returns true if this class with the given suffix is visible.
-  // Example:
-  //   class_name_ = com.foo.MyClass
-  //   suffix = myMethod
-  //   checks: com.foo.MyClass.myMethod
-  bool IsVisible(const string& suffix, string* reason) {
-    string path = class_name_ + "." + suffix;
-    if (config_->blacklists.Matches(path) &&
-        !config_->blacklist_exceptions.Matches(path)) {
-      *reason = kReasonIsBlacklisted;
-      return false;
-    }
-
-    return true;
-  }
-
- private:
-  // Name of this class
-  const string class_name_;
-
-  // read-only pointer back to the global glob config
-  const GlobDataVisibilityPolicy::Config* config_;
-};
-
-
 // A simple implementation of DataVisibilityPolicy::Class which always
 // reports that methods and fields have their data hidden.
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
@@ -157,27 +84,19 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   // com.foo.MyClass$Inner (visible)
   std::replace(path.begin(), path.end(), '$', '.');
 
-  // If neither this class nor it's members can ever be blacklisted,
-  // return nullptr as an optimization.
-  if (!config_.blacklists.PrefixCanMatch(path)) {
-    return nullptr;
-  }
-
-  // If this class matches an exception, return null as an optimization
+  // If this class matches an exception, it can not be blacklisted
   if (config_.blacklist_exceptions.Matches(path)) {
     return nullptr;
   }
 
-  // If the class will always be blacklisted, return a BlacklistedClassImpl,
-  // which skips checks, saving time and memory for visibility checks on this
-  // class.
-  if (config_.blacklists.Matches(path) &&
-      !config_.blacklist_exceptions.PrefixCanMatch(path)) {
+  // Blacklist this class if it matches a pattern
+  if (config_.blacklists.Matches(path)) {
     return std::unique_ptr<Class>(
         new BlacklistedClassImpl(kReasonIsBlacklisted));
   }
 
-  return std::unique_ptr<Class>(new ClassImpl(path, &config_));
+  // Nothing was matched
+  return nullptr;
 }
 
 
@@ -366,61 +285,6 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
   } else {
     generic_patterns_.insert(glob_pattern);
   }
-}
-
-
-// Returns true if it's possible for prefix* to match pattern.
-static bool PrefixCanMatchPattern(
-    const string& prefix,
-    const string& pattern) {
-  for (int i = 0; i < pattern.length() && i < prefix.length(); ++i) {
-    // It's possible for prefix to match pattern if either of the following
-    // are true:
-    //
-    // 1) prefix is a prefix of pattern
-    // 2) prefix[:n] is a prefix of pattern where pattern[n] is a '*'
-    if (pattern[i] == '*') {
-      return true;
-    }
-
-    if (pattern[i] != prefix[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-
-bool GlobDataVisibilityPolicy::GlobSet::PrefixCanMatch(
-    const string& prefix) const {
-  if (exact_patterns_.find(prefix) != exact_patterns_.end()) {
-    return true;
-  }
-
-  // TODO(mattwach): This can probably be done with more efficiency,
-  // but delay it for it's own CL.
-  for (const string& pattern : prefix_patterns_) {
-    if (PrefixCanMatchPattern(prefix, pattern + '*')) {
-      return true;
-    }
-  }
-
-  for (const string& pattern : generic_patterns_) {
-    if (PrefixCanMatchPattern(prefix, pattern)) {
-      return true;
-    }
-  }
-
-  // For inverse patterns.  If a prefix does not match any inverse
-  // pattern then it's a prefix that can match
-  for (const string& pattern : inverse_patterns_) {
-    if (!PrefixCanMatchPattern(prefix, pattern)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 

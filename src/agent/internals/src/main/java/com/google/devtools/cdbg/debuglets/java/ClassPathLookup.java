@@ -62,13 +62,6 @@ final class ClassPathLookup {
    * class loaders (such as the case with application classes in Jetty).
    */
   private final String[] extraClassPath;
-  
-  /**
-   * The whitelist/blacklist that will be used to determine if a method can be called, without using
-   * bytecode analysis. Any method not whitelisted or blacklisted by the filter will have its
-   * bytecode analyzed.
-   */
-  private final MethodsFilter methodsFilter;
 
   /**
    * Indexes resources (.class files and other files) that the application may load.
@@ -107,15 +100,7 @@ final class ClassPathLookup {
     this.useDefaultClassPath = useDefaultClassPath;
     this.extraClassPath = extraClassPath;
 
-    MethodsFilter.Builder configBuilder = new MethodsFilter.Builder();
-
-    // TODO(vlif): XML based configuration is deprecated. Remove this code when native agent
-    // doesn't need it anymore.
-    this.methodsFilter = configBuilder.build();
-
     indexApplicationResources();
-
-    SafeTransformer.setConfig(this.methodsFilter);
 
     // TODO(vlif): GcpHubClient needs ClassPathLookup to compute uniquifier. This needs to
     // be refactored. Either GcpHubClient should not require ClassPathLookup or ClassPathLookup

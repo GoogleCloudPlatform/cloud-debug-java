@@ -34,6 +34,7 @@ TreeParser::TreeParser(const TreeParserSharedInputState& state)
 
 TreeParser::~TreeParser()
 {
+  SetExceptionSlot(0);
 }
 
 /** The AST Null object; the parsing cursor is set to this when

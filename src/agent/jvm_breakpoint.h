@@ -109,6 +109,7 @@ class JvmBreakpoint : public Breakpoint,
       FormatQueue* format_queue,
       DynamicLogger* dynamic_logger,
       BreakpointsManager* breakpoints_manager,
+      std::unique_ptr<StatusMessageModel> setup_error,
       std::unique_ptr<BreakpointModel> breakpoint_definition);
 
   ~JvmBreakpoint() override;
@@ -221,6 +222,10 @@ class JvmBreakpoint : public Breakpoint,
   // Multiplexer of JVMTI breakpoints.
   // Not owned by this class.
   BreakpointsManager* const breakpoints_manager_;
+
+  // If not-null, this breakpoint will be immediately completed on Initialize()
+  // with the given status.
+  std::unique_ptr<StatusMessageModel> setup_error_;
 
   // Breakpoint definition (with no hit results). Since "definition_" doesn't
   // keep the hit results, it is very small and copying it is not a big deal.

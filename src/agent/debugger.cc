@@ -39,6 +39,7 @@ Debugger::Debugger(
     EvalCallStack* eval_call_stack,
     std::unique_ptr<MethodLocals> method_locals,
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
+    std::unique_ptr<StatusMessageModel> setup_error,
     ClassPathLookup* class_path_lookup,
     std::unique_ptr<DynamicLogger> dynamic_logger,
     std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
@@ -49,6 +50,7 @@ Debugger::Debugger(
       eval_call_stack_(eval_call_stack),
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
+      setup_error_(std::move(setup_error)),
       object_evaluator_(class_metadata_reader_.get()),
       class_files_cache_(
           &class_indexer_,
@@ -79,6 +81,7 @@ Debugger::Debugger(
         format_queue,
         dynamic_logger_.get(),
         breakpoints_manager,
+        CopySetupError(),
         std::move(breakpoint_definition));
   };
 
@@ -112,6 +115,11 @@ void Debugger::Initialize() {
             << stopwatch.GetElapsedMillis() << " ms";
 }
 
+std::unique_ptr<StatusMessageModel> Debugger::CopySetupError() {
+  return setup_error_ == nullptr ?
+      nullptr :
+      StatusMessageBuilder(*setup_error_).build();
+}
 
 void Debugger::JvmtiOnClassPrepare(jthread thread, jclass cls) {
   Stopwatch stopwatch;

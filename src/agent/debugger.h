@@ -30,6 +30,7 @@
 #include "jvm_class_indexer.h"
 #include "jvm_object_evaluator.h"
 #include "method_locals.h"
+#include "model.h"
 #include "scheduler.h"
 #include "user_id_provider.h"
 
@@ -53,6 +54,7 @@ class Debugger {
       EvalCallStack* eval_call_stack,
       std::unique_ptr<MethodLocals> method_locals,
       std::unique_ptr<ClassMetadataReader> class_metadata_reader,
+      std::unique_ptr<StatusMessageModel> setup_error,
       ClassPathLookup* class_path_lookup,
       std::unique_ptr<DynamicLogger> dynamic_logger,
       std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
@@ -86,6 +88,10 @@ class Debugger {
       std::vector<std::unique_ptr<BreakpointModel>> breakpoints);
 
  private:
+  // Makes a copy of setup_error_ and returns it
+  std::unique_ptr<StatusMessageModel> CopySetupError();
+
+ private:
   // Debugger agent configuration.
   Config* const config_;
 
@@ -101,6 +107,9 @@ class Debugger {
 
   // Indexes and caches class field readers and class methods.
   std::unique_ptr<ClassMetadataReader> class_metadata_reader_;
+
+  // If set to non-null, breakpoints will immediately be set to this status
+  std::unique_ptr<StatusMessageModel> setup_error_;
 
   // Evaluates members of Java objects.
   JvmObjectEvaluator object_evaluator_;

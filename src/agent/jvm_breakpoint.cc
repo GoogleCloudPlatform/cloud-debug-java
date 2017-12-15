@@ -184,12 +184,14 @@ JvmBreakpoint::JvmBreakpoint(
     FormatQueue* format_queue,
     DynamicLogger* dynamic_logger,
     BreakpointsManager* breakpoints_manager,
+    std::unique_ptr<StatusMessageModel> setup_error,
     std::unique_ptr<BreakpointModel> breakpoint_definition)
     : scheduler_(scheduler),
       evaluators_(evaluators),
       format_queue_(format_queue),
       dynamic_logger_(dynamic_logger),
       breakpoints_manager_(breakpoints_manager),
+      setup_error_(std::move(setup_error)),
       definition_(std::move(breakpoint_definition)),
       jvmti_breakpoint_(breakpoints_manager) {
   breakpoint_condition_cost_limiter_ =
@@ -229,6 +231,14 @@ void JvmBreakpoint::Initialize() {
       expiration_time_base + base::GetFlag(FLAGS_breakpoint_expiration_sec),
       std::weak_ptr<JvmBreakpoint>(shared_from_this()),
       &JvmBreakpoint::OnBreakpointExpired);
+
+  // If a preemtive status exists, immediately complete the breakpoint with
+  // this status.
+  if (setup_error_ != nullptr) {
+    DCHECK(setup_error_->is_error);
+    CompleteBreakpointWithStatus(std::move(setup_error_));
+    return;
+  }
 
   std::shared_ptr<ResolvedSourceLocation> rsl(new ResolvedSourceLocation);
 

@@ -215,8 +215,8 @@ variable to the JSON file path instead of adding the
 
 ### Other JVM Languages
 
-Starting with version 2.13, you can use the Java Cloud Debugger to debug Scala
-applications. You can take snapshots in both `.scala` and `.java` source files,
-however snapshot expressions and conditions must always be written using the
-Java programming language syntax.
+Starting with Java Cloud Debugger version 2.13, you can use the debugger to
+debug Scala applications. You can take snapshots in both `.scala` and `.java`
+source files, however snapshot expressions and conditions must always be written
+using the Java programming language syntax.
 

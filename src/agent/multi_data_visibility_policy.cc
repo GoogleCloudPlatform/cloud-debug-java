@@ -148,5 +148,15 @@ MultiDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   return std::move(class_impl);
 }
 
+bool MultiDataVisibilityPolicy::HasSetupError(string* error) const {
+  for (const auto& policy : policy_list_) {
+    if (policy->HasSetupError(error)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 }  // namespace cdbg
 }  // namespace devtools

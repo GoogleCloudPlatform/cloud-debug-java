@@ -43,6 +43,10 @@ class MultiDataVisibilityPolicy : public DataVisibilityPolicy {
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 
+  // Returns the error of the first found policy error, or false
+  // if no policies have an error.
+  bool HasSetupError(string* error) const override;
+
  private:
   std::vector<std::unique_ptr<DataVisibilityPolicy>> policy_list_;
 

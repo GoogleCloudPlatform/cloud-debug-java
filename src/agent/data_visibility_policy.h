@@ -86,6 +86,14 @@ class DataVisibilityPolicy {
   //
   // The instance of this class must outlive the returned object.
   virtual std::unique_ptr<Class> GetClassVisibility(jclass cls) = 0;
+
+  // Returns true if there was a setup error.  If true, the provided error
+  // parameter is set to the error message.  If false, the error parameter
+  // is not modified.
+  //
+  // Note, that even if this method returns false, the object is expected to
+  // provide a valid API.
+  virtual bool HasSetupError(string* error) const = 0;
 };
 
 }  // namespace cdbg

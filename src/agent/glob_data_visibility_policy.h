@@ -118,6 +118,8 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 
+  bool HasSetupError(string* error) const override;
+
  private:
   const Config config_;
 

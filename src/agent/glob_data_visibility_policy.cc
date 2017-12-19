@@ -59,6 +59,15 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
 
 }  // namespace
 
+bool GlobDataVisibilityPolicy::HasSetupError(string* error) const {
+  if (config_.parse_error.empty()) {
+    return false;
+  }
+
+  *error = config_.parse_error;
+  return true;
+}
+
 std::unique_ptr<DataVisibilityPolicy::Class>
 GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   if (!config_.parse_error.empty()) {

@@ -410,6 +410,21 @@ void JvmtiAgent::OnBreakpointsUpdated(
 }
 
 
+// Converts DataVisibilityPolicy error strings into a
+// StatusMessageModel.  Returns nullptr if no there is no error.
+static std::unique_ptr<StatusMessageModel> GetSetupErrorOrNull(
+    const DataVisibilityPolicy& policy) {
+  string error;
+  return policy.HasSetupError(&error) ?
+      StatusMessageBuilder()
+          .set_error()
+          .set_format(error)
+          .set_refers_to(StatusMessageModel::Context::UNSPECIFIED)
+          .build() :
+      nullptr;
+}
+
+
 void JvmtiAgent::EnableDebugger(bool is_enabled) {
   ScopedMonitoredCall monitored_call(
       is_enabled ? "Agent:EnableDebugger" : "Agent:DisableDebugger");
@@ -440,8 +455,7 @@ void JvmtiAgent::EnableDebugger(bool is_enabled) {
               new MethodLocals(data_visibility_policy_.get())),
           std::unique_ptr<ClassMetadataReader>(
               new JvmClassMetadataReader(data_visibility_policy_.get())),
-          // TODO(b/37851452): Get status from data_visiblity_policy_
-          std::unique_ptr<StatusMessageModel>(nullptr),
+          GetSetupErrorOrNull(*data_visibility_policy_),
           internals_,
           std::move(dynamic_logger),
           std::bind(&JvmtiAgent::BuildBreakpointLabelsProvider, this),

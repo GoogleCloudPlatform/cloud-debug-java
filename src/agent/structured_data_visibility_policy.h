@@ -102,6 +102,10 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 
+  bool HasSetupError(string* error) const override {
+    return false;
+  }
+
  private:
   // Raw visibility configuration. It is equivalent to the format stored in
   // the .JAR file. This configuration packs data in an efficient way, but it

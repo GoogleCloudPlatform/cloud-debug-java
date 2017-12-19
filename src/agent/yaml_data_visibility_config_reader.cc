@@ -26,7 +26,9 @@ static bool ReadYamlConfig(
   if (files.size() > 1) {
     LOG(ERROR) << "Multiple " << kResourcePath << " files found." << "  Found "
                << files.size() << " files.";
-    *error = "Multiple debugger-blacklist.yaml files found";
+    // TODO(b/37851452) Move to messages.h
+    *error = "Multiple debugger-blacklist.yaml files found in the search path. "
+        "Please contact your system administrator.";
     return false;
   }
 
@@ -59,7 +61,8 @@ static bool ParseYamlConfig(
   if (config_parser.HasException()) {
     LOG(ERROR) << "Exception creating YAML config parser object: "
                << FormatException(config_parser.GetException());
-    *error = "Errors parsing debugger-blacklist.yaml";
+    *error = "Errors parsing debugger-blacklist.yaml. "
+        "Please contact your system administrator.";
     return false;
   }
 
@@ -70,7 +73,8 @@ static bool ParseYamlConfig(
   if (blacklist_patterns.HasException()) {
     LOG(ERROR) << "Exception getting blacklist patterns: "
                << FormatException(blacklist_patterns.GetException());
-    *error = "Error building blacklist patterns";
+    *error = "Error building blacklist patterns. "
+        "Please contact your system administrator.";
     return false;
   }
 
@@ -81,7 +85,8 @@ static bool ParseYamlConfig(
   if (blacklist_exception_patterns.HasException()) {
     LOG(ERROR) << "Exception getting blacklist exception patterns: "
                << FormatException(blacklist_exception_patterns.GetException());
-    *error = "Error building blacklist exception patterns";
+    *error = "Error building blacklist exception patterns. "
+        "Please contact your system administrator.";
     return false;
   }
 

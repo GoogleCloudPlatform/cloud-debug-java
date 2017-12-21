@@ -64,14 +64,14 @@ DEFINE_FLAG(
 DEFINE_FLAG(
     int32,
     pretty_printers_max_classes_load_quota,
-    0,  // NanoJava interpreter is disabled for pretty printers.
+    5,
     "Maximum number of classes that the NanoJava interpreter is allowed "
     "to load while formatting some well known data structures");
 
 DEFINE_FLAG(
     int32,
     pretty_printers_max_interpreter_instructions_quota,
-    0,  // NanoJava interpreter is disabled for pretty printers.
+    1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while formatting some well known data structures");
 

@@ -408,6 +408,11 @@ void JvmBreakpoint::DoLogAction(
     return;
   }
 
+  if (!HasDynamicLogsQuota()) {
+    // Insufficient quota for now.
+    return;
+  }
+
   std::shared_ptr<ResolvedSourceLocation> rsl = resolved_location_;
   if (rsl == nullptr) {
     // The breakpoint is being deactivated.
@@ -428,6 +433,8 @@ void JvmBreakpoint::DoLogAction(
 
   string log_message = string(kLogpointPrefix) + collector.Format(*definition_);
 
+  // TODO(mattwach): Discuss if Log() below should be included in quota
+  // accounting.  If so, this function can be changed to void.
   if (!ApplyDynamicLogsQuota(*rsl, log_message.length())) {
     return;
   }
@@ -521,6 +528,16 @@ void JvmBreakpoint::ApplyConditionQuota() {
 }
 
 
+bool JvmBreakpoint::HasDynamicLogsQuota() const {
+  MutexLock lock(&dynamic_log_pause_.mu);
+  if (!dynamic_log_pause_.is_skipping) {
+    return true;
+  }
+  return dynamic_log_pause_.cooldown_stopwatch.GetElapsedMillis() >
+       base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms);
+}
+
+
 bool JvmBreakpoint::ApplyDynamicLogsQuota(
     const ResolvedSourceLocation& source_location,
     int log_message_bytes) {
@@ -530,16 +547,6 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
 
   LeakyBucket* global_dynamic_log_bytes_limiter =
       breakpoints_manager_->GetGlobalDynamicLogBytesLimiter();
-
-  {
-    MutexLock lock(&dynamic_log_pause_.mu);
-    if (dynamic_log_pause_.is_skipping &&
-        (dynamic_log_pause_.cooldown_stopwatch.GetElapsedMillis() <=
-          base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms))) {
-      // We are in "out of quota" period for this breakpoint.
-      return false;
-    }
-  }
 
   if (breakpoint_dynamic_log_limiter_->RequestTokens(1) &&
       breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_message_bytes) &&

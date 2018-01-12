@@ -170,14 +170,19 @@ class JvmBreakpoint : public Breakpoint,
   // condition evaluation duration (smoothed with sliding average filter).
   void ApplyConditionQuota();
 
-  // Takes one token for a dynamic log statement from the quota. Returns true
-  // if the quota allows issuing a log entry. Returns false if the debugger
-  // already produced too many logs. In such cases the caller should abandon
-  // the log entry. Once the quota replenishes, future hits on this breakpoint
-  // will be able to proceed.
-  bool ApplyDynamicLogsQuota(
-      const ResolvedSourceLocation& source_location,
-      int log_message_bytes);
+  // HasDynamicLogsQuota and ApplyDynamicLogsQuota work together to update
+  // and determine quota state.
+  //
+  // HasDynamicLogsQuota should be called ahead of potentially expensive work,
+  // including collecting data.  If this method returns false, then the log
+  // should be skipped without collecting data.
+  //
+  // ApplyDynamicLogsQuota should be called after expensive work but before
+  // actually writing the log.  If this mehtod returns false, then the log
+  // should not be written.
+  bool HasDynamicLogsQuota() const;
+  bool ApplyDynamicLogsQuota(const ResolvedSourceLocation& source_location,
+                             int log_message_bytes);
 
   // Captures the application state for data capturing breakpoints on
   // breakpoint hit.
@@ -255,7 +260,7 @@ class JvmBreakpoint : public Breakpoint,
   // Manages the pause in logger when quota is exceeded.
   struct {
     // Locks access to members of this struct.
-    Mutex mu;
+    mutable Mutex mu;
 
     // Indicates whether previous dynamic log was skipped due to quota
     // restrictions. This flag is used to log a warning that some log entries

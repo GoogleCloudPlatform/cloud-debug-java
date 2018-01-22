@@ -95,6 +95,15 @@ and obtain the credentials from the local
 Java debugger agent outside Google Cloud Platform  requires setting up a
 [service account](#service-account).
 
+You can customize the behavior of the agent by passing arguments to it.
+Multiple arguments can be passed by separating them using commas without
+spaces, as follows:
+
+<pre>
+java -agentpath:/opt/cdbg/cdbg_java_agent.so<b>=--arg1=val1,--arg2=val2</b> -jar ~/myapp.jar
+</pre>
+
+
 ### Application Servers
 
 Java application servers usually start through a bootstrap process, and each

@@ -59,6 +59,10 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
 
 }  // namespace
 
+GlobDataVisibilityPolicy::GlobDataVisibilityPolicy() {
+  config_.parse_error = "Internal Error: visibility policy not initialized.";
+}
+
 bool GlobDataVisibilityPolicy::HasSetupError(string* error) const {
   if (config_.parse_error.empty()) {
     return false;

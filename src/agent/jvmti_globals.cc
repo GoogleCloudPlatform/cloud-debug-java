@@ -28,6 +28,7 @@
 #include "jvmti_agent.h"
 #include "glob_data_visibility_policy.h"
 #include "yaml_data_visibility_config_reader.h"
+#include "data_visibility_scrubbed_eval_call_stack.h"
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
@@ -372,10 +373,22 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
 #endif
 
 // Start the agent.
+
+  // glob_policy is captured in a lambda below and sent to JvmtiAgent for final
+  // ownership after the needed initialization data is ready.  This is done so
+  // that DataVisibilityScrubbedEvalCallStack can access the object.
+  //
+  // This is assuming that the callback is actually called.  If not, then the
+  // object will never be claimed (i.e. memory leak).
+  devtools::cdbg::GlobDataVisibilityPolicy* glob_policy =
+      new devtools::cdbg::GlobDataVisibilityPolicy();
   g_instance = new devtools::cdbg::JvmtiAgent(
       g_internals,
       std::unique_ptr<devtools::cdbg::EvalCallStack>(
-          new devtools::cdbg::JvmEvalCallStack),
+          new devtools::cdbg::DataVisibilityScrubbedEvalCallStack(
+            std::unique_ptr<devtools::cdbg::EvalCallStack>(
+                new devtools::cdbg::JvmEvalCallStack),
+            glob_policy)),
       {
         jniproxy::BindDateTimeWithClassLoader,
         jniproxy::BindGcpBreakpointLabelsProviderWithClassLoader,
@@ -391,11 +404,12 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
         // There is no user id provider in GCE environment.
         return nullptr;
       },
-      [] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
+      [glob_policy] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
+        glob_policy->SetConfig(
+            devtools::cdbg::ReadYamlDataVisibilityConfiguration(
+                class_path_lookup));
         return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
-            new devtools::cdbg::GlobDataVisibilityPolicy(
-                devtools::cdbg::ReadYamlDataVisibilityConfiguration(
-                    class_path_lookup)));
+            glob_policy);
       },
       true,
       true);

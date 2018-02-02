@@ -112,8 +112,12 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     string parse_error;
   };
 
-  explicit GlobDataVisibilityPolicy(Config config)
-      : config_(std::move(config)) {
+  // Initalizes with a configuration that blocks everything.  Call setConfig()
+  // to change the configuration.
+  explicit GlobDataVisibilityPolicy();
+
+  void SetConfig(Config config) {
+      config_ = std::move(config);
   }
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
@@ -121,7 +125,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
   bool HasSetupError(string* error) const override;
 
  private:
-  const Config config_;
+  Config config_;
 
   DISALLOW_COPY_AND_ASSIGN(GlobDataVisibilityPolicy);
 };

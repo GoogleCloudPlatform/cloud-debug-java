@@ -96,8 +96,12 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
     std::map<string, Package> packages;
   };
 
-  explicit StructuredDataVisibilityPolicy(Config config)
-      : config_(config) {
+  // Initializes with an empty config that blocks nothing.
+  StructuredDataVisibilityPolicy() { }
+
+  // Sets the config.
+  void SetConfig(Config config) {
+    config_ = std::move(config);
   }
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
@@ -110,7 +114,7 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
   // Raw visibility configuration. It is equivalent to the format stored in
   // the .JAR file. This configuration packs data in an efficient way, but it
   // is relatively slow for lookup.
-  const Config config_;
+  Config config_;
 
   DISALLOW_COPY_AND_ASSIGN(StructuredDataVisibilityPolicy);
 };

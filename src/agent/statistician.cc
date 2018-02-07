@@ -21,9 +21,12 @@
 namespace devtools {
 namespace cdbg {
 
-// The "Statistician" class writes collected statistics to log once in a while.
-// This constant determines how often it happens.
-constexpr int kReportLogTimeMicros = 15 * 60 * 1000 * 1000;  // 15 minutes.
+DEFINE_FLAG(
+    int32,
+    cdbg_log_stats_time_micros,
+    15 * 60 * 1000 * 1000,  // 15 minutes
+    "How often to log debugger performance stats. "
+    "Set to zero to never logs stats.");
 
 Statistician* statCaptureTime = nullptr;
 Statistician* statDynamicLogTime = nullptr;
@@ -96,7 +99,11 @@ void Statistician::add(double sample) {
 
     ++count_;
 
-    if (report_timer_.GetElapsedMicros() > kReportLogTimeMicros) {
+    const int32 log_stats_time_micros = base::GetFlag(
+        FLAGS_cdbg_log_stats_time_micros);
+
+    if (log_stats_time_micros > 0 &&
+        report_timer_.GetElapsedMicros() > log_stats_time_micros) {
       log_statistics = true;
       report_timer_.Reset();
     }

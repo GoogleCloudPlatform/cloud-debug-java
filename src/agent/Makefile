@@ -58,7 +58,6 @@ ANTLR_CPP_LIB_SRC = $(ANTLR_CPP_LIB)/src
 ANTLR_CPP_LIB_INCLUDE = $(ANTLR_CPP_LIB)
 
 INCLUDES = \
-	-I/usr/lib/jvm/java-7-openjdk-amd64/include \
 	-I$(ROOT) \
 	-I$(THIRD_PARTY_INCLUDE_PATH) \
 	-I$(ANTLR_CPP_LIB_INCLUDE) \
@@ -72,9 +71,10 @@ INCLUDES += \
 	-I$(JDK)/include \
 	-I$(JDK)/include/darwin
 else
-JDK ?= /usr/lib/jvm/java-7-openjdk-amd64
+JDK ?= $(shell dirname $(shell dirname $(shell dirname $(shell readlink -f $(shell which java)))))
 INCLUDES += \
-	-I$(JDK)/include
+	-I$(JDK)/include \
+	-I$(JDK)/include/linux
 endif
 
 TARGET_AGENT = cdbg_java_agent.so

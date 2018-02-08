@@ -810,7 +810,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       float n2 = as<float>(stack_.PopStack(Slot::Type::Float));
       stack_.PushStack(
           Slot::Type::Int,
-          (isnan(n1) || isnan(n2)) ? -1 : ((n2 > n1) - (n2 < n1)));
+          (std::isnan(n1) || std::isnan(n2)) ? -1 : ((n2 > n1) - (n2 < n1)));
       break;
     }
 
@@ -819,7 +819,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       float n2 = as<float>(stack_.PopStack(Slot::Type::Float));
       stack_.PushStack(
           Slot::Type::Int,
-          (isnan(n1) || isnan(n2)) ? 1 : ((n2 > n1) - (n2 < n1)));
+          (std::isnan(n1) || std::isnan(n2)) ? 1 : ((n2 > n1) - (n2 < n1)));
       break;
     }
 
@@ -958,7 +958,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       double n2 = as<double>(stack_.PopStack2(Slot::Type::Double));
       stack_.PushStack(
           Slot::Type::Int,
-          (isnan(n1) || isnan(n2)) ? -1 : ((n2 > n1) - (n2 < n1)));
+          (std::isnan(n1) || std::isnan(n2)) ? -1 : ((n2 > n1) - (n2 < n1)));
       break;
     }
 
@@ -967,7 +967,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       double n2 = as<double>(stack_.PopStack2(Slot::Type::Double));
       stack_.PushStack(
           Slot::Type::Int,
-          (isnan(n1) || isnan(n2)) ? 1 : ((n2 > n1) - (n2 < n1)));
+          (std::isnan(n1) || std::isnan(n2)) ? 1 : ((n2 > n1) - (n2 < n1)));
       break;
     }
 

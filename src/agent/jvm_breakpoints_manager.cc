@@ -23,7 +23,6 @@
 #include "jvm_evaluators.h"
 #include "rate_limit.h"
 #include "statistician.h"
-#include "stopwatch.h"
 
 namespace devtools {
 namespace cdbg {
@@ -80,7 +79,7 @@ void JvmBreakpointsManager::Cleanup() {
 
 void JvmBreakpointsManager::SetActiveBreakpointsList(
     std::vector<std::unique_ptr<BreakpointModel>> breakpoints) {
-  Stopwatch stopwatch;
+  ScopedStat ss(statBreakpointsUpdateTime);
 
   // Serialize simultaneous calls to "SetActiveBreakpointsList".
   MutexLock lock_set_active_breakpoints_list(&mu_set_active_breakpoints_list_);
@@ -178,8 +177,6 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
   // TODO(vlif): remove breakpoints that the hub doesn't care about from
   // format_queue_. It needs an efficient lookup and special care about the
   // top element that might be transmitted right now.
-
-  statBreakpointsUpdateTime->add(stopwatch.GetElapsedMicros());
 }
 
 

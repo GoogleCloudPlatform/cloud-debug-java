@@ -122,15 +122,13 @@ std::unique_ptr<StatusMessageModel> Debugger::CopySetupError() {
 }
 
 void Debugger::JvmtiOnClassPrepare(jthread thread, jclass cls) {
-  Stopwatch stopwatch;
-
-  // Index the new class.
-  class_indexer_.JvmtiOnClassPrepare(cls);
-
   // Log the accumulated time. "OnClassPrepare" handler is a tax we are
   // paying upfront whether debugger is used or not. It is therefore very
   // important to keep this function fast.
-  statClassPrepareTime->add(stopwatch.GetElapsedMicros());
+  ScopedStat ss(statClassPrepareTime);
+
+  // Index the new class.
+  class_indexer_.JvmtiOnClassPrepare(cls);
 }
 
 

@@ -17,7 +17,6 @@
 #include "format_queue.h"
 
 #include "statistician.h"
-#include "stopwatch.h"
 
 namespace devtools {
 namespace cdbg {
@@ -82,8 +81,7 @@ void FormatQueue::Enqueue(
 
 
 std::unique_ptr<BreakpointModel> FormatQueue::FormatAndPop() {
-  Stopwatch stopwatch;
-
+  ScopedStat ss(statFormattingTime);
   MutexLock lock(&mu_);
 
   if (queue_.empty()) {
@@ -113,8 +111,6 @@ std::unique_ptr<BreakpointModel> FormatQueue::FormatAndPop() {
   for (int i = 0; i < expressions_count; ++i) {
     breakpoint->evaluated_expressions[i]->name = breakpoint->expressions[i];
   }
-
-  statFormattingTime->add(stopwatch.GetElapsedMicros());
 
   return breakpoint;
 }

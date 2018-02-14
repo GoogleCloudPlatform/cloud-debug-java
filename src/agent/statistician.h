@@ -81,6 +81,30 @@ class Statistician {
 };
 
 
+// Adds a new timer stat to the provided Statistician when ScopedStat
+// goes out-of-scope.
+class ScopedStat {
+ public:
+  // fn_gettime typically takes:
+  //   Stopwatch::MonotonicClock - wall time
+  //   Stopwatch::TheadClock - thread cpu time
+  explicit ScopedStat(
+      Statistician* stat,
+      std::function<int(struct timespec*)> fn_gettime =
+          Stopwatch::MonotonicClock) :
+    stat_(stat),
+    timer_(std::move(fn_gettime)) { }
+
+  ~ScopedStat() {
+    stat_->add(timer_.GetElapsedMicros());
+  }
+
+ private:
+  Statistician* stat_;
+  Stopwatch timer_;
+};
+
+
 // Global instances of all the metrics collected in the debuglet.
 extern Statistician* statCaptureTime;
 extern Statistician* statDynamicLogTime;

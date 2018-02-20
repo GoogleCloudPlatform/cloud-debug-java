@@ -71,7 +71,11 @@ INCLUDES += \
 	-I$(JDK)/include \
 	-I$(JDK)/include/darwin
 else
-JDK ?= $(shell dirname $(shell dirname $(shell dirname $(shell readlink -f $(shell which java)))))
+# Find the java command. Strip the trailing '/bin/java'. Then, strip an
+# extra trailing '/jre' (if exists).
+JDK ?= $(shell readlink -f $(shell which java) | \
+			 sed -e 's!\(.*\)/bin/java$$!\1!' | \
+			 sed -e 's!\(.*\)/jre$$!\1!')
 INCLUDES += \
 	-I$(JDK)/include \
 	-I$(JDK)/include/linux

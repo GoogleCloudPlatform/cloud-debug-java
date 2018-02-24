@@ -209,8 +209,7 @@ to authenticate with the Cloud Debugger Service.
 Use the Google Cloud Console Service Accounts
 [page](https://console.cloud.google.com/iam-admin/serviceaccounts/project) to
 create a credentials file for an existing or new service-account. The
-service-account must have at least the `Cloud Debugger Agent` role to be
-accepted by the Cloud Debugger Service.
+service-account must have at least the `Stackdriver Debugger Agent` role.
 If you don't have a Google Cloud Platform project, you can create one for free
 on [Google Cloud Console](https://console.cloud.google.com).
 

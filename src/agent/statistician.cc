@@ -84,7 +84,7 @@ void Statistician::add(double sample) {
   bool log_statistics = false;
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     sum_ += sample;
     sum2_ += sample * sample;
@@ -122,7 +122,7 @@ void Statistician::add(double sample) {
 
 
 double Statistician::mean() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (count_ == 0) {
     return -1;
@@ -132,7 +132,7 @@ double Statistician::mean() const {
 }
 
 double Statistician::stdev() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (count_ == 0) {
     return -1;

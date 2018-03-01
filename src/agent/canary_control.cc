@@ -52,7 +52,7 @@ bool CanaryControl::RegisterBreakpointCanary(
   int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
     // Fail if already in canary.
     if (canary_breakpoints_.find(breakpoint_id) != canary_breakpoints_.end()) {
       LOG(ERROR) << "Breakpoint " << breakpoint_id
@@ -73,7 +73,7 @@ bool CanaryControl::RegisterBreakpointCanary(
   }
 
   // Roll back the marking that the breakpoint is in canary.
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   canary_breakpoints_.erase(breakpoint_id);
 
   return false;
@@ -81,7 +81,7 @@ bool CanaryControl::RegisterBreakpointCanary(
 
 
 void CanaryControl::BreakpointCompleted(const string& breakpoint_id) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   canary_breakpoints_.erase(breakpoint_id);
 }
 
@@ -95,7 +95,7 @@ void CanaryControl::ApproveHealtyBreakpoints() {
     int64 cutoff =
         current_timestamp_ms - base::GetFlag(FLAGS_min_canary_duration_ms);
 
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
     for (const auto& entry : canary_breakpoints_) {
       if (entry.second.register_time > cutoff) {
         continue;  // The breakpoint hasn't spent enough time in canary.
@@ -135,7 +135,7 @@ void CanaryControl::ApproveHealtyBreakpoints() {
         .build());
   }
 
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   // Remove the approved breakpoints from the canary list.
   for (const string& breakpoint_id : approved_ids) {

@@ -260,7 +260,7 @@ class JvmBreakpoint : public Breakpoint,
   // Manages the pause in logger when quota is exceeded.
   struct {
     // Locks access to members of this struct.
-    mutable Mutex mu;
+    mutable absl::Mutex mu;
 
     // Indicates whether previous dynamic log was skipped due to quota
     // restrictions. This flag is used to log a warning that some log entries

@@ -82,7 +82,8 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
   ScopedStat ss(statBreakpointsUpdateTime);
 
   // Serialize simultaneous calls to "SetActiveBreakpointsList".
-  MutexLock lock_set_active_breakpoints_list(&mu_set_active_breakpoints_list_);
+  absl::MutexLock lock_set_active_breakpoints_list(
+      &mu_set_active_breakpoints_list_);
 
   std::map<string, std::shared_ptr<Breakpoint>> updated_active_breakpoints;
   std::set<string> updated_completed_breakpoints;
@@ -93,7 +94,7 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
     ScopedMonitoredCall monitored_call(
         "BreakpointsManager:SetActiveBreakpoints:Scan");
 
-    MutexLock lock_data(&mu_data_);
+    absl::MutexLock lock_data(&mu_data_);
 
     for (int i = 0; i < breakpoints.size(); ++i) {
       std::unique_ptr<BreakpointModel> breakpoint = std::move(breakpoints[i]);
@@ -151,7 +152,7 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
     LOG(INFO) << "Setting new breakpoint: " << jvm_breakpoint->id();
 
     {
-      MutexLock lock_data(&mu_data_);
+      absl::MutexLock lock_data(&mu_data_);
       active_breakpoints_.insert(
           std::make_pair(jvm_breakpoint->id(), jvm_breakpoint));
     }
@@ -186,7 +187,7 @@ void JvmBreakpointsManager::JvmtiOnCompiledMethodUnload(jmethodID method) {
   // the code on which the breakpoint is set. This guarantees that a method
   // with breakpoint will never get unloaded. Verify it here.
 
-  MutexLock lock_data(&mu_data_);
+  absl::MutexLock lock_data(&mu_data_);
   if (method_map_.find(method) != method_map_.end()) {
     LOG(ERROR) << "Method with breakpoint is being unloaded"
                   ", method = " << method;
@@ -202,7 +203,7 @@ void JvmBreakpointsManager::JvmtiOnBreakpoint(
   std::vector<std::shared_ptr<Breakpoint>> breakpoints;
 
   {
-    MutexLock lock_data(&mu_data_);
+    absl::MutexLock lock_data(&mu_data_);
 
     auto it_method = method_map_.find(method);
     if (it_method == method_map_.end()) {
@@ -252,7 +253,7 @@ void JvmBreakpointsManager::CompleteBreakpoint(string breakpoint_id) {
     canary_control_->BreakpointCompleted(breakpoint_id);
   }
 
-  MutexLock lock_data(&mu_data_);
+  absl::MutexLock lock_data(&mu_data_);
 
   // Do nothing if the breakpoint is not in active list. It is possible that
   // two threads hit breakpoint simultaneously and both call
@@ -276,7 +277,7 @@ bool JvmBreakpointsManager::SetJvmtiBreakpoint(
     jmethodID method,
     jlocation location,
     std::shared_ptr<Breakpoint> jvm_breakpoint) {
-  MutexLock lock_data(&mu_data_);
+  absl::MutexLock lock_data(&mu_data_);
 
   std::vector<std::pair<jlocation, std::shared_ptr<Breakpoint>>> empty;
   auto it_method = method_map_.insert(std::make_pair(method, empty)).first;
@@ -315,7 +316,7 @@ void JvmBreakpointsManager::ClearJvmtiBreakpoint(
     jmethodID method,
     jlocation location,
     std::shared_ptr<Breakpoint> jvm_breakpoint) {
-  MutexLock lock_data(&mu_data_);
+  absl::MutexLock lock_data(&mu_data_);
 
   jvmtiError err = JVMTI_ERROR_NONE;
 
@@ -371,7 +372,7 @@ void JvmBreakpointsManager::ClearJvmtiBreakpoint(
 
 std::vector<std::shared_ptr<Breakpoint>>
 JvmBreakpointsManager::GetActiveBreakpoints() {
-  MutexLock lock_data(&mu_data_);
+  absl::MutexLock lock_data(&mu_data_);
 
   std::vector<std::shared_ptr<Breakpoint>> breakpoints;
   breakpoints.reserve(active_breakpoints_.size());

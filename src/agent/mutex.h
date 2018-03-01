@@ -21,6 +21,8 @@
 #include <mutex>  // NOLINT
 #include "common.h"
 
+namespace absl {
+
 // Wrapper class for non-recursive mutex.
 class Mutex {
  public:
@@ -65,6 +67,8 @@ class MutexLock {
 
   DISALLOW_COPY_AND_ASSIGN(MutexLock);
 };
+
+}  // namespace absl
 
 
 #endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MUTEX_H_

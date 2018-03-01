@@ -78,10 +78,10 @@ class JvmEvalCallStack : public EvalCallStack {
   // Locks access to jmethodID pointers. JVM can unload a method any time.
   // When it does, it calls JvmtiOnCompiledMethodUnload function. After this
   // function returns jmethodID of that method points to a released memory.
-  mutable Mutex jmethods_mu_;
+  mutable absl::Mutex jmethods_mu_;
 
   // Locks access to the data structures used in this class.
-  mutable Mutex data_mu_;
+  mutable absl::Mutex data_mu_;
 
   // List of resolved call frames. The call frame key is index in this array.
   std::vector<std::unique_ptr<FrameInfo>> frames_;

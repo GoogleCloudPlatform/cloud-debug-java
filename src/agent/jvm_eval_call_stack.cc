@@ -38,7 +38,7 @@ void JvmEvalCallStack::Read(jthread thread, std::vector<JvmFrame>* result) {
   // Block JvmtiOnCompiledMethodUnload as long as this function is executing.
   // This is to make sure Java methods don't get unloaded while this function
   // is executing.
-  MutexLock jmethods_reader_lock(&jmethods_mu_);
+  absl::MutexLock jmethods_reader_lock(&jmethods_mu_);
 
   // Load call stack through JVMTI.
   jint frames_count = 0;
@@ -64,7 +64,7 @@ void JvmEvalCallStack::Read(jthread thread, std::vector<JvmFrame>* result) {
 
 const JvmEvalCallStack::FrameInfo& JvmEvalCallStack::ResolveCallFrameKey(
     int key) const {
-  MutexLock data_reader_lock(&data_mu_);
+  absl::MutexLock data_reader_lock(&data_mu_);
 
   DCHECK((key >= 0) && (key < frames_.size()));
 
@@ -75,7 +75,7 @@ const JvmEvalCallStack::FrameInfo& JvmEvalCallStack::ResolveCallFrameKey(
 
 
 int JvmEvalCallStack::InjectFrame(const FrameInfo& frame_info) {
-  MutexLock lock(&data_mu_);
+  absl::MutexLock lock(&data_mu_);
 
   frames_.push_back(std::unique_ptr<FrameInfo>(new FrameInfo(frame_info)));
   return frames_.size() - 1;
@@ -84,15 +84,15 @@ int JvmEvalCallStack::InjectFrame(const FrameInfo& frame_info) {
 
 // Note: JNIEnv* is not available through jni() call.
 void JvmEvalCallStack::JvmtiOnCompiledMethodUnload(jmethodID method) {
-  MutexLock jmethods_writer_lock(&jmethods_mu_);
-  MutexLock data_writer_lock(&data_mu_);
+  absl::MutexLock jmethods_writer_lock(&jmethods_mu_);
+  absl::MutexLock data_writer_lock(&data_mu_);
 
   method_cache_.erase(method);
 }
 
 
 int JvmEvalCallStack::DecodeFrame(const jvmtiFrameInfo& frame_info) {
-  MutexLock data_writer_lock(&data_mu_);
+  absl::MutexLock data_writer_lock(&data_mu_);
 
   // Fetch or load method information.
   auto in = method_cache_.insert(

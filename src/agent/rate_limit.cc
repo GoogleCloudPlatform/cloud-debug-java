@@ -80,7 +80,7 @@ constexpr double kDynamicLogBytesCapacityFactor = 2;  // allow very short burst.
 
 
 void MovingAverage::Add(int64 value) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (window_.size() >= max_size_) {   // make room
     sum_ -= window_.front();
@@ -93,7 +93,7 @@ void MovingAverage::Add(int64 value) {
 
 
 int64 MovingAverage::Average() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (window_.empty()) {
     return 0;
@@ -104,13 +104,13 @@ int64 MovingAverage::Average() const {
 
 
 int MovingAverage::IsFilled() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   return window_.size() == max_size_;
 }
 
 
 void MovingAverage::Reset() {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   window_ = std::queue<int64>();
   sum_ = 0.;

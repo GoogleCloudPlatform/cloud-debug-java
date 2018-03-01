@@ -84,7 +84,7 @@ class JvmClassMetadataReader : public ClassMetadataReader {
   DataVisibilityPolicy* const data_visibility_policy_;
 
   // Locks access to object fields cache.
-  Mutex mu_;
+  absl::Mutex mu_;
 
   // Cache of fields in classes we evaluated so far.
   JobjectMap<JObject_WeakRef, Entry> cls_cache_;

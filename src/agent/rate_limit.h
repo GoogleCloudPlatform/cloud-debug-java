@@ -84,7 +84,7 @@ class MovingAverage {
   const int max_size_ { 32 };
 
   // Lock access to "window_" and "sum_".
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // Last k values.
   std::queue<int64> window_;

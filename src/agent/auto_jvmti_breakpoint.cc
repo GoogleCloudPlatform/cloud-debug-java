@@ -25,7 +25,7 @@ bool AutoJvmtiBreakpoint::Set(
     jmethodID method,
     jlocation location,
     std::shared_ptr<Breakpoint> breakpoint) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if ((method_ == method) && (location_ == location)) {
     return true;
@@ -48,7 +48,7 @@ bool AutoJvmtiBreakpoint::Set(
 
 
 void AutoJvmtiBreakpoint::Clear(std::shared_ptr<Breakpoint> breakpoint) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   ClearUnsafe(breakpoint);
 }
 

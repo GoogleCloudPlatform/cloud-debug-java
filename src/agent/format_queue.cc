@@ -29,12 +29,12 @@ FormatQueue::~FormatQueue() {
 
 
 bool FormatQueue::IsEmpty() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   return queue_.empty();
 }
 
 void FormatQueue::RemoveAll() {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   for (Item& item : queue_) {
     if (item.collector != nullptr) {
@@ -59,7 +59,7 @@ void FormatQueue::Enqueue(
       return;
     }
 
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     // Replace pending non-final updates and ignore repeated final updates.
     for (Item& existing_item : queue_) {
@@ -82,7 +82,7 @@ void FormatQueue::Enqueue(
 
 std::unique_ptr<BreakpointModel> FormatQueue::FormatAndPop() {
   ScopedStat ss(statFormattingTime);
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (queue_.empty()) {
     return nullptr;

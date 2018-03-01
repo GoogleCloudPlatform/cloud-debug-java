@@ -87,7 +87,7 @@ class Scheduler {
       (t.*fn)(args...);
     };
 
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     int cancellation_id = ++last_id_;
 
@@ -103,7 +103,7 @@ class Scheduler {
   // has already been completed or being executed. Returns true if the item has
   // been cancelled. Calling "Cancel" with "NullId" has no effect.
   bool Cancel(Id id) {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     auto it = events_.lower_bound(id.first);
     while ((it != events_.end()) && (it->first == id.first)) {
@@ -126,7 +126,7 @@ class Scheduler {
     const time_t time = CurrentTime();
 
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       for (auto it = events_.begin(); it != events_.end(); ) {
         // "events_" is sorted by the scheduled time. Once we saw the first item
         // scheduled in the future, we can stop looking any further.
@@ -155,7 +155,7 @@ class Scheduler {
   const std::function<time_t()> clock_;
 
   // Locks access to "handlers_" and "last_id_" list in this class.
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // List of scheduled items.
   Events events_;

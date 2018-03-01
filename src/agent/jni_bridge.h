@@ -88,7 +88,7 @@ class JniBridge : public Bridge {
 
   // Locks "transmit_queue_" for thread safety. Also used to prevent race
   // between "Bind" and "Shutdown".
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // Set to true after "Shutdown" has been called.
   bool shutdown_ = false;

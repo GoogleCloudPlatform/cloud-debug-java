@@ -123,7 +123,7 @@ class ClassFilesCache {
   const int max_size_;
 
   // Locks changes to "classes_, "lru_" and "total_size_".
-  Mutex mu_;
+  absl::Mutex mu_;
 
   // All cached class files. We keep "Item" by value because "JobjectMap"
   // guarantees that it will not move when the entries are added or removed

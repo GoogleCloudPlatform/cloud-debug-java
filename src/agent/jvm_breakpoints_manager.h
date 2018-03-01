@@ -122,11 +122,11 @@ class JvmBreakpointsManager : public BreakpointsManager {
   ClassIndexer::OnClassPreparedEvent::Cookie on_class_prepared_cookie_;
 
   // Locks access to all breakpoint related data structures.
-  Mutex mu_data_;
+  absl::Mutex mu_data_;
 
   // Serializes calls to "SetActiveBreakpointsList" so that two simultaneous
   // calls don't intermingle.
-  Mutex mu_set_active_breakpoints_list_;
+  absl::Mutex mu_set_active_breakpoints_list_;
 
   // List of currently active breakpoints (keyed by breakpoint ID).
   std::map<string, std::shared_ptr<Breakpoint>> active_breakpoints_;

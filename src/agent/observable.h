@@ -48,7 +48,7 @@ class Observable {
   // unsubscribe. The callback handler must not call to Subscribe or Unsubscribe
   // because it will cause deadlock.
   Cookie Subscribe(std::function<void(Args...)> fn) {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     auto it = handlers_.insert(handlers_.end(), std::move(fn));
     return Cookie(new typename Handlers::iterator(it));
@@ -62,7 +62,7 @@ class Observable {
       return;
     }
 
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     handlers_.erase(*cookie);
   }
@@ -76,7 +76,7 @@ class Observable {
     // performance impact of this solution is negligible.
     std::list<Callback> handlers_copy;
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       handlers_copy = handlers_;
     }
 
@@ -87,7 +87,7 @@ class Observable {
 
  private:
   // Locks access to "handlers_" list in this class.
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // List of subscribers to the event.
   Handlers handlers_;

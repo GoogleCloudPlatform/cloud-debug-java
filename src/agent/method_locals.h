@@ -76,7 +76,7 @@ class MethodLocals {
   DataVisibilityPolicy* const data_visibility_policy_;
 
   // Locks access to local variables cache.
-  Mutex mu_;
+  absl::Mutex mu_;
 
   // Cache of local variables in methods we visited so far.
   std::map<jmethodID, std::shared_ptr<Entry>> method_vars_;

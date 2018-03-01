@@ -54,7 +54,7 @@ class Statistician {
 
  private:
   // Synchronize updates.
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // Name of the collector for logging purposes.
   const char* name_;

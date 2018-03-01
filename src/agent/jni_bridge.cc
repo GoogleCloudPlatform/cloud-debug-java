@@ -38,7 +38,7 @@ JniBridge::~JniBridge() {
 
 
 bool JniBridge::Bind(ClassPathLookup* class_path_lookup) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (shutdown_) {
     LOG(ERROR) << "Bind not allowed after Shutdown";
@@ -61,7 +61,7 @@ void JniBridge::EnqueueBreakpointUpdate(
       new SerializedBreakpoint(breakpoint_serializer_(*breakpoint)));
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
     transmit_queue_.enqueue(std::move(serialized_breakpoint));
   }
 }
@@ -189,7 +189,7 @@ void JniBridge::TransmitBreakpointUpdates() {
 
 
 bool JniBridge::HasPendingMessages() const {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
   return !transmit_queue_.empty();
 }
 
@@ -233,7 +233,7 @@ bool JniBridge::IsEnabled(bool* is_enabled) {
 
 
 void JniBridge::Shutdown() {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   if (jni_hub_ != nullptr) {
     jniproxy::HubClient()->shutdown(jni_hub_.get());

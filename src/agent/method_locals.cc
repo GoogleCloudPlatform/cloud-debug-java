@@ -38,7 +38,7 @@ std::shared_ptr<const MethodLocals::Entry> MethodLocals::GetLocalVariables(
     jmethodID method) {
   // Case 1: the local variables table is cached for "method".
   {
-    MutexLock reader_lock(&mu_);
+    absl::MutexLock reader_lock(&mu_);
 
     auto it_method_vars = method_vars_.find(method);
     if (it_method_vars != method_vars_.end()) {
@@ -53,7 +53,7 @@ std::shared_ptr<const MethodLocals::Entry> MethodLocals::GetLocalVariables(
       return std::shared_ptr<Entry>(new Entry);
     }
 
-    MutexLock writer_lock(&mu_);
+    absl::MutexLock writer_lock(&mu_);
 
     auto in = method_vars_.insert(
         std::make_pair(method, std::move(locals)));

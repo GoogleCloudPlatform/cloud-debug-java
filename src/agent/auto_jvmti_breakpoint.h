@@ -52,7 +52,7 @@ class AutoJvmtiBreakpoint {
 
  private:
   BreakpointsManager* const breakpoints_manager_;
-  Mutex mu_;
+  absl::Mutex mu_;
   jmethodID method_ { nullptr };
   jlocation location_ { 0 };
 

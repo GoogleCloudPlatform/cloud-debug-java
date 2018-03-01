@@ -27,7 +27,7 @@ ClassFilesCache::ClassFilesCache(ClassIndexer* class_indexer, int max_size)
 
 std::unique_ptr<ClassFilesCache::AutoClassFile> ClassFilesCache::Get(
     jobject cls) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   Item* item = classes_.Find(cls);
   if (item == nullptr) {
@@ -44,7 +44,7 @@ std::unique_ptr<ClassFilesCache::AutoClassFile> ClassFilesCache::GetOrLoad(
   *loaded = false;
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
     Item* item = classes_.Find(cls);
     if (item != nullptr) {
       return Reference(item);
@@ -62,7 +62,7 @@ std::unique_ptr<ClassFilesCache::AutoClassFile> ClassFilesCache::GetOrLoad(
   *loaded = true;
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     // The class could be inserted into the cache by another thread while
     // this thread was calling "ClassFile::Load".
@@ -111,7 +111,7 @@ std::unique_ptr<ClassFilesCache::AutoClassFile> ClassFilesCache::Reference(
 
 
 void ClassFilesCache::Unref(ClassFilesCache::Item* item) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   DCHECK_GT(item->ref_count, 0);
 

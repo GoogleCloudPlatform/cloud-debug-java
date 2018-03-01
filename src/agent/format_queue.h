@@ -94,7 +94,7 @@ class FormatQueue {
   };
 
   // Locks access to the queue.
-  mutable Mutex mu_;
+  mutable absl::Mutex mu_;
 
   // Breakpoint hit results that wait to be reported to the hub. The list is
   // used as queue. It is important to use linked list here, so that the pointer

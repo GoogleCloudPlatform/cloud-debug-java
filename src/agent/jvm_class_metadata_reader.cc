@@ -83,7 +83,7 @@ JvmClassMetadataReader::GetClassMetadata(jclass cls) {
 
   // Case 1: the class information is cached.
   {
-    MutexLock reader_lock(&mu_);
+    absl::MutexLock reader_lock(&mu_);
 
     const Entry* metadata = cls_cache_.Find(cls);
     if (metadata != nullptr) {
@@ -100,7 +100,7 @@ JvmClassMetadataReader::GetClassMetadata(jclass cls) {
     LoadClassMetadata(cls, &metadata);
 
     {
-      MutexLock writer_lock(&mu_);
+      absl::MutexLock writer_lock(&mu_);
 
       cls_cache_.Insert(cls, std::move(metadata));
 

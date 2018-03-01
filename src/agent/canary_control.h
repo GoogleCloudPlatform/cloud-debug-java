@@ -67,7 +67,7 @@ class CanaryControl {
   Bridge* const bridge_;
 
   // Locks access to all breakpoint related data structures.
-  Mutex mu_;
+  absl::Mutex mu_;
 
   // List of breakpoints currently in canary. The key is the breakpoint ID.
   std::map<string, CanaryBreakpoint> canary_breakpoints_;

@@ -41,7 +41,7 @@ class JvmClassReference : public ClassIndexer::Type {
 
   jclass FindClass() override {
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       if (cls_ != nullptr) {
         return static_cast<jclass>(cls_.get());
       }
@@ -78,7 +78,7 @@ class JvmClassReference : public ClassIndexer::Type {
     }
 
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       if (cls_ == nullptr) {
         cls_ = std::move(cls);
       }
@@ -104,7 +104,7 @@ class JvmClassReference : public ClassIndexer::Type {
     key += signature;
 
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       auto it = fields_.find(key);
       if (it != fields_.end()) {
         return it->second;
@@ -128,7 +128,7 @@ class JvmClassReference : public ClassIndexer::Type {
     }
 
     {
-      MutexLock lock(&mu_);
+      absl::MutexLock lock(&mu_);
       fields_.insert(std::make_pair(key, field_id));
     }
 
@@ -140,7 +140,7 @@ class JvmClassReference : public ClassIndexer::Type {
   const string signature_;
   JniGlobalRef cls_;
   std::map<string, jfieldID> fields_;
-  Mutex mu_;
+  absl::Mutex mu_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmClassReference);
 };
@@ -230,7 +230,7 @@ void JvmClassIndexer::Initialize() {
 void JvmClassIndexer::Cleanup() {
   // No other threads should be active at this point, but take the lock
   // just in case.
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   classes_.RemoveAll();
   name_map_.clear();
@@ -261,7 +261,7 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
   // the class was already discovered and no further action is necessary.
   jobject ref = nullptr;
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     std::pair<jobject, Empty>* inserted = nullptr;
     if (!classes_.Insert(cls, Empty(), &inserted)) {
@@ -279,7 +279,7 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
           << ", weak global reference to jclass: " << ref;
 
   {
-    MutexLock lock(&mu_);
+    absl::MutexLock lock(&mu_);
 
     std::hash<string> string_hash;
     name_map_.insert(std::make_pair(string_hash(type_name), ref));
@@ -318,7 +318,7 @@ JniLocalRef JvmClassIndexer::FindClassByHashCode(
     std::function<bool(const string&)> fn_check_signature) {
   jvmtiError err = JVMTI_ERROR_NONE;
 
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   auto it = name_map_.lower_bound(hash_code);
   while ((it != name_map_.end()) && (it->first == hash_code)) {
@@ -395,7 +395,7 @@ std::shared_ptr<ClassIndexer::Type> JvmClassIndexer::GetPrimitiveType(
 
 std::shared_ptr<ClassIndexer::Type> JvmClassIndexer::GetReference(
     const string& signature) {
-  MutexLock lock(&mu_);
+  absl::MutexLock lock(&mu_);
 
   auto it = ref_cache_.find(signature);
   if (it != ref_cache_.end()) {

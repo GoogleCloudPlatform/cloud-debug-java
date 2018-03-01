@@ -529,7 +529,7 @@ void JvmBreakpoint::ApplyConditionQuota() {
 
 
 bool JvmBreakpoint::HasDynamicLogsQuota() const {
-  MutexLock lock(&dynamic_log_pause_.mu);
+  absl::MutexLock lock(&dynamic_log_pause_.mu);
   if (!dynamic_log_pause_.is_skipping) {
     return true;
   }
@@ -552,7 +552,7 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
       breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_message_bytes) &&
       global_dynamic_log_limiter->RequestTokens(1) &&
       global_dynamic_log_bytes_limiter->RequestTokens(log_message_bytes)) {
-    MutexLock lock(&dynamic_log_pause_.mu);
+    absl::MutexLock lock(&dynamic_log_pause_.mu);
     dynamic_log_pause_.is_skipping = false;
     return true;
   }
@@ -561,7 +561,7 @@ bool JvmBreakpoint::ApplyDynamicLogsQuota(
   // to "out of quota" state. Stick to the "out of quota" state for some time.
   bool log_out_of_quota_message = false;
   {
-    MutexLock lock(&dynamic_log_pause_.mu);
+    absl::MutexLock lock(&dynamic_log_pause_.mu);
     if (!dynamic_log_pause_.is_skipping) {
       dynamic_log_pause_.cooldown_stopwatch.Reset();
       dynamic_log_pause_.is_skipping = true;

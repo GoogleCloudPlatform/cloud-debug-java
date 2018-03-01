@@ -72,7 +72,7 @@ class JvmClassIndexer : public ClassIndexer {
   struct Empty { };
 
   // Locks access to all data structures in this class.
-  Mutex mu_;
+  absl::Mutex mu_;
 
   // Keeps a set of loaded Java classes.
   JobjectMap<JObject_WeakRef, Empty> classes_;

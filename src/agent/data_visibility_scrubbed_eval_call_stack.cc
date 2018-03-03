@@ -25,6 +25,14 @@ namespace cdbg {
 static bool isMethodVisible(
     DataVisibilityPolicy* policy,
     const jmethodID method) {
+  if (method == nullptr) {
+    // This method was already scrubbed by the inner nested scrubber. Treat it
+    // as visible at the current level to prevent a negative interaction between
+    // nested scrubbers (returning 'false' will cause the rest of the frames to
+    // be blocked).
+    return true;
+  }
+
   // Read class information.
   jclass cls = nullptr;
   jvmtiError err = jvmti()->GetMethodDeclaringClass(method, &cls);

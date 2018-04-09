@@ -203,33 +203,31 @@ Alternatively you can make the Java Cloud Debugger log to *stderr*:
 ### Service Account
 
 To use the Java debugger agent on machines <i>not</i> hosted by Google Cloud
-Platform, the agent must use a Google Cloud Platform service-account credentials
+Platform, the agent must use a Google Cloud Platform service account credentials
 to authenticate with the Cloud Debugger Service.
 
 Use the Google Cloud Console Service Accounts
 [page](https://console.cloud.google.com/iam-admin/serviceaccounts/project) to
-create a credentials file for an existing or new service-account. The
-service-account must have at least the `Stackdriver Debugger Agent` role.
+create a credentials file for an existing or new service account. The
+service account must have at least the `Stackdriver Debugger Agent` role.
 If you don't have a Google Cloud Platform project, you can create one for free
 on [Google Cloud Console](https://console.cloud.google.com).
 
-Once you have the service-account JSON file, deploy it alongside the Java
+Once you have the service account JSON file, deploy it alongside the Java
 debugger agent.
 
-Using the service-account option requires the Java debugger agent version that
+Using the service account option requires the Java debugger agent version that
 supports it. Either download the pre-packaged agent from
 https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz
 or the locally built `cdbg_java_agent_service_account.tar.gz`
 
-To use the service-account credentials add these system properties:
+To use the service account credentials add this system property:
 <pre>
--Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/gcp-svc.json</i>
 </pre>
 
 Alternatively, you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment
-variable to the JSON file path instead of adding the
-`auth.serviceaccount.jsonfile` system property.
+variable to the JSON file path.
 
 
 ### Other JVM Languages

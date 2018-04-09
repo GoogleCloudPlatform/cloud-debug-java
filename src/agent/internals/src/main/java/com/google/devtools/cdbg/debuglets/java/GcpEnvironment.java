@@ -17,7 +17,6 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 import com.google.devtools.clouddebugger.v2.Labels;
-
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,9 +31,9 @@ final class GcpEnvironment {
   public static final String DEBUGGEE_DESCRIPTION_SUFFIX_LABEL = "description";
 
   /**
-   * Cached instance of authentication class.
+   * Cached instance of authentication class. Visible for testing.
    */
-  private static MetadataQuery metadataQuery = null;
+  static MetadataQuery metadataQuery = null;
 
   /**
    * Gets the value of a flag defined in the C++ portion of the debuglet.
@@ -83,25 +82,16 @@ final class GcpEnvironment {
   }
 
   /**
-   * Returns true if the debuglet is configured to authenticate to the backend with service account.
-   */
-  static boolean getIsServiceAccountEnabled() {
-    String value = getFlag("auth.serviceaccount.enable", "enable_service_account_auth");
-    return value.equals("1") || value.equalsIgnoreCase("true");
-  }
-
-  /**
    * Lazily creates and returns the class to get access token and project information.
    */
   static synchronized MetadataQuery getMetadataQuery() {
     // Lazy initialization.
     if (metadataQuery == null) {
-      if (getIsServiceAccountEnabled()) {
-        String jsonFile = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
-        if (jsonFile == null) {
-          jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
-        }
-
+      String jsonFile = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
+      if (jsonFile == null) {
+        jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
+      }
+      if (jsonFile != null && !jsonFile.isEmpty()) {
         try {
           // Use reflection to create a new instance of "ServiceAccountAuth" class. This way this
           // class has no explicit dependency on "com.google.api.client" package that can be

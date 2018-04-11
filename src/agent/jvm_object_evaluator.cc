@@ -61,7 +61,7 @@ JvmObjectEvaluator::~JvmObjectEvaluator() {
 }
 
 
-void JvmObjectEvaluator::Initialize() {
+void JvmObjectEvaluator::Initialize(const Options& options) {
   generic_.reset(new GenericTypeEvaluator);
 
   array_[static_cast<int>(JType::Boolean)].reset(
@@ -83,10 +83,18 @@ void JvmObjectEvaluator::Initialize() {
   array_[static_cast<int>(JType::Object)].reset(
       new ArrayTypeEvaluator<jobject>);
 
-  iterable_.reset(new IterableTypeEvaluator);
-  map_entry_.reset(new MapEntryTypeEvaluator);
-  map_.reset(new MapTypeEvaluator);
-  stringable_.reset(new StringableTypeEvaluator);
+  if (options.pretty_print_iterable) {
+    iterable_.reset(new IterableTypeEvaluator);
+  }
+  if (options.pretty_print_map_entry) {
+    map_entry_.reset(new MapEntryTypeEvaluator);
+  }
+  if (options.pretty_print_map) {
+    map_.reset(new MapTypeEvaluator);
+  }
+  if (options.pretty_print_stringable) {
+    stringable_.reset(new StringableTypeEvaluator);
+  }
 }
 
 

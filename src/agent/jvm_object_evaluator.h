@@ -34,12 +34,33 @@ namespace cdbg {
 
 class JvmObjectEvaluator : public ObjectEvaluator {
  public:
+  struct Options {
+    // Determines whether classes that implement the Iterable interface should
+    // be pretty printed.
+    bool pretty_print_iterable = true;
+
+    // Determines whether classes that implement the Map interface should be
+    // pretty printed.
+    bool pretty_print_map = true;
+
+    // Determines whether classes that implement the Map.Entry interface should
+    // be pretty printed.
+    bool pretty_print_map_entry = true;
+
+    // Determines whether supported classes should be pretty printed using
+    // "toString()". StringableTypeEvaluator::IsSupported() is used to determine
+    // if a class is supported for pretty printing using "toString()".
+    bool pretty_print_stringable = true;
+  };
+
   JvmObjectEvaluator(
       ClassMetadataReader* class_metadata_reader);
 
   ~JvmObjectEvaluator() override;
 
-  void Initialize();
+  void Initialize() { Initialize(Options()); }
+
+  void Initialize(const Options& options);
 
   void Evaluate(
       MethodCaller* method_caller,
@@ -73,4 +94,3 @@ class JvmObjectEvaluator : public ObjectEvaluator {
 }  // namespace devtools
 
 #endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_OBJECT_EVALUATOR_H_
-

@@ -85,6 +85,12 @@ sudo apt-get -y -q --no-install-recommends install \
     cmake python maven
 ```
 
+### Alpine Linux
+
+The Java agent is not regularly tested on Alpine Linux, and support will be on a
+best effort basis. The [Dockerfile](alpine/Dockerfile) shows how to build a
+minimal image with the agent installed.
+
 ## Setup
 
 The Java debugger agent is a
@@ -236,4 +242,3 @@ Starting with Java Cloud Debugger version 2.13, you can use the debugger to
 debug Scala applications. You can take snapshots in both `.scala` and `.java`
 source files, however snapshot expressions and conditions must always be written
 using the Java programming language syntax.
-

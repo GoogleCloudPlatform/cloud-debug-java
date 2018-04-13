@@ -227,14 +227,15 @@ supports it. Either download the pre-packaged agent from
 https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz
 or the locally built `cdbg_java_agent_service_account.tar.gz`
 
-To use the service account credentials add this system property:
+To use the service account credentials add these system properties:
 <pre>
+-Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/gcp-svc.json</i>
 </pre>
 
 Alternatively, you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment
-variable to the JSON file path.
-
+variable to the JSON file path instead of adding the
+`auth.serviceaccount.jsonfile` system property.
 
 ### Other JVM Languages
 

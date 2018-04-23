@@ -408,8 +408,7 @@ void JvmBreakpoint::DoLogAction(
     return;
   }
 
-  if (!HasDynamicLogsQuota()) {
-    // Insufficient quota for now.
+  if (dynamic_log_pause_.IsPaused()) {
     return;
   }
 
@@ -417,6 +416,12 @@ void JvmBreakpoint::DoLogAction(
   if (rsl == nullptr) {
     // The breakpoint is being deactivated.
     LOG(WARNING) << "Source location is not available";
+    return;
+  }
+
+  // Note: It is important to apply quota before doing any potentially-expensive
+  // work.
+  if (!ApplyDynamicLogsCallQuota(*rsl)) {
     return;
   }
 
@@ -435,7 +440,7 @@ void JvmBreakpoint::DoLogAction(
 
   // TODO(mattwach): Discuss if Log() below should be included in quota
   // accounting.  If so, this function can be changed to void.
-  if (!ApplyDynamicLogsQuota(*rsl, log_message.length())) {
+  if (!ApplyDynamicLogsByteQuota(*rsl, log_message.length())) {
     return;
   }
 
@@ -528,55 +533,87 @@ void JvmBreakpoint::ApplyConditionQuota() {
 }
 
 
-bool JvmBreakpoint::HasDynamicLogsQuota() const {
-  absl::MutexLock lock(&dynamic_log_pause_.mu);
-  if (!dynamic_log_pause_.is_skipping) {
-    return true;
+bool JvmBreakpoint::DynamicLogPause::IsPaused() {
+  absl::MutexLock lock(&mu_);
+  if (!is_paused_) {
+    return false;
   }
-  return dynamic_log_pause_.cooldown_stopwatch.GetElapsedMillis() >
-       base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms);
+
+  if (cooldown_stopwatch_.GetElapsedMillis() >
+      base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms)) {
+    is_paused_ = false;
+    return false;
+  }
+
+  return true;
 }
 
 
-bool JvmBreakpoint::ApplyDynamicLogsQuota(
-    const ResolvedSourceLocation& source_location,
-    int log_message_bytes) {
-  // TODO(emrekultursay): Move these get calls after the next block.
-  LeakyBucket* global_dynamic_log_limiter =
-      breakpoints_manager_->GetGlobalDynamicLogLimiter();
-
-  LeakyBucket* global_dynamic_log_bytes_limiter =
-      breakpoints_manager_->GetGlobalDynamicLogBytesLimiter();
-
-  if (breakpoint_dynamic_log_limiter_->RequestTokens(1) &&
-      breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_message_bytes) &&
-      global_dynamic_log_limiter->RequestTokens(1) &&
-      global_dynamic_log_bytes_limiter->RequestTokens(log_message_bytes)) {
-    absl::MutexLock lock(&dynamic_log_pause_.mu);
-    dynamic_log_pause_.is_skipping = false;
-    return true;
-  }
-
+void JvmBreakpoint::DynamicLogPause::OutOfQuota(
+    DynamicLogger* logger,
+    BreakpointModel::LogLevel log_level,
+    const string& message,
+    const ResolvedSourceLocation& source_location) {
   // We are out of quota. Log warning when we transition from "normal" state
   // to "out of quota" state. Stick to the "out of quota" state for some time.
   bool log_out_of_quota_message = false;
   {
-    absl::MutexLock lock(&dynamic_log_pause_.mu);
-    if (!dynamic_log_pause_.is_skipping) {
-      dynamic_log_pause_.cooldown_stopwatch.Reset();
-      dynamic_log_pause_.is_skipping = true;
+    absl::MutexLock lock(&mu_);
+    if (!is_paused_) {
+      cooldown_stopwatch_.Reset();
+      is_paused_ = true;
       log_out_of_quota_message = true;
     }
   }
 
   if (log_out_of_quota_message) {
-    dynamic_logger_->Log(
-        definition_->log_level,
+    logger->Log(
+        log_level,
         source_location,
-        string(kLogpointPrefix) + DynamicLogOutOfQuota);
+        string(kLogpointPrefix) + message);
+  }
+}
+
+bool JvmBreakpoint::ApplyDynamicLogsCallQuota(
+    const ResolvedSourceLocation& source_location) {
+  LeakyBucket* global_dynamic_log_limiter =
+      breakpoints_manager_->GetGlobalDynamicLogLimiter();
+
+  // Note logic below should be || so that both quotas are charged, even
+  // if the first bucket is empty
+  if (!breakpoint_dynamic_log_limiter_->RequestTokens(1) ||
+      !global_dynamic_log_limiter->RequestTokens(1)) {
+    dynamic_log_pause_.OutOfQuota(
+        dynamic_logger_,
+        definition_->log_level,
+        DynamicLogOutOfCallQuota,
+        source_location);
+    return false;
   }
 
-  return false;
+  return true;
+}
+
+
+bool JvmBreakpoint::ApplyDynamicLogsByteQuota(
+    const ResolvedSourceLocation& source_location,
+    int log_bytes) {
+  LeakyBucket* global_dynamic_log_bytes_limiter =
+      breakpoints_manager_->GetGlobalDynamicLogBytesLimiter();
+
+  // Note logic below should be || so that both quotas are charged, even
+  // if the first bucket is empty
+  if (!breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_bytes) ||
+      !global_dynamic_log_bytes_limiter->RequestTokens(log_bytes)) {
+    dynamic_log_pause_.OutOfQuota(
+        dynamic_logger_,
+        definition_->log_level,
+        DynamicLogOutOfBytesQuota,
+        source_location);
+    return false;
+  }
+
+  return true;
 }
 
 

@@ -170,20 +170,15 @@ class JvmBreakpoint : public Breakpoint,
   // condition evaluation duration (smoothed with sliding average filter).
   void ApplyConditionQuota();
 
-  // HasDynamicLogsQuota and ApplyDynamicLogsQuota work together to update
-  // and determine quota state.
-  //
-  // HasDynamicLogsQuota should be called ahead of potentially expensive work,
-  // including collecting data.  If this method returns false, then the log
-  // should be skipped without collecting data.
-  //
-  // ApplyDynamicLogsQuota should be called after expensive work but before
-  // actually writing the log.  If this mehtod returns false, then the log
-  // should not be written.
-  bool HasDynamicLogsQuota() const;
-  bool ApplyDynamicLogsQuota(const ResolvedSourceLocation& source_location,
-                             int log_message_bytes);
+  // Charges one log collection against quota.  Only call this if a collection
+  // will occur, otherwise the cost will be artifically high.  Returns false
+  // if there is insufficient call quota to collect log data.
+  bool ApplyDynamicLogsCallQuota(const ResolvedSourceLocation& source_location);
 
+  // Charges bytes collected against quota.  Returns false if there is
+  // insufficient byte quota to log the request.
+  bool ApplyDynamicLogsByteQuota(const ResolvedSourceLocation& source_location,
+                                 int log_bytes);
   // Captures the application state for data capturing breakpoints on
   // breakpoint hit.
   void DoCaptureAction(jthread thread, CompiledBreakpoint* state);
@@ -258,20 +253,36 @@ class JvmBreakpoint : public Breakpoint,
   std::unique_ptr<LeakyBucket> breakpoint_dynamic_log_bytes_limiter_;
 
   // Manages the pause in logger when quota is exceeded.
-  struct {
-    // Locks access to members of this struct.
-    mutable absl::Mutex mu;
+  class DynamicLogPause {
+   public:
+    // Called when quota has been exceeded.  Updates is_paused_ and logs a
+    // message.  The message parameter specifies the out-of-quota message to
+    // log.
+    void OutOfQuota(
+        DynamicLogger* logger,
+        BreakpointModel::LogLevel log_level,
+        const string& message,
+        const ResolvedSourceLocation& source_location);
 
-    // Indicates whether previous dynamic log was skipped due to quota
+    // Returns true if logging is paused.
+    bool IsPaused();
+
+   private:
+    // Locks access to members of this struct.
+    mutable absl::Mutex mu_;
+
+    // Indicates whether log collection should be paused due to quota
     // restrictions. This flag is used to log a warning that some log entries
     // are omitted when we run out of quota. Obviously we don't want to log
     // this warning every time we omit a log entry.
-    bool is_skipping { false };
+    bool is_paused_ { false };
 
     // Time at which the dynamic log was disabled due to quota. Used to enforce
     // the cool down period.
-    Stopwatch cooldown_stopwatch;
-  } dynamic_log_pause_;
+    Stopwatch cooldown_stopwatch_;
+  };
+
+  DynamicLogPause dynamic_log_pause_;
 
   //
   // Breakpoint state machine:

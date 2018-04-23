@@ -207,9 +207,11 @@ constexpr char ArrayIndexNotInteger[] =
 constexpr char InvalidParameterIndex[] =
     "Invalid parameter $$$0";
 
-constexpr char DynamicLogOutOfQuota[] =
-    "Logpoint is paused due to high log rate "
-    "until log quota is restored";
+constexpr char DynamicLogOutOfBytesQuota[] =
+    "Logpoint is paused due to high byte rate until log quota is restored";
+
+constexpr char DynamicLogOutOfCallQuota[] =
+    "Logpoint is paused due to high call rate until log quota is restored";
 
 constexpr char CanaryBreakpointUnhealthy[] =
     "The snapshot canary has failed and the snapshot cancelled. Please try "

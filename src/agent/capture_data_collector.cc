@@ -17,6 +17,7 @@
 #include "capture_data_collector.h"
 
 #include <algorithm>
+#include "encoding_util.h"
 #include "eval_call_stack.h"
 #include "expression_evaluator.h"
 #include "expression_util.h"
@@ -207,6 +208,36 @@ void CaptureDataCollector::EvaluateEnqueuedObjects(
   unexplored_memory_objects_.clear();
 }
 
+void CaptureDataCollector::FormatByteArray(
+    const std::vector<NamedJVariant>& source,
+    std::vector<std::unique_ptr<VariableModel>>* target) const {
+  std::vector<char> bytes(source.size());
+  int bytes_count = 0;
+  for (auto it = source.begin(); it != source.end(); ++it) {
+    if (it->value.type() == JType::Byte) {
+      it->value.get(reinterpret_cast<jbyte*>(&bytes[bytes_count]));
+      ++bytes_count;
+    }
+  }
+
+  int valid_utf8_bytes = ValidateUtf8(bytes.data(), bytes_count);
+  // Possibly add $utf8 field. We allow leeway in the case that the array was
+  // trimmed in the middle of an extended sequence.
+  if (valid_utf8_bytes > 0 && valid_utf8_bytes > bytes_count - 3) {
+    std::unique_ptr<VariableModel> utf8(new VariableModel);
+    utf8->name = "$utf8";
+    utf8->type = "String";
+    utf8->value = "\"" + string(bytes.data(), valid_utf8_bytes) + "\"";
+    target->push_back(std::move(utf8));
+  }
+
+  std::unique_ptr<VariableModel> base64(new VariableModel);
+  base64->name = "$base64";
+  base64->type = "String";
+  base64->value = Base64Encode(bytes.data(), bytes_count);
+  target->push_back(std::move(base64));
+}
+
 void CaptureDataCollector::ReleaseRefs() {
   explored_object_index_map_.RemoveAll();
 
@@ -279,9 +310,11 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
               StatusMessageBuilder(memory_object.status).build();
         }
 
-        FormatVariablesArray(
-            memory_object.members,
-            &object_variable->members);
+        if (object_variable->type == "byte[]") {
+          FormatByteArray(memory_object.members, &object_variable->members);
+        }
+
+        FormatVariablesArray(memory_object.members, &object_variable->members);
       }
     }
 
@@ -558,5 +591,3 @@ bool CaptureDataCollector::CanCollectMoreMemoryObjects() const {
 
 }  // namespace cdbg
 }  // namespace devtools
-
-

@@ -218,6 +218,11 @@ class CaptureDataCollector {
       bool is_watch_expression,
       MethodCaller* pretty_printers_method_caller);
 
+  // Adds additional base64 and (possibly) utf8 fields for a byte array.
+  void FormatByteArray(
+      const std::vector<NamedJVariant>& source,
+      std::vector<std::unique_ptr<VariableModel>>* target) const;
+
   // Bundles all the evaluation classes together. Evaluators are guaranteed
   // to be valid throughout the lifetime of "CaptureDataCollector".
   // Not owned by this class.

@@ -50,6 +50,7 @@ final class ClassPathLookup {
   private static final String JAVA_CLASS_PATH = "java.class.path";
   private static final String JAVA_EXTENSION = ".java";
   private static final String SCALA_EXTENSION = ".scala";
+  private static final String KOTLIN_EXTENSION = ".kt";
 
   /**
    * Enables indexing of classes specified in Java class path.
@@ -141,7 +142,9 @@ final class ClassPathLookup {
           new FormatMessage(Messages.INVALID_LINE_NUMBER, Integer.toString(lineNumber)));
     }
 
-    if (!sourcePath.endsWith(JAVA_EXTENSION) && !sourcePath.endsWith(SCALA_EXTENSION)) {
+    if (!sourcePath.endsWith(JAVA_EXTENSION)
+        && !sourcePath.endsWith(SCALA_EXTENSION)
+        && !sourcePath.endsWith(KOTLIN_EXTENSION)) {
       return new ResolvedSourceLocation(
           new FormatMessage(Messages.UNSUPPORTED_SOURCE_FILE_EXTENSION));
     }

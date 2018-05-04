@@ -66,13 +66,13 @@ constexpr char ClassLoadFailed[] =
     "Failed to load Java class $0";
 
 constexpr char AmbiguousClassName2[] =
-    "The identifier $0 is ambigious (possible matches: $1, $2)";
+    "The identifier $0 is ambiguous (possible matches: $1, $2)";
 
 constexpr char AmbiguousClassName3[] =
-    "The identifier $0 is ambigious (possible matches: $1, $2, $3)";
+    "The identifier $0 is ambiguous (possible matches: $1, $2, $3)";
 
 constexpr char AmbiguousClassName4OrMore[] =
-    "The identifier $0 is ambigious "
+    "The identifier $0 is ambiguous "
     "(possible matches: $1, $2, $3 and $4 more)";
 
 constexpr char PrimitiveTypeField[] =

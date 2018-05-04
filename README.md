@@ -239,7 +239,37 @@ variable to the JSON file path instead of adding the
 
 ### Other JVM Languages
 
-Starting with Java Cloud Debugger version 2.13, you can use the debugger to
-debug Scala applications. You can take snapshots in both `.scala` and `.java`
-source files, however snapshot expressions and conditions must always be written
-using the Java programming language syntax.
+#### Scala
+
+Debugging Scala applications is supported; however, expressions and conditions
+conditions must be written using the Java programming language syntax.
+
+#### Kotlin
+
+Debugging Kotlin applications is supported; however, expressions and conditions
+conditions must be written using the Java programming language syntax.
+
+Many Kotlin-specific features can be used in conditions and expressions with
+simple workarounds:
+
+```Kotlin
+// Main.kt
+private fun getGreeting() {
+  return "Hello world!"
+}
+class Main {
+  companion object {
+    fun welcome() {
+      return getGreeting()
+    }
+  }
+}
+```
+
+Package-level functions can be accessed by qualifying them with the name of the
+file and a `Kt` suffix. For instance, the `getGreeting` function above can be
+used in an expression as `MainKt.getGreeting()`
+
+Companion object methods can be accessed by qualifying them with the `Companion`
+keyword. For instance, the `welcome` function above can be used in an expression
+as `Main.Companion.welcome()`

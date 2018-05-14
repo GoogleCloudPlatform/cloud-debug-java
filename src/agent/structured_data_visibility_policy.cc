@@ -42,7 +42,6 @@ class ClassImpl : public DataVisibilityPolicy::Class {
       const string& name,
       int32 field_modifiers,
       string* reason) override {
-    // TODO(emrekultursay): InvisibleForDebugging should block data, not fields.
     return true;
   }
 
@@ -95,7 +94,6 @@ class ClassImpl : public DataVisibilityPolicy::Class {
       const string& method_signature,
       const string& variable_name,
       string* reason) override {
-    // TODO(emrekultursay): InvisibleForDebugging should block data, not fields.
     return true;
   }
 

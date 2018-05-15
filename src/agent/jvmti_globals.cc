@@ -83,13 +83,6 @@ DEFINE_FLAG(
 
 DEFINE_FLAG(
     string,
-    service_account_p12_file,
-    "",
-    "Path to .p12 file containing private key of the service account "
-    "(deprecated: use JSON file)");
-
-DEFINE_FLAG(
-    string,
     service_account_json_file,
     "",
     "Path to JSON file containing private key of the service account");

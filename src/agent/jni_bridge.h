@@ -69,11 +69,6 @@ class JniBridge : public Bridge {
 
   bool ApproveBreakpointCanary(const string& breakpoint_id) override;
 
-  // TODO(mattwach): This method might be better put into it's own interface.
-  // The reason it's not done now is that creating a new interface involves
-  // a lot of change and boilerplate.  It would seems reasonable to see the need
-  // for an interface expanded a bit before putting the definitions and
-  // rules in place.
   bool IsEnabled(bool* is_enabled) override;
 
  private:

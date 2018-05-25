@@ -81,6 +81,12 @@ class Bridge {
   // sets is_enabled to true and returns true.  If the debugger is disabled,
   // sets is_enabled to false and returns true.  If the method can not determine
   // status, sets is_enabled to false and returns false.
+  //
+  // Note: This method might be better put into it's own interface.
+  // The reason it's not done now is that creating a new interface involves
+  // a lot of change and boilerplate.  It would seems reasonable to see the need
+  // for an interface expanded a bit before putting the definitions and
+  // rules in place.
   virtual bool IsEnabled(bool* is_enabled) = 0;
 };
 

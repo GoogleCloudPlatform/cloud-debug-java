@@ -36,7 +36,7 @@ DEFINE_FLAG(
 DEFINE_FLAG(
     double,
     max_dynamic_log_rate,
-    50,  // maximum of 50 log entries per second on average
+    12,  // maximum of 12 log entries per second on average
     "maximum rate of dynamic log entries in this process; short bursts are "
     "allowed to exceed this limit");
 
@@ -75,7 +75,7 @@ namespace cdbg {
 // burst that consume 100% CPU for 1 ms, but no more.
 
 constexpr double kConditionCostCapacityFactor = 0.1;
-constexpr double kDynamicLogCapacityFactor = 5;  // allow short bursts.
+constexpr double kDynamicLogCapacityFactor = 2;  // allow short bursts.
 constexpr double kDynamicLogBytesCapacityFactor = 2;  // allow very short burst.
 
 

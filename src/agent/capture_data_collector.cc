@@ -220,6 +220,10 @@ void CaptureDataCollector::FormatByteArray(
     }
   }
 
+  if (bytes_count == 0) {
+    return;
+  }
+
   int valid_utf8_bytes = ValidateUtf8(bytes.data(), bytes_count);
   // Possibly add $utf8 field. We allow leeway in the case that the array was
   // trimmed in the middle of an extended sequence.

@@ -50,6 +50,24 @@ class TimestampBuilder {
   }
 };
 
+class DurationBuilder {
+ public:
+  static DurationModel Build(time_t seconds) {
+    DurationModel duration;
+    duration.seconds = seconds;
+    duration.nanos = 0;
+
+    return duration;
+  }
+
+  static DurationModel Build(int64 seconds, int32 nanos) {
+    DurationModel duration;
+    duration.seconds = seconds;
+    duration.nanos = nanos;
+
+    return duration;
+  }
+};
 
 class StatusMessageBuilder {
  public:
@@ -571,6 +589,12 @@ class BreakpointBuilder {
     return set_evaluated_user_id(evaluated_user_id.build());
   }
 
+  BreakpointBuilder& set_expires_in(DurationModel expires_in) {
+    data_->expires_in.reset(new DurationModel);
+    *data_->expires_in = expires_in;
+    return *this;
+  }
+
   std::unique_ptr<BreakpointModel> build() {
     return std::move(data_);
   }
@@ -643,6 +667,14 @@ inline bool operator!= (const TimestampModel& t1, const TimestampModel& t2) {
   return !(t1 == t2);
 }
 
+inline bool operator== (const DurationModel& d1, const DurationModel& d2) {
+  return (d1.seconds == d2.seconds) && (d1.nanos == d2.nanos);
+}
+
+
+inline bool operator!= (const DurationModel& d1, const DurationModel& d2) {
+  return !(d1 == d2);
+}
 
 // Debug printer for error messages.
 inline std::ostream& operator<< (

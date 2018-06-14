@@ -227,8 +227,16 @@ void JvmBreakpoint::Initialize() {
     expiration_time_base = definition_->create_time.seconds;
   }
 
+  int32 expiration_seconds = base::GetFlag(FLAGS_breakpoint_expiration_sec);
+  if (definition_->expires_in != nullptr) {
+    // Truncate if per-breakpoint expiration exceeds the agent maximum limit.
+    // Ignore the nanos field, we don't need that precision.
+    expiration_seconds =
+        std::min<int64>(definition_->expires_in->seconds, expiration_seconds);
+  }
+
   scheduler_id_ = scheduler_->Schedule(
-      expiration_time_base + base::GetFlag(FLAGS_breakpoint_expiration_sec),
+      expiration_time_base + expiration_seconds,
       std::weak_ptr<JvmBreakpoint>(shared_from_this()),
       &JvmBreakpoint::OnBreakpointExpired);
 

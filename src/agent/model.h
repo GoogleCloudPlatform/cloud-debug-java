@@ -32,6 +32,12 @@ struct TimestampModel {
   int32 nanos = 0;
 };
 
+// See google/protobuf/duration.proto for explanation of this structure.
+struct DurationModel {
+  int64 seconds = 0;
+  int32 nanos = 0;
+};
+
 struct FormatMessageModel {
   string format;
   std::vector<string> parameters;
@@ -140,6 +146,7 @@ struct BreakpointModel {
   std::vector<std::unique_ptr<VariableModel>> variable_table;
   std::map<string, string> labels;
   std::unique_ptr<UserIdModel> evaluated_user_id;
+  std::unique_ptr<DurationModel> expires_in;
 };
 
 // BreakpointModel in serialized form that we send to the Java code. The

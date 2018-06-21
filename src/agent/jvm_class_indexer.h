@@ -19,10 +19,11 @@
 
 #include <list>
 #include <map>
+#include "class_indexer.h"
 #include "common.h"
 #include "jobject_map.h"
-#include "class_indexer.h"
 #include "mutex.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -25,6 +25,7 @@
 #include "jni_utils.h"
 #include "mutex.h"
 #include "transmit_queue.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

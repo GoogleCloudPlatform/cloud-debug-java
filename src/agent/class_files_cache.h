@@ -20,10 +20,11 @@
 #include <list>
 
 #include "nullable.h"
-#include "class_indexer.h"
 #include "class_file.h"
+#include "class_indexer.h"
 #include "common.h"
 #include "jobject_map.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -18,6 +18,7 @@
 
 #include "messages.h"
 #include "model_util.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -20,6 +20,7 @@
 #include "common.h"
 #include "jni_utils.h"
 #include "jvmti_buffer.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 DEFINE_FLAG(
     int32,

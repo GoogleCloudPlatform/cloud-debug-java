@@ -18,11 +18,12 @@
 
 #include <algorithm>
 #include "callbacks_monitor.h"
-#include "format_queue.h"
 #include "breakpoint.h"
+#include "format_queue.h"
 #include "jvm_evaluators.h"
 #include "rate_limit.h"
 #include "statistician.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -17,13 +17,14 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_FORMAT_QUEUE_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_FORMAT_QUEUE_H_
 
-#include <queue>
 #include <memory>
+#include <queue>
 #include "capture_data_collector.h"
 #include "common.h"
-#include "observable.h"
 #include "model.h"
 #include "mutex.h"
+#include "observable.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

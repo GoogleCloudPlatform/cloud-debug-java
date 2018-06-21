@@ -16,10 +16,11 @@
 
 #include "jvm_class_indexer.h"
 
-#include "jvmti_buffer.h"
-#include "jni_utils.h"
-#include "type_util.h"
 #include "jni_proxy_class.h"
+#include "jni_utils.h"
+#include "jvmti_buffer.h"
+#include "type_util.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

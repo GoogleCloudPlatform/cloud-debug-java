@@ -21,6 +21,7 @@
 #include <queue>
 #include "common.h"
 #include "mutex.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -17,6 +17,7 @@
 #include "format_queue.h"
 
 #include "statistician.h"
+#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

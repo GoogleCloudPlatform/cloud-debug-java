@@ -71,7 +71,7 @@ int ValidateUtf8(const char* in, size_t in_size) {
         valid_bytes_read = i + 1;
         code_point = 0;
       }
-    } else if (cur < 0x80) {
+    } else if (!(cur & 0x80)) {
       valid_bytes_read = i + 1;
     } else if ((cur & 0xE0) == 0xC0) {
       code_point = cur & 0x1F;

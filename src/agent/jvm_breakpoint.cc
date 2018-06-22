@@ -32,7 +32,6 @@
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "statistician.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 
 DEFINE_FLAG(

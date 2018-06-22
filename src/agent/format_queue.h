@@ -24,7 +24,6 @@
 #include "model.h"
 #include "mutex.h"
 #include "observable.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

@@ -19,7 +19,6 @@
 #include "jni_utils.h"
 #include "jvm_local_variable_reader.h"
 #include "jvmti_buffer.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

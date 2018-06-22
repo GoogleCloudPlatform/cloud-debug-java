@@ -18,7 +18,6 @@
 
 #include <thread>  // NOLINT
 #include "leaky_bucket.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 //
 // See comment in rate_limit.h explaining the meaning of these flags and how

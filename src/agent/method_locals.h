@@ -23,7 +23,6 @@
 #include "common.h"
 #include "data_visibility_policy.h"
 #include "mutex.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

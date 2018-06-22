@@ -17,7 +17,6 @@
 #include "auto_jvmti_breakpoint.h"
 
 #include "breakpoints_manager.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

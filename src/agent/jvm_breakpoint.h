@@ -27,7 +27,6 @@
 #include "rate_limit.h"
 #include "scheduler.h"
 #include "stopwatch.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

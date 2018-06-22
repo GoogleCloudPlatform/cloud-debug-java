@@ -22,7 +22,6 @@
 #include "jvm_instance_field_reader.h"
 #include "jvm_static_field_reader.h"
 #include "jvmti_buffer.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

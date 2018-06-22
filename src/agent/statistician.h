@@ -20,7 +20,6 @@
 #include "common.h"
 #include "mutex.h"
 #include "stopwatch.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

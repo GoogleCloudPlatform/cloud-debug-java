@@ -23,7 +23,6 @@
 #include "jvm_evaluators.h"
 #include "rate_limit.h"
 #include "statistician.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

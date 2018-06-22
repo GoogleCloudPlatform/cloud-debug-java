@@ -15,7 +15,6 @@
  */
 
 #include "class_files_cache.h"
-#include "third_party/absl/synchronization/mutex.h"
 
 namespace devtools {
 namespace cdbg {

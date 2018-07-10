@@ -24,6 +24,7 @@
 #include "common.h"
 #include "expression_util.h"
 #include "jni_utils.h"
+#include "mutex.h"
 #include "rate_limit.h"
 #include "scheduler.h"
 #include "stopwatch.h"

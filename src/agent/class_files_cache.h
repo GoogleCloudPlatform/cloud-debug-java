@@ -24,6 +24,7 @@
 #include "class_indexer.h"
 #include "common.h"
 #include "jobject_map.h"
+#include "mutex.h"
 
 namespace devtools {
 namespace cdbg {

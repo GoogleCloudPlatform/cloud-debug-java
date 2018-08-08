@@ -111,15 +111,14 @@ bool JvmInternals::CreateClassPathLookupInstance(
     jobject extra_class_path) {
   Stopwatch stopwatch;
 
-  JniLocalRef instance_local_ref(jni()->NewObject(
-      class_path_lookup_.cls.get(),
-      class_path_lookup_.constructor,
-      use_default_class_path,
-      extra_class_path));
-
-  if (!JniCheckNoException("new ClassPathLookup(...)")) {
-    return false;
-  }
+  JniLocalRef instance_local_ref = CatchOr(
+      "new ClassPathLookup(...)",
+      JniLocalRef(jni()->NewObject(
+          class_path_lookup_.cls.get(),
+          class_path_lookup_.constructor,
+          use_default_class_path,
+          extra_class_path)))
+      .Release(ExceptionAction::LOG_AND_IGNORE);
 
   if (instance_local_ref == nullptr) {
     return false;

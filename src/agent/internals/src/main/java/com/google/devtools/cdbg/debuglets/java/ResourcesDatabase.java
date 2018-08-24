@@ -282,19 +282,23 @@ final class ResourcesDatabase {
      * @param path full path to the indexed file.
      */
     public Builder add(String path) {
-      if ((path == null) || path.endsWith("/")) {
-        throw new IllegalArgumentException("path");
+      if ((path == null) || path.endsWith("/") || path.startsWith("/")) {
+        throw new IllegalArgumentException("invalid file path");
       }
-      
+
       // Tokenize the path and insert into the tree.
       String[] components = path.split("/");
       DirectoryBuilder node = root;
       for (int i = 0; i < components.length - 1; ++i) {
+        if (components[i].isEmpty()) {
+          continue;  // Skip. Repeated slashes count as one slash.
+        }
+
         node = node.createChild(components[i]);
       }
-      
+
       node.addFile(components[components.length - 1]);
-      
+
       return this;
     }
 

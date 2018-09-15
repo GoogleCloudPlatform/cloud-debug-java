@@ -27,11 +27,10 @@
 #include "model_util.h"
 #include "object_evaluator.h"
 #include "value_formatter.h"
+#include "third_party/absl/flags/flag.h"
 
-DEFINE_FLAG(
-    bool,
-    cdbg_capture_user_id,
-    true,
+ABSL_FLAG(
+    bool, cdbg_capture_user_id, true,
     "If true, the agent also captures the end user identity for audit logging");
 
 namespace devtools {

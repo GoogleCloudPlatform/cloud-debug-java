@@ -15,6 +15,7 @@
  */
 
 #include "common.h"
+#include "third_party/absl/flags/flag.h"
 
 //
 // Define flags we no longer use. We can't remove these flags because some
@@ -23,4 +24,4 @@
 //
 
 // Deprecated as of 11/2015.
-DEFINE_FLAG(string, cdbg_agentdir, "", "deprecated");
+ABSL_FLAG(string, cdbg_agentdir, "", "deprecated");

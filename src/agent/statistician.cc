@@ -21,12 +21,10 @@
 namespace devtools {
 namespace cdbg {
 
-DEFINE_FLAG(
-    int32,
-    cdbg_log_stats_time_micros,
-    15 * 60 * 1000 * 1000,  // 15 minutes
-    "How often to log debugger performance stats. "
-    "Set to zero to never logs stats.");
+ABSL_FLAG(int32, cdbg_log_stats_time_micros,
+          15 * 60 * 1000 * 1000,  // 15 minutes
+          "How often to log debugger performance stats. "
+          "Set to zero to never logs stats.");
 
 Statistician* statCaptureTime = nullptr;
 Statistician* statDynamicLogTime = nullptr;

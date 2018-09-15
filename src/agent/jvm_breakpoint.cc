@@ -32,19 +32,16 @@
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "statistician.h"
+#include "third_party/absl/flags/flag.h"
 
 
-DEFINE_FLAG(
-    int32,
-    breakpoint_expiration_sec,
-    60 * 60 * 24,  // 24 hours
-    "breakpoint expiration time in seconds");
+ABSL_FLAG(int32, breakpoint_expiration_sec,
+          60 * 60 * 24,  // 24 hours
+          "breakpoint expiration time in seconds");
 
-DEFINE_FLAG(
-    int32,
-    dynamic_log_quota_recovery_ms,
-    500,  // ms
-    "time to pause dynamic logs after it runs out of quota");
+ABSL_FLAG(int32, dynamic_log_quota_recovery_ms,
+          500,  // ms
+          "time to pause dynamic logs after it runs out of quota");
 
 namespace devtools {
 namespace cdbg {

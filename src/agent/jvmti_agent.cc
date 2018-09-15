@@ -39,12 +39,10 @@
 #include "jni_proxy_hubclient.h"
 #include "jni_proxy_hubclient_listactivebreakpointsresult.h"
 #include "jni_proxy_useridprovider.h"
+#include "third_party/absl/flags/flag.h"
 
-DEFINE_FLAG(
-    string,
-    cdbg_extra_class_path,
-    "",
-    "additional directories and files containing resolvable binaries");
+ABSL_FLAG(string, cdbg_extra_class_path, "",
+          "additional directories and files containing resolvable binaries");
 
 
 using google::SetCommandLineOption;

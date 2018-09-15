@@ -19,91 +19,60 @@
 #include <sstream>
 
 #include "safe_caller_proxies.h"
+#include "third_party/absl/flags/flag.h"
 
 // Multiple items in flags like "extra_allowed_methods" are separated with
 // a colon. Method names are specified as "class#method".
 
-DEFINE_FLAG(
-    bool,
-    enable_safe_caller,
-    true,
-    "Allows any method without side effects in expressions");
+ABSL_FLAG(bool, enable_safe_caller, true,
+          "Allows any method without side effects in expressions");
 
-DEFINE_FLAG(
-    string,
-    extra_blocked_methods,
-    "",
-    "Additional methods to block for testing purposes");
+ABSL_FLAG(string, extra_blocked_methods, "",
+          "Additional methods to block for testing purposes");
 
-DEFINE_FLAG(
-    string,
-    extra_allowed_methods,
-    "",
-    "Additional methods to allowed for testing purposes");
+ABSL_FLAG(string, extra_allowed_methods, "",
+          "Additional methods to allowed for testing purposes");
 
-DEFINE_FLAG(
-    string,
-    extra_whitelisted_classes,
-    "",
-    "Internal names of additional classes to allow for testing purposes");
+ABSL_FLAG(string, extra_whitelisted_classes, "",
+          "Internal names of additional classes to allow for testing purposes");
 
-DEFINE_FLAG(
-    int32,
-    expression_max_classes_load_quota,
-    5,
-    "Maximum number of classes that the NanoJava interpreter is allowed "
-    "to load while evaluating a single breakpoint expression");
+ABSL_FLAG(int32, expression_max_classes_load_quota, 5,
+          "Maximum number of classes that the NanoJava interpreter is allowed "
+          "to load while evaluating a single breakpoint expression");
 
-DEFINE_FLAG(
-    int32,
-    expression_max_interpreter_instructions_quota,
-    1000,
+ABSL_FLAG(
+    int32, expression_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while evaluating a single breakpoint expression");
 
-DEFINE_FLAG(
-    int32,
-    pretty_printers_max_classes_load_quota,
-    5,
-    "Maximum number of classes that the NanoJava interpreter is allowed "
-    "to load while formatting some well known data structures");
+ABSL_FLAG(int32, pretty_printers_max_classes_load_quota, 5,
+          "Maximum number of classes that the NanoJava interpreter is allowed "
+          "to load while formatting some well known data structures");
 
-DEFINE_FLAG(
-    int32,
-    pretty_printers_max_interpreter_instructions_quota,
-    1000,
+ABSL_FLAG(
+    int32, pretty_printers_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while formatting some well known data structures");
 
-DEFINE_FLAG(
-    int32,
-    dynamic_log_max_classes_load_quota,
-    5,
-    "Maximum number of classes that the NanoJava interpreter is allowed "
-    "to load while evaluating all expressions in a single dynamic log "
-    "statement");
+ABSL_FLAG(int32, dynamic_log_max_classes_load_quota, 5,
+          "Maximum number of classes that the NanoJava interpreter is allowed "
+          "to load while evaluating all expressions in a single dynamic log "
+          "statement");
 
-DEFINE_FLAG(
-    int32,
-    dynamic_log_max_interpreter_instructions_quota,
-    1000,
+ABSL_FLAG(
+    int32, dynamic_log_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while evaluating all expressions in a single dynamic log "
     "statement");
 
-DEFINE_FLAG(
-    int32,
-    safe_caller_max_array_elements,
-    65536,
+ABSL_FLAG(
+    int32, safe_caller_max_array_elements, 65536,
     "Maximum allowed size of the array to copy or allocate in safe caller"
     "(copying or allocating larger arrays is considered to be too expensive "
     "and will be blocked)");
 
-DEFINE_FLAG(
-    int32,
-    safe_caller_max_interpreter_stack_depth,
-    20,
-    "Maximum stack depth that safe caller will allow");
+ABSL_FLAG(int32, safe_caller_max_interpreter_stack_depth, 20,
+          "Maximum stack depth that safe caller will allow");
 
 
 namespace devtools {

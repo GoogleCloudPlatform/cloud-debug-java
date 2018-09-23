@@ -99,8 +99,8 @@ void Statistician::add(double sample) {
 
     ++count_;
 
-    const int32 log_stats_time_micros = base::GetFlag(
-        FLAGS_cdbg_log_stats_time_micros);
+    const int32 log_stats_time_micros =
+        absl::GetFlag(FLAGS_cdbg_log_stats_time_micros);
 
     if (log_stats_time_micros > 0 &&
         report_timer_.GetElapsedMicros() > log_stats_time_micros) {

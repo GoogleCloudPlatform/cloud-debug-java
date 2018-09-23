@@ -17,9 +17,10 @@
 #include "safe_caller_proxies.h"
 
 #include "class_metadata_reader.h"
+#include "jni_proxy_object.h"
 #include "safe_method_caller.h"
 #include "type_util.h"
-#include "jni_proxy_object.h"
+#include "third_party/absl/flags/flag.h"
 
 DECLARE_FLAG(int32, safe_caller_max_array_elements);
 
@@ -43,7 +44,7 @@ MethodCallResult ObjectClonePre(
   string signature = GetObjectClassSignature(instance);
   if (IsArrayObjectSignature(signature)) {
     jsize length = jni()->GetArrayLength(static_cast<jarray>(instance));
-    if (length > base::GetFlag(FLAGS_safe_caller_max_array_elements)) {
+    if (length > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
       return MethodCallResult::Error({
         MethodNotSafeNewArrayTooLarge,
         { caller->GetCurrentMethodName(), { std::to_string(length) } }
@@ -78,7 +79,7 @@ MethodCallResult SystemArraycopyPre(
     return MethodCallResult::Success(JVariant());
   }
 
-  if (length > base::GetFlag(FLAGS_safe_caller_max_array_elements)) {
+  if (length > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
     return MethodCallResult::Error({
       MethodNotSafeCopyArrayTooLarge,
       { caller->GetCurrentMethodName(), { std::to_string(length) } }
@@ -127,7 +128,7 @@ MethodCallResult StringFormatPre(
   }
 
   jsize size = jni()->GetArrayLength(static_cast<jobjectArray>(source));
-  if (size > base::GetFlag(FLAGS_safe_caller_max_array_elements)) {
+  if (size > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
     return MethodCallResult::Error({
       MethodNotSafeNewArrayTooLarge,
       { "java.lang.String.format", { std::to_string(size) } }

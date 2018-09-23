@@ -16,9 +16,10 @@
 
 #include "safe_method_caller.h"
 
+#include "jni_proxy_nullpointerexception.h"
 #include "jni_method_caller.h"
 #include "type_util.h"
-#include "jni_proxy_nullpointerexception.h"
+#include "third_party/absl/flags/flag.h"
 
 DECLARE_FLAG(bool, enable_safe_caller);
 DECLARE_FLAG(int32, safe_caller_max_array_elements);
@@ -341,7 +342,7 @@ MethodCallResult SafeMethodCaller::InvokeInterpreter(
     jobject source,
     std::vector<JVariant> arguments,
     const CallTarget& call_target) {
-  if (!base::GetFlag(FLAGS_enable_safe_caller)) {
+  if (!absl::GetFlag(FLAGS_enable_safe_caller)) {
     // Configuration error. When safe caller is not enabled, the configuration
     // should never specify MethodCallAction::Interpret.
     return MethodCallResult::Error(INTERNAL_ERROR_MESSAGE);
@@ -357,7 +358,7 @@ MethodCallResult SafeMethodCaller::InvokeInterpreter(
   // Limit maximum interpreter stack depth to avoid native stack overflow.
   if ((current_interpreter_ != nullptr) &&
       (current_interpreter_->GetStackDepth() >=
-       base::GetFlag(FLAGS_safe_caller_max_interpreter_stack_depth))) {
+       absl::GetFlag(FLAGS_safe_caller_max_interpreter_stack_depth))) {
     LOG(INFO) << "Interpreter stack overflow:\n" << CurrentCallStack();
     return MethodCallResult::Error({ StackOverflow });
   }
@@ -428,7 +429,7 @@ SafeMethodCaller::IsNextInstructionAllowed() {
 
 std::unique_ptr<FormatMessageModel> SafeMethodCaller::IsNewArrayAllowed(
     int32 count) {
-  if (count > base::GetFlag(FLAGS_safe_caller_max_array_elements)) {
+  if (count > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
     return std::unique_ptr<FormatMessageModel>(new FormatMessageModel {
         MethodNotSafeNewArrayTooLarge,
         { GetCurrentMethodName(), std::to_string(count) }

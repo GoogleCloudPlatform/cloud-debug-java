@@ -93,7 +93,7 @@ void CanaryControl::ApproveHealtyBreakpoints() {
   {
     int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
     int64 cutoff =
-        current_timestamp_ms - base::GetFlag(FLAGS_min_canary_duration_ms);
+        current_timestamp_ms - absl::GetFlag(FLAGS_min_canary_duration_ms);
 
     absl::MutexLock lock(&mu_);
     for (const auto& entry : canary_breakpoints_) {

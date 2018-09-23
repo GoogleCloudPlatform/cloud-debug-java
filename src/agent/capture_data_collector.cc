@@ -59,7 +59,7 @@ void CaptureDataCollector::Collect(
   breakpoint_labels_provider_->Collect();
 
   // Collect current end user identity, but don't format it yet.
-  if (base::GetFlag(FLAGS_cdbg_capture_user_id)) {
+  if (absl::GetFlag(FLAGS_cdbg_capture_user_id)) {
     DCHECK(evaluators_->user_id_provider_factory);
     user_id_provider_ = evaluators_->user_id_provider_factory();
     DCHECK(user_id_provider_);
@@ -329,7 +329,7 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
   breakpoint->labels = breakpoint_labels_provider_->Format();
 
   // Format the end user identity.
-  if (base::GetFlag(FLAGS_cdbg_capture_user_id)) {
+  if (absl::GetFlag(FLAGS_cdbg_capture_user_id)) {
     string kind;
     string id;
     if (user_id_provider_->Format(&kind, &id)) {

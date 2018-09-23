@@ -43,13 +43,10 @@ void JvmEvalCallStack::Read(jthread thread, std::vector<JvmFrame>* result) {
   // Load call stack through JVMTI.
   jint frames_count = 0;
   std::unique_ptr<jvmtiFrameInfo[]> frames(
-      new jvmtiFrameInfo[base::GetFlag(FLAGS_cdbg_max_stack_depth)]);
-  err = jvmti()->GetStackTrace(
-      thread,
-      0,
-      base::GetFlag(FLAGS_cdbg_max_stack_depth),
-      frames.get(),
-      &frames_count);
+      new jvmtiFrameInfo[absl::GetFlag(FLAGS_cdbg_max_stack_depth)]);
+  err = jvmti()->GetStackTrace(thread, 0,
+                               absl::GetFlag(FLAGS_cdbg_max_stack_depth),
+                               frames.get(), &frames_count);
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "Failed to get stack trace, error: " << err;
     return;

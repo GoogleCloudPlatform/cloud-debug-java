@@ -34,9 +34,7 @@ namespace devtools {
 namespace cdbg {
 
 Debugger::Debugger(
-    Scheduler<>* scheduler,
-    Config* config,
-    EvalCallStack* eval_call_stack,
+    Scheduler<>* scheduler, Config* config, EvalCallStack* eval_call_stack,
     std::unique_ptr<MethodLocals> method_locals,
     std::unique_ptr<ClassMetadataReader> class_metadata_reader,
     std::unique_ptr<StatusMessageModel> setup_error,
@@ -44,17 +42,15 @@ Debugger::Debugger(
     std::unique_ptr<DynamicLogger> dynamic_logger,
     std::function<std::unique_ptr<BreakpointLabelsProvider>()> labels_factory,
     std::function<std::unique_ptr<UserIdProvider>()> user_id_provider_factory,
-    FormatQueue* format_queue,
-    CanaryControl* canary_control /* = nullptr */)
+    FormatQueue* format_queue, CanaryControl* canary_control /* = nullptr */)
     : config_(config),
       eval_call_stack_(eval_call_stack),
       method_locals_(std::move(method_locals)),
       class_metadata_reader_(std::move(class_metadata_reader)),
       setup_error_(std::move(setup_error)),
       object_evaluator_(class_metadata_reader_.get()),
-      class_files_cache_(
-          &class_indexer_,
-          base::GetFlag(FLAGS_cdbg_class_files_cache_size)),
+      class_files_cache_(&class_indexer_,
+                         absl::GetFlag(FLAGS_cdbg_class_files_cache_size)),
       dynamic_logger_(std::move(dynamic_logger)) {
   evaluators_.class_path_lookup = class_path_lookup;
   evaluators_.class_indexer = &class_indexer_;
@@ -91,7 +87,6 @@ Debugger::Debugger(
       format_queue,
       canary_control));
 }
-
 
 Debugger::~Debugger() {
   breakpoints_manager_->Cleanup();

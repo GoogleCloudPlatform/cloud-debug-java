@@ -195,18 +195,18 @@ static MethodRuleBuilder Block(string method_name) {
 
 static MethodRuleBuilder InterpretAll() {
   Config::Method rule;
-  rule.action = base::GetFlag(FLAGS_enable_safe_caller)
-      ? Config::Method::CallAction::Interpret
-      : Config::Method::CallAction::Block;
+  rule.action = absl::GetFlag(FLAGS_enable_safe_caller)
+                    ? Config::Method::CallAction::Interpret
+                    : Config::Method::CallAction::Block;
   return MethodRuleBuilder(rule);
 }
 
 
 static MethodRuleBuilder Interpret(string method_name) {
   Config::Method rule;
-  rule.action = base::GetFlag(FLAGS_enable_safe_caller)
-      ? Config::Method::CallAction::Interpret
-      : Config::Method::CallAction::Block;
+  rule.action = absl::GetFlag(FLAGS_enable_safe_caller)
+                    ? Config::Method::CallAction::Interpret
+                    : Config::Method::CallAction::Block;
   rule.name = std::move(method_name);
   return MethodRuleBuilder(rule);
 }
@@ -587,7 +587,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   //
 
   for (const string& item :
-       SplitString(base::GetFlag(FLAGS_extra_allowed_methods))) {
+       SplitString(absl::GetFlag(FLAGS_extra_allowed_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding block rule for class " << method.first
             << ", method " << method.second;
@@ -595,7 +595,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }
 
   for (const string& item :
-       SplitString(base::GetFlag(FLAGS_extra_blocked_methods))) {
+       SplitString(absl::GetFlag(FLAGS_extra_blocked_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding allow rule for class " << method.first
             << ", method " << method.second;
@@ -603,7 +603,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }
 
   for (const string& cls :
-       SplitString(base::GetFlag(FLAGS_extra_whitelisted_classes))) {
+       SplitString(absl::GetFlag(FLAGS_extra_whitelisted_classes))) {
     VLOG(1) << "Adding allow-all rule for class " << cls;
     classes[cls].push_back(AllowAll().build());
   }
@@ -615,24 +615,24 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 std::unique_ptr<Config> DefaultConfig() {
   Config::Builder builder;
 
-  if (base::GetFlag(FLAGS_enable_safe_caller)) {
+  if (absl::GetFlag(FLAGS_enable_safe_caller)) {
     Config::MethodCallQuota expression_method_call_quota;
     expression_method_call_quota.max_classes_load =
-        base::GetFlag(FLAGS_expression_max_classes_load_quota);
+        absl::GetFlag(FLAGS_expression_max_classes_load_quota);
     expression_method_call_quota.max_interpreter_instructions =
-        base::GetFlag(FLAGS_expression_max_interpreter_instructions_quota);
+        absl::GetFlag(FLAGS_expression_max_interpreter_instructions_quota);
 
     Config::MethodCallQuota pretty_printers_method_call_quota;
     pretty_printers_method_call_quota.max_classes_load =
-        base::GetFlag(FLAGS_pretty_printers_max_classes_load_quota);
+        absl::GetFlag(FLAGS_pretty_printers_max_classes_load_quota);
     pretty_printers_method_call_quota.max_interpreter_instructions =
-        base::GetFlag(FLAGS_pretty_printers_max_interpreter_instructions_quota);
+        absl::GetFlag(FLAGS_pretty_printers_max_interpreter_instructions_quota);
 
     Config::MethodCallQuota dynamic_log_method_call_quota;
     dynamic_log_method_call_quota.max_classes_load =
-        base::GetFlag(FLAGS_dynamic_log_max_classes_load_quota);
+        absl::GetFlag(FLAGS_dynamic_log_max_classes_load_quota);
     dynamic_log_method_call_quota.max_interpreter_instructions =
-        base::GetFlag(FLAGS_dynamic_log_max_interpreter_instructions_quota);
+        absl::GetFlag(FLAGS_dynamic_log_max_interpreter_instructions_quota);
 
     builder.SetDefaultMethodRule(InterpretAll().build());
     builder.SetQuota(

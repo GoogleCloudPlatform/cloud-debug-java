@@ -227,7 +227,7 @@ void JvmBreakpoint::Initialize() {
     expiration_time_base = definition_->create_time.seconds;
   }
 
-  int32 expiration_seconds = base::GetFlag(FLAGS_breakpoint_expiration_sec);
+  int32 expiration_seconds = absl::GetFlag(FLAGS_breakpoint_expiration_sec);
   if (definition_->expires_in != nullptr) {
     // Truncate if per-breakpoint expiration exceeds the agent maximum limit.
     // Ignore the nanos field, we don't need that precision.
@@ -548,7 +548,7 @@ bool JvmBreakpoint::DynamicLogPause::IsPaused() {
   }
 
   if (cooldown_stopwatch_.GetElapsedMillis() >
-      base::GetFlag(FLAGS_dynamic_log_quota_recovery_ms)) {
+      absl::GetFlag(FLAGS_dynamic_log_quota_recovery_ms)) {
     is_paused_ = false;
     return false;
   }

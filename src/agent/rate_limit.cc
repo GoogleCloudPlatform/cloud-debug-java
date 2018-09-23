@@ -153,13 +153,13 @@ static int GetCpuCount() {
 static int64 GetBaseFillRate(CostLimitType type) {
   switch (type) {
     case CostLimitType::BreakpointCondition:
-      return base::GetFlag(FLAGS_max_condition_cost) * 1000000000L;
+      return absl::GetFlag(FLAGS_max_condition_cost) * 1000000000L;
 
     case CostLimitType::DynamicLog:
-      return base::GetFlag(FLAGS_max_dynamic_log_rate);
+      return absl::GetFlag(FLAGS_max_dynamic_log_rate);
 
     case CostLimitType::DynamicLogBytes:
-      return base::GetFlag(FLAGS_max_dynamic_log_bytes_rate);
+      return absl::GetFlag(FLAGS_max_dynamic_log_bytes_rate);
   }
 
   return 0;

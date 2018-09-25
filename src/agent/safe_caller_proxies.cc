@@ -20,9 +20,8 @@
 #include "jni_proxy_object.h"
 #include "safe_method_caller.h"
 #include "type_util.h"
-#include "third_party/absl/flags/flag.h"
 
-DECLARE_FLAG(int32, safe_caller_max_array_elements);
+ABSL_DECLARE_FLAG(int32, safe_caller_max_array_elements);
 
 namespace devtools {
 namespace cdbg {

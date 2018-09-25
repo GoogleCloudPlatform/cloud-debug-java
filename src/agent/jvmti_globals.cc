@@ -48,44 +48,28 @@
 #ifdef GCP_HUB_CLIENT
 // TODO(vlif): retire this flag in favor of debuggee labels
 // set through system properties.
-DEFINE_FLAG(
-    string,
-    cdbg_description_suffix,
-    "",
-    "additional text to be appended to debuggee description");
+ABSL_FLAG(string, cdbg_description_suffix, "",
+          "additional text to be appended to debuggee description");
 
-DEFINE_FLAG(
-    bool,
-    enable_service_account_auth,
-    false,
-    "Enables service account authentication instead of relying on "
-    "a local metadata service");
+ABSL_FLAG(bool, enable_service_account_auth, false,
+          "Enables service account authentication instead of relying on "
+          "a local metadata service");
 
-DEFINE_FLAG(
-    string,
-    project_id,
-    "",
+ABSL_FLAG(
+    string, project_id, "",
     "Explicitly set GCP project ID used when service account authentication"
     "is enabled");
 
-DEFINE_FLAG(
-    string,
-    project_number,
-    "",
+ABSL_FLAG(
+    string, project_number, "",
     "(Deprecated) Explicitly set GCP project number used when service account "
     "authentication is enabled");
 
-DEFINE_FLAG(
-    string,
-    service_account_email,
-    "",
-    "Identifier of the service account");
+ABSL_FLAG(string, service_account_email, "",
+          "Identifier of the service account");
 
-DEFINE_FLAG(
-    string,
-    service_account_json_file,
-    "",
-    "Path to JSON file containing private key of the service account");
+ABSL_FLAG(string, service_account_json_file, "",
+          "Path to JSON file containing private key of the service account");
 #endif
 
 
@@ -289,8 +273,8 @@ static void InitEnvironment(const char* options) {
 
   // Change default options to never log to stderr (since it may impact the
   // application we are debugging).
-  base::SetFlag(&FLAGS_logtostderr, false);
-  base::SetFlag(&FLAGS_stderrthreshold,
+  absl::SetFlag(&FLAGS_logtostderr, false);
+  absl::SetFlag(&FLAGS_stderrthreshold,
                 3);  // By default only fatal errors go to stderr.
   TrySetDefaultLogDirectory();
 

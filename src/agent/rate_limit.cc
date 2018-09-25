@@ -24,18 +24,16 @@
 // they are used.
 //
 
-DEFINE_FLAG(
-    double,
-    max_condition_cost,
+ABSL_FLAG(
+    double, max_condition_cost,
     0.01,  // 1% of CPU time
     "maximum cost in percentage of CPU consumption of condition evaluation");
 
 // This constant defines the fill rate for the leaky bucket for logs per second
 // limit. The capacity is computed as
 //   "FLAGS_max_dynamic_log_rate * kDynamicLogCapacityFactor".
-DEFINE_FLAG(
-    double,
-    max_dynamic_log_rate,
+ABSL_FLAG(
+    double, max_dynamic_log_rate,
     12,  // maximum of 12 log entries per second on average
     "maximum rate of dynamic log entries in this process; short bursts are "
     "allowed to exceed this limit");
@@ -43,13 +41,10 @@ DEFINE_FLAG(
 // This constant defines the fill rate for the leaky bucket for log bytes per
 // second. The capacity is computed as
 //   "FLAGS_max_dynamic_log_rate_bytes * kDynamicLogBytesCapacityFactor".
-DEFINE_FLAG(
-    double,
-    max_dynamic_log_bytes_rate,
-    20480,  // maximum of 20K bytes per second on average
-    "maximum rate of dynamic log bytes in this process; short bursts are "
-    "allowed to exceed this limit");
-
+ABSL_FLAG(double, max_dynamic_log_bytes_rate,
+          20480,  // maximum of 20K bytes per second on average
+          "maximum rate of dynamic log bytes in this process; short bursts are "
+          "allowed to exceed this limit");
 
 namespace devtools {
 namespace cdbg {

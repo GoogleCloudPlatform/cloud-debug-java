@@ -20,19 +20,15 @@
 #include "agent_thread.h"
 #include "bridge.h"
 
-DEFINE_FLAG(
-    int32,
-    hub_retry_delay_ms,
-    10000,  // 10 seconds
-    "amount of time in milliseconds to sleep before retrying failed "
-    "requests to Cloud Debugger backend");
+ABSL_FLAG(int32, hub_retry_delay_ms,
+          10000,  // 10 seconds
+          "amount of time in milliseconds to sleep before retrying failed "
+          "requests to Cloud Debugger backend");
 
-DEFINE_FLAG(
-    int32,
-    debuggee_disabled_delay_ms,
-    600000,  // 10 minutes
-    "amount of time in milliseconds to sleep before checking whether "
-    "the debugger was enabled back");
+ABSL_FLAG(int32, debuggee_disabled_delay_ms,
+          600000,  // 10 minutes
+          "amount of time in milliseconds to sleep before checking whether "
+          "the debugger was enabled back");
 
 
 namespace devtools {

@@ -52,29 +52,28 @@ using google::AddLogSink;  // NOLINT
 using google::RemoveLogSink;  // NOLINT
 
 
-#define DEFINE_FLAG(type, name, default_value, help) \
-    DEFINE_##type(name, default_value, help)
+#define ABSL_FLAG(type, name, default_value, help) \
+  DEFINE_##type(name, default_value, help)
 
-#define DECLARE_FLAG(type, name) \
-    DECLARE_##type(name)
+#define ABSL_DECLARE_FLAG(type, name) DECLARE_##type(name)
 
-namespace base {
-  // Return the value of an old-style flag.  Not thread-safe.
-  inline bool GetFlag(bool flag) { return flag; }
-  inline int32 GetFlag(int32 flag) { return flag; }
-  inline int64 GetFlag(int64 flag) { return flag; }
-  inline uint64 GetFlag(uint64 flag) { return flag; }
-  inline double GetFlag(double flag) { return flag; }
-  inline string GetFlag(const string& flag) { return flag; }
+namespace absl {
+// Return the value of an old-style flag.  Not thread-safe.
+inline bool GetFlag(bool flag) { return flag; }
+inline int32 GetFlag(int32 flag) { return flag; }
+inline int64 GetFlag(int64 flag) { return flag; }
+inline uint64 GetFlag(uint64 flag) { return flag; }
+inline double GetFlag(double flag) { return flag; }
+inline string GetFlag(const string& flag) { return flag; }
 
-  // Change the value of an old-style flag.  Not thread-safe.
-  inline void SetFlag(bool* f, bool v) { *f = v; }
-  inline void SetFlag(int32* f, int32 v) { *f = v; }
-  inline void SetFlag(int64* f, int64 v) { *f = v; }
-  inline void SetFlag(uint64* f, uint64 v) { *f = v; }
-  inline void SetFlag(double* f, double v) { *f = v; }
-  inline void SetFlag(string* f, const string& v) { *f = v; }
-}  // namespace base
+// Change the value of an old-style flag.  Not thread-safe.
+inline void SetFlag(bool* f, bool v) { *f = v; }
+inline void SetFlag(int32* f, int32 v) { *f = v; }
+inline void SetFlag(int64* f, int64 v) { *f = v; }
+inline void SetFlag(uint64* f, uint64 v) { *f = v; }
+inline void SetFlag(double* f, double v) { *f = v; }
+inline void SetFlag(string* f, const string& v) { *f = v; }
+}  // namespace absl
 
 
 #define STRINGIZE(s)    #s

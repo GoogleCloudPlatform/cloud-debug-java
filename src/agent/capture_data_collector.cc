@@ -28,10 +28,8 @@
 #include "object_evaluator.h"
 #include "value_formatter.h"
 
-DEFINE_FLAG(
-    bool,
-    cdbg_capture_user_id,
-    true,
+ABSL_FLAG(
+    bool, cdbg_capture_user_id, true,
     "If true, the agent also captures the end user identity for audit logging");
 
 namespace devtools {

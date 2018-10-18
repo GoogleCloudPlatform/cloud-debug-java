@@ -23,6 +23,7 @@
 #include "safe_method_caller.h"
 #include "statistician.h"
 #include "stopwatch.h"
+#include "third_party/absl/flags/flag.h"
 
 ABSL_FLAG(int32, cdbg_class_files_cache_size,
           1024 * 1024,  // 1 MB.

@@ -20,6 +20,7 @@
 #include "common.h"
 #include "jni_utils.h"
 #include "jvmti_buffer.h"
+#include "third_party/absl/flags/flag.h"
 
 ABSL_FLAG(int32, cdbg_max_stack_depth, 20,
           "Maximum number of stack frames to unwind");

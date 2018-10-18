@@ -18,6 +18,7 @@
 
 #include <thread>  // NOLINT
 #include "leaky_bucket.h"
+#include "third_party/absl/flags/flag.h"
 
 //
 // See comment in rate_limit.h explaining the meaning of these flags and how

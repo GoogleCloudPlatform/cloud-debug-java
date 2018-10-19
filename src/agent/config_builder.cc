@@ -19,7 +19,6 @@
 #include <sstream>
 
 #include "safe_caller_proxies.h"
-#include "third_party/absl/flags/flag.h"
 
 // Multiple items in flags like "extra_allowed_methods" are separated with
 // a colon. Method names are specified as "class#method".

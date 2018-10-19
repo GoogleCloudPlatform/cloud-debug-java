@@ -19,7 +19,6 @@
 #include "jni_proxy_nullpointerexception.h"
 #include "jni_method_caller.h"
 #include "type_util.h"
-#include "third_party/absl/flags/flag.h"
 
 ABSL_DECLARE_FLAG(bool, enable_safe_caller);
 ABSL_DECLARE_FLAG(int32, safe_caller_max_array_elements);

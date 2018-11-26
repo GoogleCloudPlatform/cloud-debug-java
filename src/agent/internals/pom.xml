@@ -11,17 +11,17 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>6.0</version>
+      <version>7.0</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-commons</artifactId>
-      <version>6.0</version>
+      <version>7.0</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-util</artifactId>
-      <version>6.0</version>
+      <version>7.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.api-client</groupId>

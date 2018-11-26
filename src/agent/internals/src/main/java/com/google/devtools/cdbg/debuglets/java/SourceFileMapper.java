@@ -89,7 +89,7 @@ final class SourceFileMapper {
     private boolean isSyntheticClass;
 
     public MapperClassVisitor() {
-      super(Opcodes.ASM6);
+      super(Opcodes.ASM7);
     }
 
     @Override
@@ -125,7 +125,7 @@ final class SourceFileMapper {
         final String descriptor,
         final String signature,
         final String[] exceptions) {
-      return new MethodVisitor(Opcodes.ASM6) {
+      return new MethodVisitor(Opcodes.ASM7) {
         @Override
         public void visitMethodInsn(
             int opcode,

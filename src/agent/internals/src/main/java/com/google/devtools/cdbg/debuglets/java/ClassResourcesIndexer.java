@@ -84,7 +84,7 @@ class ClassResourcesIndexer {
     private String classSignature;
 
     public IndexerClassVisitor(String resourcePath) {
-      super(Opcodes.ASM6);
+      super(Opcodes.ASM7);
       this.resourcePath = resourcePath;
     }
 

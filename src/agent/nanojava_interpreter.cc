@@ -1504,8 +1504,9 @@ jclass NanoJavaInterpreter::LoadClass(
   FormatMessageModel error_message {
       ClassNotLoaded,
       {
-          TypeNameFromSignature(
-              { JType::Object, class_reference->GetSignature() })
+        TypeNameFromSignature(
+            { JType::Object, class_reference->GetSignature() }),
+        class_reference->GetSignature()
       }
   };
 
@@ -1801,7 +1802,10 @@ void NanoJavaInterpreter::InvokeOperation(
   if (!operand.is_found) {
     SetResult(MethodCallResult::Error({
         ClassNotLoaded,
-        { TypeNameFromJObjectSignature(operand.owner->type->GetSignature()) }
+        {
+          TypeNameFromJObjectSignature(operand.owner->type->GetSignature()),
+          operand.owner->type->GetSignature()
+        }
     }));
 
     return;
@@ -1842,7 +1846,10 @@ void NanoJavaInterpreter::CheckFieldFound(const ConstantPool::FieldRef& field) {
   if (!field.is_found) {
     SetResult(MethodCallResult::Error({
         ClassNotLoaded,
-        { TypeNameFromJObjectSignature(field.owner->type->GetSignature()) }
+        {
+          TypeNameFromJObjectSignature(field.owner->type->GetSignature()),
+          field.owner->type->GetSignature()
+        }
     }));
   }
 }

@@ -24,7 +24,6 @@
 #include "jvm_internals.h"
 #include "jvmti_buffer.h"
 #include "statistician.h"
-
 #include "jvmti_agent.h"
 #include "glob_data_visibility_policy.h"
 #include "yaml_data_visibility_config_reader.h"
@@ -71,8 +70,6 @@ ABSL_FLAG(string, service_account_email, "",
 ABSL_FLAG(string, service_account_json_file, "",
           "Path to JSON file containing private key of the service account");
 #endif
-
-
 static devtools::cdbg::JvmtiAgent* g_instance = nullptr;
 
 static devtools::cdbg::JvmInternals* g_internals = nullptr;
@@ -221,7 +218,6 @@ static bool InitializeJvmtiCallbacks() {
   return true;
 }
 
-
 // Set default log directory to Java default temporary directory. The directory
 // can still be customized through FLAGS_logdir flag.
 static void TrySetDefaultLogDirectory() {
@@ -253,7 +249,6 @@ static void TrySetDefaultLogDirectory() {
     FLAGS_log_dir = tmpdir_buffer.get();
   }
 }
-
 
 
 static void InitEnvironment(const char* options) {
@@ -405,6 +400,4 @@ JNIEXPORT void JNICALL Agent_OnUnload(JavaVM* vm) {
   devtools::cdbg::CallbacksMonitor::CleanupSingleton();
   devtools::cdbg::CleanupStatisticians();
 }
-
-
 

@@ -32,7 +32,7 @@
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "statistician.h"
-
+#include "type_util.h"
 
 ABSL_FLAG(int32, breakpoint_expiration_sec,
           60 * 60 * 24,  // 24 hours
@@ -48,13 +48,9 @@ namespace cdbg {
 constexpr char kLogpointPrefix[] = "LOGPOINT: ";
 
 // Resolves method line in a loaded and prepared Java class.
-static bool FindMethodLine(
-    jclass cls,
-    const string& method_name,
-    const string& method_signature,
-    int line_number,
-    jmethodID* method,
-    jlocation* location) {
+static bool FindMethodLine(jclass cls, const string& method_name,
+                           const string& method_signature, int line_number,
+                           jmethodID* method, jlocation* location) {
   *method = nullptr;
   *location = 0;
 
@@ -76,11 +72,8 @@ static bool FindMethodLine(
     // Ignore the method unless it's the one we are looking for.
     JvmtiBuffer<char> name_buf;
     JvmtiBuffer<char> sig_buf;
-    err = jvmti()->GetMethodName(
-        cur_method,
-        name_buf.ref(),
-        sig_buf.ref(),
-        nullptr);
+    err = jvmti()->GetMethodName(cur_method, name_buf.ref(), sig_buf.ref(),
+                                 nullptr);
     if (err != JVMTI_ERROR_NONE) {
       LOG(ERROR) << "GetMethodName failed, error: " << err << ", ignoring...";
       continue;
@@ -97,10 +90,8 @@ static bool FindMethodLine(
     // Get the line numbers corresponding to the code statements of the method.
     jint line_entries_count = 0;
     JvmtiBuffer<jvmtiLineNumberEntry> line_entries;
-    err = jvmti()->GetLineNumberTable(
-        cur_method,
-        &line_entries_count,
-        line_entries.ref());
+    err = jvmti()->GetLineNumberTable(cur_method, &line_entries_count,
+                                      line_entries.ref());
 
     if (err == JVMTI_ERROR_ABSENT_INFORMATION) {
       LOG(ERROR) << "Class doesn't have line number debugging information";
@@ -134,9 +125,9 @@ static bool FindMethodLine(
   }
 
   if (matched_name_count > 0) {
-    LOG(ERROR) << "No statement at line " << line_number
-               << " found in method " << method_name
-               << " (" << matched_name_count << " methods matched)";
+    LOG(ERROR) << "No statement at line " << line_number << " found in method "
+               << method_name << " (" << matched_name_count
+               << " methods matched)";
   } else {
     LOG(ERROR) << "Method " << method_name << " not found in the class";
   }
@@ -144,13 +135,10 @@ static bool FindMethodLine(
   return false;
 }
 
-
-CompiledBreakpoint::CompiledBreakpoint(
-    jclass cls,
-    const jmethodID method,
-    const jlocation location,
-    CompiledExpression condition,
-    std::vector<CompiledExpression> watches)
+CompiledBreakpoint::CompiledBreakpoint(jclass cls, const jmethodID method,
+                                       const jlocation location,
+                                       CompiledExpression condition,
+                                       std::vector<CompiledExpression> watches)
     : method_(method),
       location_(location),
       condition_(std::move(condition)),
@@ -158,10 +146,7 @@ CompiledBreakpoint::CompiledBreakpoint(
   cls_.Assign(cls);
 }
 
-
-CompiledBreakpoint::~CompiledBreakpoint() {
-}
-
+CompiledBreakpoint::~CompiledBreakpoint() {}
 
 bool CompiledBreakpoint::HasBadWatchedExpression() const {
   for (const auto& watch : watches_) {
@@ -173,12 +158,9 @@ bool CompiledBreakpoint::HasBadWatchedExpression() const {
   return false;
 }
 
-
 JvmBreakpoint::JvmBreakpoint(
-    Scheduler<>* scheduler,
-    JvmEvaluators* evaluators,
-    FormatQueue* format_queue,
-    DynamicLogger* dynamic_logger,
+    Scheduler<>* scheduler, JvmEvaluators* evaluators,
+    FormatQueue* format_queue, DynamicLogger* dynamic_logger,
     BreakpointsManager* breakpoints_manager,
     std::unique_ptr<StatusMessageModel> setup_error,
     std::unique_ptr<BreakpointModel> breakpoint_definition)
@@ -202,11 +184,7 @@ JvmBreakpoint::JvmBreakpoint(
   }
 }
 
-
-JvmBreakpoint::~JvmBreakpoint() {
-  scheduler_->Cancel(scheduler_id_);
-}
-
+JvmBreakpoint::~JvmBreakpoint() { scheduler_->Cancel(scheduler_id_); }
 
 void JvmBreakpoint::Initialize() {
   DCHECK(resolved_location_ == nullptr);
@@ -231,10 +209,10 @@ void JvmBreakpoint::Initialize() {
         std::min<int64>(definition_->expires_in->seconds, expiration_seconds);
   }
 
-  scheduler_id_ = scheduler_->Schedule(
-      expiration_time_base + expiration_seconds,
-      std::weak_ptr<JvmBreakpoint>(shared_from_this()),
-      &JvmBreakpoint::OnBreakpointExpired);
+  scheduler_id_ =
+      scheduler_->Schedule(expiration_time_base + expiration_seconds,
+                           std::weak_ptr<JvmBreakpoint>(shared_from_this()),
+                           &JvmBreakpoint::OnBreakpointExpired);
 
   // If a preemtive status exists, immediately complete the breakpoint with
   // this status.
@@ -254,25 +232,25 @@ void JvmBreakpoint::Initialize() {
     rsl->error_message = INTERNAL_ERROR_MESSAGE;
   } else {
     evaluators_->class_path_lookup->ResolveSourceLocation(
-        definition_->location->path,
-        definition_->location->line,
-        rsl.get());
+        definition_->location->path, definition_->location->line, rsl.get());
   }
 
   if (!rsl->error_message.format.empty()) {
     // The breakpoint location could not be resolved, send final breakpoint
     // update and complete the breakpoint.
-    CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
-        .set_description(rsl->error_message)
-        .build());
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+            .set_error()
+            .set_refers_to(
+                StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
+            .set_description(rsl->error_message)
+            .build());
     return;
   }
 
-  LOG(INFO) << "Breakpoint " << id() << " initialized to pending state"
-               ", path: " << definition_->location->path
+  LOG(INFO) << "Breakpoint " << id()
+            << " initialized to pending state, path: "
+            << definition_->location->path
             << ", line number: " << definition_->location->line
             << ", resolved class signature: " << rsl->class_signature
             << ", resolved method name: " << rsl->method_name
@@ -296,7 +274,6 @@ void JvmBreakpoint::Initialize() {
   TryActivatePendingBreakpoint();
 }
 
-
 void JvmBreakpoint::ResetToPending() {
   // We assume here that a class will not be reloaded while a method
   // is being unloaded. If that happens, we may ignore "OnClassLoaded" event.
@@ -305,10 +282,8 @@ void JvmBreakpoint::ResetToPending() {
   compiled_breakpoint_ = nullptr;
 }
 
-
-void JvmBreakpoint::OnClassPrepared(
-    const string& type_name,
-    const string& class_signature) {
+void JvmBreakpoint::OnClassPrepared(const string& type_name,
+                                    const string& class_signature) {
   if (compiled_breakpoint_ != nullptr) {
     return;  // The breakpoint is already active.
   }
@@ -318,7 +293,8 @@ void JvmBreakpoint::OnClassPrepared(
     return;  // The breakpoint is still uninitialized
   }
 
-  if (location->class_signature == class_signature) {
+  if (location->class_signature == class_signature ||
+     condition_class_dependency_signature_ == class_signature) {
     LOG(INFO) << "Class " << type_name << " loaded (" << class_signature
               << "), trying to activate pending breakpoint " << id();
 
@@ -326,19 +302,16 @@ void JvmBreakpoint::OnClassPrepared(
   }
 }
 
-
-void JvmBreakpoint::OnJvmBreakpointHit(
-    jthread thread,
-    jmethodID method,
-    jlocation location) {
+void JvmBreakpoint::OnJvmBreakpointHit(jthread thread, jmethodID method,
+                                       jlocation location) {
   Stopwatch stopwatch(Stopwatch::ThreadClock);
 
   std::shared_ptr<CompiledBreakpoint> state = compiled_breakpoint_;
   if (state == nullptr) {
     // The breakpoint is already pending. This is possible if some other thread
     // just completed this breakpoint (while the callback was being routed).
-    LOG(INFO) << "Breakpoint " << id() << " is in pending state, "
-                 "ignoring breakpoint hit";
+    LOG(INFO) << "Breakpoint " << id()
+              << " is in pending state, ignoring breakpoint hit";
     return;
   }
 
@@ -379,10 +352,7 @@ void JvmBreakpoint::OnJvmBreakpointHit(
   }
 }
 
-
-void JvmBreakpoint::DoCaptureAction(
-    jthread thread,
-    CompiledBreakpoint* state) {
+void JvmBreakpoint::DoCaptureAction(jthread thread, CompiledBreakpoint* state) {
   // It will now take a few milliseconds to capture all the data. Then the
   // breakpoint will be done. We don't want other threads to waste their time
   // on this breakpoint while capturing data, so we clear it here.
@@ -399,15 +369,12 @@ void JvmBreakpoint::DoCaptureAction(
   CompleteBreakpoint(&builder, std::move(collector));
 }
 
-
-void JvmBreakpoint::DoLogAction(
-    jthread thread,
-    CompiledBreakpoint* state) {
+void JvmBreakpoint::DoLogAction(jthread thread, CompiledBreakpoint* state) {
   if (!dynamic_logger_->IsAvailable()) {
     CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_format(DynamicLoggerNotAvailable)
-        .build());
+                                     .set_error()
+                                     .set_format(DynamicLoggerNotAvailable)
+                                     .build());
 
     return;
   }
@@ -434,11 +401,8 @@ void JvmBreakpoint::DoLogAction(
 
   LogDataCollector collector;
 
-  collector.Collect(
-      method_caller.get(),
-      evaluators_->object_evaluator,
-      state->watches(),
-      thread);
+  collector.Collect(method_caller.get(), evaluators_->object_evaluator,
+                    state->watches(), thread);
 
   string log_message = string(kLogpointPrefix) + collector.Format(*definition_);
 
@@ -451,10 +415,8 @@ void JvmBreakpoint::DoLogAction(
   dynamic_logger_->Log(definition_->log_level, *rsl, log_message);
 }
 
-
-bool JvmBreakpoint::EvaluateCondition(
-    const CompiledExpression& condition,
-    jthread thread) {
+bool JvmBreakpoint::EvaluateCondition(const CompiledExpression& condition,
+                                      jthread thread) {
   std::unique_ptr<MethodCaller> method_caller =
       evaluators_->method_caller_factory(Config::EXPRESSION_EVALUATION);
 
@@ -467,17 +429,15 @@ bool JvmBreakpoint::EvaluateCondition(
       condition.evaluator->Evaluate(evaluation_context);
   if (condition_result.is_error()) {
     LOG(WARNING) << "Evaluation of breakpoint condition failed, breakpoint ID: "
-            << id()
-            << ", evaluation error message: "
-            << condition_result.error_message();
+                 << id() << ", evaluation error message: "
+                 << condition_result.error_message();
 
     CompleteBreakpointWithStatus(
         StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_description(condition_result.error_message())
-        .build());
+            .set_error()
+            .set_refers_to(StatusMessageModel::Context::BREAKPOINT_CONDITION)
+            .set_description(condition_result.error_message())
+            .build());
 
     return false;
   }
@@ -485,13 +445,13 @@ bool JvmBreakpoint::EvaluateCondition(
   jboolean condition_result_value = false;
   if (!condition_result.value().get<jboolean>(&condition_result_value)) {
     LOG(WARNING) << "Breakpoint condition result is not boolean, "
-                    "breakpoint ID = " << id();
+                    "breakpoint ID = "
+                 << id();
     return false;
   }
 
   return condition_result_value;
 }
-
 
 void JvmBreakpoint::ApplyConditionQuota() {
   // Only start to apply the cost limit after we evaluated the condition a few
@@ -505,37 +465,38 @@ void JvmBreakpoint::ApplyConditionQuota() {
 
   const int64 tokens = condition_cost_ns_.Average();
 
+  // Apply per-breakpoint cost limit.
+  if (!breakpoint_condition_cost_limiter_->RequestTokens(tokens)) {
+    LOG(WARNING) << "Cost of condition evaluations exceeded per-breakpoint "
+                    "limit, breakpoint ID: "
+                 << id();
+
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+            .set_error()
+            .set_refers_to(StatusMessageModel::Context::BREAKPOINT_CONDITION)
+            .set_format(ConditionEvaluationCostExceededPerBreakpointLimit)
+            .build());
+    return;
+  }
+
   // Apply global cost limit.
   auto* global_condition_cost_limiter =
       breakpoints_manager_->GetGlobalConditionCostLimiter();
   if (!global_condition_cost_limiter->RequestTokens(tokens)) {
     LOG(WARNING) << "Cost of condition evaluations exceeded global "
-                    "limit, breakpoint ID: " << id();
+                    "limit, breakpoint ID: "
+                 << id();
 
-    CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_format(ConditionEvaluationCostExceededGlobalLimit)
-        .build());
-    return;
-  }
-
-  // Apply per-breakpoint cost limit.
-  if (!breakpoint_condition_cost_limiter_->RequestTokens(tokens)) {
-    LOG(WARNING) << "Cost of condition evaluations exceeded per-breakpoint "
-                    "limit, breakpoint ID: " << id();
-
-    CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_format(ConditionEvaluationCostExceededPerBreakpointLimit)
-        .build());
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+            .set_error()
+            .set_refers_to(StatusMessageModel::Context::BREAKPOINT_CONDITION)
+            .set_format(ConditionEvaluationCostExceededGlobalLimit)
+            .build());
     return;
   }
 }
-
 
 bool JvmBreakpoint::DynamicLogPause::IsPaused() {
   absl::MutexLock lock(&mu_);
@@ -552,12 +513,9 @@ bool JvmBreakpoint::DynamicLogPause::IsPaused() {
   return true;
 }
 
-
 void JvmBreakpoint::DynamicLogPause::OutOfQuota(
-    DynamicLogger* logger,
-    BreakpointModel::LogLevel log_level,
-    const string& message,
-    const ResolvedSourceLocation& source_location) {
+    DynamicLogger* logger, BreakpointModel::LogLevel log_level,
+    const string& message, const ResolvedSourceLocation& source_location) {
   // We are out of quota. Log warning when we transition from "normal" state
   // to "out of quota" state. Stick to the "out of quota" state for some time.
   bool log_out_of_quota_message = false;
@@ -571,10 +529,7 @@ void JvmBreakpoint::DynamicLogPause::OutOfQuota(
   }
 
   if (log_out_of_quota_message) {
-    logger->Log(
-        log_level,
-        source_location,
-        string(kLogpointPrefix) + message);
+    logger->Log(log_level, source_location, string(kLogpointPrefix) + message);
   }
 }
 
@@ -587,21 +542,16 @@ bool JvmBreakpoint::ApplyDynamicLogsCallQuota(
   // if the first bucket is empty
   if (!breakpoint_dynamic_log_limiter_->RequestTokens(1) ||
       !global_dynamic_log_limiter->RequestTokens(1)) {
-    dynamic_log_pause_.OutOfQuota(
-        dynamic_logger_,
-        definition_->log_level,
-        DynamicLogOutOfCallQuota,
-        source_location);
+    dynamic_log_pause_.OutOfQuota(dynamic_logger_, definition_->log_level,
+                                  DynamicLogOutOfCallQuota, source_location);
     return false;
   }
 
   return true;
 }
 
-
 bool JvmBreakpoint::ApplyDynamicLogsByteQuota(
-    const ResolvedSourceLocation& source_location,
-    int log_bytes) {
+    const ResolvedSourceLocation& source_location, int log_bytes) {
   LeakyBucket* global_dynamic_log_bytes_limiter =
       breakpoints_manager_->GetGlobalDynamicLogBytesLimiter();
 
@@ -609,17 +559,13 @@ bool JvmBreakpoint::ApplyDynamicLogsByteQuota(
   // if the first bucket is empty
   if (!breakpoint_dynamic_log_bytes_limiter_->RequestTokens(log_bytes) ||
       !global_dynamic_log_bytes_limiter->RequestTokens(log_bytes)) {
-    dynamic_log_pause_.OutOfQuota(
-        dynamic_logger_,
-        definition_->log_level,
-        DynamicLogOutOfBytesQuota,
-        source_location);
+    dynamic_log_pause_.OutOfQuota(dynamic_logger_, definition_->log_level,
+                                  DynamicLogOutOfBytesQuota, source_location);
     return false;
   }
 
   return true;
 }
-
 
 bool JvmBreakpoint::IsSourceLineAdjusted() const {
   std::shared_ptr<ResolvedSourceLocation> location = resolved_location_;
@@ -629,7 +575,6 @@ bool JvmBreakpoint::IsSourceLineAdjusted() const {
 
   return definition_->location->line != location->adjusted_line_number;
 }
-
 
 void JvmBreakpoint::TryActivatePendingBreakpoint() {
   if (compiled_breakpoint_ != nullptr) {
@@ -648,8 +593,8 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
       evaluators_->class_indexer->FindClassBySignature(rsl->class_signature);
   if (cls_local_ref == nullptr) {
     LOG(INFO) << "Class signature is valid, but class is not loaded yet, "
-                 "leaving it as pending, breakpoint ID: " << id()
-              << ", path: " << definition_->location->path
+                 "leaving it as pending, breakpoint ID: "
+              << id() << ", path: " << definition_->location->path
               << ", line: " << definition_->location->line;
 
     return;
@@ -662,50 +607,65 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
   // line number to set the breakpoint.
   jmethodID method = nullptr;
   jlocation location = 0;
-  if (!FindMethodLine(
-        static_cast<jclass>(cls_local_ref.get()),
-        rsl->method_name,
-        rsl->method_signature,
-        rsl->adjusted_line_number,
-        &method,
-        &location)) {
+  if (!FindMethodLine(static_cast<jclass>(cls_local_ref.get()),
+                      rsl->method_name, rsl->method_signature,
+                      rsl->adjusted_line_number, &method, &location)) {
     // This should not normally happen. If we hit this condition, it means
     // some disagreement between "ClassPathLookup.resolveSourceLocation" that
     // told us that "resolved_location_" is a valid source location, but
     // "FindMethodLine" could not find it.
     LOG(ERROR) << "Resolved source location not found"
-                  ", class signature: " << rsl->class_signature
-               << ", method: " << rsl->method_name
+                  ", class signature: "
+               << rsl->class_signature << ", method: " << rsl->method_name
                << ", adjusted line: " << rsl->adjusted_line_number;
 
-    CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
-        .set_description(INTERNAL_ERROR_MESSAGE)
-        .build());
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+            .set_error()
+            .set_refers_to(
+                StatusMessageModel::Context::BREAKPOINT_SOURCE_LOCATION)
+            .set_description(INTERNAL_ERROR_MESSAGE)
+            .build());
 
     return;
   }
 
   std::shared_ptr<CompiledBreakpoint> new_state = CompileBreakpointExpressions(
-      static_cast<jclass>(cls_local_ref.get()),
-      method,
-      location);
+      static_cast<jclass>(cls_local_ref.get()), method, location);
 
   // The only fatal failure of "CompileBreakpointExpression" is compilation
   // of breakpoint condition. The rest of it does not fail the breakpoint.
+  // Even in this case, we leave the breakpoint in pending state if
+  // the reason for condition compilation failure is a class not being loaded.
+  // we record this dependency and listen for OnClassPrepare event in case it
+  // is loaded later.
   if (!definition_->condition.empty() &&
       (new_state->condition().evaluator == nullptr)) {
+    if (new_state->condition().error_message.format == ClassNotLoaded &&
+        new_state->condition().error_message.parameters[1] !=
+            kJavaSignatureNotAvailable) {
+      LOG(WARNING) << "Failed to set breakpoint " << id()
+                   << " because breakpoint condition uses class "
+                   << new_state->condition().error_message.parameters[0]
+                   << " which has not been loaded yet. Leaving breakpoint"
+                      " in pending state.";
+
+      // The not-loaded class signature is the second parameter
+      // in 'error_message'
+      condition_class_dependency_signature_ =
+          new_state->condition().error_message.parameters[1];
+      return;
+    }
+
     LOG(WARNING) << "Failed to set breakpoint " << id()
                  << " because breakpoint condition could not be compiled";
 
-    CompleteBreakpointWithStatus(StatusMessageBuilder()
-        .set_error()
-        .set_refers_to(
-            StatusMessageModel::Context::BREAKPOINT_CONDITION)
-        .set_description(new_state->condition().error_message)
-        .build());
+    CompleteBreakpointWithStatus(
+        StatusMessageBuilder()
+            .set_error()
+            .set_refers_to(StatusMessageModel::Context::BREAKPOINT_CONDITION)
+            .set_description(new_state->condition().error_message)
+            .build());
 
     return;
   }
@@ -713,10 +673,9 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
   const bool is_source_line_adjusted = IsSourceLineAdjusted();
 
   if (is_source_line_adjusted) {
-    LOG(INFO) << "Breakpoint " << id()
-              << " location adjusted from line "
-              << definition_->location->line
-              << " to line " << rsl->adjusted_line_number;
+    LOG(INFO) << "Breakpoint " << id() << " location adjusted from line "
+              << definition_->location->line << " to line "
+              << rsl->adjusted_line_number;
 
     // This is the only case when we change the supposedly immutable
     // "definition_". Since we are only changing integer, it will not
@@ -737,18 +696,15 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
             << ", line: " << definition_->location->line;
 
   // Set the actual JVMTI breakpoints.
-  if (!jvmti_breakpoint_.Set(
-        new_state->method(),
-        new_state->location(),
-        shared_from_this())) {
+  if (!jvmti_breakpoint_.Set(new_state->method(), new_state->location(),
+                             shared_from_this())) {
     LOG(ERROR) << "Failed to set JVMTI breakpoint " << id()
                << ", method = " << new_state->method()
                << ", location = " << std::hex << std::showbase << location;
 
     BreakpointBuilder builder(*definition_);
-    builder.set_status(StatusMessageBuilder()
-        .set_error()
-        .set_description(INTERNAL_ERROR_MESSAGE));
+    builder.set_status(StatusMessageBuilder().set_error().set_description(
+        INTERNAL_ERROR_MESSAGE));
 
     CompleteBreakpoint(&builder, nullptr);
 
@@ -758,15 +714,9 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
   compiled_breakpoint_ = new_state;
 }
 
-
 std::shared_ptr<CompiledBreakpoint> JvmBreakpoint::CompileBreakpointExpressions(
-    jclass cls,
-    jmethodID method,
-    jlocation location) const {
-  JvmReadersFactory readers_factory(
-      evaluators_,
-      method,
-      location);
+    jclass cls, jmethodID method, jlocation location) const {
+  JvmReadersFactory readers_factory(evaluators_, method, location);
 
   // Compile breakpoint condition (if present).
   CompiledExpression condition = CompileCondition(&readers_factory);
@@ -778,13 +728,8 @@ std::shared_ptr<CompiledBreakpoint> JvmBreakpoint::CompileBreakpointExpressions(
   }
 
   return std::make_shared<CompiledBreakpoint>(
-      cls,
-      method,
-      location,
-      std::move(condition),
-      std::move(watches));
+      cls, method, location, std::move(condition), std::move(watches));
 }
-
 
 CompiledExpression JvmBreakpoint::CompileCondition(
     ReadersFactory* readers_factory) const {
@@ -797,7 +742,8 @@ CompiledExpression JvmBreakpoint::CompileCondition(
 
   if (condition.evaluator == nullptr) {
     LOG(WARNING) << "Breakpoint condition could not be compiled, "
-                    "condition: " << definition_->condition
+                    "condition: "
+                 << definition_->condition
                  << ", error message: " << condition.error_message;
     return condition;
   }
@@ -805,16 +751,15 @@ CompiledExpression JvmBreakpoint::CompileCondition(
   const JType return_type = condition.evaluator->GetStaticType().type;
   if (return_type != JType::Boolean) {
     LOG(WARNING) << "Breakpoint condition does not evaluate to boolean, "
-                    "return type: " << static_cast<int>(return_type);
+                    "return type: "
+                 << static_cast<int>(return_type);
 
     CompiledExpression result;
     result.evaluator = nullptr;
     result.error_message = {
-      ConditionNotBoolean,              // error_message.format
-      {                                 // error_message.parameters
-        TypeNameFromSignature(condition.evaluator->GetStaticType())
-      }
-    };
+        ConditionNotBoolean,  // error_message.format
+        {                     // error_message.parameters
+         TypeNameFromSignature(condition.evaluator->GetStaticType())}};
     result.expression = definition_->condition;
 
     return result;
@@ -823,7 +768,6 @@ CompiledExpression JvmBreakpoint::CompileCondition(
   return condition;
 }
 
-
 void JvmBreakpoint::CompleteBreakpointWithStatus(
     std::unique_ptr<StatusMessageModel> status) {
   BreakpointBuilder builder(*definition_);
@@ -831,7 +775,6 @@ void JvmBreakpoint::CompleteBreakpointWithStatus(
 
   CompleteBreakpoint(&builder, nullptr);
 }
-
 
 void JvmBreakpoint::CompleteBreakpoint(
     BreakpointBuilder* builder,
@@ -844,7 +787,6 @@ void JvmBreakpoint::CompleteBreakpoint(
 
   ResetToPending();
 }
-
 
 void JvmBreakpoint::SendInterimBreakpointUpdate(
     const CompiledBreakpoint& state) {
@@ -863,11 +805,12 @@ void JvmBreakpoint::SendInterimBreakpointUpdate(
     variable_builder.set_name(watch.expression);
 
     if (watch.evaluator == nullptr) {
-      variable_builder.set_status(StatusMessageBuilder()
-          .set_error()
-          .set_refers_to(StatusMessageModel::Context::VARIABLE_NAME)
-          .set_description(watch.error_message)
-          .build());
+      variable_builder.set_status(
+          StatusMessageBuilder()
+              .set_error()
+              .set_refers_to(StatusMessageModel::Context::VARIABLE_NAME)
+              .set_description(watch.error_message)
+              .build());
     } else {
       variable_builder.set_value(string());
     }
@@ -878,7 +821,6 @@ void JvmBreakpoint::SendInterimBreakpointUpdate(
   format_queue_->Enqueue(breakpoint_builder.build(), nullptr);
 }
 
-
 void JvmBreakpoint::OnBreakpointExpired() {
   // Keep this instance alive at least until this function exits.
   std::shared_ptr<Breakpoint> instance_holder = shared_from_this();
@@ -887,16 +829,15 @@ void JvmBreakpoint::OnBreakpointExpired() {
 
   ResetToPending();
 
-  CompleteBreakpointWithStatus(StatusMessageBuilder()
-      .set_error()
-      .set_refers_to(
-          StatusMessageModel::Context::BREAKPOINT_AGE)
-      .set_format(definition_->action == BreakpointModel::Action::LOG ?
-                  LogpointExpired : SnapshotExpired)
-      .build());
+  CompleteBreakpointWithStatus(
+      StatusMessageBuilder()
+          .set_error()
+          .set_refers_to(StatusMessageModel::Context::BREAKPOINT_AGE)
+          .set_format(definition_->action == BreakpointModel::Action::LOG
+                          ? LogpointExpired
+                          : SnapshotExpired)
+          .build());
 }
 
 }  // namespace cdbg
 }  // namespace devtools
-
-

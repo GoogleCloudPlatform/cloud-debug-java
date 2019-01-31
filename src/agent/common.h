@@ -17,7 +17,6 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_COMMON_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_COMMON_H_
 
-
 #include <string.h>
 #include <stdint.h>
 #include <memory>
@@ -51,7 +50,6 @@ using google::LogSeverity;  // NOLINT
 using google::AddLogSink;  // NOLINT
 using google::RemoveLogSink;  // NOLINT
 
-
 #define ABSL_FLAG(type, name, default_value, help) \
   DEFINE_##type(name, default_value, help)
 
@@ -74,7 +72,6 @@ inline void SetFlag(uint64* f, uint64 v) { *f = v; }
 inline void SetFlag(double* f, double v) { *f = v; }
 inline void SetFlag(string* f, const string& v) { *f = v; }
 }  // namespace absl
-
 
 #define STRINGIZE(s)    #s
 #define STRINGIFY(s)    STRINGIZE(s)

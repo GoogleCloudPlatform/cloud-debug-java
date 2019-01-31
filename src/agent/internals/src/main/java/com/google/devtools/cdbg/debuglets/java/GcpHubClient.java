@@ -21,7 +21,6 @@ import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.devtools.clouddebugger.v2.Labels;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;

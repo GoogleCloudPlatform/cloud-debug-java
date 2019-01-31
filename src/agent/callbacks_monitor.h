@@ -21,7 +21,11 @@
 #include <list>
 #include <mutex>  // NOLINT
 
+// TODO(b/123243277): remove the surrounding MOE block
+// MOE:begin_strip
+
 #include "common.h"
+// MOE:end_strip_and_replace #include "common.h"
 
 namespace devtools {
 namespace cdbg {

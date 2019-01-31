@@ -537,11 +537,9 @@ final class ResourcesDatabase {
     }
   }
 
-  /**
-   * Serialized BLOB storing the entire database.
-   */
-  private final byte buffer[];
-  
+  /** Serialized BLOB storing the entire database. */
+  private final byte[] buffer;
+
   private ResourcesDatabase(Builder builder) {
     // Compute size of the output buffer and assign space for each node.
     int size = 0;

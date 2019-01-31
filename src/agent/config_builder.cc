@@ -73,7 +73,6 @@ ABSL_FLAG(
 ABSL_FLAG(int32, safe_caller_max_interpreter_stack_depth, 20,
           "Maximum stack depth that safe caller will allow");
 
-
 namespace devtools {
 namespace cdbg {
 
@@ -622,7 +621,6 @@ std::unique_ptr<Config> DefaultConfig() {
 
   return builder.Build();
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

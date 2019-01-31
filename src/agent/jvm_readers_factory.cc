@@ -121,7 +121,10 @@ JniLocalRef JvmReadersFactory::FindClassByName(
 
       *error_message = {
         ClassNotLoaded,
-        { TypeNameFromJObjectSignature(candidates[0]) }
+        {
+         TypeNameFromJObjectSignature(candidates[0]),
+         candidates[0]
+        }
       };
       return nullptr;
 
@@ -237,7 +240,7 @@ JvmReadersFactory::CreateInstanceFieldReader(
 
     *error_message = {
       ClassNotLoaded,
-      { TypeNameFromJObjectSignature(class_signature) }
+      { TypeNameFromJObjectSignature(class_signature), class_signature }
     };
 
     return nullptr;
@@ -359,7 +362,7 @@ bool JvmReadersFactory::FindInstanceMethods(
     LOG(ERROR) << "Instance class not found: " << class_signature;
     *error_message = {
       ClassNotLoaded,
-      { TypeNameFromJObjectSignature(class_signature) }
+      { TypeNameFromJObjectSignature(class_signature), class_signature }
     };
     return false;
   }
@@ -390,7 +393,8 @@ bool JvmReadersFactory::FindStaticMethods(
     FormatMessageModel* error_message) {
   JniLocalRef cls = FindClassByName(class_name, error_message);
   if (cls == nullptr) {
-    *error_message = { ClassNotLoaded, { class_name } };
+    *error_message = { ClassNotLoaded, { class_name,
+                                        kJavaSignatureNotAvailable } };
     return false;
   }
 

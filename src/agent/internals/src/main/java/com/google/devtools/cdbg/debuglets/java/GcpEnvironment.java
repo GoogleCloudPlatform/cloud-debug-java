@@ -16,7 +16,6 @@
 
 package com.google.devtools.cdbg.debuglets.java;
 
-import com.google.devtools.clouddebugger.v2.Labels;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;

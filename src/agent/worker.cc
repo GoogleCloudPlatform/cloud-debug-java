@@ -30,7 +30,6 @@ ABSL_FLAG(int32, debuggee_disabled_delay_ms,
           "amount of time in milliseconds to sleep before checking whether "
           "the debugger was enabled back");
 
-
 namespace devtools {
 namespace cdbg {
 
@@ -113,15 +112,12 @@ void Worker::Shutdown() {
 }
 
 
-
-
 void Worker::MainThreadProc() {
   //
   // One time initialization of Worker. This initialization logically belongs
   // to "Start", but it was moved here to reduce the impact of debugger on
   // application startup time.
   //
-
 
   // Deferred initialization of the agent.
   if (!provider_->OnWorkerReady()) {

@@ -26,6 +26,8 @@
 namespace devtools {
 namespace cdbg {
 
+constexpr char kJavaSignatureNotAvailable[] = "__JSIGNATURE_NOT_AVAILABLE__";
+
 constexpr char kJavaObjectClassSignature[] = "Ljava/lang/Object;";
 constexpr char kJavaStringClassSignature[] = "Ljava/lang/String;";
 

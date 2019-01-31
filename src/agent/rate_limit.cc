@@ -137,6 +137,14 @@ static int GetCpuCount() {
 
     LOG(INFO) << "CPU count: " << cpu_count;
 
+    // The cpu_count is the schedulable CPUs and does not reflect available
+    // CPU capacity.  For example, you may have 100 cpus on which your threads
+    // may be scheduled, but be limited to 1 cpu second/second.
+    // Set the cpu_count to 1 to avoid overinflating the global limit.
+
+    cpu_count = 1;
+    LOG(INFO) << "Adjusted CPU count: " << cpu_count;
+
     // If CPU count is not available, assume single CPU.
     cpu_count_cache = std::max(1, cpu_count);
   }

@@ -51,9 +51,9 @@ public class JniProxyCodeGen {
    */
   public static class ProxyType {
     private final Class<?> cls;
-
+    
     private static final ImmutableMap<Class<?>, String> PRIMITIVE_TYPES;
-
+    
     static {
       ImmutableMap.Builder<Class<?>, String> builder = ImmutableMap.builder();
       builder.put(void.class, "void");
@@ -68,7 +68,7 @@ public class JniProxyCodeGen {
 
       PRIMITIVE_TYPES = builder.build();
     }
-
+    
     public ProxyType(Class<?> cls) {
       this.cls = cls;
     }
@@ -78,16 +78,16 @@ public class JniProxyCodeGen {
       if (primitiveNativeType != null) {
         return primitiveNativeType;
       }
-
+      
       return "jobject";
     }
-
+    
     public String getNativeReturnType() {
       if (cls == void.class) {
-        // We can't instantiate ExceptionOr<void>, so we use nullptr_t instead.
+        // We can't instantiate ExceptionOr<void>, so we use nullptr_t instead. 
         return "::devtools::cdbg::ExceptionOr<std::nullptr_t>";
       }
-
+      
       String primitiveNativeType = PRIMITIVE_TYPES.get(cls);
       if (primitiveNativeType != null) {
         return String.format("::devtools::cdbg::ExceptionOr<%s>", primitiveNativeType);
@@ -99,7 +99,7 @@ public class JniProxyCodeGen {
 
       return "::devtools::cdbg::ExceptionOr< ::devtools::cdbg::JniLocalRef >";
     }
-
+    
     public String getNativeArgumentType() {
       String primitiveNativeType = PRIMITIVE_TYPES.get(cls);
       if (primitiveNativeType != null) {
@@ -116,7 +116,7 @@ public class JniProxyCodeGen {
     public boolean isVoid() {
       return cls == void.class;
     }
-
+    
     /**
      * Gets the type name used to format the JNI call method.
      */
@@ -124,23 +124,23 @@ public class JniProxyCodeGen {
       if (PRIMITIVE_TYPES.containsKey(cls)) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, cls.getSimpleName());
       }
-
+      
       return "Object";
     }
 
     public String getReturnValueConversion(String rc) {
       return String.format(getReturnValueConversionFormat(), rc);
     }
-
+    
     String getArgumentConversionFormat() {
       if (cls == String.class) {
         return "::devtools::cdbg::JniToJavaString(%s).get()";
       }
-
+      
       if (cls == byte[].class) {
         return "::devtools::cdbg::JniToByteArray(%s).get()";
       }
-
+      
       return "%s";
     }
 
@@ -148,39 +148,39 @@ public class JniProxyCodeGen {
       if (cls == void.class) {
         return "nullptr";
       }
-
+      
       if (PRIMITIVE_TYPES.containsKey(cls)) {
         return "%s";
       }
-
+      
       if (cls == String.class) {
         return "::devtools::cdbg::JniToNativeString(%s)";
       }
-
+      
       if (cls == byte[].class) {
         return "::devtools::cdbg::JniToNativeBlob(%s)";
       }
-
+      
       return "::devtools::cdbg::JniLocalRef(%s)";
     }
   }
-
+  
   /**
    * Wrapper class to expose method argument to code generator.
    */
   public static class ProxyArgument {
     private final String name;
     private final ProxyType type;
-
+    
     public ProxyArgument(String name, ProxyType type) {
       this.name = name;
       this.type = type;
     }
-
+    
     public String getName() {
       return name;
     }
-
+    
     public ProxyType getType() {
       return type;
     }
@@ -196,76 +196,76 @@ public class JniProxyCodeGen {
   public static class ProxyConstructor {
     /**
      * Generates {@code NewObjectOf} method that allocates a subclass of this class.
-     *
+     * 
      * TODO(vlif): remove this option.
-     */
+     */ 
     private final boolean subclassConstructor;
-
+    
     /**
      * Proxy-enabled Java class constructor.
      */
     private final Constructor<?> constructor;
-
+    
     /**
      * Index of this constructor for name disambiguation.
      */
     private final int id;
-
+    
     public ProxyConstructor(boolean subclassConstructor, Constructor<?> constructor, int id) {
       this.subclassConstructor = subclassConstructor;
       this.constructor = constructor;
       this.id = id;
     }
-
+    
     /**
      * Returns true if the generated method allocates a subclass of this class and not
      * necesserily instance of this class.
-     */
+     */ 
     public boolean isSubclassConstructor() {
       return subclassConstructor;
     }
-
-
+    
+    
     /**
      * Gets the index of this constructor for name disambiguation.
      */
     public int getId() {
       return id;
     }
-
+    
     /**
      * Gets the name of the generated method that allocates a new object.
      */
     public String getMethodName() {
       return subclassConstructor ? "NewObjectOf" : "NewObject";
     }
-
+    
     /**
      * Gets the constructor declaration string.
      */
     public String getDescription() {
       return constructor.toString();
     }
-
+    
     /**
      * Gets the JNI signature of the method.
      */
     public String getSignature() {
       return Type.getConstructorDescriptor(constructor);
     }
-
+    
     /**
      * Gets the list of method arguments.
      */
     public List<ProxyArgument> getArguments() {
       List<ProxyArgument> arguments = new ArrayList<>();
-
+      
       if (subclassConstructor) {
         arguments.add(new ProxyArgument("cls", new ProxyType(Class.class)));
       }
-
+      
       arguments.addAll(getConstructorArguments());
-
+      
       return arguments;
     }
 
@@ -278,10 +278,10 @@ public class JniProxyCodeGen {
         arguments.add(
             new ProxyArgument(String.format("arg%d", arguments.size()), new ProxyType(cls)));
       }
-
+      
       return arguments;
     }
-
+    
     /**
      * Checks whether a method has at least one argument.
      */
@@ -289,7 +289,7 @@ public class JniProxyCodeGen {
       return constructor.getParameterTypes().length > 0;
     }
   }
-
+  
   /**
    * Wrapper class to expose method to code generator.
    */
@@ -298,24 +298,24 @@ public class JniProxyCodeGen {
      * Proxy-enabled Java method.
      */
     private final Method method;
-
+    
     /**
      * Index of this method to disambiguate overloaded methods.
      */
     private final int id;
-
+    
     public ProxyMethod(Method method, int id) {
       this.method = method;
       this.id = id;
     }
-
+    
     /**
      * Gets the index of this method to disambiguate overloaded methods.
      */
     public int getId() {
       return id;
     }
-
+    
     /**
      * Gets method name (might not be unique due to method overloading).
      */
@@ -329,28 +329,28 @@ public class JniProxyCodeGen {
     public String getDescription() {
       return method.toString();
     }
-
+    
     /**
      * Gets the JNI signature of the method.
      */
     public String getSignature() {
       return Type.getMethodDescriptor(method);
     }
-
+    
     /**
      * Checks method modifiers for "static".
      */
     public boolean isStatic() {
       return Modifier.isStatic(method.getModifiers());
     }
-
+    
     /**
      * Gets the return type for the method.
      */
     public ProxyType getReturnType() {
       return new ProxyType(method.getReturnType());
     }
-
+    
     /**
      * Gets the list of method arguments.
      */
@@ -360,10 +360,10 @@ public class JniProxyCodeGen {
         arguments.add(
             new ProxyArgument(String.format("arg%d", arguments.size()), new ProxyType(cls)));
       }
-
+      
       return arguments;
     }
-
+    
     /**
      * Checks whether a method has at least one argument.
      */
@@ -376,12 +376,12 @@ public class JniProxyCodeGen {
    * Directory for the generated files.
    */
   private final File path;
-
+  
   /**
-   * Class for which the proxy is generated.
+   * Class for which the proxy is generated. 
    */
   private final Class<?> cls;
-
+  
   /**
    * Configuration of the code generator for this Java class.
    */
@@ -391,17 +391,17 @@ public class JniProxyCodeGen {
    * Normalized name of the class used to format the name of the generated file.
    */
   private final String fileNameClass;
-
+  
   /**
    * List of constructors to proxy.
    */
   private final ArrayList<ProxyConstructor> constructors;
-
+  
   /**
    * List of methods to proxy.
    */
   private final ArrayList<ProxyMethod> methods;
-
+  
   /**
    * Code generator configuration.
    */
@@ -423,10 +423,10 @@ public class JniProxyCodeGen {
         .replaceFirst("^com_google_api_client_util_", "api_client_")
         .replaceFirst("^com_google_devtools_cdbg_debuglets_java_", "")
         .toLowerCase();
-
+    
     Constructor<?>[] clsConstructors = cls.getDeclaredConstructors();
     Method[] clsMethods = cls.getDeclaredMethods();
-
+    
     // Sort list of methods to ensure consistent generated code (Class returns elements
     // in no particular order).
     Comparator<Object> methodComparator = new Comparator<Object>() {
@@ -435,10 +435,10 @@ public class JniProxyCodeGen {
         return o1.toString().compareTo(o2.toString());
       }
     };
-
+      
     Arrays.sort(clsConstructors, methodComparator);
     Arrays.sort(clsMethods, methodComparator);
-
+    
     constructors = new ArrayList<>();
     methods = new ArrayList<>();
     for (Config.ProxyMethod methodConfig : config.getMethods()) {
@@ -460,17 +460,17 @@ public class JniProxyCodeGen {
           if (!method.getName().equals(methodConfig.getMethodName())) {
             continue;
           }
-
+          
           if ((methodConfig.getMethodSignature() != null)
               && !Type.getMethodDescriptor(method).equals(methodConfig.getMethodSignature())) {
             continue;
           }
-
+          
           methods.add(new ProxyMethod(method, methods.size()));
           found = true;
         }
       }
-
+      
       if (!found) {
         throw new RuntimeException(
             String.format("Method %s (signature: %s) not found in class %s",
@@ -481,25 +481,25 @@ public class JniProxyCodeGen {
                 cls.getName()));
       }
     }
-
+    
     codeGenConfig = new Configuration(Configuration.VERSION_2_3_22);
     codeGenConfig.setClassForTemplateLoading(getClass(), "");
     codeGenConfig.setObjectWrapper(new DefaultObjectWrapper(Configuration.VERSION_2_3_22));
   }
-
+  
   public void generate() throws IOException, TemplateException {
     generateFile("JniProxy.h.tpl", new File(path, "jni_proxy_" + fileNameClass + ".h"));
     generateFile("JniProxy.cc.tpl", new File(path, "jni_proxy_" + fileNameClass + ".cc"));
     generateFile("Mock.h.tpl", new File(path, "mock_" + fileNameClass + ".h"));
   }
-
+  
   private void generateFile(String templateName, File destinationFile)
       throws IOException, TemplateException {
     Template template = codeGenConfig.getTemplate(templateName);
 
     FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
     Writer writer = new OutputStreamWriter(fileOutputStream);
-
+    
     Map<String, Object> data = new HashMap<String, Object>();
     data.put("fileName", destinationFile.getName());
     data.put("fileNameWithoutExtension", Files.getNameWithoutExtension(destinationFile.getName()));
@@ -515,15 +515,14 @@ public class JniProxyCodeGen {
     String clsName = cls.getName();
     data.put("normalizedClassName", clsName.substring(clsName.lastIndexOf(".") + 1)
         .replace('$', '_'));
-
-data.put("includeDirectory", "");
-
+    data.put("includeDirectory", "");
+    
     template.process(data, writer);
-
+    
     writer.flush();
     writer.close();
   }
-
+  
   public static void main(String[] args) throws Exception {
     // Load code generator configuration.
     String configJson = Files.asCharSource(new File(args[0]), UTF_8).read();

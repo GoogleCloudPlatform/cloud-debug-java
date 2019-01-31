@@ -150,7 +150,10 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
                  << " not loaded, call stack:\n" << CurrentCallStack();
       return FormatMessageModel {
           ClassNotLoaded,
-          { TypeNameFromSignature(metadata.class_signature) }
+          {
+            TypeNameFromSignature(metadata.class_signature),
+            SignatureFromJSignature(metadata.class_signature)
+          }
       };
     }
 
@@ -194,7 +197,10 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
                  << " not loaded, call stack:\n" << CurrentCallStack();
       return FormatMessageModel {
           ClassNotLoaded,
-          { TypeNameFromSignature(metadata.class_signature) }
+          {
+            TypeNameFromSignature(metadata.class_signature),
+            SignatureFromJSignature(metadata.class_signature)
+          }
       };
     }
 
@@ -321,7 +327,10 @@ MethodCallResult SafeMethodCaller::InvokeJni(
           metadata)) {
     return MethodCallResult::Error({
         ClassNotLoaded,
-        { TypeNameFromJObjectSignature(call_target.object_cls_signature) }
+        {
+          TypeNameFromJObjectSignature(call_target.object_cls_signature),
+          call_target.object_cls_signature
+        }
     });
   }
 

@@ -297,6 +297,10 @@ class JvmBreakpoint : public Breakpoint,
   // method containing this statement may or may not be loaded by JVM.
   std::shared_ptr<ResolvedSourceLocation> resolved_location_;
 
+  // Conditions can also put a breakpoints into pending state if the class they
+  // are called on is not loaded.
+  string condition_class_dependency_signature_;
+
   // Immutable state of active breakpoint. The code should assume that this
   // variable can change any time (point to a new instance of immutable
   // "CompiledBreakpoint").

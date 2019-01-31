@@ -26,7 +26,6 @@ namespace cdbg {
 // Generates the default configuration.
 std::unique_ptr<Config> DefaultConfig();
 
-
 }  // namespace cdbg
 }  // namespace devtools
 

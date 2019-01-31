@@ -17,10 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MUTEX_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MUTEX_H_
 
-
 #include <mutex>  // NOLINT
 #include "common.h"
-
 namespace absl {
 
 // Wrapper class for non-recursive mutex.
@@ -69,6 +67,5 @@ class MutexLock {
 };
 
 }  // namespace absl
-
 
 #endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MUTEX_H_

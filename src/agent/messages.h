@@ -60,7 +60,7 @@ constexpr char InvalidIdentifier[] =
     "Identifier $0 not found";
 
 constexpr char ClassNotLoaded[] =
-    "Java class $0 has not been loaded yet";
+    "Java class $0 has not been loaded yet (Class signature is $1)";
 
 constexpr char ClassLoadFailed[] =
     "Failed to load Java class $0";
@@ -216,7 +216,7 @@ constexpr char DynamicLogOutOfCallQuota[] =
 constexpr char CanaryBreakpointUnhealthy[] =
     "The snapshot canary has failed and the snapshot cancelled. Please try "
     "again at a later time."
-;
+    ;
 
 #define INTERNAL_ERROR_MESSAGE (devtools::cdbg::FormatMessageModel { \
       "Internal error at $0:$1", \

@@ -56,11 +56,11 @@ public final class SafeCallerException extends Error {
     throw new SafeCallerException("Internal error at $0:$1",
         new String[] { file, Integer.toString(line) });
   }
-
+  
   public static void throwMethodNotAllowed(String method) {
     throw new SafeCallerException("Method call $0 is not allowed", new String[] { method });
   }
-
+  
   public static void throwChangingStaticFieldNotAllowed(String field) {
     throw new SafeCallerException("Method $0 is not safe (attempted to change static field $1)",
         new String[] { getCallerName(), field });
@@ -69,32 +69,32 @@ public final class SafeCallerException extends Error {
   public static void throwMethodBlacklisted(String method) {
     throw new SafeCallerException("Calling $0 is not allowed", new String[] { method });
   }
-
+  
   public static void throwInvokeDynamicNotSupported(String method) {
     throw new SafeCallerException("Method $0 blocked (INVOKEDYNAMIC not supported)",
         new String[] { method });
   }
-
+  
   public static void throwMultiANewArrayOpcodeNotSupported() {
     throw new SafeCallerException("Method $0 blocked (MULTIANEWARRAY not supported)",
         new String[] { getCallerName() });
-  }
-
+  }  
+  
   public static void throwCopyArrayTooLarge(int length) {
     throw new SafeCallerException("Method $0 blocked (attempted to copy $1 elements of an array)",
         new String[] { getCallerName(), Integer.toString(length) });
   }
-
+  
   public static Throwable createNativeMethodNotAllowed(String method) {
     return new SafeCallerException("Native method call $0 is not allowed",
         new String[] { method });
   }
-
+  
   /**
    * Determines the binary name of the caller omitting internally generated safe caller methods.
    */
   private static String getCallerName() {
-
+    
     return "<unknown>";
   }
 }

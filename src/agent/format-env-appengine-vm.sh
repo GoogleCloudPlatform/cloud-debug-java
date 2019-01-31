@@ -48,4 +48,3 @@ if [[ -n "${CDBG_APP_WEB_INF_DIR}" ]]; then
 fi
 
 echo "${ARGS}"
-

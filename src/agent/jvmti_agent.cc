@@ -43,7 +43,6 @@
 ABSL_FLAG(string, cdbg_extra_class_path, "",
           "additional directories and files containing resolvable binaries");
 
-
 using google::SetCommandLineOption;
 
 namespace devtools {
@@ -334,7 +333,7 @@ void JvmtiAgent::EnableJvmtiDebuggerNotifications(jvmtiEventMode mode) {
 
 bool JvmtiAgent::OnWorkerReady() {
   // Connect to Java internals implementation.
-{
+  {
     if (!internals_->LoadInternals()) {
       LOG(ERROR) << "Internals could not be initialized";
       return false;

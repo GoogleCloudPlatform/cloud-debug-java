@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -43,67 +40,48 @@ import java.util.zip.InflaterInputStream;
 /**
  * Memory efficient data structure storing index of a files tree.
  *
- * <p>Data structure to store large list of files. Provides index of all the referenced
- * directories and files names in these directories. The actual content of files is not stored
- * here.
+ * <p>Data structure to store large list of files. Provides index of all the referenced directories
+ * and files names in these directories. The actual content of files is not stored here.
  *
- * <p>This class supports index of hundreds of thousands of files. The memory footprint is
- * about 500 KB for 100K files.
+ * <p>This class supports index of hundreds of thousands of files. The memory footprint is about 500
+ * KB for 100K files.
  *
  * <p>{@link ResourcesDatabase} keeps a tree of all directories. Each directory has a reference to
- * its parent and its children. Full directory name is constructed by walking up to the parent
- * and appending node names. Each directory stores a flat list of file names in this directory.
+ * its parent and its children. Full directory name is constructed by walking up to the parent and
+ * appending node names. Each directory stores a flat list of file names in this directory.
  *
- * <p>{@link ResourcesDatabase.Builder} is used to collect the data. It then serializes all the
- * data into a very compact BLOB. {@link ResourcesDatabase} provides methods to access this BLOB.
+ * <p>{@link ResourcesDatabase.Builder} is used to collect the data. It then serializes all the data
+ * into a very compact BLOB. {@link ResourcesDatabase} provides methods to access this BLOB.
  *
- * <p>The {@link Builder} is not thread safe. {@link ResourcesDatabase} instances are immutable
- * and therefore thread safe.
+ * <p>The {@link Builder} is not thread safe. {@link ResourcesDatabase} instances are immutable and
+ * therefore thread safe.
  */
 final class ResourcesDatabase {
-  /**
-   * Root directory ID.
-   */
+  /** Root directory ID. */
   public static final int ROOT = 0;
 
-  private static final byte[] NULL_TERMINATOR = new byte[] { 0 };
+  private static final byte[] NULL_TERMINATOR = new byte[] {0};
 
-  /**
-   * Constructs the database.
-   */
+  /** Constructs the database. */
   static final class Builder {
-    /**
-     * Content of a single directory prior to serialization.
-     */
+    /** Content of a single directory prior to serialization. */
     private class DirectoryBuilder {
-      /**
-       * Parent node or null if this is a root node.
-       */
+      /** Parent node or null if this is a root node. */
       private final DirectoryBuilder parent;
 
-      /**
-       * Name of this directory (not including parent directory name). Empty string if root.
-       */
+      /** Name of this directory (not including parent directory name). Empty string if root. */
       private final String nodeName;
 
-      /**
-       * Child directories of this directory.
-       */
+      /** Child directories of this directory. */
       private final Collection<DirectoryBuilder> children = new ArrayList<>();
 
-      /**
-       * Names of the files in this directory.
-       */
+      /** Names of the files in this directory. */
       private final Collection<String> files = new ArrayList<>();
 
-      /**
-       * {@link nodeName} encoded in UTF-8
-       */
+      /** {@link nodeName} encoded in UTF-8 */
       private byte[] encodedNodeName;
 
-      /**
-       * {@link nodeName} encoded in UTF-8
-       */
+      /** {@link nodeName} encoded in UTF-8 */
       private byte[] encodedFiles;
 
       private DirectoryBuilder(DirectoryBuilder parent, String name) {
@@ -111,9 +89,7 @@ final class ResourcesDatabase {
         this.nodeName = name;
       }
 
-      /**
-       * Finalizes the compression for file names.
-       */
+      /** Finalizes the compression for file names. */
       private void finish() {
         try {
           encodedNodeName = nodeName.getBytes(UTF_8.name());
@@ -139,17 +115,15 @@ final class ResourcesDatabase {
         }
       }
 
-      /**
-       * Computes the size of this entry once serialized.
-       */
+      /** Computes the size of this entry once serialized. */
       private int size() {
-        return 4                                         // node type and parent node offset
-             + encodedNodeName.length                    // name encoded in UTF-8
-             + 1                                         // null terminator of the name string
-             + encodedIntSize(children.size())           // number of children
-             + 4 * children.size()                       // offsets of children
-             + encodedIntSize(encodedFiles.length)       // size of serialized files stream
-             + encodedFiles.length;                      // serialized set of files in this package
+        return 4 // node type and parent node offset
+            + encodedNodeName.length // name encoded in UTF-8
+            + 1 // null terminator of the name string
+            + encodedIntSize(children.size()) // number of children
+            + 4 * children.size() // offsets of children
+            + encodedIntSize(encodedFiles.length) // size of serialized files stream
+            + encodedFiles.length; // serialized set of files in this package
       }
 
       /**
@@ -158,24 +132,24 @@ final class ResourcesDatabase {
        * <p>The offset of this entry is determined by {@code nodeOffsets}.
        *
        * @param buffer serialization buffer for the entire database
-       * @param nodeOffsets assigns offset for each instance of {@link DirectoryBuilder}
-       *     in {@code buffer}
+       * @param nodeOffsets assigns offset for each instance of {@link DirectoryBuilder} in {@code
+       *     buffer}
        */
       private void serialize(byte[] buffer, Map<DirectoryBuilder, Integer> nodeOffsets) {
         int offset = nodeOffsets.get(this);
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, offset, buffer.length - offset);
-        
+
         // Node type and parent node offset.
         int parentOffset = ((parent != null) ? nodeOffsets.get(parent) : 0xFFFFFFFF);
         byteBuffer.putInt(parentOffset);
-        
+
         // Null terminated name encoded in UTF-8.
         byteBuffer.put(encodedNodeName);
         byteBuffer.put((byte) 0);
-        
+
         // Number of children.
         putEncodedInt(byteBuffer, children.size());
-        
+
         // Offsets of children.
         for (DirectoryBuilder child : children) {
           byteBuffer.putInt(nodeOffsets.get(child));
@@ -190,20 +164,19 @@ final class ResourcesDatabase {
        * Retrives child directory by name or creates a new instance if one doesn't exist.
        *
        * @param name child directory name (without parent name)
-       *
        * @return instance of {@link DirectoryBuilder} corresponding to the child directory
        */
       private DirectoryBuilder createChild(String name) {
         if ((name == null) || name.isEmpty()) {
           throw new IllegalArgumentException("name");
         }
-        
+
         for (DirectoryBuilder child : children) {
           if (child.nodeName.equals(name)) {
             return child;
           }
         }
-        
+
         DirectoryBuilder newNode = new DirectoryBuilder(this, name);
         nodes.add(newNode);
         children.add(newNode);
@@ -213,8 +186,8 @@ final class ResourcesDatabase {
       /**
        * Registers a new file in this directory.
        *
-       * <p>This function will happily allow duplicates. It is the responsibility of the caller
-       * to ensure this doesn't happen.
+       * <p>This function will happily allow duplicates. It is the responsibility of the caller to
+       * ensure this doesn't happen.
        *
        * @param fileName name of the file in this directory (without the directory name and slashes)
        */
@@ -227,19 +200,15 @@ final class ResourcesDatabase {
       }
     }
 
-    /**
-     * Root of the directories tree.
-     */
+    /** Root of the directories tree. */
     private final DirectoryBuilder root;
 
-    /**
-     * Flat list of all the directories in the tree. Used to avoid unnecessary recursion.
-     */
+    /** Flat list of all the directories in the tree. Used to avoid unnecessary recursion. */
     private Collection<DirectoryBuilder> nodes;
-    
+
     public Builder() {
       root = new DirectoryBuilder(null, "");
-      
+
       nodes = new ArrayList<>();
       nodes.add(root);
     }
@@ -257,9 +226,7 @@ final class ResourcesDatabase {
       return builder.build();
     }
 
-    /**
-     * Builds {@link ResourcesDatabase} for all the entries in a JAR file.
-     */
+    /** Builds {@link ResourcesDatabase} for all the entries in a JAR file. */
     public static ResourcesDatabase forJar(JarFile jarFile) {
       Builder builder = new Builder();
       Enumeration<JarEntry> enumeration = jarFile.entries();
@@ -269,7 +236,7 @@ final class ResourcesDatabase {
           builder.add(entry.getName());
         }
       }
-      
+
       return builder.build();
     }
 
@@ -291,7 +258,7 @@ final class ResourcesDatabase {
       DirectoryBuilder node = root;
       for (int i = 0; i < components.length - 1; ++i) {
         if (components[i].isEmpty()) {
-          continue;  // Skip. Repeated slashes count as one slash.
+          continue; // Skip. Repeated slashes count as one slash.
         }
 
         node = node.createChild(components[i]);
@@ -302,27 +269,27 @@ final class ResourcesDatabase {
       return this;
     }
 
-    /**
-     * Serializes the file paths added so far.
-     */
+    /** Serializes the file paths added so far. */
     public ResourcesDatabase build() {
       for (DirectoryBuilder node : nodes) {
         node.finish();
       }
-      
+
       return new ResourcesDatabase(this);
     }
 
     private void addFileSystemFile(Path rootPath, File file) {
       if (file.isDirectory()) {
         // Get list of files and directories in the directory referenced by file.
-        File[] childFiles = file.listFiles(new FilenameFilter() {
-          @Override
-          public boolean accept(File dir, String name) {
-            // Ignore directories like ".", "..", ".svn" and ".git".
-            return !name.startsWith(".");
-          }
-        });
+        File[] childFiles =
+            file.listFiles(
+                new FilenameFilter() {
+                  @Override
+                  public boolean accept(File dir, String name) {
+                    // Ignore directories like ".", "..", ".svn" and ".git".
+                    return !name.startsWith(".");
+                  }
+                });
 
         for (File childFile : childFiles) {
           addFileSystemFile(rootPath, childFile);
@@ -335,106 +302,74 @@ final class ResourcesDatabase {
     }
   }
 
-  /**
-   * Represents a single directory in the serialized data structure.
-   */
+  /** Represents a single directory in the serialized data structure. */
   class Directory {
-    /**
-     * Offset of this directory in the BLOB.
-     */
+    /** Offset of this directory in the BLOB. */
     private final int id;
 
-    /**
-     * Offset of the parent directory in the BLOB or 0xFFFFFFF if this is a root directory.
-     */
+    /** Offset of the parent directory in the BLOB or 0xFFFFFFF if this is a root directory. */
     private final int parentId;
 
-    /**
-     * Name of this directory (not including parent directory name).
-     */
+    /** Name of this directory (not including parent directory name). */
     private final String nodeName;
 
-    /**
-     * Lazily built cache of full path of this directory (parent.name/nodeName).
-     */
+    /** Lazily built cache of full path of this directory (parent.name/nodeName). */
     private String name = null;
 
-    /**
-     * Offset of each child directory in the BLOB.
-     */
+    /** Offset of each child directory in the BLOB. */
     private final int[] childrenIds;
 
-    /**
-     * Size of the compressed files BLOB.
-     */
+    /** Size of the compressed files BLOB. */
     private final int filesSize;
 
-    /**
-     * Position of the files BLOB in "buffer".
-     */
+    /** Position of the files BLOB in "buffer". */
     private final int filesPosition;
 
-    /**
-     * Lazily built cache of file names (without directory name).
-     */
+    /** Lazily built cache of file names (without directory name). */
     private SoftReference<String[]> fileNamesCache = null;
 
-    /**
-     * Lazily built cache of file paths (with full directory name).
-     */
+    /** Lazily built cache of file paths (with full directory name). */
     private SoftReference<String[]> filePathsCache = null;
 
-    /**
-     * Deserializes some fields leaving others to be lazily retrieved as needed.
-     */
+    /** Deserializes some fields leaving others to be lazily retrieved as needed. */
     private Directory(int directoryId) {
       this.id = directoryId;
-      
+
       ByteBuffer bufferWrap = ByteBuffer.wrap(buffer, directoryId, buffer.length - directoryId);
       parentId = bufferWrap.getInt();
-      
+
       nodeName = getString(bufferWrap);
-      
+
       childrenIds = new int[getEncodedInt(bufferWrap)];
       for (int i = 0; i < childrenIds.length; ++i) {
         childrenIds[i] = bufferWrap.getInt();
       }
-      
+
       filesSize = getEncodedInt(bufferWrap);
       filesPosition = bufferWrap.position();
     }
 
-    /**
-     * Gets the unique ID of this directory.
-     */
+    /** Gets the unique ID of this directory. */
     public int getId() {
       return id;
     }
 
-    /**
-     * Returns true if this is a virtual root directory.
-     */
+    /** Returns true if this is a virtual root directory. */
     public boolean isRoot() {
       return parentId == 0xFFFFFFFF;
     }
 
-    /**
-     * Returns unique ID of a parent directory of 0xFFFFFFFF if this is a root directory.
-     */
+    /** Returns unique ID of a parent directory of 0xFFFFFFFF if this is a root directory. */
     public int getParentId() {
       return parentId;
     }
 
-    /**
-     * Gets the name of this directory (not including parent directory name).
-     */
+    /** Gets the name of this directory (not including parent directory name). */
     public String getNodeName() {
       return nodeName;
     }
 
-    /**
-     * Gets the full path of this directory (parent.name/nodeName).
-     */
+    /** Gets the full path of this directory (parent.name/nodeName). */
     public synchronized String getName() {
       if (!isRoot() && (name == null)) {
         String parentName = getDirectory(parentId).getName();
@@ -444,13 +379,11 @@ final class ResourcesDatabase {
           name = parentName + "/" + nodeName;
         }
       }
-      
+
       return name;
     }
 
-    /**
-     * Gets the list of child directory IDs.
-     */
+    /** Gets the list of child directory IDs. */
     public int[] getChildrenIds() {
       return childrenIds;
     }
@@ -459,7 +392,6 @@ final class ResourcesDatabase {
      * Looks up a child directory by name.
      *
      * @param childNodeName name of the child directory (not including parent name)
-     *
      * @return instance of {@link Directory} if found or null otherwise.
      */
     public Directory getChild(String childNodeName) {
@@ -469,7 +401,7 @@ final class ResourcesDatabase {
           return childDirectory;
         }
       }
-    
+
       return null;
     }
 
@@ -485,8 +417,8 @@ final class ResourcesDatabase {
       }
 
       ByteArrayOutputStream uncompressedFiles = new ByteArrayOutputStream();
-      try (InflaterInputStream decompressionStream = new InflaterInputStream(
-              new ByteArrayInputStream(buffer, filesPosition, filesSize))) {
+      try (InflaterInputStream decompressionStream =
+          new InflaterInputStream(new ByteArrayInputStream(buffer, filesPosition, filesSize))) {
         byte[] decompressionBuffer = new byte[256];
         int bytesRead;
 
@@ -548,18 +480,16 @@ final class ResourcesDatabase {
       nodeOffsets.put(node, size);
       size += node.size();
     }
-    
+
     buffer = new byte[size];
-    
+
     // Serialize all nodes.
     for (Builder.DirectoryBuilder node : builder.nodes) {
       node.serialize(buffer, nodeOffsets);
     }
   }
 
-  /**
-   * Gets the root directory.
-   */
+  /** Gets the root directory. */
   public Directory getRoot() {
     return getDirectory(ROOT);
   }
@@ -575,14 +505,14 @@ final class ResourcesDatabase {
 
   /**
    * Searches for a directory by path (e.g. "/my/his/her").
-   * 
+   *
    * <p>Trailing slashes are ignored.
    *
    * @return instance of {@Directory} or null if not found.
    */
   public Directory getDirectory(String path) {
     Directory directory = getRoot();
-    
+
     if ((path != null) && !path.isEmpty()) {
       for (String component : path.split("/")) {
         directory = directory.getChild(component);
@@ -591,7 +521,7 @@ final class ResourcesDatabase {
         }
       }
     }
-    
+
     return directory;
   }
 
@@ -606,7 +536,7 @@ final class ResourcesDatabase {
       public Iterator<Directory> iterator() {
         return new Iterator<Directory>() {
           private Directory next = getRoot();
-          
+
           @Override
           public boolean hasNext() {
             return next != null;
@@ -619,30 +549,30 @@ final class ResourcesDatabase {
             }
 
             Directory rc = next;
-            
-            if (next.childrenIds.length > 0) {  // First child.
+
+            if (next.childrenIds.length > 0) { // First child.
               next = getDirectory(next.childrenIds[0]);
-            } else {  // Next sibling (if any).
+            } else { // Next sibling (if any).
               if (next.isRoot()) {
                 next = null;
               }
-              
+
               while (next != null) {
                 Directory parent = getDirectory(next.getParentId());
                 int i = 0;
                 while (parent.childrenIds[i] != next.id) {
                   ++i;
                 }
-                
+
                 if (i < parent.childrenIds.length - 1) {
                   next = getDirectory(parent.childrenIds[i + 1]);
                   break;
                 }
-                
+
                 next = (parent.isRoot() ? null : parent);
               }
             }
-            
+
             return rc;
           }
 
@@ -666,7 +596,7 @@ final class ResourcesDatabase {
     }
 
     Directory directory;
-    
+
     int sep = filePath.lastIndexOf('/');
     if (sep == -1) {
       directory = getRoot();
@@ -676,27 +606,23 @@ final class ResourcesDatabase {
         return false;
       }
     }
-    
+
     String fileName = filePath.substring(sep + 1);
     for (String currentFileName : directory.getFileNames()) {
       if (currentFileName.equals(fileName)) {
         return true;
       }
     }
-    
+
     return false;
   }
 
-  /**
-   * Size of the serialized BLOB for debugging purposes.
-   */
+  /** Size of the serialized BLOB for debugging purposes. */
   int size() {
     return buffer.length;
   }
 
-  /**
-   * Prints content of the index for debugging purposes.
-   */
+  /** Prints content of the index for debugging purposes. */
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
@@ -704,18 +630,18 @@ final class ResourcesDatabase {
       if (stringBuilder.length() > 0) {
         stringBuilder.append('\n');
       }
-      
+
       if (directory.isRoot()) {
         stringBuilder.append("<ROOT>:");
       } else {
         stringBuilder.append(String.format("%s:", directory.getName()));
       }
-      
+
       for (String fileName : directory.getFileNames()) {
         stringBuilder.append(String.format("\n  %s", fileName));
       }
     }
-    
+
     return stringBuilder.toString();
   }
 
@@ -758,18 +684,16 @@ final class ResourcesDatabase {
     return bufferWrap.getInt();
   }
 
-  /**
-   * Reads NULL terminated string from the buffer.
-   */
+  /** Reads NULL terminated string from the buffer. */
   private static String getString(ByteBuffer bufferWrap) {
     int nameStart = bufferWrap.position();
     while (bufferWrap.get() != 0) {
       // Do nothing.
     }
-    
+
     try {
-      return new String(bufferWrap.array(), nameStart, bufferWrap.position() - nameStart - 1,
-          UTF_8.name());
+      return new String(
+          bufferWrap.array(), nameStart, bufferWrap.position() - nameStart - 1, UTF_8.name());
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

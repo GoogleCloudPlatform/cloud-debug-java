@@ -16,8 +16,6 @@
 
 // Ensure that Python.h is included before any other header in Python debuglet.
 #include "common.h"
-// TODO(b/123243277): remove this line
-// MOE:insert #include "common.h"
 
 #include "leaky_bucket.h"
 

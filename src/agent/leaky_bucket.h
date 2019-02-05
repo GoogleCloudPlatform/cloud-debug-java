@@ -18,15 +18,9 @@
 #define DEVTOOLS_CDBG_COMMON_LEAKY_BUCKET_H_
 
 #include <atomic>
-// TODO(b/123243277): remove this line
-// MOE:insert #include <atomic>
 #include <mutex>  // NOLINT
 
-// TODO(b/123243277): remove the surrounding MOE block
-// MOE:begin_strip
-
 #include "common.h"
-// MOE:end_strip_and_replace #include "common.h"
 
 namespace devtools {
 namespace cdbg {
@@ -69,29 +63,14 @@ class LeakyBucket {
   // indicates the current time in nanoseconds.
   int64 RefillBucket(int64 available_tokens, int64 current_time_ns);
 
-  // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
   // Atomically increment "tokens_".
   inline int64 AtomicIncrementTokens(int64 increment) {
-    // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
     return tokens_ += increment;
-    // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
   }
 
   // Atomically load the value of "tokens_".
   inline int64 AtomicLoadTokens() const {
-    // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
     return tokens_;
-    // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
   }
 
  private:
@@ -105,12 +84,7 @@ class LeakyBucket {
   //
   // Tokens can be momentarily negative, either via TakeTokens or
   // during a normal RequestTokens that was not satisfied.
-  // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
-// MOE:end_strip
   std::atomic<int64> tokens_;
-  // TODO(b/123243277): remove this surrounding MOE block
-// MOE:begin_strip
 
   // Capacity of the bucket.
   const int64 capacity_;

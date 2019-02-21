@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import java.lang.reflect.Constructor;
@@ -29,9 +26,7 @@ final class GcpEnvironment {
    */
   public static final String DEBUGGEE_DESCRIPTION_SUFFIX_LABEL = "description";
 
-  /**
-   * Cached instance of authentication class. Visible for testing.
-   */
+  /** Cached instance of authentication class. Visible for testing. */
   static MetadataQuery metadataQuery = null;
 
   /**
@@ -44,16 +39,12 @@ final class GcpEnvironment {
    */
   private static native String getAgentFlag(String name);
 
-  /**
-   * Wrapper interface for getEnv to facilitate testing.
-   */
+  /** Wrapper interface for getEnv to facilitate testing. */
   public static interface EnvironmentStore {
     public String get(String name);
   }
 
-  /**
-   * Default system environmentStore implementation
-   */
+  /** Default system environmentStore implementation */
   private static class SystemEnvironmentStore implements EnvironmentStore {
     @Override
     public String get(String name) {
@@ -61,14 +52,10 @@ final class GcpEnvironment {
     }
   }
 
-  /**
-   * The environment variable store. Public for testing.
-   */
+  /** The environment variable store. Public for testing. */
   public static EnvironmentStore environmentStore = new SystemEnvironmentStore();
 
-  /**
-   * Gets the URL of the Debuglet Controller API.
-   */
+  /** Gets the URL of the Debuglet Controller API. */
   static URL getControllerBaseUrl() {
     String url = System.getProperty(
         "com.google.cdbg.controller",
@@ -80,9 +67,7 @@ final class GcpEnvironment {
     }
   }
 
-  /**
-   * Lazily creates and returns the class to get access token and project information.
-   */
+  /** Lazily creates and returns the class to get access token and project information. */
   static synchronized MetadataQuery getMetadataQuery() {
     // Lazy initialization.
     if (metadataQuery == null) {
@@ -95,10 +80,12 @@ final class GcpEnvironment {
           // Use reflection to create a new instance of "ServiceAccountAuth" class. This way this
           // class has no explicit dependency on "com.google.api.client" package that can be
           // removed if we don't need it.
-          Class<? extends MetadataQuery> serviceAccountAuthClass = Class.forName(
-              GcpEnvironment.class.getPackage().getName() + ".ServiceAccountAuth",
-              true,
-              GcpEnvironment.class.getClassLoader()).asSubclass(MetadataQuery.class);
+          Class<? extends MetadataQuery> serviceAccountAuthClass =
+              Class.forName(
+                      GcpEnvironment.class.getPackage().getName() + ".ServiceAccountAuth",
+                      true,
+                      GcpEnvironment.class.getClassLoader())
+                  .asSubclass(MetadataQuery.class);
           Constructor<? extends MetadataQuery> constructor =
               serviceAccountAuthClass.getConstructor(String.class);
           // Note that we are passing projectId instead of projectNumber here, as the Cloud Debugger
@@ -124,9 +111,9 @@ final class GcpEnvironment {
 
   /**
    * Gets map of debuggee labels.
-   * 
-   * <p>TODO(vlif): add additional fallback to Kubernetes to automatically read things like
-   * pod, version and Docker image ID (for minor version).
+   *
+   * <p>TODO(vlif): add additional fallback to Kubernetes to automatically read things like pod,
+   * version and Docker image ID (for minor version).
    */
   static Map<String, String> getDebuggeeLabels() {
     Map<String, String> labels = new HashMap<>();
@@ -147,11 +134,11 @@ final class GcpEnvironment {
         module = null;
       }
     }
-    
+
     if ((module != null) && !module.isEmpty()) {
       labels.put(Labels.Debuggee.MODULE, module);
     }
-    
+
     // Read major version from environment variable allowing overrides through system property.
     String majorVersion = System.getProperty("com.google.cdbg.version");
     if (majorVersion == null) {
@@ -160,7 +147,7 @@ final class GcpEnvironment {
         majorVersion = environmentStore.get("GAE_MODULE_VERSION");
       }
     }
-    
+
     if ((majorVersion != null) && !majorVersion.isEmpty()) {
       labels.put(Labels.Debuggee.VERSION, majorVersion);
     }
@@ -174,26 +161,24 @@ final class GcpEnvironment {
     if ((minorVersion != null) && !minorVersion.isEmpty()) {
       labels.put(Labels.Debuggee.MINOR_VERSION, minorVersion);
     }
-    
+
     return labels;
   }
-  
-  /**
-   * Gets configuration flag from a system property falling back to agent flags.
-   */
+
+  /** Gets configuration flag from a system property falling back to agent flags. */
   private static String getFlag(String systemPropertySuffix, String agentFlagName) {
     String value;
-    
+
     value = System.getProperty("com.google.cdbg." + systemPropertySuffix);
     if (value != null) {
       return value;
     }
-    
+
     value = getAgentFlag(agentFlagName);
     if (value != null) {
       return value;
     }
-    
-    return "";  // Return empty string so that we don't need to check for null references. 
+
+    return ""; // Return empty string so that we don't need to check for null references.
   }
 }

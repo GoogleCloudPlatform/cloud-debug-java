@@ -72,7 +72,7 @@ final class GcpEnvironment {
   static URL getControllerBaseUrl() {
     String url = System.getProperty(
         "com.google.cdbg.controller",
-        "https://clouddebugger.googleapis.com/v2/controller/");  // Default
+        "https://clouddebugger.googleapis.com/v2/controller/");  // Default.
     try {
       return new URL(url);
     } catch (MalformedURLException e) {

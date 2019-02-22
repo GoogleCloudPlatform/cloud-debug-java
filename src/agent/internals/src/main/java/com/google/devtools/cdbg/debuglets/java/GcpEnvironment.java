@@ -130,6 +130,9 @@ final class GcpEnvironment {
       if (module == null || module.isEmpty()) {
         module = environmentStore.get("GAE_MODULE_NAME");
       }
+      if (module == null || module.isEmpty()) {
+        module = environmentStore.get("K_SERVICE");
+      }
       if ((module != null) && module.equals("default")) {
         module = null;
       }
@@ -145,6 +148,9 @@ final class GcpEnvironment {
       majorVersion = environmentStore.get("GAE_VERSION");
       if (majorVersion == null || majorVersion.isEmpty()) {
         majorVersion = environmentStore.get("GAE_MODULE_VERSION");
+      }
+      if (majorVersion == null || majorVersion.isEmpty()) {
+        majorVersion = environmentStore.get("K_REVISION");
       }
     }
 

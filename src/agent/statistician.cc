@@ -18,13 +18,13 @@
 
 #include <math.h>
 
-namespace devtools {
-namespace cdbg {
-
 ABSL_FLAG(int32, cdbg_log_stats_time_micros,
           15 * 60 * 1000 * 1000,  // 15 minutes
           "How often to log debugger performance stats. "
           "Set to zero to never logs stats.");
+
+namespace devtools {
+namespace cdbg {
 
 Statistician* statCaptureTime = nullptr;
 Statistician* statDynamicLogTime = nullptr;
@@ -139,7 +139,6 @@ double Statistician::stdev() const {
   const double mean_value = sum_ / count_;
   return sqrt((sum2_ / count_) - (mean_value * mean_value));
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

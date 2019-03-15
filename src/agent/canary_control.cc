@@ -19,13 +19,6 @@
 #include "messages.h"
 #include "model_util.h"
 
-namespace devtools {
-namespace cdbg {
-
-// Number of attempts to register or approve a canary breakpoint before
-// failing the operation.
-static constexpr int kMaxAttempts = 3;
-
 // The "ApproveHealtyBreakpoints" method is called from worker thread every
 // cycle of "ListActiveBreakpoints", which is once every 40 seconds. The
 // constant of 35 seconds is deliberately a bit shorter than that so that the
@@ -34,6 +27,13 @@ ABSL_FLAG(
     int32, min_canary_duration_ms, 35000,
     "Time interval after which an enabled canary breakpoint is considered as "
     "safe for a global rollout (from this debuglet's perspective)");
+
+namespace devtools {
+namespace cdbg {
+
+// Number of attempts to register or approve a canary breakpoint before
+// failing the operation.
+static constexpr int kMaxAttempts = 3;
 
 CanaryControl::CanaryControl(
     CallbacksMonitor* callbacks_monitor,
@@ -150,4 +150,3 @@ void CanaryControl::ApproveHealtyBreakpoints() {
 
 }  // namespace cdbg
 }  // namespace devtools
-

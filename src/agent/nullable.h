@@ -28,8 +28,7 @@ class Nullable {
   Nullable() : has_value_(false) {}
 
   // Copy constructor.
-  Nullable(const Nullable<T>& other)  // NOLINT(runtime/explicit)
-      : has_value_(other.has_value()) {
+  Nullable(const Nullable<T>& other) : has_value_(other.has_value()) {
     if (other.has_value()) {
       value_ = other.value_;
     }
@@ -39,10 +38,11 @@ class Nullable {
   Nullable(Nullable<T>&& other) = default;
 
   // Implicit initialization to no value.
-  Nullable(std::nullptr_t) : has_value_(false) {}  // NOLINT(runtime/explicit)
+  Nullable(std::nullptr_t)  // NOLINT
+      : has_value_(false) {}
 
   // Implicit initialization from the value of type T.
-  Nullable(T value)  // NOLINT(runtime/explicit)
+  Nullable(T value)  // NOLINT
       : has_value_(true), value_(std::move(value)) {}
 
   // Assignment of the value of type Nullable<T>.

@@ -24,6 +24,7 @@
 #include "jvm_internals.h"
 #include "jvmti_buffer.h"
 #include "statistician.h"
+
 #include "jvmti_agent.h"
 #include "glob_data_visibility_policy.h"
 #include "yaml_data_visibility_config_reader.h"
@@ -70,6 +71,7 @@ ABSL_FLAG(string, service_account_email, "",
 ABSL_FLAG(string, service_account_json_file, "",
           "Path to JSON file containing private key of the service account");
 #endif
+
 static devtools::cdbg::JvmtiAgent* g_instance = nullptr;
 
 static devtools::cdbg::JvmInternals* g_internals = nullptr;

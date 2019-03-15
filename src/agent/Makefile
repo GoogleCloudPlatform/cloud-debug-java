@@ -33,9 +33,10 @@ CFLAGS += \
 THIRD_PARTY_LIB_PATH ?= /usr/local/lib
 THIRD_PARTY_INCLUDE_PATH ?= /usr/local/include
 SYSTEM_LIB_PATH ?= /usr/lib/x86_64-linux-gnu
-ASM_JAR_PATH ?= /usr/lib/asm-7.0/lib/asm-7.0.jar
-ASM_COMMONS_JAR_PATH ?= /usr/lib/asm-7.0/lib/asm-commons-7.0.jar
-ASM_UTIL_JAR_PATH ?= /usr/lib/asm-7.0/lib/asm-util-7.0.jar
+ASM_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-7.1.jar
+ASM_COMMONS_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-commons-7.1.jar
+ASM_DEPRECATED_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-deprecated-7.1.jar
+ASM_UTIL_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-util-7.1.jar
 GOOGLE_API_JAVA_CLIENT_PATH ?= /usr/lib/google-api-java-client
 JARJAR_PATH ?= ../../build/jarjar.jar
 JAVA_BUILD ?= maven
@@ -245,9 +246,10 @@ ifeq ($(JAVA_BUILD),maven)
 	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR_FULL)
 else
 	mkdir -p internals/target
-	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH):$(SNAKE_YAML_JAR_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java
+	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_DEPRECATED_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH):$(SNAKE_YAML_JAR_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java
 	cd internals/target ; jar xf $(ASM_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_COMMONS_JAR_PATH) ; rm -rf META-INF
+	cd internals/target ; jar xf $(ASM_DEPRECATED_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_UTIL_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GSON_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(SNAKE_YAML_JAR_PATH) ; rm -rf META-INF

@@ -215,8 +215,7 @@ constexpr char DynamicLogOutOfCallQuota[] =
 
 constexpr char CanaryBreakpointUnhealthy[] =
     "The snapshot canary has failed and the snapshot cancelled. Please try "
-    "again at a later time."
-    ;
+    "again at a later time.";
 
 #define INTERNAL_ERROR_MESSAGE (devtools::cdbg::FormatMessageModel { \
       "Internal error at $0:$1", \

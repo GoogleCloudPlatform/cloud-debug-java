@@ -452,6 +452,7 @@ public class JniProxyCodeGen {
     String clsName = cls.getName();
     data.put(
         "normalizedClassName", clsName.substring(clsName.lastIndexOf(".") + 1).replace('$', '_'));
+
     data.put("includeDirectory", "");
     template.process(data, writer);
 

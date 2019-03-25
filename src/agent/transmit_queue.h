@@ -35,7 +35,6 @@ constexpr int kMaxRetryAttempts = 10;
 
 // Simple list of pending UpdateActiveBreakpoint messages.
 //
-//
 // Since communication channel is not reliable, "TransmitQueue" supports
 // retrying. Each message maintains retry count and if exceeded, the message is
 // considered poisonous and discarded.

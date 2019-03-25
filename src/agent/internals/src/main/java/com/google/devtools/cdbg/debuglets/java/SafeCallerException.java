@@ -80,7 +80,6 @@ public final class SafeCallerException extends Error {
 
   /** Determines the binary name of the caller omitting internally generated safe caller methods. */
   private static String getCallerName() {
-
     return "<unknown>";
   }
 }

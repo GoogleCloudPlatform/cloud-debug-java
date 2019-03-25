@@ -140,6 +140,14 @@ std::shared_ptr<MethodLocals::Entry> MethodLocals::LoadEntry(
   for (int i = 0; i < num_entries; ++i) {
     const jvmtiLocalVariableEntry& local_variable_entry = table.get()[i];
 
+    // Get rid of memory leaks because these buffer were malloc by JVM in function JvmtiEnv::GetLocalVariableTable (https://github.com/openjdk/jdk/blob/master/src/hotspot/share/prims/jvmtiEnv.cpp)
+    JvmtiBuffer<char> class_name;
+    JvmtiBuffer<char> class_signature;
+    JvmtiBuffer<char> class_generic;
+    *class_name.ref() = local_variable_entry.name;
+    *class_signature.ref() = local_variable_entry.signature;
+    *class_generic.ref() = local_variable_entry.generic_signature;
+
     if ((class_visibility != nullptr) &&
         !class_visibility->IsVariableVisible(
             method_name,

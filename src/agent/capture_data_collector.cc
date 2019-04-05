@@ -35,6 +35,21 @@ ABSL_FLAG(
 namespace devtools {
 namespace cdbg {
 
+// Local utility functions
+namespace {
+
+void MergeLabels(std::map<std::string, std::string>* existing_labels,
+                 std::map<std::string, std::string> agent_labels) {
+  // This will merge in the agent labels with the pre existing client labels
+  // that may already be present. In the event of a duplicate label the insert
+  // will favour the pre existing labels an not update the entry.  This
+  // generally should not be an issue as the pre existing client label names are
+  // chosen with care and there should be no conflicts.
+  existing_labels->insert(agent_labels.begin(), agent_labels.end());
+}
+
+}  // namespace
+
 CaptureDataCollector::CaptureDataCollector(JvmEvaluators* evaluators)
     : evaluators_(evaluators) {
   // Reserve "var_table_index" 0 for memory objects that we didn't capture
@@ -323,8 +338,9 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
     breakpoint->variable_table.push_back(std::move(object_variable));
   }
 
-  // Format the breakpoint labels.
-  breakpoint->labels = breakpoint_labels_provider_->Format();
+  // Format the breakpoint labels and merge them with the existing client
+  // labels.
+  MergeLabels(&breakpoint->labels, breakpoint_labels_provider_->Format());
 
   // Format the end user identity.
   if (absl::GetFlag(FLAGS_cdbg_capture_user_id)) {

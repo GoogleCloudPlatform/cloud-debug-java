@@ -40,13 +40,12 @@ class CallbacksMonitor {
 
   typedef std::list<OngoingCall>::iterator Id;
 
-  CallbacksMonitor(
+  explicit CallbacksMonitor(
       int max_call_duration_ms,
       std::function<int64()> fn_gettime = MonotonicClockMillis)
       : max_call_duration_ms_(max_call_duration_ms),
         fn_gettime_(fn_gettime),
-        last_unhealthy_time_ms_(-1) {
-  }
+        last_unhealthy_time_ms_(-1) {}
 
   ~CallbacksMonitor() {
     if (!ongoing_calls_.empty()) {

@@ -15,8 +15,7 @@ namespace {
 // reports that methods and fields have their data hidden.
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
-  BlacklistedClassImpl(const string& reason) :
-    reason_(reason) { }
+  explicit BlacklistedClassImpl(const string& reason) : reason_(reason) {}
 
   bool IsFieldVisible(const string& name, int32 field_modifiers) override {
     return true;

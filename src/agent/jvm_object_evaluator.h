@@ -53,8 +53,7 @@ class JvmObjectEvaluator : public ObjectEvaluator {
     bool pretty_print_stringable = true;
   };
 
-  JvmObjectEvaluator(
-      ClassMetadataReader* class_metadata_reader);
+  explicit JvmObjectEvaluator(ClassMetadataReader* class_metadata_reader);
 
   ~JvmObjectEvaluator() override;
 

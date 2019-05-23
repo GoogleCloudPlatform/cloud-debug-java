@@ -17,9 +17,10 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_H_
 
-#include <vector>
 #include <map>
 #include <memory>
+#include <vector>
+
 #include "nullable.h"
 #include "common.h"
 

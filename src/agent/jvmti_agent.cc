@@ -22,6 +22,11 @@
 #include "callbacks_monitor.h"
 #include "auto_reset_event.h"
 #include "bridge.h"
+#include "jni_proxy_breakpointlabelsprovider.h"
+#include "jni_proxy_classpathlookup.h"
+#include "jni_proxy_dynamicloghelper.h"
+#include "jni_proxy_hubclient.h"
+#include "jni_proxy_hubclient_listactivebreakpointsresult.h"
 #include "config_builder.h"
 #include "jni_breakpoint_labels_provider.h"
 #include "jni_semaphore.h"
@@ -33,11 +38,6 @@
 #include "jvmti_buffer.h"
 #include "method_locals.h"
 #include "stopwatch.h"
-#include "jni_proxy_breakpointlabelsprovider.h"
-#include "jni_proxy_classpathlookup.h"
-#include "jni_proxy_dynamicloghelper.h"
-#include "jni_proxy_hubclient.h"
-#include "jni_proxy_hubclient_listactivebreakpointsresult.h"
 #include "jni_proxy_useridprovider.h"
 
 ABSL_FLAG(string, cdbg_extra_class_path, "",

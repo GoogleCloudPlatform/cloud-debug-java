@@ -17,7 +17,9 @@
 #include "jvm_internals.h"
 
 #include <dlfcn.h>
+
 #include <fstream>  // NOLINT
+
 #include "jvariant.h"
 #include "model_util.h"
 #include "resolved_source_location.h"

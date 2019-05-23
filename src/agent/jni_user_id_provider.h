@@ -17,10 +17,9 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JNI_USER_ID_PROVIDER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JNI_USER_ID_PROVIDER_H_
 
-#include "user_id_provider.h"
-
 #include "common.h"
 #include "jni_utils.h"
+#include "user_id_provider.h"
 
 namespace devtools {
 namespace cdbg {

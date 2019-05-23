@@ -18,10 +18,11 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_PRIMITIVE_ARRAY_READER_H_
 
 #include <memory>
+
 #include "array_reader.h"
 #include "common.h"
-#include "jvariant.h"
 #include "jni_utils.h"
+#include "jvariant.h"
 #include "messages.h"
 #include "method_call_result.h"
 #include "model.h"

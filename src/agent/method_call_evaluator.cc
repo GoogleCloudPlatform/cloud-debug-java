@@ -17,13 +17,14 @@
 #include "method_call_evaluator.h"
 
 #include <sstream>
+
 #include "class_indexer.h"
 #include "class_metadata_reader.h"
 #include "jni_utils.h"
 #include "local_variable_reader.h"
-#include "model.h"
 #include "messages.h"
 #include "method_caller.h"
+#include "model.h"
 #include "readers_factory.h"
 #include "type_util.h"
 

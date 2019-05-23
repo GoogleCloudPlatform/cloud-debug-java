@@ -18,7 +18,9 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_STOPWATCH_H_
 
 #include <time.h>
+
 #include <functional>
+
 #include "common.h"
 
 namespace devtools {

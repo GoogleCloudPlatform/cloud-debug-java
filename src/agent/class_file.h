@@ -20,6 +20,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+
 #include "nullable.h"
 #include "byte_source.h"
 #include "class_indexer.h"

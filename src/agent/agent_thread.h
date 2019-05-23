@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_AGENT_THREAD_H_
 
 #include <functional>
+
 #include "common.h"
 
 namespace devtools {

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_RESOLVED_SOURCE_LOCATION_H_
 
 #include <string>
+
 #include "model.h"
 
 namespace devtools {

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MULTI_DATA_VISIBILITY_POLICY_H_
 
 #include <vector>
+
 #include "data_visibility_policy.h"
 
 namespace devtools {

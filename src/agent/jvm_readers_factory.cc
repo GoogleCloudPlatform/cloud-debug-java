@@ -17,6 +17,7 @@
 #include "jvm_readers_factory.h"
 
 #include <algorithm>
+
 #include "class_indexer.h"
 #include "class_metadata_reader.h"
 #include "class_path_lookup.h"

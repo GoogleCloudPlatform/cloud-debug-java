@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_INTERNALS_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVM_INTERNALS_H_
 
-#include "common.h"
 #include "class_path_lookup.h"
+#include "common.h"
 #include "jni_utils.h"
 #include "model.h"
 

@@ -16,11 +16,11 @@
 
 #include "log_data_collector.h"
 
+#include "jni_proxy_object.h"
 #include "expression_evaluator.h"
 #include "messages.h"
 #include "readers_factory.h"
 #include "value_formatter.h"
-#include "jni_proxy_object.h"
 
 namespace devtools {
 namespace cdbg {

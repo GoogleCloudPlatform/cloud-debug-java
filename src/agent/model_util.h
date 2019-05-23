@@ -19,9 +19,10 @@
 
 #include <memory>
 #include <numeric>
+
 #include "jni_utils.h"
-#include "model.h"
 #include "messages.h"
+#include "model.h"
 #include "type_util.h"
 
 namespace devtools {

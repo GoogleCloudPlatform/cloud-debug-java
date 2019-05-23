@@ -19,6 +19,7 @@
 
 #include <list>
 #include <map>
+
 #include "class_indexer.h"
 #include "common.h"
 #include "jobject_map.h"

@@ -16,10 +16,10 @@
 
 #include "array_expression_evaluator.h"
 
-#include "jni_utils.h"
 #include "array_reader.h"
-#include "model.h"
+#include "jni_utils.h"
 #include "messages.h"
+#include "model.h"
 #include "numeric_cast_evaluator.h"
 #include "readers_factory.h"
 #include "type_util.h"

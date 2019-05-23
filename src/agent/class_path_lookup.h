@@ -19,9 +19,10 @@
 
 #include <memory>
 #include <set>
+
 #include "common.h"
-#include "jvariant.h"
 #include "jni_utils.h"
+#include "jvariant.h"
 
 namespace devtools {
 namespace cdbg {

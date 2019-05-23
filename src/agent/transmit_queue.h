@@ -17,8 +17,9 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_TRANSMIT_QUEUE_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_TRANSMIT_QUEUE_H_
 
-#include <queue>
 #include <memory>
+#include <queue>
+
 #include "common.h"
 
 namespace devtools {

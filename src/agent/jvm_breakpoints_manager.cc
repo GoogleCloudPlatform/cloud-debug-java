@@ -17,6 +17,7 @@
 #include "jvm_breakpoints_manager.h"
 
 #include <algorithm>
+
 #include "callbacks_monitor.h"
 #include "breakpoint.h"
 #include "format_queue.h"

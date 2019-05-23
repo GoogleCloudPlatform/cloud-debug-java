@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JNI_SEMAPHORE_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JNI_SEMAPHORE_H_
 
-#include "semaphore.h"
 #include "jni_utils.h"
+#include "semaphore.h"
 
 namespace devtools {
 namespace cdbg {

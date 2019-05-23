@@ -17,6 +17,7 @@
 #include "jvm_class_metadata_reader.h"
 
 #include <algorithm>
+
 #include "jni_proxy_object.h"
 #include "jni_utils.h"
 #include "jvm_instance_field_reader.h"

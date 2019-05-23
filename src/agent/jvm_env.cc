@@ -15,6 +15,7 @@
  */
 
 #include <map>
+
 #include "jni_proxy_arithmeticexception.h"
 #include "jni_proxy_bigdecimal.h"
 #include "jni_proxy_biginteger.h"

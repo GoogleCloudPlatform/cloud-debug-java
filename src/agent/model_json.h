@@ -17,8 +17,9 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_JSON_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_JSON_H_
 
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include "common.h"
 #include "model.h"
 

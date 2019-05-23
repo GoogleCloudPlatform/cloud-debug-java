@@ -17,13 +17,15 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_COMMON_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_COMMON_H_
 
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
+
 #include <memory>
-#include "jni.h"  // NOLINT
-#include "jvmti.h"  // NOLINT
+
 #include "classfile_constants.h"  // NOLINT
 #include "glog/logging.h"
+#include "jni.h"    // NOLINT
+#include "jvmti.h"  // NOLINT
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName)  \
     TypeName(const TypeName&) = delete;  \

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVARIANT_H_
 
 #include <memory>
+
 #include "common.h"
 #include "jni_utils.h"
 

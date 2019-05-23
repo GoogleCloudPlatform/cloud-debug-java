@@ -17,6 +17,7 @@
 #include "capture_data_collector.h"
 
 #include <algorithm>
+
 #include "encoding_util.h"
 #include "eval_call_stack.h"
 #include "expression_evaluator.h"

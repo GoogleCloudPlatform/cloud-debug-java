@@ -19,6 +19,7 @@
 
 #include <map>
 #include <memory>
+
 #include "common.h"
 #include "instance_field_reader.h"
 #include "jni_utils.h"

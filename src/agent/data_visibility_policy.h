@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_DATA_VISIBILITY_POLICY_H_
 
 #include <memory>
+
 #include "common.h"
 
 namespace devtools {

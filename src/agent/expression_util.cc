@@ -17,14 +17,15 @@
 #include "expression_util.h"
 
 #include <sstream>
-#include "java_expression.h"
+
+#include "JavaExpressionCompiler.hpp"
+#include "JavaExpressionLexer.hpp"
+#include "JavaExpressionParser.hpp"
 #include "expression_evaluator.h"
+#include "java_expression.h"
 #include "messages.h"
 #include "model_util.h"
 #include "readers_factory.h"
-#include "JavaExpressionLexer.hpp"
-#include "JavaExpressionParser.hpp"
-#include "JavaExpressionCompiler.hpp"
 
 namespace devtools {
 namespace cdbg {

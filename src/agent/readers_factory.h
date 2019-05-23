@@ -19,8 +19,9 @@
 
 #include <map>
 #include <memory>
-#include "common.h"
+
 #include "class_metadata_reader.h"
+#include "common.h"
 #include "method_caller.h"
 
 namespace devtools {

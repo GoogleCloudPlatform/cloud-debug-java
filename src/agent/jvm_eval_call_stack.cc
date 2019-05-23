@@ -17,6 +17,7 @@
 #include "jvm_eval_call_stack.h"
 
 #include <algorithm>
+
 #include "common.h"
 #include "jni_utils.h"
 #include "jvmti_buffer.h"

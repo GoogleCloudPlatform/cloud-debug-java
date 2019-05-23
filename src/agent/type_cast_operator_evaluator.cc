@@ -16,13 +16,13 @@
 
 #include "type_cast_operator_evaluator.h"
 
-#include "common.h"
 #include "class_indexer.h"
+#include "common.h"
 #include "jvmti_buffer.h"
-#include "readers_factory.h"
 #include "messages.h"
 #include "model.h"
 #include "numeric_cast_evaluator.h"
+#include "readers_factory.h"
 #include "type_util.h"
 
 namespace devtools {

@@ -18,8 +18,9 @@
 
 #include <cmath>
 #include <limits>
-#include "model.h"
+
 #include "messages.h"
+#include "model.h"
 #include "numeric_cast_evaluator.h"
 
 namespace devtools {

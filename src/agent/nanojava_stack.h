@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_STACK_H_
 
 #include <algorithm>
+
 #include "common.h"
 #include "jvariant.h"
 #include "nanojava_internal_error_builder.h"

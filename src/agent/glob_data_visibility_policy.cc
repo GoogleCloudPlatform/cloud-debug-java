@@ -1,7 +1,9 @@
 #include "glob_data_visibility_policy.h"
 
 #include <fnmatch.h>
+
 #include <algorithm>
+
 #include "type_util.h"
 
 namespace devtools {

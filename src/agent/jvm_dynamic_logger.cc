@@ -16,10 +16,10 @@
 
 #include "jvm_dynamic_logger.h"
 
+#include "jni_proxy_dynamicloghelper.h"
+#include "jni_proxy_jul_logger.h"
 #include "resolved_source_location.h"
 #include "type_util.h"
-#include "jni_proxy_jul_logger.h"
-#include "jni_proxy_dynamicloghelper.h"
 
 namespace devtools {
 namespace cdbg {

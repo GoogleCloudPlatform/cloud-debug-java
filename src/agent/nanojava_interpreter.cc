@@ -18,11 +18,12 @@
 
 #include <cmath>
 #include <limits>
-#include "messages.h"
+
 #include "jni_proxy_arithmeticexception.h"
 #include "jni_proxy_classcastexception.h"
 #include "jni_proxy_negativearraysizeexception.h"
 #include "jni_proxy_nullpointerexception.h"
+#include "messages.h"
 
 namespace devtools {
 namespace cdbg {

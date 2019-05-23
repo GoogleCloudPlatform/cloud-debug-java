@@ -16,8 +16,10 @@
 
 #include <dirent.h>
 #include <sys/types.h>
+
 #include <memory>
 #include <sstream>
+
 #include "callbacks_monitor.h"
 #include "common.h"
 #include "jvm_eval_call_stack.h"
@@ -25,10 +27,10 @@
 #include "jvmti_buffer.h"
 #include "statistician.h"
 
-#include "jvmti_agent.h"
-#include "glob_data_visibility_policy.h"
-#include "yaml_data_visibility_config_reader.h"
 #include "data_visibility_scrubbed_eval_call_stack.h"
+#include "glob_data_visibility_policy.h"
+#include "jvmti_agent.h"
+#include "yaml_data_visibility_config_reader.h"
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
@@ -37,12 +39,12 @@
 #endif
 
 #ifdef GCP_HUB_CLIENT
-#include "jni_bridge.h"
-#include "model_json.h"
 #include "jni_proxy_api_client_datetime.h"
 #include "jni_proxy_gcpbreakpointlabelsprovider.h"
 #include "jni_proxy_gcphubclient.h"
 #include "jni_proxy_yamlconfigparser.h"
+#include "jni_bridge.h"
+#include "model_json.h"
 #endif
 
 #ifdef GCP_HUB_CLIENT

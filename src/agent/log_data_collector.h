@@ -18,8 +18,9 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_LOG_DATA_COLLECTOR_H_
 
 #include <functional>
-#include "common.h"
+
 #include "class_indexer.h"
+#include "common.h"
 #include "expression_util.h"
 #include "method_caller.h"
 #include "model.h"

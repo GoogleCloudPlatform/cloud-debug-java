@@ -18,9 +18,9 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_TYPE_CAST_OPERATOR_EVALUATOR_H_
 
 #include "common.h"
-#include "jni_utils.h"
 #include "expression_evaluator.h"
 #include "java_expression.h"
+#include "jni_utils.h"
 
 namespace devtools {
 namespace cdbg {

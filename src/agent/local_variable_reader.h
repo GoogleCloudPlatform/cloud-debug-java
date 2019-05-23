@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_LOCAL_VARIABLE_READER_H_
 
 #include <memory>
+
 #include "common.h"
 #include "model.h"
 #include "type_util.h"

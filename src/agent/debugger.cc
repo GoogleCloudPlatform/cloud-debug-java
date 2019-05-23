@@ -17,6 +17,7 @@
 #include "debugger.h"
 
 #include <memory>
+
 #include "jni_utils.h"
 #include "jvm_breakpoint.h"
 #include "jvm_breakpoints_manager.h"

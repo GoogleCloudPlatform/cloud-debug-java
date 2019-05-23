@@ -18,8 +18,9 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_WORKER_H_
 
 #include <atomic>
-#include <memory>
 #include <map>
+#include <memory>
+
 #include "auto_reset_event.h"
 #include "canary_control.h"
 #include "common.h"

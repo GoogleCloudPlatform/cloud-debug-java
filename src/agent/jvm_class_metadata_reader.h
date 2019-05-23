@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+
 #include "class_metadata_reader.h"
 #include "common.h"
 #include "data_visibility_policy.h"

@@ -18,6 +18,7 @@
 
 #include <numeric>
 #include <queue>
+
 #include "jni_utils.h"
 #include "model_util.h"
 

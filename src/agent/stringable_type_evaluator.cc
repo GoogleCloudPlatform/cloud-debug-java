@@ -15,6 +15,7 @@
  */
 
 #include "stringable_type_evaluator.h"
+
 #include "jni_proxy_bigdecimal.h"
 #include "jni_proxy_biginteger.h"
 

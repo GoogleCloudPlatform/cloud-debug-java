@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_VALUE_FORMATTER_H_
 
 #include <memory>
+
 #include "common.h"
 #include "type_util.h"
 

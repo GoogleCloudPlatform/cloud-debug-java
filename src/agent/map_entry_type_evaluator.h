@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MAP_ENTRY_TYPE_EVALUATOR_H_
 
 #include <memory>
+
 #include "common.h"
 #include "type_evaluator.h"
 

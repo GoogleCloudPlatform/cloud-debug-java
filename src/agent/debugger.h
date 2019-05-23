@@ -19,6 +19,7 @@
 
 #include <atomic>
 #include <memory>
+
 #include "breakpoint_labels_provider.h"
 #include "canary_control.h"
 #include "class_files_cache.h"
@@ -26,8 +27,8 @@
 #include "common.h"
 #include "dynamic_logger.h"
 #include "eval_call_stack.h"
-#include "jvm_evaluators.h"
 #include "jvm_class_indexer.h"
+#include "jvm_evaluators.h"
 #include "jvm_object_evaluator.h"
 #include "method_locals.h"
 #include "model.h"

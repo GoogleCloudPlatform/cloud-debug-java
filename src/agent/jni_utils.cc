@@ -17,6 +17,7 @@
 #include "jni_utils.h"
 
 #include <cstdarg>
+
 #include "jni_proxy_object.h"
 #include "jni_proxy_printwriter.h"
 #include "jni_proxy_stringwriter.h"

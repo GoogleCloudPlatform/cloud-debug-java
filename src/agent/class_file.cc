@@ -15,6 +15,7 @@
  */
 
 #include "class_file.h"
+
 #include "jni_proxy_classpathlookup.h"
 #include "jvmti_buffer.h"
 

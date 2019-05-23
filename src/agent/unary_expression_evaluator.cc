@@ -16,8 +16,8 @@
 
 #include "unary_expression_evaluator.h"
 
-#include "model.h"
 #include "messages.h"
+#include "model.h"
 #include "numeric_cast_evaluator.h"
 
 namespace devtools {

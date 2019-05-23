@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <queue>
+
 #include "capture_data_collector.h"
 #include "common.h"
 #include "model.h"

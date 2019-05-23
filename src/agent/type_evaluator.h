@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_TYPE_EVALUATOR_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_TYPE_EVALUATOR_H_
 
-#include "common.h"
 #include "class_metadata_reader.h"
+#include "common.h"
 #include "method_caller.h"
 
 namespace devtools {

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_TYPE_UTIL_H_
 
 #include <memory>
+
 #include "common.h"
 #include "jni_utils.h"
 #include "jvariant.h"

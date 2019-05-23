@@ -19,11 +19,12 @@
 
 #include <memory>
 #include <vector>
+
 #include "common.h"
 #include "config.h"
+#include "data_visibility_policy.h"
 #include "debugger.h"
 #include "eval_call_stack.h"
-#include "data_visibility_policy.h"
 #include "jvm_internals.h"
 #include "scheduler.h"
 #include "user_id_provider.h"

@@ -15,6 +15,7 @@
  */
 
 #include "data_visibility_scrubbed_eval_call_stack.h"
+
 #include "jvmti_buffer.h"
 
 namespace devtools {

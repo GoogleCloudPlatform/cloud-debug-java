@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <memory>
+
 #include "nullable.h"
 #include "bridge.h"
 #include "common.h"

@@ -65,12 +65,12 @@ class LeakyBucket {
 
   // Atomically increment "tokens_".
   inline int64 AtomicIncrementTokens(int64 increment) {
-    return tokens_ += increment;
+    return tokens_.fetch_add(increment, std::memory_order_relaxed) + increment;
   }
 
   // Atomically load the value of "tokens_".
   inline int64 AtomicLoadTokens() const {
-    return tokens_;
+    return tokens_.load(std::memory_order_relaxed);
   }
 
  private:

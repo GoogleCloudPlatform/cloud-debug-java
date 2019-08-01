@@ -394,8 +394,6 @@ bool JvmReadersFactory::FindStaticMethods(
     FormatMessageModel* error_message) {
   JniLocalRef cls = FindClassByName(class_name, error_message);
   if (cls == nullptr) {
-    *error_message = { ClassNotLoaded, { class_name,
-                                        kJavaSignatureNotAvailable } };
     return false;
   }
 

@@ -200,7 +200,6 @@ class JvmBreakpoint : public Breakpoint,
   // Callback invoked "breakpoint_expiration_sec" seconds after the breakpoint
   // has been created. This callback signals that the breakpoint has expired.
   void OnBreakpointExpired();
-
  private:
   // Schedules callbacks at a future time. Used to expire breakpoints.
   // Not owned by this class.
@@ -298,9 +297,9 @@ class JvmBreakpoint : public Breakpoint,
   // method containing this statement may or may not be loaded by JVM.
   std::shared_ptr<ResolvedSourceLocation> resolved_location_;
 
-  // Conditions can also put a breakpoints into pending state if the class they
-  // are called on is not loaded.
-  string condition_class_dependency_signature_;
+  // Conditions or expressions can also put a breakpoints into pending state if
+  // the class they are called on is not loaded.
+  string class_dependency_signature_;
 
   // Immutable state of active breakpoint. The code should assume that this
   // variable can change any time (point to a new instance of immutable

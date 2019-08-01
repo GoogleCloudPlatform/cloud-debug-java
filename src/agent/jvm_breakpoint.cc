@@ -22,6 +22,7 @@
 #include "class_path_lookup.h"
 #include "dynamic_logger.h"
 #include "expression_evaluator.h"
+#include "expression_util.h"
 #include "format_queue.h"
 #include "jvm_evaluators.h"
 #include "jvm_readers_factory.h"
@@ -133,6 +134,15 @@ static bool FindMethodLine(jclass cls, const string& method_name,
   }
 
   return false;
+}
+
+// Check if a compiled expression has an error due to ClassNotLoaded on an
+// available class signature.
+static inline bool IsClassNotLoadedError(const CompiledExpression& expression) {
+  return !expression.expression.empty() && expression.evaluator == nullptr &&
+         expression.error_message.format == ClassNotLoaded &&
+         expression.error_message.parameters.size() > 1 &&
+         expression.error_message.parameters[1] != kJavaSignatureNotAvailable;
 }
 
 CompiledBreakpoint::CompiledBreakpoint(jclass cls, const jmethodID method,
@@ -294,7 +304,7 @@ void JvmBreakpoint::OnClassPrepared(const string& type_name,
   }
 
   if (location->class_signature == class_signature ||
-     condition_class_dependency_signature_ == class_signature) {
+      class_dependency_signature_ == class_signature) {
     LOG(INFO) << "Class " << type_name << " loaded (" << class_signature
               << "), trying to activate pending breakpoint " << id();
 
@@ -640,23 +650,25 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
   // we record this dependency and listen for OnClassPrepare event in case it
   // is loaded later.
   if (!definition_->condition.empty() &&
-      (new_state->condition().evaluator == nullptr)) {
-    if (new_state->condition().error_message.format == ClassNotLoaded &&
-        new_state->condition().error_message.parameters[1] !=
-            kJavaSignatureNotAvailable) {
-      LOG(WARNING) << "Failed to set breakpoint " << id()
-                   << " because breakpoint condition uses class "
-                   << new_state->condition().error_message.parameters[0]
-                   << " which has not been loaded yet. Leaving breakpoint"
-                      " in pending state.";
+      IsClassNotLoadedError(new_state->condition())) {
+    LOG(WARNING) << "Failed to set breakpoint " << id()
+                 << " because breakpoint condition uses class "
+                 << new_state->condition().error_message.parameters[0]
+                 << " which has not been loaded yet. Leaving breakpoint"
+                    " in pending state.";
 
-      // The not-loaded class signature is the second parameter
-      // in 'error_message'
-      condition_class_dependency_signature_ =
-          new_state->condition().error_message.parameters[1];
-      return;
-    }
+    // The not-loaded class signature is the second parameter
+    // in 'error_message'
+    class_dependency_signature_ =
+        new_state->condition().error_message.parameters[1];
 
+    return;
+  }
+
+  // Fail the breakpoint if the condition has compilation error other than
+  // ClassNotLoaded.
+  if (!definition_->condition.empty() &&
+      new_state->condition().evaluator == nullptr) {
     LOG(WARNING) << "Failed to set breakpoint " << id()
                  << " because breakpoint condition could not be compiled";
 
@@ -668,6 +680,25 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
             .build());
 
     return;
+  }
+
+  // For each expression, apply the ClassNotLoaded check similar to above that
+  // if there is any expression compilation failure due to ClassNotLoaded, the
+  // breakpoint would subscribe to the corresponding class and remain pending.
+  // However, if there is any failure due to non-ClassNotLoaded reason, the
+  // breakpoint continues to proceed so that the expression(s) other than the
+  // failure one(s) will still be evaluated.
+  for (const auto& expression : new_state->watches()) {
+    if (IsClassNotLoadedError(expression)) {
+      LOG(WARNING) << "Failed to set breakpoint " << id()
+                   << " because breakpoint expression uses class "
+                   << expression.error_message.parameters[0]
+                   << " which has not been loaded yet. Leaving breakpoint"
+                      " in pending state.";
+      class_dependency_signature_ = expression.error_message.parameters[1];
+
+      return;
+    }
   }
 
   const bool is_source_line_adjusted = IsSourceLineAdjusted();

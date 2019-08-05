@@ -34,6 +34,7 @@
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
+#include "base/logging_extensions.h"
 #include "base/init_google.h"
 #include "base/process_state.h"
 #endif

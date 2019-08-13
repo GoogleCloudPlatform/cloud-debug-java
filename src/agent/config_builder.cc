@@ -331,7 +331,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }();
 
   [&classes]() {
-      // TODO(vlif): add "pre_call" to string constructors that copy array.
+      // TODO: add "pre_call" to string constructors that copy array.
       classes["java/lang/String"] = ToMethods({
         Allow("format").pre_call(StringFormatPre),
         Interpret("copyValueOf"),  // unsafe if the string is too long.
@@ -363,7 +363,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   }();
 
   [&classes]() {
-      // TODO(vlif): augment with interpreter call stack (which JDK
+      // TODO: augment with interpreter call stack (which JDK
       // implementation of "Throwable.fillInStackTrace" is not aware of).
       classes["java/lang/Throwable"] = ToMethods({
         Allow("fillInStackTrace")

@@ -59,7 +59,7 @@ class Worker {
     virtual void OnIdle() = 0;
 
     // Called upon a change in a set of active breakpoints.
-    // TODO(vlif): add support for added/removed actions for a single
+    // TODO: add support for added/removed actions for a single
     // breakpoint.
     virtual void OnBreakpointsUpdated(
         std::vector<std::unique_ptr<BreakpointModel>> breakpoints) = 0;

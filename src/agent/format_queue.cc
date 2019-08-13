@@ -88,7 +88,7 @@ std::unique_ptr<BreakpointModel> FormatQueue::FormatAndPop() {
     return nullptr;
   }
 
-  // TODO(vlif): refactor to avoid keeping mutex locked during "Format".
+  // TODO: refactor to avoid keeping mutex locked during "Format".
 
   Item& front = queue_.front();
   std::unique_ptr<BreakpointModel> breakpoint = std::move(front.breakpoint);

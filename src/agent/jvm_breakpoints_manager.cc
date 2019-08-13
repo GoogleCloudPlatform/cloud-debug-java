@@ -176,7 +176,7 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
     }
   }
 
-  // TODO(vlif): remove breakpoints that the hub doesn't care about from
+  // TODO: remove breakpoints that the hub doesn't care about from
   // format_queue_. It needs an efficient lookup and special care about the
   // top element that might be transmitted right now.
 }

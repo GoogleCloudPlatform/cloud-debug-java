@@ -416,7 +416,7 @@ void JvmBreakpoint::DoLogAction(jthread thread, CompiledBreakpoint* state) {
 
   string log_message = string(kLogpointPrefix) + collector.Format(*definition_);
 
-  // TODO(mattwach): Discuss if Log() below should be included in quota
+  // TODO: Discuss if Log() below should be included in quota
   // accounting.  If so, this function can be changed to void.
   if (!ApplyDynamicLogsByteQuota(*rsl, log_message.length())) {
     return;
@@ -711,7 +711,7 @@ void JvmBreakpoint::TryActivatePendingBreakpoint() {
     // This is the only case when we change the supposedly immutable
     // "definition_". Since we are only changing integer, it will not
     // cause any race conditions.
-    // TODO(vlif): make "definition_" truly immutable and change line
+    // TODO: make "definition_" truly immutable and change line
     // number when enqueuing breakpoint update.
     definition_->location->line = rsl->adjusted_line_number;
   }

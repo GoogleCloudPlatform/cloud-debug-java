@@ -119,7 +119,7 @@ class JvmClassReference : public ClassIndexer::Type {
     }
 
     if (!JniCheckNoException(name.c_str())) {
-      // TODO(vlif): propagate the exception to the caller.
+      // TODO: propagate the exception to the caller.
       return nullptr;
     }
 
@@ -162,7 +162,7 @@ class JvmPrimitiveType : public ClassIndexer::Type {
   }
 
   jclass FindClass() override {
-    // TODO(vlif): implement for completeness.
+    // TODO: implement for completeness.
     DCHECK(false);
     return nullptr;
   }

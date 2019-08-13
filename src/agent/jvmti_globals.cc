@@ -49,7 +49,7 @@
 #endif
 
 #ifdef GCP_HUB_CLIENT
-// TODO(vlif): retire this flag in favor of debuggee labels
+// TODO: retire this flag in favor of debuggee labels
 // set through system properties.
 ABSL_FLAG(string, cdbg_description_suffix, "",
           "additional text to be appended to debuggee description");

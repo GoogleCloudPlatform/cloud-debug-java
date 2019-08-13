@@ -1169,12 +1169,12 @@ Nullable<ClassFile::Instruction> ClassFile::Method::GetInstruction(int offset) {
       instruction.next_instruction_offset = offset + 3;
       break;
 
-    // TODO(vlif): implement support for INVOKE_DYNAMIC instruction.
+    // TODO: implement support for INVOKE_DYNAMIC instruction.
     case InstructionType::INVOKEDYNAMIC:
       instruction.next_instruction_offset = offset + 5;
       break;
 
-    // TODO(vlif): implement support for MULTIANEWARRAY instruction.
+    // TODO: implement support for MULTIANEWARRAY instruction.
     case InstructionType::MULTIANEWARRAY:
       instruction.next_instruction_offset = offset + 4;
       break;

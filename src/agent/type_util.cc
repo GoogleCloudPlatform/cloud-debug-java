@@ -395,7 +395,7 @@ string TypeNameFromJObjectSignature(string object_signature) {
   // Read from "source" and write to "target" as we go.
   //
 
-  // TODO(vlif): add support for non-ASCII UTF-8 encoded names.
+  // TODO: add support for non-ASCII UTF-8 encoded names.
 
   string::const_iterator source = object_signature.begin();
   if (*source == 'L') {

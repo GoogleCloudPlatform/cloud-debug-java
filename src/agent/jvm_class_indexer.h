@@ -104,7 +104,7 @@ class JvmClassIndexer : public ClassIndexer {
   const std::shared_ptr<ClassIndexer::Type> primitive_double_;
 
   // Cache of type references.
-  // TODO(vlif): implement some sort of LRU cache to keep "Type" alive.
+  // TODO: implement some sort of LRU cache to keep "Type" alive.
   std::map<string, std::weak_ptr<Type>> ref_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmClassIndexer);

@@ -48,7 +48,7 @@ class ClassIndexer {
     virtual jclass FindClass() = 0;
 
     // Searches field by name and signature. Returns nullptr if not found.
-    // TODO(vlif): remove this method. It doesn't belong here.
+    // TODO: remove this method. It doesn't belong here.
     virtual jfieldID FindField(
         bool is_static,
         const string& name,

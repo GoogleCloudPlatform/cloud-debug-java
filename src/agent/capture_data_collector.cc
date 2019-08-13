@@ -310,7 +310,7 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
         // variable value rather than as a member. We don't want to do this
         // collapsing for synthetic member entries like "object has no fields".
         //
-        // TODO(vlif): it is possible that the string object is referenced by
+        // TODO: it is possible that the string object is referenced by
         // a watched expression. In this case we should pass true in
         // "FormatVariable" to increase the size limit of captured a string
         // string object.
@@ -370,7 +370,7 @@ void CaptureDataCollector::ReadLocalVariables(
   std::shared_ptr<const MethodLocals::Entry> entry =
       evaluators_->method_locals->GetLocalVariables(method);
 
-  // TODO(vlif): refactor this function to add locals and arguments to
+  // TODO: refactor this function to add locals and arguments to
   // output vectors as we go.
 
   // Count number of local variables that are defined at "location".

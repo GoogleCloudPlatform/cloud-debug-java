@@ -119,12 +119,12 @@ final class ServiceAccountAuth implements MetadataQuery {
 
   @Override
   public void shutdown() {
-    // TODO(vlif): implement if not handled properly by JVM shutdown.
+    // TODO: implement if not handled properly by JVM shutdown.
   }
 
 
   /** Parses the given JSON auth file.
-   * <p> TODO(emrekultursay): Remove this method when a new version of the google-api-java-client
+   * <p> TODO: Remove this method when a new version of the google-api-java-client
    * library is released (newer than v22), and replace it with the new
    * GoogleCredential.getServiceAccountProjectId() method. */
   private static ServiceAccountAuthJsonFile parseServiceAccountAuthJsonFile(

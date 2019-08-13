@@ -75,7 +75,7 @@ final class ClassPathLookup {
    */
   private Collection<ClassResourcesIndexer> classResourcesIndexers;
   
-  // TODO(vlif): refactor to get rid of this
+  // TODO: refactor to get rid of this
   static ClassPathLookup defaultInstance;
   
   /**
@@ -103,7 +103,7 @@ final class ClassPathLookup {
 
     indexApplicationResources();
 
-    // TODO(vlif): GcpHubClient needs ClassPathLookup to compute uniquifier. This needs to
+    // TODO: GcpHubClient needs ClassPathLookup to compute uniquifier. This needs to
     // be refactored. Either GcpHubClient should not require ClassPathLookup or ClassPathLookup
     // should become static.
     defaultInstance = this;

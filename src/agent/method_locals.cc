@@ -218,7 +218,7 @@ std::unique_ptr<LocalVariableReader> MethodLocals::LoadLocalInstance(
   // The alternative method to access local instance is through JVMTI
   // "GetLocalInstance" method. It is a better way than "GetLocalObject", but
   // only available in JRE7.
-  // TODO(vlif): replace with dedicated class to call "GetLocalInstance" after
+  // TODO: replace with dedicated class to call "GetLocalInstance" after
   // default JDK in Google switches to JDK7.
   jvmtiLocalVariableEntry localInstance;
   memset(&localInstance, 0, sizeof(localInstance));

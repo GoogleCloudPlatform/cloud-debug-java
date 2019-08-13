@@ -58,7 +58,7 @@ bool UnaryExpressionEvaluator::Compile(
 
 bool UnaryExpressionEvaluator::CompilePlusMinusOperators(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
   DCHECK((type_ == UnaryJavaExpression::Type::plus) ||
          (type_ == UnaryJavaExpression::Type::minus));
@@ -106,7 +106,7 @@ bool UnaryExpressionEvaluator::CompilePlusMinusOperators(
 
 bool UnaryExpressionEvaluator::CompileBitwiseComplement(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
   switch (arg_->GetStaticType().type) {
     case JType::Byte:
@@ -138,7 +138,7 @@ bool UnaryExpressionEvaluator::CompileBitwiseComplement(
 
 bool UnaryExpressionEvaluator::CompileLogicalComplement(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
   if (arg_->GetStaticType().type == JType::Boolean) {
     computer_ = LogicalComplementComputer;

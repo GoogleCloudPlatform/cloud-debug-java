@@ -59,7 +59,7 @@ bool TypeCastOperatorEvaluator::Compile(
   // Checks if only one of the source and target is boolean.
   if (IsInvalidPrimitiveBooleanTypeConversion()) {
     // Currently, it is going to say Invalid for boolean unbox cases.
-    // TODO(pratibhap) : Fix this soon.
+    // TODO : Fix this soon.
     *error_message = {
         TypeCastCompileInvalid,
         { target_type_, TypeNameFromSignature(source_->GetStaticType()) }
@@ -72,7 +72,7 @@ bool TypeCastOperatorEvaluator::Compile(
     return true;
   }
 
-  // TODO(pratibhap): Handle unbox. Or at least put the unsupported information
+  // TODO: Handle unbox. Or at least put the unsupported information
   // clearly in the error_message.
   if (IsNumericJType(source_->GetStaticType().type) &&
       NumericTypeNameToJType(target_type_, &(result_type_.type))) {

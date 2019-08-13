@@ -26,7 +26,7 @@ static bool ReadYamlConfig(
   if (files.size() > 1) {
     LOG(ERROR) << "Multiple " << kResourcePath << " files found." << "  Found "
                << files.size() << " files.";
-    // TODO(b/37851452) Move to messages.h
+    // TODO Move to messages.h
     *error = "Multiple debugger-blacklist.yaml files found in the search path. "
         "Please contact your system administrator.";
     return false;

@@ -615,7 +615,7 @@ class GcpHubClient implements HubClient {
     StringBuilder description = new StringBuilder();
     description.append(metadata.getProjectId());
     
-    // TODO(vlif): remove after we completely switch over to structured labels.
+    // TODO: remove after we completely switch over to structured labels.
     if (labels.containsKey(GcpEnvironment.DEBUGGEE_DESCRIPTION_SUFFIX_LABEL)) {
       description.append(labels.get(GcpEnvironment.DEBUGGEE_DESCRIPTION_SUFFIX_LABEL));
       return description.toString();

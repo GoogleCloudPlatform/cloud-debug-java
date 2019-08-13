@@ -320,7 +320,7 @@ MethodCallResult SafeMethodCaller::InvokeJni(
     return rc;
   }
 
-  // TODO(vlif): cache method callers.
+  // TODO: cache method callers.
   JniMethodCaller method_caller;
   if (!method_caller.Bind(
           static_cast<jclass>(call_target.object_cls.get()),

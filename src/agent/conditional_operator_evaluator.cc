@@ -43,7 +43,7 @@ bool ConditionalOperatorEvaluator::Compile(
     return false;
   }
 
-  // TODO(vlif): unbox "condition_" (Java Language Specification section 5.1.8).
+  // TODO: unbox "condition_" (Java Language Specification section 5.1.8).
 
   // All conditional operators must have "condition_" of a boolean type.
   if (condition_->GetStaticType().type != JType::Boolean) {
@@ -73,7 +73,7 @@ bool ConditionalOperatorEvaluator::Compile(
 
 
 bool ConditionalOperatorEvaluator::CompileBoolean() {
-  // TODO(vlif): unbox "if_true_" and "if_false_" from Boolean to boolean.
+  // TODO: unbox "if_true_" and "if_false_" from Boolean to boolean.
 
   if ((if_true_->GetStaticType().type == JType::Boolean) &&
       (if_false_->GetStaticType().type == JType::Boolean)) {
@@ -88,14 +88,14 @@ bool ConditionalOperatorEvaluator::CompileBoolean() {
 bool ConditionalOperatorEvaluator::CompileNumeric() {
   FormatMessageModel unused_error_message;
 
-  // TODO(vlif): unbox "if_true_" and "if_false_".
+  // TODO: unbox "if_true_" and "if_false_".
 
-  // TODO(vlif): implement this clause after we have support for byte/short:
+  // TODO: implement this clause after we have support for byte/short:
   //    If one of the operands is of type byte or Byte and the other is of
   //    type short or Short, then the type of the conditional expression is
   //    short.
 
-  // TODO(vlif): add support for constants and implement this clause:
+  // TODO: add support for constants and implement this clause:
   //    If one of the operands is of type T where T is byte, short, or char,
   //    and the other operand is a constant expression (15.28) of type int
   //    whose value is representable in type T, then the type of the
@@ -139,7 +139,7 @@ bool ConditionalOperatorEvaluator::CompileNumeric() {
 
 
 bool ConditionalOperatorEvaluator::CompileObjects() {
-  // TODO(vlif): this is a super-simplistic implementation that doesn't cover
+  // TODO: this is a super-simplistic implementation that doesn't cover
   // a lot of cases. For more details please refer to Java Language
   // Specification section 15.25.3 and tables in section 15.25.
 

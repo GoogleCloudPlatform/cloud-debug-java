@@ -63,7 +63,7 @@ void GenericTypeEvaluator::Evaluate(
   }
 
   if (class_metadata.instance_fields_omitted) {
-    // TODO(vlif): improve this message for @InvisibleForDebugging case.
+    // TODO: improve this message for @InvisibleForDebugging case.
     result->push_back(NamedJVariant::InfoStatus({ InstanceFieldsOmitted }));
   }
 }

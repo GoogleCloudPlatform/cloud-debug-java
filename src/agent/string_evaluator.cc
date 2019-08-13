@@ -23,7 +23,7 @@
 namespace devtools {
 namespace cdbg {
 
-// TODO(vlif): refactor this code to use auto-ref classes.
+// TODO: refactor this code to use auto-ref classes.
 
 StringEvaluator::StringEvaluator(std::vector<jchar> string_content)
     : string_content_(std::move(string_content)),
@@ -55,7 +55,7 @@ bool StringEvaluator::Compile(
   }
 
   // Create new Java string object (obtaining local reference).
-  // TODO(vlif): wrap with exception checking.
+  // TODO: wrap with exception checking.
   jobject jstr_local_ref = jni()->NewString(string_ptr, string_content_.size());
 
   if (!JniCheckNoException("StringEvaluator::Compile")) {

@@ -70,7 +70,7 @@ static string SubstitutePlaceholders(
 // Formats structured message into a string.
 // Note that we are losing the ability to localize the message that goes into
 // the log.
-// TODO(vlif): retain the message as is once we have structured log messages.
+// TODO: retain the message as is once we have structured log messages.
 static string FormatMessage(const FormatMessageModel& message) {
   return SubstitutePlaceholders(
       message.format,

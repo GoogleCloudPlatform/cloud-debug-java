@@ -148,7 +148,7 @@ protected ZeroToThree
 
 
 // Only ASCII characters are supported right now.
-// TODO(vlif): add support for Unicode characters in Java identifiers.
+// TODO: add support for Unicode characters in Java identifiers.
 Identifier
   : ( 'a'..'z' | 'A'..'Z' | '$' | '_' )
     ( 'a'..'z' | 'A'..'Z' | '0'..'9' | '$' | '_' )*
@@ -407,7 +407,7 @@ literal
   | JNULL
   ;
 
-// TODO(vlif): add support for generic types.
+// TODO: add support for generic types.
 classOrInterfaceType
   : Identifier
     (

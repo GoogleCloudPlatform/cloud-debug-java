@@ -195,9 +195,9 @@ bool BinaryExpressionEvaluator::Compile(
 
 bool BinaryExpressionEvaluator::CompileArithmetical(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
-  // TODO(vlif): implement concatenation for strings
+  // TODO: implement concatenation for strings
 
   // Apply numeric promotions (Java Language Specification section 5.6.2)
   // and initialize the computation routine.
@@ -256,7 +256,7 @@ bool BinaryExpressionEvaluator::CompileConditional(
     // strings in Java is through "equals" method, but expression evaluator
     // doesn't support methods yet. Also it wouldn't make sense if breakpoint
     // condition like (myName == "vlad") would always evaluate to false.
-    // TODO(vlif): support string comparison through "equals" method and keep
+    // TODO: support string comparison through "equals" method and keep
     // this kind of string comparison for inline strings only.
     if ((signature1.object_signature == kJavaStringClassSignature) &&
         (signature2.object_signature == kJavaStringClassSignature)) {
@@ -269,7 +269,7 @@ bool BinaryExpressionEvaluator::CompileConditional(
     return true;
   }
 
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
   FormatMessageModel unused_error_message;
   if (CompileBooleanConditional(&unused_error_message)) {
     return true;
@@ -349,7 +349,7 @@ bool BinaryExpressionEvaluator::CompileBooleanConditional(
 
 bool BinaryExpressionEvaluator::CompileBitwise(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
   // Bitwise operators become conditional when applied to boolean arguments
   // (Java Language Specification, section 15.22.2).
@@ -391,7 +391,7 @@ bool BinaryExpressionEvaluator::CompileBitwise(
 
 bool BinaryExpressionEvaluator::CompileShift(
     FormatMessageModel* error_message) {
-  // TODO(vlif): unbox (Java Language Specification section 5.1.8).
+  // TODO: unbox (Java Language Specification section 5.1.8).
 
   // Numeric promotion is applied separately for each argument
   // (Java Language Specification section 15.19)
@@ -468,7 +468,7 @@ ErrorOr<JVariant> BinaryExpressionEvaluator::Evaluate(
     return arg1_value;
   }
 
-  // TODO(vlif): evaluate second argument on demand. For example in this one:
+  // TODO: evaluate second argument on demand. For example in this one:
   //    (true || exp)
   // "exp" should never be evaluated.
   ErrorOr<JVariant> arg2_value = arg2_->Evaluate(evaluation_context);

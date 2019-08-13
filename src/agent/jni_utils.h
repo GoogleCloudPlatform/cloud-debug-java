@@ -156,7 +156,7 @@ class JavaEnum {
 };
 
 
-// TODO(vlif): remove this class and replace usage with ExceptionOr<>.
+// TODO: remove this class and replace usage with ExceptionOr<>.
 struct JavaExceptionInfo {
   // Caught exception object.
   JniLocalRef exception_obj;
@@ -271,7 +271,7 @@ string GetObjectClassSignature(jobject obj);
 // If it was, clears the exception and returns the information about the
 // thrown exception.
 // The exception_message is only filled if "verbose" was specified.
-// TODO(vlif): remove this class and replace usage with ExceptionOr<>.
+// TODO: remove this class and replace usage with ExceptionOr<>.
 Nullable<JavaExceptionInfo> JniCatchException(bool verbose);
 
 // Checks whether JVM exception has been thrown. If it was, this function
@@ -280,7 +280,7 @@ Nullable<JavaExceptionInfo> JniCatchException(bool verbose);
 // "debug_context" printed as is in the log in case of exception.
 // This function should not be used to check exceptions after calling
 // arbitrary application method, use "JniCatchException" instead.
-// TODO(vlif): remove this class and replace usage with ExceptionOr<>.
+// TODO: remove this class and replace usage with ExceptionOr<>.
 bool JniCheckNoException(const char* debug_context);
 
 // Prints exception details with the call stack.

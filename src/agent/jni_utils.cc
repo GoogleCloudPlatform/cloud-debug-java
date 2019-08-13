@@ -116,7 +116,7 @@ std::vector<string> JniToNativeStringArray(jobject string_array_obj) {
 JniLocalRef JniToJavaStringArray(const std::vector<string>& arr) {
   const size_t size = arr.size();
 
-  // TODO(vlif): use JNI proxy generated code.
+  // TODO: use JNI proxy generated code.
   JavaClass jstring;
   if (!jstring.FindWithJNI("java/lang/String")) {
     return nullptr;

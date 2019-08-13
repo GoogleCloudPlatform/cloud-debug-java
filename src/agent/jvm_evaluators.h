@@ -38,7 +38,7 @@ class ObjectEvaluator;
 struct JvmEvaluators {
   // Proxy for ClassPathLookup class implemented in
   // cdbg_java_agent_internals.jar
-  // TODO(vlif): remove it from this structure.
+  // TODO: remove it from this structure.
   ClassPathLookup* class_path_lookup = nullptr;
 
   // Indexes all the available Java classes and locates classes based on

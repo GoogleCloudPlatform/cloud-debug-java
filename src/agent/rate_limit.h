@@ -81,7 +81,7 @@ class MovingAverage {
 
  private:
   // We compute the k-term moving average. The choice of 32 is arbitrary.
-  // TODO(vlif): adjust it to optimal value.
+  // TODO: adjust it to optimal value.
   const int max_size_ { 32 };
 
   // Lock access to "window_" and "sum_".

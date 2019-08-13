@@ -43,7 +43,7 @@ struct FormatMessageModel;
 // interface exposes local variables at compile time and locates types and
 // static variables. The associated code location is stored in each instance
 // of this interface and is hidden from the caller.
-// TODO(vlif): rename to something that better suits this class purpose.
+// TODO: rename to something that better suits this class purpose.
 class ReadersFactory {
  public:
   virtual ~ReadersFactory() { }
@@ -145,7 +145,7 @@ class ReadersFactory {
 // Defines the JVM specific parameters that define code context (i.e.
 // location) in which the variables are being evaluated and methods are
 // caller.
-// TODO(vlif): move this struct elsewhere.
+// TODO: move this struct elsewhere.
 struct EvaluationContext {
   // Java thread in which the expression is being evaluated.
   jthread thread = nullptr;

@@ -656,7 +656,7 @@ std::unique_ptr<BreakpointModel> DeserializeModel<BreakpointModel>(
 
   // evaluated_user_id field is output-only, and hence, it does not need
   // translation.
-  // TODO(emrekultursay): There are various other output-only fields that also
+  // TODO: There are various other output-only fields that also
   // don't need translation. We should either remove them too, or add
   // evaluated_user_id here, in order to be symmetric.
 
@@ -698,7 +698,7 @@ std::unique_ptr<BreakpointModel> BreakpointFromJsonString(
   Json::Value root;
   Json::Reader reader;
   if (!reader.parse(json_string, root)) {
-    // TODO(vlif): print "reader.getFormattedErrorMessages()" when
+    // TODO: print "reader.getFormattedErrorMessages()" when
     // external build upgrade to the latest version of JsonCpp.
     LOG(ERROR) << "JSON string could not be parsed";
     return nullptr;

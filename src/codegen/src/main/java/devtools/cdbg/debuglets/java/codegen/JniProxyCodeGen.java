@@ -185,7 +185,7 @@ public class JniProxyCodeGen {
     /**
      * Generates {@code NewObjectOf} method that allocates a subclass of this class.
      *
-     * <p>TODO(vlif): remove this option.
+     * <p>TODO: remove this option.
      */
     private final boolean subclassConstructor;
 

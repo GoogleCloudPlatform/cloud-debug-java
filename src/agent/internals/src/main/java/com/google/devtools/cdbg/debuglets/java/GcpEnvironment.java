@@ -112,7 +112,7 @@ final class GcpEnvironment {
   /**
    * Gets map of debuggee labels.
    *
-   * <p>TODO(vlif): add additional fallback to Kubernetes to automatically read things like pod,
+   * <p>TODO: add additional fallback to Kubernetes to automatically read things like pod,
    * version and Docker image ID (for minor version).
    */
   static Map<String, String> getDebuggeeLabels() {

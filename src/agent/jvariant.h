@@ -150,7 +150,7 @@ class JVariant {
     return rc;
   }
 
-  // TODO(vlif): remove after all JNI methods are wrapped to return
+  // TODO: remove after all JNI methods are wrapped to return
   // JniLocalRef.
   static JVariant LocalRef(jobject ref) {
     JVariant rc;

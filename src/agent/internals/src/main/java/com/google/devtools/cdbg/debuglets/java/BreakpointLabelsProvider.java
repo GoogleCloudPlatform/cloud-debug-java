@@ -24,7 +24,7 @@ package com.google.devtools.cdbg.debuglets.java;
  * {@link BreakpointLabelsProvider#format} is called on anohter thread. A new instance
  * of this class will be created for each breakpoint.
  *
- * TODO(gigid): consider changing to avoid doing work in a constructor.
+ * TODO: consider changing to avoid doing work in a constructor.
  *     e.g., introduce a static method to create the object and capture the labels.
  */
 interface BreakpointLabelsProvider {

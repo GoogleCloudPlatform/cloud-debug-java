@@ -25,6 +25,7 @@
 #include "jni_proxy_breakpointlabelsprovider.h"
 #include "jni_proxy_classpathlookup.h"
 #include "jni_proxy_dynamicloghelper.h"
+#include "jni_proxy_gcpdebugletversion.h"
 #include "jni_proxy_hubclient.h"
 #include "jni_proxy_hubclient_listactivebreakpointsresult.h"
 #include "config_builder.h"
@@ -344,6 +345,7 @@ bool JvmtiAgent::OnWorkerReady() {
     jniproxy::BindBreakpointLabelsProviderWithClassLoader,
     jniproxy::BindClassPathLookupWithClassLoader,
     jniproxy::BindDynamicLogHelperWithClassLoader,
+    jniproxy::BindGcpDebugletVersionWithClassLoader,
     jniproxy::BindHubClientWithClassLoader,
     jniproxy::BindHubClient_ListActiveBreakpointsResultWithClassLoader,
     jniproxy::BindUserIdProviderWithClassLoader,
@@ -359,6 +361,9 @@ bool JvmtiAgent::OnWorkerReady() {
       return false;
     }
   }
+
+  LOG(INFO) << "Initializing Cloud Debugger Java agent version: "
+            << jniproxy::GcpDebugletVersion()->getVersion().GetData();
 
   // Split the extra class path into individual components.
   std::vector<string> extra_class_path;

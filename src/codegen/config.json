@@ -315,6 +315,15 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion",
+      "methods": [
+        {
+          "methodName": "getVersion"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "com.google.devtools.cdbg.debuglets.java.HubClient$ListActiveBreakpointsResult",
       "methods": [
         {

@@ -37,7 +37,6 @@ ASM_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-7.1.jar
 ASM_COMMONS_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-commons-7.1.jar
 ASM_UTIL_JAR_PATH ?= /usr/lib/asm-7.1/lib/asm-util-7.1.jar
 GOOGLE_API_JAVA_CLIENT_PATH ?= /usr/lib/google-api-java-client
-JARJAR_PATH ?= ../../build/jarjar.jar
 JAVA_BUILD ?= maven
 JAVAC=javac -source 1.7 -target 1.7
 BUILD_TARGET_PATH ?= .
@@ -84,8 +83,7 @@ endif
 TARGET_AGENT = cdbg_java_agent.so
 INTERNALS_CLASS_LOADER = cdbg_java_agent_internals_loader.class
 INTERNALS_CLASS_LOADER_STATIC_DEFS = internals_class_loader_static_defs.inl
-INTERNALS_JAR_FULL = internals_full.jar
-INTERNALS_JAR_STRIPPED = internals_stripped.jar
+INTERNALS_JAR = internals.jar
 SERVICE_ACCOUNT_AUTH_TOOL = $(BUILD_TARGET_PATH)/cdbg_service_account_auth.jar
 TARGET_TAR_GZ_APPENGINE = $(BUILD_TARGET_PATH)/cdbg_java_agent.tar.gz
 TARGET_TAR_GZ_GCE = $(BUILD_TARGET_PATH)/cdbg_java_agent_gce.tar.gz
@@ -204,7 +202,7 @@ antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
 $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen
 
 
-jni_proxies_src: internals_jar_full
+jni_proxies_src: internals_jar
 ifeq ($(JAVA_BUILD),maven)
 	cd ../codegen && mvn clean install
 	java -cp "../codegen/target/jni_proxy_code_gen_tool-SNAPSHOT-jar-with-dependencies.jar" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
@@ -212,7 +210,7 @@ else
 	mkdir -p ../codegen/target
 	cd ../codegen ; $(JAVAC) -g -cp "$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(SNAKE_YAML_JAR_PATH)" -d target src/main/java/devtools/cdbg/debuglets/java/codegen/*.java
 	cp ../codegen/src/main/java/devtools/cdbg/debuglets/java/codegen/*.tpl ../codegen/target/devtools/cdbg/debuglets/java/codegen
-	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR_FULL):$(SNAKE_YAML_JAR_PATH)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
+	java -cp "../codegen/target:$(ASM_JAR_PATH):$(GSON_JAR_PATH):$(FREE_MARKER_JAR_PATH):$(GUAVA_JAR_PATH):$(INTERNALS_JAR):$(SNAKE_YAML_JAR_PATH)" devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen ../codegen/config.json ../codegen
 endif
 
 %.o: %.cpp antlrgen
@@ -239,10 +237,10 @@ endif
 internals_class_loader_static_defs: internals_class_loader
 	python ../codegen/static_def_gen.py $(INTERNALS_CLASS_LOADER_STATIC_DEFS) .:^$(INTERNALS_CLASS_LOADER)$
 
-internals_jar_full:
+internals_jar:
 ifeq ($(JAVA_BUILD),maven)
 	cd internals ; mvn clean install
-	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR_FULL)
+	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR)
 else
 	mkdir -p internals/target
 	cd internals ; $(JAVAC) -g:none -cp $(ASM_JAR_PATH):$(ASM_COMMONS_JAR_PATH):$(ASM_UTIL_JAR_PATH):$(GSON_JAR_PATH):$(GOOGLE_API_CLIENT_JARS_CLASS_PATH):$(SNAKE_YAML_JAR_PATH) -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java
@@ -252,45 +250,35 @@ else
 	cd internals/target ; jar xf $(GSON_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(SNAKE_YAML_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; echo "$(GOOGLE_API_CLIENT_JARS)" | xargs -n 1 jar xf
-	jar cvf $(INTERNALS_JAR_FULL) -C internals/target/ .
+	jar cvf $(INTERNALS_JAR) -C internals/target/ .
 endif
-
-# Remove service account authentication classes from internals.jar. They take
-# a lot of space and usually not needed. We will use the stripped JAR in all
-# cases when service account authentication is not used.
-# We remove classes with jarjar and then remove non class files that we don't
-# need with zip utility.
-internals_jar_stripped: internals_jar_full
-	java -jar $(JARJAR_PATH) process strip_service_account_auth_jarjar_rules.txt $(INTERNALS_JAR_FULL) $(INTERNALS_JAR_STRIPPED)
 
 # Generate packages:
 # 1. Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
 # 2. Java Cloud Debugger package used on GCE with metadata service
-#    authentication (default and recommended solution)
+#    authentication or service account file authentication
+#    (default and recommended solution)
 # 3. Java Cloud Debugger package used on GCE with service account authentication
-#    (fallback solution used when metadata service authentication can't be
-#    used).
-packages: target_agent internals_jar_stripped internals_jar_full $(APPENGINE_FORMAT_SCRIPT)
-	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
+#    (Identical to #2, retained for legacy purposes).
+packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT)
+	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
 	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
-	cp $(INTERNALS_JAR_STRIPPED) cdbg_java_agent_internals.jar
 	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar
-	cp $(INTERNALS_JAR_FULL) cdbg_java_agent_internals.jar
 	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar
 
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account
 # authentication is enabled.
-service_account_auth_tool: internals_jar_full
+service_account_auth_tool: internals_jar
 ifeq ($(JAVA_BUILD),maven)
 	cd service-account-auth ; mvn clean install
 	cp service-account-auth/target/cdbg_service_account_auth-SNAPSHOT-jar-with-dependencies.jar $(SERVICE_ACCOUNT_AUTH_TOOL)
 else
 	mkdir -p service-account-auth/target
-	cd service-account-auth ; $(JAVAC) -g:none -cp ../$(INTERNALS_JAR_FULL) -d target src/main/java/com/google/devtools/cdbg/*.java
-	cd service-account-auth/target ; jar xf ../../$(INTERNALS_JAR_FULL) ; rm -rf META-INF
+	cd service-account-auth ; $(JAVAC) -g:none -cp ../$(INTERNALS_JAR) -d target src/main/java/com/google/devtools/cdbg/*.java
+	cd service-account-auth/target ; jar xf ../../$(INTERNALS_JAR) ; rm -rf META-INF
 	jar cvfe $(SERVICE_ACCOUNT_AUTH_TOOL) com.google.devtools.cdbg.debuglets.java.ServiceAccountAuthTool -C service-account-auth/target/ .
 endif
 
-target_version_txt: internals_jar_stripped
-	java -cp $(INTERNALS_JAR_STRIPPED) com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion > $(TARGET_VERSION_TXT)
+target_version_txt: internals_jar
+	java -cp $(INTERNALS_JAR) com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion > $(TARGET_VERSION_TXT)

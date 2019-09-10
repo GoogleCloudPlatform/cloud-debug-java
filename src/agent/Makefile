@@ -253,19 +253,6 @@ else
 	jar cvf $(INTERNALS_JAR) -C internals/target/ .
 endif
 
-# Generate packages:
-# 1. Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
-# 2. Java Cloud Debugger package used on GCE with metadata service
-#    authentication or service account file authentication
-#    (default and recommended solution)
-# 3. Java Cloud Debugger package used on GCE with service account authentication
-#    (Identical to #2, retained for legacy purposes).
-packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT)
-	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
-	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT)
-	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar
-	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar
-
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account
 # authentication is enabled.
@@ -282,3 +269,16 @@ endif
 
 target_version_txt: internals_jar
 	java -cp $(INTERNALS_JAR) com.google.devtools.cdbg.debuglets.java.GcpDebugletVersion > $(TARGET_VERSION_TXT)
+
+# Generate packages:
+# 1. Java Cloud Debugger package used in Managed VM (aka AppEngine v2)
+# 2. Java Cloud Debugger package used on GCE with metadata service
+#    authentication or service account file authentication
+#    (default and recommended solution)
+# 3. Java Cloud Debugger package used on GCE with service account authentication
+#    (Identical to #2, retained for legacy purposes).
+packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT) target_version_txt
+	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
+	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT) $(TARGET_VERSION_TXT)
+	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(TARGET_VERSION_TXT)
+	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(TARGET_VERSION_TXT)

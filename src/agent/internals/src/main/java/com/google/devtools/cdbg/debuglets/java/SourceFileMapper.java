@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
@@ -37,31 +34,21 @@ import org.objectweb.asm.Opcodes;
  * Loads and queries source information of all the classes defined in the same source file.
  *
  * <p>Note that while regular methods are always defined in a single source code block, this is not
- * the case with constructors and static initializers. A member or static variable initializer
- * can be defined anywhere in the class, but it is compiled to be part of constructor. For example:
- * {@code
- *   1. class A {
- *   2.   public A() {
- *   3.     System.out.println("I am constructor");
- *   4.   }
- *   5.   public void f() {
- *   6.     System.out.println("I am f");
- *   7.   }
- *   8.   private int x = 17;
- *   9. }
- * }
- * Class A will have two methods. Method f will have statements at lines 5 and 6 and the 
- * constructor at lines 2, 3 and 8.
+ * the case with constructors and static initializers. A member or static variable initializer can
+ * be defined anywhere in the class, but it is compiled to be part of constructor. For example:
+ * {@code 1. class A { 2. public A() { 3. System.out.println("I am constructor"); 4. } 5. public
+ * void f() { 6. System.out.println("I am f"); 7. } 8. private int x = 17; 9. } } Class A will have
+ * two methods. Method f will have statements at lines 5 and 6 and the constructor at lines 2, 3 and
+ * 8.
  */
 final class SourceFileMapper {
   /**
-   * Maximum number of lines that the mapper is allowed to move the queried source line. For
-   * example if we have a 20 line statement, the mapper will figure out that 15th line is still
-   * part of the statement, but will consider line 16th as line without code. We need this
-   * because Java debug information doesn't distinguish between empty spaces and multi-line
-   * statements. In practice statements are unlikely to be longer than 2-3 lines because
-   * function calls spanning multiple lines usually involve additional statements to compute
-   * parameters.
+   * Maximum number of lines that the mapper is allowed to move the queried source line. For example
+   * if we have a 20 line statement, the mapper will figure out that 15th line is still part of the
+   * statement, but will consider line 16th as line without code. We need this because Java debug
+   * information doesn't distinguish between empty spaces and multi-line statements. In practice
+   * statements are unlikely to be longer than 2-3 lines because function calls spanning multiple
+   * lines usually involve additional statements to compute parameters.
    */
   private static final int MAX_LINE_ADJUSTMENT = 15;
 
@@ -72,14 +59,10 @@ final class SourceFileMapper {
    * providing {@code ClassVisitor} to delegate, these visitor methods are doing nothing.
    */
   class MapperClassVisitor extends ClassVisitor {
-    /**
-     * Java signature of the currently visited class.
-     */
+    /** Java signature of the currently visited class. */
     private String currentClassSignature;
 
-    /**
-     * True if the currently visited class is identified to be unsafe.
-     **/
+    /** True if the currently visited class is identified to be unsafe. */
     private boolean isUnsafeClass;
 
     /**
@@ -128,11 +111,7 @@ final class SourceFileMapper {
       return new MethodVisitor(Opcodes.ASM7) {
         @Override
         public void visitMethodInsn(
-            int opcode,
-            String owner,
-            String name,
-            String desc,
-            boolean itf) {
+            int opcode, String owner, String name, String desc, boolean itf) {
           if (!isUnsafeClass && blacklistedClasses.contains(owner)) {
             isUnsafeClass = true;
           }
@@ -154,16 +133,15 @@ final class SourceFileMapper {
           }
 
           statements.put(
-              line,
-              new ResolvedSourceLocation(currentClassSignature, name, descriptor, line));
+              line, new ResolvedSourceLocation(currentClassSignature, name, descriptor, line));
         }
       };
     }
   }
 
   /**
-   * List of statements in the mapped source file sorted by line number. This includes all the
-   * class resources provided in the constructor.
+   * List of statements in the mapped source file sorted by line number. This includes all the class
+   * resources provided in the constructor.
    */
   private SortedMap<Integer, ResolvedSourceLocation> statements = new TreeMap<>();
 
@@ -211,8 +189,8 @@ final class SourceFileMapper {
   }
 
   /**
-   * Finds code statement at the specified source line. The scope of the lookup is the source
-   * file corresponding with the top level class provided in constructor.
+   * Finds code statement at the specified source line. The scope of the lookup is the source file
+   * corresponding with the top level class provided in constructor.
    */
   public ResolvedSourceLocation map(int lineNumber) {
     // Find closest statement at or prior to {@code lineNumber}.
@@ -226,7 +204,8 @@ final class SourceFileMapper {
 
     // Don't allow to move the line too far away.
     if (lineNumber - candidateLineNumber > MAX_LINE_ADJUSTMENT) {
-      infofmt("Closest statement too far away, mapped line number: %d, statement: %d",
+      infofmt(
+          "Closest statement too far away, mapped line number: %d, statement: %d",
           lineNumber, candidateLineNumber);
       return noCodeAtLineError(lineNumber);
     }
@@ -274,9 +253,7 @@ final class SourceFileMapper {
     return candidate;
   }
 
-  /**
-   * Returns "no code at line $0" error in {@code ResolvedSourceLocation}.
-   */
+  /** Returns "no code at line $0" error in {@code ResolvedSourceLocation}. */
   private ResolvedSourceLocation noCodeAtLineError(int lineNumber) {
     return new ResolvedSourceLocation(
         new FormatMessage(Messages.NO_CODE_FOUND_AT_LINE, Integer.toString(lineNumber)));
@@ -286,7 +263,6 @@ final class SourceFileMapper {
    * Returns "enclosing class contains unsafe Java code" error in {@code ResolvedSourceLocation}.
    */
   private ResolvedSourceLocation unsafeClassError() {
-    return new ResolvedSourceLocation(
-        new FormatMessage(Messages.BREAKPOINT_INSIDE_UNSAFE_CLASS));
+    return new ResolvedSourceLocation(new FormatMessage(Messages.BREAKPOINT_INSIDE_UNSAFE_CLASS));
   }
 }

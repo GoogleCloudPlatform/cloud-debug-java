@@ -57,9 +57,10 @@ final class GcpEnvironment {
 
   /** Gets the URL of the Debuglet Controller API. */
   static URL getControllerBaseUrl() {
-    String url = System.getProperty(
-        "com.google.cdbg.controller",
-        "https://clouddebugger.googleapis.com/v2/controller/");  // Default
+    String url =
+        System.getProperty(
+            "com.google.cdbg.controller",
+            "https://clouddebugger.googleapis.com/v2/controller/"); // Default
     try {
       return new URL(url);
     } catch (MalformedURLException e) {

@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
@@ -31,21 +28,17 @@ import java.util.Collections;
 import java.util.jar.JarFile;
 
 /**
- * Explores set of directories and locates all the resource files. Resource file is typically
- * a .class file, but it can also be a metadata file. If exploration encounters .jar file, it
- * will open it and index all the embedded resources.
+ * Explores set of directories and locates all the resource files. Resource file is typically a
+ * .class file, but it can also be a metadata file. If exploration encounters .jar file, it will
+ * open it and index all the embedded resources.
  *
  * <p>This class builds all the data structures in constructor and after that all public methods
  * only read data. Therefore the class is thread safe.
  */
 final class ResourceIndexer {
-  /**
-   * Represents a source of resources (e.g. directory or .jar file).
-   */
+  /** Represents a source of resources (e.g. directory or .jar file). */
   public static interface ResourcesSource {
-    /**
-     * Gets index of all the files in this source.
-     */
+    /** Gets index of all the files in this source. */
     ResourcesDatabase getResourcesDatabase();
 
     /**
@@ -56,20 +49,14 @@ final class ResourceIndexer {
     InputStream getResource(String resourcePath) throws IOException;
   }
 
-  /**
-   * Application resources in a directory (i.e. exploded .jar file) or a single .class file.
-   */
+  /** Application resources in a directory (i.e. exploded .jar file) or a single .class file. */
   static final class FileSystemResourcesSource implements ResourcesSource {
-    /**
-     * Path to directory or a single file.
-     */
+    /** Path to directory or a single file. */
     private final Path path;
 
-    /**
-     * Index of all available files.
-     */
+    /** Index of all available files. */
     private final ResourcesDatabase db;
-    
+
     public FileSystemResourcesSource(File file) {
       if (file.isDirectory()) {
         path = file.toPath();
@@ -83,39 +70,31 @@ final class ResourceIndexer {
         db = new ResourcesDatabase.Builder().add(file.getName()).build();
       }
     }
-    
+
     @Override
     public ResourcesDatabase getResourcesDatabase() {
       return db;
     }
-    
+
     @Override
     public InputStream getResource(String resourcePath) throws IOException {
       return Files.newInputStream(path.resolve(resourcePath));
     }
 
-    /**
-     * Gets absolute file path for a resource.
-     */
+    /** Gets absolute file path for a resource. */
     public File getResourceFile(String resourcePath) {
       return path.resolve(resourcePath).toFile();
     }
   }
 
-  /**
-   * Represents application resources in a .jar file.
-   */
+  /** Represents application resources in a .jar file. */
   private static final class JarResourcesSource implements ResourcesSource {
-    /**
-     * Reader for .jar file.
-     */
+    /** Reader for .jar file. */
     private final JarFile jarFile;
 
-    /**
-     * Index of all available files in a .jar file.
-     */
+    /** Index of all available files in a .jar file. */
     private final ResourcesDatabase db;
-    
+
     public JarResourcesSource(JarFile jarFile) {
       this.jarFile = jarFile;
       this.db = ResourcesDatabase.Builder.forJar(jarFile);
@@ -125,26 +104,20 @@ final class ResourceIndexer {
     public ResourcesDatabase getResourcesDatabase() {
       return db;
     }
-    
+
     @Override
     public InputStream getResource(String resourcePath) throws IOException {
       return jarFile.getInputStream(jarFile.getJarEntry(resourcePath));
     }
   }
 
-  /**
-   * Sources of application files.
-   */
+  /** Sources of application files. */
   private Collection<FileSystemResourcesSource> fileSystemSources;
 
-  /**
-   * All sources of application resources (.jar files and directories).
-   */
+  /** All sources of application resources (.jar files and directories). */
   private Collection<ResourcesSource> sources;
-  
-  /**
-   * Explores files and resources in the specified set of paths.
-   */
+
+  /** Explores files and resources in the specified set of paths. */
   public ResourceIndexer(Iterable<String> paths) {
     // First of all create instances of FileSystemResourcesSource for each directory
     // in the class path and explicitly specified JAR files.
@@ -155,11 +128,11 @@ final class ResourceIndexer {
         severefmt("Invalid application class path %s", path);
         continue;
       }
-      
+
       File file = new File(path);
       fileSystemSources.add(new FileSystemResourcesSource(file));
     }
-    
+
     sources = new ArrayList<>();
     sources.addAll(fileSystemSources);
 
@@ -205,16 +178,12 @@ final class ResourceIndexer {
     infofmt("Total size of indexed resources database: %d bytes", totalSize);
   }
 
-  /**
-   * Gets sources of application files.
-   */
+  /** Gets sources of application files. */
   public Collection<ResourcesSource> getSources() {
     return sources;
   }
 
-  /**
-   * Gets all sources of application resources (.jar files and directories).
-   */
+  /** Gets all sources of application resources (.jar files and directories). */
   public Collection<FileSystemResourcesSource> getFileSystemSources() {
     return fileSystemSources;
   }

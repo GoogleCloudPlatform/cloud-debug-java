@@ -79,7 +79,6 @@ public class AppPathLookup {
         // yet.
         allDirNames.add(parentDir.toString());
       }
-
     }
 
     appDirs = allDirNames.toArray(new String[0]);

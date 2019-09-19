@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
@@ -32,28 +29,23 @@ import java.util.SortedSet;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import javax.xml.bind.DatatypeConverter;
 
 /**
- * Iterates over all the application .jar and .class files and computes their SHA1 hash. This
- * hash code then serves as debuggee uniquifier.
+ * Iterates over all the application .jar and .class files and computes their SHA1 hash. This hash
+ * code then serves as debuggee uniquifier.
  */
 final class UniquifierComputer {
-  /**
-   * SHA1 hash algorithm.
-   */
+  /** SHA1 hash algorithm. */
   private final MessageDigest hash = MessageDigest.getInstance("SHA1");
 
-  /**
-   * Temporary buffer for file reads.
-   */
+  /** Temporary buffer for file reads. */
   private final byte[] buffer = new byte[65536];
 
   /**
-   * Computes hash of set of application files. The use of {@code SortedSet} is intentional, so 
-   * that the uniquifier remains stable even when order of files changes on the file system.
-   * 
+   * Computes hash of set of application files. The use of {@code SortedSet} is intentional, so that
+   * the uniquifier remains stable even when order of files changes on the file system.
+   *
    * @param initializationVector initialization vector for the hash computation
    * @param applicationFiles list of files in standard JVM class path and extra class path
    */
@@ -65,17 +57,13 @@ final class UniquifierComputer {
       append(applicationFile);
     }
   }
-  
-  /**
-   * Computes the SHA1 hash value and encodes it in a string. 
-   */
+
+  /** Computes the SHA1 hash value and encodes it in a string. */
   public String getUniquifier() {
     return DatatypeConverter.printHexBinary(hash.digest());
   }
 
-  /**
-   * Hashes a single application file.
-   */
+  /** Hashes a single application file. */
   private void append(String applicationFile) {
     hash.update(new File(applicationFile).getName().getBytes(UTF_8));
 
@@ -88,9 +76,7 @@ final class UniquifierComputer {
     }
   }
 
-  /**
-   * Hashes a single application file of unknown type.
-   */
+  /** Hashes a single application file of unknown type. */
   private void appendBinaryFile(String applicationFile) {
     try (InputStream stream = Files.newInputStream(Paths.get(applicationFile))) {
       hashStream(stream);
@@ -104,8 +90,8 @@ final class UniquifierComputer {
   /**
    * Hashes a single .zip file.
    *
-   * <p>Instead of reading the content of the entire file, we just hash the CRC codes of
-   * all the files in the archive. This is supposed to be much faster.
+   * <p>Instead of reading the content of the entire file, we just hash the CRC codes of all the
+   * files in the archive. This is supposed to be much faster.
    */
   private void appendZipFile(String applicationFile) {
     try (ZipFile zipFile = new ZipFile(applicationFile)) {
@@ -120,8 +106,8 @@ final class UniquifierComputer {
   /**
    * Hashes a single .jar file.
    *
-   * <p>We first try to use some manifest file that will be different for each build. If
-   * such file is not there, we fall back to hashing a ZIP file.
+   * <p>We first try to use some manifest file that will be different for each build. If such file
+   * is not there, we fall back to hashing a ZIP file.
    */
   private void appendJarFile(String applicationFile) {
     try (JarFile jarFile = new JarFile(applicationFile)) {
@@ -139,9 +125,7 @@ final class UniquifierComputer {
     }
   }
 
-  /**
-   * Appends CRC codes of all the files in the .zip archive to the hash.
-   */
+  /** Appends CRC codes of all the files in the .zip archive to the hash. */
   private void hashZipEntries(ZipFile zipFile) {
     ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / 8);
     Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
@@ -155,9 +139,7 @@ final class UniquifierComputer {
     }
   }
 
-  /**
-   * Hashes the content of a stream.
-   */
+  /** Hashes the content of a stream. */
   private void hashStream(InputStream stream) throws IOException {
     int bytesRead;
     do {
@@ -168,4 +150,3 @@ final class UniquifierComputer {
     } while (bytesRead != -1);
   }
 }
-

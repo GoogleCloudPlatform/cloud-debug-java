@@ -1,19 +1,16 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import java.io.PrintWriter;
@@ -24,15 +21,16 @@ import java.util.IllegalFormatException;
 /**
  * Static class to log diagnostic messages.
  *
- * <p>We want to have a single log file for messages coming from C++ code as well as from
- * Java code. Hence this class just sends log messages to the C++ code, that logs messages
- * with glog library.
+ * <p>We want to have a single log file for messages coming from C++ code as well as from Java code.
+ * Hence this class just sends log messages to the C++ code, that logs messages with glog library.
  *
  * <p>This class has to be public because it is used by classes loaded by another class loader.
  */
 public final class AgentLogger {
   public static native void info(String message);
+
   public static native void warn(String message);
+
   public static native void severe(String message);
 
   public static void infofmt(Throwable thrown, String message, Object... args) {
@@ -60,8 +58,8 @@ public final class AgentLogger {
   }
 
   /**
-   * Safely formats a message string with exception and gaurantees not to throw an exception,
-   * but instead returns a slightly different message.
+   * Safely formats a message string with exception and gaurantees not to throw an exception, but
+   * instead returns a slightly different message.
    *
    * @param thrown exception to format
    * @param fmt the format string
@@ -72,9 +70,8 @@ public final class AgentLogger {
   }
 
   /**
-   * Safely formats a string with {@link String#format(String, Object[])},
-   * and gaurantees not to throw an exception, but instead returns a slightly
-   * different message.
+   * Safely formats a string with {@link String#format(String, Object[])}, and gaurantees not to
+   * throw an exception, but instead returns a slightly different message.
    *
    * @param fmt the format string
    * @param args array of parameters for the format string
@@ -84,8 +81,9 @@ public final class AgentLogger {
       try {
         return String.format(fmt, args);
       } catch (IllegalFormatException e) {
-        return String.format("Failed to format message: \"%s\", args: %s", fmt,
-            (args != null) ? Arrays.toString(args) : "null");
+        return String.format(
+            "Failed to format message: \"%s\", args: %s",
+            fmt, (args != null) ? Arrays.toString(args) : "null");
       }
     } catch (Exception e) {
       // such as a failure during toString() on one of the arguments
@@ -94,8 +92,8 @@ public final class AgentLogger {
   }
 
   /**
-   * Safely formats the exception with call stack and gaurantees not to throw an exception,
-   * but instead returns a slightly different message.
+   * Safely formats the exception with call stack and gaurantees not to throw an exception, but
+   * instead returns a slightly different message.
    *
    * @param thrown exception to format
    */

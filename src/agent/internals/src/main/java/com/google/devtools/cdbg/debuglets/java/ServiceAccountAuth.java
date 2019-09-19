@@ -1,26 +1,22 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Key;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,9 +24,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Objects;
 
-/**
- * Exchanges service account private key for OAuth access token.
- */
+/** Exchanges service account private key for OAuth access token. */
 final class ServiceAccountAuth implements MetadataQuery {
 
   /** The JSON Service Account file gets parsed into an object of this type. */
@@ -44,34 +38,25 @@ final class ServiceAccountAuth implements MetadataQuery {
     }
   }
 
-  /**
-   * OAuth scope requested.
-   */
+  /** OAuth scope requested. */
   private static final String CLOUD_PLATFORM_SCOPE =
       "https://www.googleapis.com/auth/cloud-platform";
 
-  /**
-   * Time to refresh the token before it expires.
-   */
+  /** Time to refresh the token before it expires. */
   private static final int TOKEN_EXPIRATION_BUFFER_SEC = 60;
 
-  /**
-   * GCP project ID that created the service account.
-   */
+  /** GCP project ID that created the service account. */
   private final String projectId;
 
-  /**
-   * GCP project number corresponding to projectId.
-   */
+  /** GCP project number corresponding to projectId. */
   private final String projectNumber;
 
-  /**
-   * Runs OAuth flow to obtain the access token.
-   */
+  /** Runs OAuth flow to obtain the access token. */
   private final GoogleCredential credential;
 
   /**
    * Class constructor
+   *
    * @param serviceAccountJsonFile json file with the private key of the service account
    */
   public ServiceAccountAuth(String serviceAccountJsonFile)
@@ -82,8 +67,9 @@ final class ServiceAccountAuth implements MetadataQuery {
     this.projectNumber = this.projectId;
 
     InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
-    this.credential = GoogleCredential.fromStream(serviceAccountJsonStream)
-        .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
+    this.credential =
+        GoogleCredential.fromStream(serviceAccountJsonStream)
+            .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
   }
 
   @Override
@@ -99,7 +85,7 @@ final class ServiceAccountAuth implements MetadataQuery {
   /**
    * Gets the cached OAuth access token refreshing it as needed.
    *
-   * <p> Access token refresh is done synchronously delaying the call.
+   * <p>Access token refresh is done synchronously delaying the call.
    */
   @Override
   public synchronized String getAccessToken() {
@@ -122,15 +108,18 @@ final class ServiceAccountAuth implements MetadataQuery {
     // TODO: implement if not handled properly by JVM shutdown.
   }
 
-
-  /** Parses the given JSON auth file.
-   * <p> TODO: Remove this method when a new version of the google-api-java-client
+  /**
+   * Parses the given JSON auth file.
+   *
+   * <p>TODO: Remove this method when a new version of the google-api-java-client
    * library is released (newer than v22), and replace it with the new
-   * GoogleCredential.getServiceAccountProjectId() method. */
+   * GoogleCredential.getServiceAccountProjectId() method.
+   */
   private static ServiceAccountAuthJsonFile parseServiceAccountAuthJsonFile(
       String serviceAccountJsonFile) throws IOException {
-    JsonParser parser = JacksonFactory.getDefaultInstance().createJsonParser(
-        new FileInputStream(serviceAccountJsonFile));
+    JsonParser parser =
+        JacksonFactory.getDefaultInstance()
+            .createJsonParser(new FileInputStream(serviceAccountJsonFile));
     ServiceAccountAuthJsonFile parsedFile = parser.parse(ServiceAccountAuthJsonFile.class);
     if (parsedFile.getProjectId() == null) {
       throw new IllegalArgumentException("Service account JSON file is missing project_id field");

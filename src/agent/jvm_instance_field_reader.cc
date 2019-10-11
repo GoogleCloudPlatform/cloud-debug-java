@@ -23,18 +23,13 @@ namespace devtools {
 namespace cdbg {
 
 JvmInstanceFieldReader::JvmInstanceFieldReader(
-    const string& name,
-    jfieldID field_id,
-    const JSignature& signature,
-    bool is_read_error,
-    const FormatMessageModel& read_error)
+    const std::string& name, jfieldID field_id, const JSignature& signature,
+    bool is_read_error, const FormatMessageModel& read_error)
     : name_(name),
       signature_(signature),
       field_id_(field_id),
       is_read_error_(is_read_error),
-      read_error_(read_error) {
-}
-
+      read_error_(read_error) {}
 
 JvmInstanceFieldReader::JvmInstanceFieldReader(
     const JvmInstanceFieldReader& jvm_instance_field_reader)

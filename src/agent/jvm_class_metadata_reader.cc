@@ -50,7 +50,7 @@ static void ReleaseEntryRefs(jobject cls, ClassMetadataReader::Entry* entry) {
 //                     // but here we convert it to SomeClass.this.foo
 //      }
 //    }
-static string ProcessFieldName(string name) {
+static std::string ProcessFieldName(std::string name) {
   constexpr char kPrefix[] = "val$";
   constexpr int kPrefixLength = sizeof(kPrefix) / sizeof(kPrefix[0]) - 1;
 
@@ -60,7 +60,6 @@ static string ProcessFieldName(string name) {
 
   return name;
 }
-
 
 JvmClassMetadataReader::JvmClassMetadataReader(
     DataVisibilityPolicy* data_visibility_policy)
@@ -114,7 +113,7 @@ JvmClassMetadataReader::GetClassMetadata(jclass cls) {
 
 
 void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
-  string signature = GetClassSignature(cls);
+  std::string signature = GetClassSignature(cls);
   if (signature.empty()) {
     return;
   }
@@ -126,7 +125,7 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
 
   // Maintain set of methods we discovered in superclasses to ignore those
   // in base classes. The pair stores method name and signature.
-  std::set<std::pair<string, string>> registered_methods;
+  std::set<std::pair<std::string, std::string>> registered_methods;
 
   while (current_class_ref != nullptr) {
     LoadSingleClassMetadata(
@@ -167,10 +166,9 @@ void JvmClassMetadataReader::LoadClassMetadata(jclass cls, Entry* metadata) {
       metadata->static_fields.end());
 }
 
-
 void JvmClassMetadataReader::LoadImplementedInterfacesMetadata(
     jclass parent,
-    std::set<std::pair<string, string>>* registered_methods,
+    std::set<std::pair<std::string, std::string>>* registered_methods,
     Entry* metadata) {
   jvmtiError err = JVMTI_ERROR_NONE;
 
@@ -189,14 +187,13 @@ void JvmClassMetadataReader::LoadImplementedInterfacesMetadata(
   }
 }
 
-
 void JvmClassMetadataReader::LoadSingleClassMetadata(
     jclass cls,
-    std::set<std::pair<string, string>>* registered_methods,
+    std::set<std::pair<std::string, std::string>>* registered_methods,
     Entry* metadata) {
   jvmtiError err = JVMTI_ERROR_NONE;
 
-  string class_signature = GetClassSignature(cls);
+  std::string class_signature = GetClassSignature(cls);
   if (class_signature.empty()) {
     return;
   }
@@ -251,7 +248,7 @@ void JvmClassMetadataReader::LoadSingleClassMetadata(
       // If two instance methods have the same arguments, the one in the
       // superclass overrides the one in the base class. This will be true
       // even if return types are difference (this is called covariance).
-      std::pair<string, string> key;
+      std::pair<std::string, std::string> key;
       if (method_metadata.is_static()) {
         key = {
           method_metadata.name,
@@ -276,13 +273,9 @@ void JvmClassMetadataReader::LoadSingleClassMetadata(
   }
 }
 
-
 void JvmClassMetadataReader::LoadFieldInfo(
-    jclass cls,
-    const string& class_signature,
-    jfieldID field_id,
-    DataVisibilityPolicy::Class* class_visibility,
-    Entry* metadata) {
+    jclass cls, const std::string& class_signature, jfieldID field_id,
+    DataVisibilityPolicy::Class* class_visibility, Entry* metadata) {
   int err = JVMTI_ERROR_NONE;
 
   jint field_modifiers = 0;
@@ -311,8 +304,8 @@ void JvmClassMetadataReader::LoadFieldInfo(
     return;
   }
 
-  string field_name = ProcessFieldName(field_name_buffer.get());
-  string field_signature = field_signature_buffer.get();
+  std::string field_name = ProcessFieldName(field_name_buffer.get());
+  std::string field_signature = field_signature_buffer.get();
 
   if ((class_visibility != nullptr) &&
       !class_visibility->IsFieldVisible(field_name, field_modifiers)) {
@@ -356,11 +349,8 @@ void JvmClassMetadataReader::LoadFieldInfo(
   }
 }
 
-
 JvmClassMetadataReader::Method JvmClassMetadataReader::LoadMethodInfo(
-    jclass cls,
-    const string& class_signature,
-    jmethodID method_id,
+    jclass cls, const std::string& class_signature, jmethodID method_id,
     DataVisibilityPolicy::Class* class_visibility) {
   int err = JVMTI_ERROR_NONE;
 
@@ -399,7 +389,6 @@ JvmClassMetadataReader::Method JvmClassMetadataReader::LoadMethodInfo(
 
   return method;
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

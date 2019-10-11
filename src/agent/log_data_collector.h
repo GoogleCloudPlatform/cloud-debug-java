@@ -44,7 +44,7 @@ class LogDataCollector {
       jthread thread);
 
   // Formats the log message string.
-  string Format(const BreakpointModel& breakpoint) const;
+  std::string Format(const BreakpointModel& breakpoint) const;
 
  private:
   // Evaluates a watched expression. Returns compilation error message if
@@ -62,7 +62,7 @@ class LogDataCollector {
   // 3. Formatted object if an expression evaluates to an object. The
   //    formatting may either call "toString()" or print out all the object
   //    fields.
-  std::vector<string> watch_results_;
+  std::vector<std::string> watch_results_;
 
   DISALLOW_COPY_AND_ASSIGN(LogDataCollector);
 };

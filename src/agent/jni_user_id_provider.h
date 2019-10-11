@@ -34,7 +34,7 @@ class JniUserIdProvider : public UserIdProvider {
 
   void Collect() override;
 
-  bool Format(string* kind, string* id) override;
+  bool Format(std::string* kind, std::string* id) override;
 
  private:
   // Callback that creates a Java object implementing the

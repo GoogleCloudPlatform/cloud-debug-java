@@ -333,7 +333,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[Z") {  // Boolean array.
         jni()->SetBooleanArrayRegion(
             static_cast<jbooleanArray>(ref.get()),
@@ -470,7 +470,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if ((signature.size() > 2) && (signature.front() == '[')) {
         // JVM verifies that the array element is of the right type.
         jni()->SetObjectArrayElement(
@@ -492,7 +492,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[Z") {  // Boolean array.
         jboolean value = 0;
         jni()->GetBooleanArrayRegion(
@@ -531,7 +531,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[C") {
         jchar value = 0;
         jni()->GetCharArrayRegion(
@@ -558,7 +558,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[S") {
         jshort value = 0;
         jni()->GetShortArrayRegion(
@@ -585,7 +585,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[I") {
         jint value = 0;
         jni()->GetIntArrayRegion(
@@ -612,7 +612,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[J") {
         jlong value = 0;
         jni()->GetLongArrayRegion(
@@ -639,7 +639,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[F") {
         jfloat value = 0;
         jni()->GetFloatArrayRegion(
@@ -666,7 +666,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (signature == "[D") {
         jdouble value = 0;
         jni()->GetDoubleArrayRegion(
@@ -693,7 +693,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if ((signature.size() > 2) && (signature.front() == '[')) {
         JniLocalRef value(jni()->GetObjectArrayElement(
             static_cast<jobjectArray>(ref.get()),
@@ -1240,7 +1240,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
         break;
       }
 
-      const string& signature = GetObjectClassSignature(ref.get());
+      const std::string& signature = GetObjectClassSignature(ref.get());
       if (!IsArrayObjectSignature(signature)) {
         SET_INTERNAL_ERROR("$0 is not an array type", signature);
         break;
@@ -1515,12 +1515,10 @@ jclass NanoJavaInterpreter::LoadClass(
   return nullptr;
 }
 
-
-void NanoJavaInterpreter::SetOpcodeNotSupportedError(string opcode) {
+void NanoJavaInterpreter::SetOpcodeNotSupportedError(std::string opcode) {
   SetResult(MethodCallResult::Error(FormatMessageModel
       { OpcodeNotSupported, { method_name(), std::move(opcode) } }));
 }
-
 
 bool NanoJavaInterpreter::DispatchExceptionHandler() {
   if ((result_ == nullptr) ||
@@ -1628,7 +1626,7 @@ JniLocalRef NanoJavaInterpreter::PopModifiablePrimitiveArray(
     return nullptr;
   }
 
-  const string& signature = GetObjectClassSignature(ref.get());
+  const std::string& signature = GetObjectClassSignature(ref.get());
   if (signature != array_signature) {
     SET_INTERNAL_ERROR(
         "$0 is not a primitive array $1",
@@ -2243,8 +2241,8 @@ void NanoJavaInterpreter::ReturnOperation(JType return_opcode_type) {
   JniLocalRef return_value = stack_.PopStackObject();
   if (return_value != nullptr) {
     if (!jni()->IsInstanceOf(return_value.get(), return_cls)) {
-      string actual = GetObjectClassSignature(return_value.get());
-      string expected = GetClassSignature(return_cls);
+      std::string actual = GetObjectClassSignature(return_value.get());
+      std::string expected = GetClassSignature(return_cls);
       SET_INTERNAL_ERROR(
           "returned object ($0) is not an instance of $1",
           TypeNameFromSignature({ JType::Object, actual }),
@@ -2328,9 +2326,8 @@ NanoJavaInterpreter::DiagState::DiagState(
       parent_frame_(parent_frame) {
 }
 
-
-string NanoJavaInterpreter::DiagState::method_name() const {
-  string name;
+std::string NanoJavaInterpreter::DiagState::method_name() const {
+  std::string name;
 
   name += TypeNameFromSignature(
       interpreter_->method_->class_file()->class_signature());
@@ -2340,8 +2337,8 @@ string NanoJavaInterpreter::DiagState::method_name() const {
   return name;
 }
 
-string NanoJavaInterpreter::DiagState::FormatCallStack() const {
-  string s;
+std::string NanoJavaInterpreter::DiagState::FormatCallStack() const {
+  std::string s;
   const NanoJavaInterpreter* frame = interpreter_;
   while (frame != nullptr) {
     if (!s.empty()) {

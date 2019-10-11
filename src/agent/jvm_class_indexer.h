@@ -52,13 +52,13 @@ class JvmClassIndexer : public ClassIndexer {
     on_class_prepared_.Unsubscribe(std::move(cookie));
   }
 
-  JniLocalRef FindClassBySignature(const string& class_signature) override;
+  JniLocalRef FindClassBySignature(const std::string& class_signature) override;
 
-  JniLocalRef FindClassByName(const string& class_name) override;
+  JniLocalRef FindClassByName(const std::string& class_name) override;
 
   std::shared_ptr<Type> GetPrimitiveType(JType type) override;
 
-  std::shared_ptr<Type> GetReference(const string& signature) override;
+  std::shared_ptr<Type> GetReference(const std::string& signature) override;
 
  private:
   // Looks up the loaded class object by hash code of a class type name.
@@ -66,7 +66,7 @@ class JvmClassIndexer : public ClassIndexer {
   // hash code.
   JniLocalRef FindClassByHashCode(
       size_t hash_code,
-      std::function<bool(const string&)> fn_check_signature);
+      std::function<bool(const std::string&)> fn_check_signature);
 
  private:
   // We want to use JobjectMap as a set, so we map key to empty structure.
@@ -105,7 +105,7 @@ class JvmClassIndexer : public ClassIndexer {
 
   // Cache of type references.
   // TODO: implement some sort of LRU cache to keep "Type" alive.
-  std::map<string, std::weak_ptr<Type>> ref_cache_;
+  std::map<std::string, std::weak_ptr<Type>> ref_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmClassIndexer);
 };

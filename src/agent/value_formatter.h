@@ -62,10 +62,8 @@ class ValueFormatter {
   // name of "source" (e.g. "int"). If type not needed, "type" can be nullptr.
   // Returns status message of "Format" operation (can be nullptr).
   static std::unique_ptr<StatusMessageModel> Format(
-      const NamedJVariant& source,
-      const Options& options,
-      string* formatted_value,
-      string* type);
+      const NamedJVariant& source, const Options& options,
+      std::string* formatted_value, std::string* type);
 };
 
 

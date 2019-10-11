@@ -38,9 +38,7 @@ class IterableTypeEvaluator : public TypeEvaluator {
   // interface.
   bool IsIterable(jclass cls) const;
 
-  string GetEvaluatorName() override {
-    return "IterableTypeEvaluator";
-  }
+  std::string GetEvaluatorName() override { return "IterableTypeEvaluator"; }
 
   void Evaluate(
       MethodCaller* method_caller,

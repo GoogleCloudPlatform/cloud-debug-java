@@ -31,9 +31,9 @@ class MethodCaller;
 class MethodCallEvaluator : public ExpressionEvaluator {
  public:
   MethodCallEvaluator(
-      string method_name,
+      std::string method_name,
       std::unique_ptr<ExpressionEvaluator> instance_source,
-      string possible_class_name,
+      std::string possible_class_name,
       std::vector<std::unique_ptr<ExpressionEvaluator>> arguments);
 
   ~MethodCallEvaluator() override;
@@ -100,7 +100,7 @@ class MethodCallEvaluator : public ExpressionEvaluator {
 
  private:
   // Method name (whether it's an instance method or a static method).
-  const string method_name_;
+  const std::string method_name_;
 
   // Source object on which the instance method is invoked. Ignored if the
   // call turns out to be to a static method.
@@ -108,7 +108,7 @@ class MethodCallEvaluator : public ExpressionEvaluator {
 
   // Fully qualified class name to try to interpret "method_name_" as a static
   // method.
-  const string possible_class_name_;
+  const std::string possible_class_name_;
 
   // Reader for local instance object (i.e. "this") for implicit instance
   // method calls (example: "1+getSomething()", where "getSomething" is an

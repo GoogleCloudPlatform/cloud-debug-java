@@ -41,9 +41,8 @@ static CompiledExpression EnsureDefaultErrorMessage(
   return compiled_expression;
 }
 
-CompiledExpression CompileExpression(
-    const string& string_expression,
-    ReadersFactory* readers_factory) {
+CompiledExpression CompileExpression(const std::string& string_expression,
+                                     ReadersFactory* readers_factory) {
   if (string_expression.size() > kMaxExpressionLength) {
     LOG(WARNING) << "Expression can't be compiled because it is too long: "
                  << string_expression.size();
@@ -110,7 +109,6 @@ CompiledExpression CompileExpression(
 
   return compiled_expression;
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

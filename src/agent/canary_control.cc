@@ -42,9 +42,8 @@ CanaryControl::CanaryControl(
       bridge_(bridge) {
 }
 
-
 bool CanaryControl::RegisterBreakpointCanary(
-    const string& breakpoint_id,
+    const std::string& breakpoint_id,
     std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete) {
   int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
 
@@ -76,17 +75,15 @@ bool CanaryControl::RegisterBreakpointCanary(
   return false;
 }
 
-
-void CanaryControl::BreakpointCompleted(const string& breakpoint_id) {
+void CanaryControl::BreakpointCompleted(const std::string& breakpoint_id) {
   absl::MutexLock lock(&mu_);
   canary_breakpoints_.erase(breakpoint_id);
 }
 
-
 void CanaryControl::ApproveHealtyBreakpoints() {
   // Choose breakpoints that can be approved.
-  std::vector<string> healthy_ids;
-  std::map<string, CanaryBreakpoint> unhealthy_ids;
+  std::vector<std::string> healthy_ids;
+  std::map<std::string, CanaryBreakpoint> unhealthy_ids;
   {
     int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
     int64 cutoff =
@@ -112,10 +109,10 @@ void CanaryControl::ApproveHealtyBreakpoints() {
   }
 
   // Try to approve the breakpoints.
-  std::vector<string> approved_ids;
+  std::vector<std::string> approved_ids;
   approved_ids.reserve(healthy_ids.size());
 
-  for (const string& breakpoint_id : healthy_ids) {
+  for (const std::string& breakpoint_id : healthy_ids) {
     for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
       if (bridge_->ApproveBreakpointCanary(breakpoint_id)) {
         approved_ids.push_back(breakpoint_id);
@@ -135,7 +132,7 @@ void CanaryControl::ApproveHealtyBreakpoints() {
   absl::MutexLock lock(&mu_);
 
   // Remove the approved breakpoints from the canary list.
-  for (const string& breakpoint_id : approved_ids) {
+  for (const std::string& breakpoint_id : approved_ids) {
     canary_breakpoints_.erase(breakpoint_id);
   }
 

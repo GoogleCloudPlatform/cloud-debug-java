@@ -35,11 +35,9 @@ class FieldEvaluator : public ExpressionEvaluator {
   // 2. Static variable of a "possible_class_name" class (if specified). The
   // name should be fully qualified (e.g. "com.my.Green"). "instance_source"
   // is ignored in this case.
-  FieldEvaluator(
-      std::unique_ptr<ExpressionEvaluator> instance_source,
-      string identifier_name,
-      string possible_class_name,
-      string field_name);
+  FieldEvaluator(std::unique_ptr<ExpressionEvaluator> instance_source,
+                 std::string identifier_name, std::string possible_class_name,
+                 std::string field_name);
 
   ~FieldEvaluator() override;
 
@@ -83,13 +81,13 @@ class FieldEvaluator : public ExpressionEvaluator {
 
   // Fully qualified identifier name we are trying to interpret. This should
   // be "possible_class_name_.identifier_name".
-  const string identifier_name_;
+  const std::string identifier_name_;
 
   // Fully qualified class name to try to interpret "field_name_" as static.
-  const string possible_class_name_;
+  const std::string possible_class_name_;
 
   // Name of the instance field to read.
-  const string field_name_;
+  const std::string field_name_;
 
   // Reader for instance fields. In case of an inner class this chain will
   // follow inner classes references (e.g. this$3.this$2.this$1.myField).
@@ -113,11 +111,10 @@ class FieldEvaluator : public ExpressionEvaluator {
 // Helper function to create a chain of instance field readers supporting
 // inner classes. Returns empty vector if no field was matched.
 std::vector<std::unique_ptr<InstanceFieldReader>>
-CreateInstanceFieldReadersChain(
-    ReadersFactory* readers_factory,
-    const string& class_signature,
-    const string& field_name,
-    FormatMessageModel* error_message);
+CreateInstanceFieldReadersChain(ReadersFactory* readers_factory,
+                                const std::string& class_signature,
+                                const std::string& field_name,
+                                FormatMessageModel* error_message);
 
 }  // namespace cdbg
 }  // namespace devtools

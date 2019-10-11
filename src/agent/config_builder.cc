@@ -83,7 +83,7 @@ class MethodRuleBuilder {
   explicit MethodRuleBuilder(Config::Method rule) : rule_(std::move(rule)) {
   }
 
-  MethodRuleBuilder& signature(const string& value) {
+  MethodRuleBuilder& signature(const std::string& value) {
     rule_.signature = value;
     return *this;
   }
@@ -136,14 +136,12 @@ static MethodRuleBuilder AllowAll() {
   return MethodRuleBuilder(rule);
 }
 
-
-static MethodRuleBuilder Allow(string method_name) {
+static MethodRuleBuilder Allow(std::string method_name) {
   Config::Method rule;
   rule.action = Config::Method::CallAction::Allow;
   rule.name = std::move(method_name);
   return MethodRuleBuilder(rule);
 }
-
 
 static MethodRuleBuilder BlockAll() {
   Config::Method rule;
@@ -151,14 +149,12 @@ static MethodRuleBuilder BlockAll() {
   return MethodRuleBuilder(rule);
 }
 
-
-static MethodRuleBuilder Block(string method_name) {
+static MethodRuleBuilder Block(std::string method_name) {
   Config::Method rule;
   rule.action = Config::Method::CallAction::Block;
   rule.name = std::move(method_name);
   return MethodRuleBuilder(rule);
 }
-
 
 static MethodRuleBuilder InterpretAll() {
   Config::Method rule;
@@ -168,8 +164,7 @@ static MethodRuleBuilder InterpretAll() {
   return MethodRuleBuilder(rule);
 }
 
-
-static MethodRuleBuilder Interpret(string method_name) {
+static MethodRuleBuilder Interpret(std::string method_name) {
   Config::Method rule;
   rule.action = absl::GetFlag(FLAGS_enable_safe_caller)
                     ? Config::Method::CallAction::Interpret
@@ -177,7 +172,6 @@ static MethodRuleBuilder Interpret(string method_name) {
   rule.name = std::move(method_name);
   return MethodRuleBuilder(rule);
 }
-
 
 static std::vector<Config::Method> ToMethods(
     std::initializer_list<MethodRuleBuilder> rules) {
@@ -192,10 +186,10 @@ static std::vector<Config::Method> ToMethods(
 
 
 // Split string separated by a semicolon delimiter.
-static std::vector<string> SplitString(const string& s) {
+static std::vector<std::string> SplitString(const std::string& s) {
   std::stringstream ss(s);
-  string item;
-  std::vector<string> items;
+  std::string item;
+  std::vector<std::string> items;
   while (std::getline(ss, item, ':')) {
     items.push_back(std::move(item));
   }
@@ -203,23 +197,22 @@ static std::vector<string> SplitString(const string& s) {
   return items;
 }
 
-
 // Splits "class#method" into the two strings.
-static std::pair<string, string> SplitMethod(const string& s) {
+static std::pair<std::string, std::string> SplitMethod(const std::string& s) {
   size_t pos = s.find('#');
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     DCHECK(false) << s;
-    return std::make_pair(string(), string());
+    return std::make_pair(std::string(), std::string());
   }
 
   return std::make_pair(s.substr(0, pos), s.substr(pos + 1));
 }
 
-
 // Builds default configuration of safe method calling.
-static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
+static std::map<std::string, std::vector<Config::Method>>
+DefaultMethodsConfig() {
   // Build set of classes, but use internal names, to make the code cleaner.
-  std::map<string, std::vector<Config::Method>> classes;
+  std::map<std::string, std::vector<Config::Method>> classes;
 
   [&classes]() {
       classes["java/lang/Object"] = ToMethods({
@@ -553,7 +546,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
   // Additional configuration provided through flags.
   //
 
-  for (const string& item :
+  for (const std::string& item :
        SplitString(absl::GetFlag(FLAGS_extra_allowed_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding block rule for class " << method.first
@@ -561,7 +554,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
     classes[method.first].push_back(Allow(method.second).build());
   }
 
-  for (const string& item :
+  for (const std::string& item :
        SplitString(absl::GetFlag(FLAGS_extra_blocked_methods))) {
     const auto method = SplitMethod(item);
     VLOG(1) << "Adding allow rule for class " << method.first
@@ -569,7 +562,7 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
     classes[method.first].push_back(Block(method.second).build());
   }
 
-  for (const string& cls :
+  for (const std::string& cls :
        SplitString(absl::GetFlag(FLAGS_extra_whitelisted_classes))) {
     VLOG(1) << "Adding allow-all rule for class " << cls;
     classes[cls].push_back(AllowAll().build());
@@ -577,7 +570,6 @@ static std::map<string, std::vector<Config::Method>> DefaultMethodsConfig() {
 
   return classes;
 }
-
 
 std::unique_ptr<Config> DefaultConfig() {
   Config::Builder builder;

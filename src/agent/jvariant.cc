@@ -252,8 +252,7 @@ void JVariant::change_ref_type(ReferenceKind new_reference_type) {
   }
 }
 
-
-string JVariant::ToString(bool concise) const {
+std::string JVariant::ToString(bool concise) const {
   // Long formatting includes the type of the value. This option is only used
   // in unit tests, so we don't need to optimize it. The concise form on the
   // other hand is called a lot in product code and needs to be as optimal as
@@ -343,9 +342,8 @@ string JVariant::ToString(bool concise) const {
       return (u_.l == nullptr) ? "null" : "<Object>";
   }
 
-  return string();
+  return std::string();
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

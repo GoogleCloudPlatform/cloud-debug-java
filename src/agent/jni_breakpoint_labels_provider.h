@@ -35,7 +35,7 @@ class JniBreakpointLabelsProvider : public BreakpointLabelsProvider {
 
   void Collect() override;
 
-  std::map<string, string> Format() override;
+  std::map<std::string, std::string> Format() override;
 
  private:
   // Callback that creates a Java object implementing the

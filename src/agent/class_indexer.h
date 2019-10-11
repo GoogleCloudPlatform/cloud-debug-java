@@ -40,7 +40,7 @@ class ClassIndexer {
     virtual JType GetType() const = 0;
 
     // Gets the JVMTI signature of the class (e.g. "Lcom/prod/MyClass$Inner").
-    virtual const string& GetSignature() const = 0;
+    virtual const std::string& GetSignature() const = 0;
 
     // Finds the class object. Returns nullptr if the class hasn't been loaded
     // yet. The global reference to the class object is cached. The caller
@@ -49,17 +49,15 @@ class ClassIndexer {
 
     // Searches field by name and signature. Returns nullptr if not found.
     // TODO: remove this method. It doesn't belong here.
-    virtual jfieldID FindField(
-        bool is_static,
-        const string& name,
-        const string& signature) = 0;
+    virtual jfieldID FindField(bool is_static, const std::string& name,
+                               const std::string& signature) = 0;
   };
 
   // Event fired when a new class has been prepared in JVM (i.e. loaded and
   // initialized).
-  typedef Observable<
-      const string& /* type_name */,
-      const string& /* class_signature */> OnClassPreparedEvent;
+  typedef Observable<const std::string& /* type_name */,
+                     const std::string& /* class_signature */>
+      OnClassPreparedEvent;
 
   virtual ~ClassIndexer() { }
 
@@ -74,13 +72,14 @@ class ClassIndexer {
   // Looks for a prepared Java class by class signature. A class is prepared
   // after it is first referenced and has its static fields initialized. If
   // the class is found, the function returns local reference to "jclass".
-  virtual JniLocalRef FindClassBySignature(const string& class_signature) = 0;
+  virtual JniLocalRef FindClassBySignature(
+      const std::string& class_signature) = 0;
 
   // Looks for a prepared Java class by fully qualified class name (e.g.
   // "com.google.util.SuperString.Nested"). A class is prepared after it is
   // first referenced and has its static fields initialized. If the class is
   // found, the function returns local reference to "jclass".
-  virtual JniLocalRef FindClassByName(const string& class_name) = 0;
+  virtual JniLocalRef FindClassByName(const std::string& class_name) = 0;
 
   // Gets reference to primitive type. The function returns "shared_ptr" for
   // consistency with "CreateReference".
@@ -90,7 +89,7 @@ class ClassIndexer {
   // into a class object. The lookup operation is cached. The cache can be
   // invalidated any time, hence the returned "shared_ptr".
   // The returned "Type" object should not outlive this instance.
-  virtual std::shared_ptr<Type> GetReference(const string& signature) = 0;
+  virtual std::shared_ptr<Type> GetReference(const std::string& signature) = 0;
 };
 
 

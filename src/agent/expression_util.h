@@ -45,7 +45,7 @@ struct CompiledExpression {
   FormatMessageModel error_message;
 
   // Original expression text.
-  string expression;
+  std::string expression;
 };
 
 // Shortcut method to tokenize, parse, tree-walk and compile the specified
@@ -53,9 +53,8 @@ struct CompiledExpression {
 // semantically incorrect expression). In such cases, "error_message" is
 // populated with a human readable parameterized description of why the
 // expression could not be compiled.
-CompiledExpression CompileExpression(
-    const string& string_expression,
-    ReadersFactory* readers_factory);
+CompiledExpression CompileExpression(const std::string& string_expression,
+                                     ReadersFactory* readers_factory);
 
 }  // namespace cdbg
 }  // namespace devtools

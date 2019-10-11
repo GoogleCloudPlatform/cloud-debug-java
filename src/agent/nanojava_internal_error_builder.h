@@ -57,10 +57,10 @@ class NanoJavaInternalErrorProvider {
   virtual ~NanoJavaInternalErrorProvider() {}
 
   // Gets the name of the currently executing method.
-  virtual string method_name() const = 0;
+  virtual std::string method_name() const = 0;
 
   // Format call stack of the interpreted methods.
-  virtual string FormatCallStack() const = 0;
+  virtual std::string FormatCallStack() const = 0;
 
   // Sets result of the method. This will stop the execution.
   virtual void SetResult(MethodCallResult result) = 0;
@@ -70,11 +70,8 @@ class NanoJavaInternalErrorProvider {
 // Augments FormatMessageModel with additional details ("internal error"
 // prefix, source file name and line number and the interpreter call stack).
 inline MethodCallResult BuildNanoJavaInternalError(
-    NanoJavaInternalErrorProvider* provider,
-    string source_file_name,
-    int line,
-    string format,
-    std::vector<string> parameters) {
+    NanoJavaInternalErrorProvider* provider, std::string source_file_name,
+    int line, std::string format, std::vector<std::string> parameters) {
   const int size = parameters.size();
 
   std::ostringstream ss;

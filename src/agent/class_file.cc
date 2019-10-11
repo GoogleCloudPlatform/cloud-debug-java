@@ -104,13 +104,12 @@ static ClassFile::InstructionType* BuildInstructionTypeMap() {
 // signatures). Therefore, we also need to make a similar transformation. Here,
 // we search the target class to see if there is a signature polymorphic method
 // that matches the Java method being called.
-static bool IsPolymorphicMethod(
-    jclass owner_cls,
-    const string& owner_cls_signature,
-    const string& method_name,
-    string* polymorphic_method_signature,
-    jmethodID* polymorphic_instance_method_id,
-    jmethodID* polymorphic_static_method_id) {
+static bool IsPolymorphicMethod(jclass owner_cls,
+                                const std::string& owner_cls_signature,
+                                const std::string& method_name,
+                                std::string* polymorphic_method_signature,
+                                jmethodID* polymorphic_instance_method_id,
+                                jmethodID* polymorphic_static_method_id) {
   if (owner_cls_signature != "Ljava/lang/invoke/VarHandle;" &&
       owner_cls_signature != "Ljava/lang/invoke/MethodHandle;") {
     return false;
@@ -179,13 +178,10 @@ static bool IsPolymorphicMethod(
   return false;  // Not found.
 }
 
-
-ClassFile::ClassFile(ClassIndexer* class_indexer, string buffer)
+ClassFile::ClassFile(ClassIndexer* class_indexer, std::string buffer)
     : buffer_(std::move(buffer)),
       class_indexer_(class_indexer),
-      constant_pool_(class_indexer) {
-}
-
+      constant_pool_(class_indexer) {}
 
 bool ClassFile::Initialize() {
   if (!CheckClassFileVersion()) {
@@ -212,15 +208,13 @@ bool ClassFile::Initialize() {
 std::unique_ptr<ClassFile> ClassFile::Load(
     ClassIndexer* class_indexer,
     jclass cls) {
-  string blob = jniproxy::ClassPathLookup()->readClassFile(cls)
-      .Release(ExceptionAction::LOG_AND_IGNORE);
+  std::string blob = jniproxy::ClassPathLookup()->readClassFile(cls).Release(
+      ExceptionAction::LOG_AND_IGNORE);
   return LoadFromBlob(class_indexer, std::move(blob));
 }
 
-
-std::unique_ptr<ClassFile> ClassFile::LoadFromBlob(
-    ClassIndexer* class_indexer,
-    string blob) {
+std::unique_ptr<ClassFile> ClassFile::LoadFromBlob(ClassIndexer* class_indexer,
+                                                   std::string blob) {
   std::unique_ptr<ClassFile> instance(
       new ClassFile(class_indexer, std::move(blob)));
   if (!instance->Initialize()) {
@@ -229,7 +223,6 @@ std::unique_ptr<ClassFile> ClassFile::LoadFromBlob(
 
   return instance;
 }
-
 
 Nullable<int> ClassFile::GetClassModifiers() const {
   ByteSource reader = GetData();
@@ -253,11 +246,9 @@ const ConstantPool::ClassRef* ClassFile::GetClass() {
   return constant_pool_.GetClass(index);
 }
 
-
-ClassFile::Method* ClassFile::FindMethod(
-    bool is_static,
-    const string& name,
-    const string& signature) {
+ClassFile::Method* ClassFile::FindMethod(bool is_static,
+                                         const std::string& name,
+                                         const std::string& signature) {
   for (Method& method : methods_) {
     if ((method.IsStatic() == is_static) &&
         (method.name() == name) &&
@@ -268,7 +259,6 @@ ClassFile::Method* ClassFile::FindMethod(
 
   return nullptr;  // Not found.
 }
-
 
 bool ClassFile::CheckClassFileVersion() {
   ByteSource reader(buffer_);

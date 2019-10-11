@@ -40,8 +40,8 @@ struct DurationModel {
 };
 
 struct FormatMessageModel {
-  string format;
-  std::vector<string> parameters;
+  std::string format;
+  std::vector<std::string> parameters;
 
   bool operator== (const FormatMessageModel& other) const {
     return (format == other.format) &&
@@ -70,7 +70,7 @@ struct StatusMessageModel {
            (description == other.description);
   }
 
-  string RefersToToString() const {
+  std::string RefersToToString() const {
     switch (refers_to) {
       case Context::UNSPECIFIED : return "UNSPECIFIED";
       case Context::BREAKPOINT_SOURCE_LOCATION :
@@ -86,29 +86,29 @@ struct StatusMessageModel {
 };
 
 struct SourceLocationModel {
-  string path;
+  std::string path;
   int32 line = -1;
 };
 
 struct VariableModel {
-  string name;
-  Nullable<string> value;
-  string type;
+  std::string name;
+  Nullable<std::string> value;
+  std::string type;
   Nullable<uint64> var_table_index;
   std::vector<std::unique_ptr<VariableModel>> members;
   std::unique_ptr<StatusMessageModel> status;
 };
 
 struct StackFrameModel {
-  string function;
+  std::string function;
   std::unique_ptr<SourceLocationModel> location;
   std::vector<std::unique_ptr<VariableModel>> arguments;
   std::vector<std::unique_ptr<VariableModel>> locals;
 };
 
 struct UserIdModel {
-  string kind;
-  string id;
+  std::string kind;
+  std::string id;
 };
 
 struct BreakpointModel {
@@ -123,7 +123,7 @@ struct BreakpointModel {
     ERROR = 2
   };
 
-  string ActionToString() const {
+  std::string ActionToString() const {
     switch (action) {
       case Action::CAPTURE : return "CAPTURE";
       case Action::LOG : return "LOG";
@@ -131,13 +131,13 @@ struct BreakpointModel {
     }
   }
 
-  string id;
+  std::string id;
   bool is_canary = false;
   Action action = Action::CAPTURE;
   std::unique_ptr<SourceLocationModel> location;
-  string condition;
-  std::vector<string> expressions;
-  string log_message_format;
+  std::string condition;
+  std::vector<std::string> expressions;
+  std::string log_message_format;
   LogLevel log_level = LogLevel::INFO;
   bool is_final_state = false;
   TimestampModel create_time;
@@ -145,7 +145,7 @@ struct BreakpointModel {
   std::vector<std::unique_ptr<StackFrameModel>> stack;
   std::vector<std::unique_ptr<VariableModel>> evaluated_expressions;
   std::vector<std::unique_ptr<VariableModel>> variable_table;
-  std::map<string, string> labels;
+  std::map<std::string, std::string> labels;
   std::unique_ptr<UserIdModel> evaluated_user_id;
   std::unique_ptr<DurationModel> expires_in;
 };
@@ -154,17 +154,17 @@ struct BreakpointModel {
 // format is either ProtoBuf or JSON depending on the build and configuration.
 struct SerializedBreakpoint {
   // Either "v2proto" or "json".
-  string format;
+  std::string format;
 
   // Breakpoint ID is encoded somewhere in "data", but it is hard to get. We
   // pass it around so that we don't need to deserialize the entire breakpoint
   // to get it.
-  string id;
+  std::string id;
 
   // If format is "v2proto", data is protobuf message serialized to byte
   // array.
   // If format is "json", data is UTF-8 encoded JSON string.
-  string data;
+  std::string data;
 };
 
 }  // namespace cdbg

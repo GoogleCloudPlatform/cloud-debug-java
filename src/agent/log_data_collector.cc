@@ -27,19 +27,18 @@ namespace cdbg {
 
 // Substitutes parameter placeholders $0, $1, etc. with the parameter value
 // as evaluated by "parameters".
-static string SubstitutePlaceholders(
-    const string& format,
-    std::function<string(int)> parameters) {
-  string result;
+static std::string SubstitutePlaceholders(
+    const std::string& format, std::function<std::string(int)> parameters) {
+  std::string result;
   result.reserve(format.size());
 
-  for (string::const_iterator it = format.begin(); it != format.end(); ) {
+  for (std::string::const_iterator it = format.begin(); it != format.end();) {
     if ((*it != '$') || (it + 1 == format.end())) {
       result.push_back(*it++);
       continue;
     }
 
-    string::const_iterator p = it + 1;
+    std::string::const_iterator p = it + 1;
 
     // "$$" is an escaped form of "$"
     if (*p == '$') {
@@ -66,12 +65,11 @@ static string SubstitutePlaceholders(
   return result;
 }
 
-
 // Formats structured message into a string.
 // Note that we are losing the ability to localize the message that goes into
 // the log.
 // TODO: retain the message as is once we have structured log messages.
-static string FormatMessage(const FormatMessageModel& message) {
+static std::string FormatMessage(const FormatMessageModel& message) {
   return SubstitutePlaceholders(
       message.format,
       [&message] (int parameter_index) -> string {
@@ -86,9 +84,8 @@ static string FormatMessage(const FormatMessageModel& message) {
       });
 }
 
-
 // Prints out the value of JVariant or status message if present.
-static string FormatValue(const NamedJVariant& result, bool quote_string) {
+static std::string FormatValue(const NamedJVariant& result, bool quote_string) {
   if (result.value.type() == JType::Void) {
     return FormatMessage(result.status.description);
   }
@@ -96,16 +93,15 @@ static string FormatValue(const NamedJVariant& result, bool quote_string) {
   ValueFormatter::Options format_options;
   format_options.quote_string = quote_string;
 
-  string formatted_value;
+  std::string formatted_value;
   ValueFormatter::Format(result, format_options, &formatted_value, nullptr);
 
   return formatted_value;
 }
 
-
 // Prints out all the members of an object in a yaml like format. The output
 // is supposed to be human readable rather than a protocol format.
-static string FormatMembers(const std::vector<NamedJVariant>& members) {
+static std::string FormatMembers(const std::vector<NamedJVariant>& members) {
   if ((members.size() == 1) &&
       members[0].name.empty() &&
       members[0].status.description.format.empty()) {
@@ -114,7 +110,7 @@ static string FormatMembers(const std::vector<NamedJVariant>& members) {
     return FormatValue(members[0], false);
   }
 
-  string result;
+  std::string result;
   result += "{ ";
 
   for (const NamedJVariant& member : members) {
@@ -131,7 +127,6 @@ static string FormatMembers(const std::vector<NamedJVariant>& members) {
 
   return result;
 }
-
 
 // Checks if the object class has a non-default version of "toString()".
 static bool HasCustomToString(const JVariant& item) {
@@ -252,8 +247,7 @@ NamedJVariant LogDataCollector::EvaluateWatchedExpression(
   return result;
 }
 
-
-string LogDataCollector::Format(const BreakpointModel& breakpoint) const {
+std::string LogDataCollector::Format(const BreakpointModel& breakpoint) const {
   return SubstitutePlaceholders(
       breakpoint.log_message_format,
       [this] (int watch_index) -> string {
@@ -267,7 +261,6 @@ string LogDataCollector::Format(const BreakpointModel& breakpoint) const {
         return watch_results_[watch_index];
       });
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

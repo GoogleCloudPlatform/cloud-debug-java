@@ -116,15 +116,14 @@ class JvmBreakpoint : public Breakpoint,
 
   ~JvmBreakpoint() override;
 
-  const string& id() const override { return definition_->id; }
+  const std::string& id() const override { return definition_->id; }
 
   void Initialize() override;
 
   void ResetToPending() override;
 
-  void OnClassPrepared(
-      const string& type_name,
-      const string& class_signature) override;
+  void OnClassPrepared(const std::string& type_name,
+                       const std::string& class_signature) override;
 
   void OnJvmBreakpointHit(
       jthread thread,
@@ -259,11 +258,9 @@ class JvmBreakpoint : public Breakpoint,
     // Called when quota has been exceeded.  Updates is_paused_ and logs a
     // message.  The message parameter specifies the out-of-quota message to
     // log.
-    void OutOfQuota(
-        DynamicLogger* logger,
-        BreakpointModel::LogLevel log_level,
-        const string& message,
-        const ResolvedSourceLocation& source_location);
+    void OutOfQuota(DynamicLogger* logger, BreakpointModel::LogLevel log_level,
+                    const std::string& message,
+                    const ResolvedSourceLocation& source_location);
 
     // Returns true if logging is paused.
     bool IsPaused();
@@ -299,7 +296,7 @@ class JvmBreakpoint : public Breakpoint,
 
   // Conditions or expressions can also put a breakpoints into pending state if
   // the class they are called on is not loaded.
-  string class_dependency_signature_;
+  std::string class_dependency_signature_;
 
   // Immutable state of active breakpoint. The code should assume that this
   // variable can change any time (point to a new instance of immutable

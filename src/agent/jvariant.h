@@ -259,7 +259,7 @@ class JVariant {
   void change_ref_type(ReferenceKind new_reference_type);
 
   // Prints the content of this instance to string for debugging purposes.
-  string ToString(bool concise) const;
+  std::string ToString(bool concise) const;
 
  private:
   JVariant& operator= (const JVariant& source) = delete;

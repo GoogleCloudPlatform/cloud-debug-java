@@ -76,7 +76,7 @@ class JvmBreakpointsManager : public BreakpointsManager {
 
   // "breakpoint_id" is not reference because it is a string that might get
   // deleted when breakpoint gets completed.
-  void CompleteBreakpoint(string breakpoint_id) override;
+  void CompleteBreakpoint(std::string breakpoint_id) override;
 
   LeakyBucket* GetGlobalConditionCostLimiter() override {
     return global_condition_cost_limiter_.get();
@@ -99,9 +99,8 @@ class JvmBreakpointsManager : public BreakpointsManager {
   std::vector<std::shared_ptr<Breakpoint>> GetActiveBreakpoints();
 
   // Callback invoked when JVM initialized (aka prepared) a Java class.
-  void OnClassPrepared(
-      const string& type_name,
-      const string& class_signature);
+  void OnClassPrepared(const std::string& type_name,
+                       const std::string& class_signature);
 
  private:
   // Functor to create new instances of "Breakpoint".
@@ -130,7 +129,7 @@ class JvmBreakpointsManager : public BreakpointsManager {
   absl::Mutex mu_set_active_breakpoints_list_;
 
   // List of currently active breakpoints (keyed by breakpoint ID).
-  std::map<string, std::shared_ptr<Breakpoint>> active_breakpoints_;
+  std::map<std::string, std::shared_ptr<Breakpoint>> active_breakpoints_;
 
   // List of recently completed breakpoint IDs that were removed from
   // "active_breakpoints_" and should not go back even if listed
@@ -138,7 +137,7 @@ class JvmBreakpointsManager : public BreakpointsManager {
   // reporting a breakpoint hit and receiving list of active breakpoints
   // from the server. Entries are removed from the set when hub stops listing
   // the breakpoint as active.
-  std::set<string> completed_breakpoints_;
+  std::set<std::string> completed_breakpoints_;
 
   // Reverse map of breakpoints. "method_map_" allows quick lookup of
   // breakpoint given code location (useful on breakpoint hit) and lookup

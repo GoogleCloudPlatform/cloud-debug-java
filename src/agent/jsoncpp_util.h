@@ -27,7 +27,7 @@ namespace cdbg {
 
 // Gets the value of JSON string element. Returns empty string if the attribute
 // does not exist or if it is not a string type.
-string JsonCppGetString(const Json::Value& value, const char* name);
+std::string JsonCppGetString(const Json::Value& value, const char* name);
 
 // Gets the value of JSON boolean element. Returns "def" if the attribute
 // does not exist or if it is not a boolean type.

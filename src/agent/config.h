@@ -55,10 +55,10 @@ class Config {
     };
 
     // Method name. If empty matches any method.
-    string name;
+    std::string name;
 
     // Method signature. If empty matches all methods with the right name.
-    string signature;
+    std::string signature;
 
     // Action for the debugger to take when calling this method.
     CallAction action = CallAction::Block;
@@ -127,14 +127,13 @@ class Config {
     Builder();
 
     // Sets safe caller rules for methods in the specified class.
-    Builder& SetClassConfig(
-        const string& class_signature,
-        std::vector<Method> rules);
+    Builder& SetClassConfig(const std::string& class_signature,
+                            std::vector<Method> rules);
 
     // Adds a single method rule. Creates class configuration as needed.
     // "SetClassConfig" doesn't have to be called before calling this
     // function.
-    Builder& AddMethodRule(const string& class_signature, Method rule);
+    Builder& AddMethodRule(const std::string& class_signature, Method rule);
 
     // Sets default safe caller method rule. It will be used when none of
     // the method rules set with "SetClassConfig" and "AddMethodRule" match.
@@ -162,11 +161,10 @@ class Config {
   // "object_cls_signature" will be "Ljava/lang/Integer;".
   // For static methods, "object_cls_signature" is either equal to
   // "method_cls_signature" or its subclass.
-  const Method& GetMethodRule(
-      const string& method_cls_signature,
-      const string& object_cls_signature,
-      const string& method_name,
-      const string& method_signature) const;
+  const Method& GetMethodRule(const std::string& method_cls_signature,
+                              const std::string& object_cls_signature,
+                              const std::string& method_name,
+                              const std::string& method_signature) const;
 
   // Gets the method call quota for the specified use.
   const MethodCallQuota& GetQuota(MethodCallQuotaType type) const {
@@ -183,7 +181,7 @@ class Config {
   // Non default configuration for class methods. The key is class signature.
   // The list is scanned sequentially until a match is found. If no matches
   // found, the default is Method::kDefault.
-  std::map<string, std::vector<Method>> classes_;
+  std::map<std::string, std::vector<Method>> classes_;
 
   // Default behavior for all class methods unless a method has an explicit
   // configuration.

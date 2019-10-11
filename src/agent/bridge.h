@@ -73,10 +73,10 @@ class Bridge {
   virtual bool HasPendingMessages() const = 0;
 
   // Notifies the backend that a canary agent enabled the breakpoint.
-  virtual bool RegisterBreakpointCanary(const string& breakpoint_id) = 0;
+  virtual bool RegisterBreakpointCanary(const std::string& breakpoint_id) = 0;
 
   // Approves the breakpoint for a global rollout.
-  virtual bool ApproveBreakpointCanary(const string& breakpoint_id) = 0;
+  virtual bool ApproveBreakpointCanary(const std::string& breakpoint_id) = 0;
 
   // Tries to determine if the debugger is enabled.  If the debugger is enabled,
   // sets is_enabled to true and returns true.  If the debugger is disabled,

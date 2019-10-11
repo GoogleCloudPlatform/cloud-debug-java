@@ -43,8 +43,8 @@ static bool IsJavaString(const NamedJVariant& data) {
 
 // The code below replaces all occurrences of "\xC0\x80" in *data_ptr with
 // "\\u0000". It is optimized for performance: works in-place, and runs O(n).
-static void ScrubEmbeddedZeroCharacters(string* data_ptr) {
-  string& data = *data_ptr;
+static void ScrubEmbeddedZeroCharacters(std::string* data_ptr) {
+  std::string& data = *data_ptr;
 
   // Make a pass to identify all embedded zeros (2 bytes).
   std::vector<int> zeros;
@@ -135,12 +135,11 @@ static void ScrubEmbeddedZeroCharacters(string* data_ptr) {
   }
 }
 
-
 // The code below replaces all occurrences of unicode supplementary characters
 // in *data_ptr with a different encoding of the same characters. It is
 // optimized for performance: works in-place, and runs O(n).
-static void ScrubSupplementaryCharacters(string* data_ptr) {
-  string& data = *data_ptr;
+static void ScrubSupplementaryCharacters(std::string* data_ptr) {
+  std::string& data = *data_ptr;
 
   // Make a pass to identify all supplementary characters (6 bytes).
   std::queue<std::pair<int, int32>> supplementaries;
@@ -252,7 +251,6 @@ static void ScrubSupplementaryCharacters(string* data_ptr) {
   data.resize(data.size() + (4 - 6) * supplementaries.size());
 }
 
-
 // Converts Modified UTF8 Java string to a partially equivalent standard UTF8
 // representation. The input must be a valid Modified UTF8 string.
 //
@@ -272,16 +270,14 @@ static void ScrubSupplementaryCharacters(string* data_ptr) {
 //  UTF8 directly encodes these supplementary characters, which takes 4 bytes.
 //  We convert these characters from Modified UTF8 encoding into standard UTF8
 //  encoding.
-static void ScrubModifiedUtf8(string* data_ptr) {
+static void ScrubModifiedUtf8(std::string* data_ptr) {
   ScrubEmbeddedZeroCharacters(data_ptr);
   ScrubSupplementaryCharacters(data_ptr);
 }
 
-
 static std::unique_ptr<StatusMessageModel> FormatJavaString(
-    const NamedJVariant& source,
-    const ValueFormatter::Options& options,
-    string* formatted_value) {
+    const NamedJVariant& source, const ValueFormatter::Options& options,
+    std::string* formatted_value) {
   jobject ref = nullptr;
   if (!source.value.get<jobject>(&ref)) {
     DCHECK(false);
@@ -376,7 +372,6 @@ static std::unique_ptr<StatusMessageModel> FormatJavaString(
           .build();
 }
 
-
 bool ValueFormatter::IsImmutableValueObject(
     WellKnownJClass well_known_jclass) {
   return (well_known_jclass == WellKnownJClass::String);
@@ -447,12 +442,9 @@ int ValueFormatter::GetTotalDataSize(const NamedJVariant& data) {
   return name_size + 4;
 }
 
-
 std::unique_ptr<StatusMessageModel> ValueFormatter::Format(
-    const NamedJVariant& source,
-    const Options& options,
-    string* formatted_value,
-    string* type) {
+    const NamedJVariant& source, const Options& options,
+    std::string* formatted_value, std::string* type) {
   // Format Java string.
   if (IsJavaString(source)) {
     std::unique_ptr<StatusMessageModel> status_message =
@@ -478,7 +470,6 @@ std::unique_ptr<StatusMessageModel> ValueFormatter::Format(
   }
   return nullptr;
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

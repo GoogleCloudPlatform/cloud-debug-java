@@ -27,10 +27,8 @@
 namespace devtools {
 namespace cdbg {
 
-IdentifierEvaluator::IdentifierEvaluator(string identifier_name)
-    : identifier_name_(identifier_name) {
-}
-
+IdentifierEvaluator::IdentifierEvaluator(std::string identifier_name)
+    : identifier_name_(identifier_name) {}
 
 IdentifierEvaluator::~IdentifierEvaluator() {
   if (static_field_reader_ != nullptr) {

@@ -32,16 +32,14 @@ namespace devtools {
 namespace cdbg {
 
 MethodCallEvaluator::MethodCallEvaluator(
-    string method_name,
+    std::string method_name,
     std::unique_ptr<ExpressionEvaluator> instance_source,
-    string possible_class_name,
+    std::string possible_class_name,
     std::vector<std::unique_ptr<ExpressionEvaluator>> arguments)
     : method_name_(std::move(method_name)),
       instance_source_(std::move(instance_source)),
       possible_class_name_(std::move(possible_class_name)),
-      arguments_(std::move(arguments)) {
-}
-
+      arguments_(std::move(arguments)) {}
 
 MethodCallEvaluator::~MethodCallEvaluator() {
 }

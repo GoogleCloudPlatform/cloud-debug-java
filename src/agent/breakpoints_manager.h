@@ -87,7 +87,7 @@ class BreakpointsManager {
   // Removes the breakpoint from list of active breakpoints and clears the
   // breakpoint. It is possible that some other thread is currently handling
   // breakpoint hit for this breakpoint.
-  virtual void CompleteBreakpoint(string breakpoint_id) = 0;
+  virtual void CompleteBreakpoint(std::string breakpoint_id) = 0;
 
   // Gets the counter for total cost incurred by evaluating conditions across
   // all enabled breakpoints. The purpose of this counter is to prevent many

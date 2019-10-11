@@ -31,10 +31,9 @@ class JvmDynamicLogger : public DynamicLogger {
 
   bool IsAvailable() const override;
 
-  void Log(
-      BreakpointModel::LogLevel level,
-      const ResolvedSourceLocation& source_location,
-      const string& message) override;
+  void Log(BreakpointModel::LogLevel level,
+           const ResolvedSourceLocation& source_location,
+           const std::string& message) override;
 
  private:
   // Instance of "java.util.logging.Logger" class.

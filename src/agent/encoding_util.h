@@ -7,7 +7,7 @@ namespace devtools {
 namespace cdbg {
 
 // Encodes buffer into a base 64 string.
-string Base64Encode(const char* in, size_t in_size);
+std::string Base64Encode(const char* in, size_t in_size);
 
 // Checks whether a buffer is valid utf8. The return value is the number of
 // valid utf8 bytes read from the beginning of the buffer.

@@ -26,18 +26,14 @@ namespace cdbg {
 
 class JvmClassReference : public ClassIndexer::Type {
  public:
-  JvmClassReference(ClassIndexer* class_indexer, const string& signature)
-      : class_indexer_(class_indexer),
-        signature_(signature) {
-  }
+  JvmClassReference(ClassIndexer* class_indexer, const std::string& signature)
+      : class_indexer_(class_indexer), signature_(signature) {}
 
   JType GetType() const override {
     return JType::Object;
   }
 
-  const string& GetSignature() const override {
-    return signature_;
-  }
+  const std::string& GetSignature() const override { return signature_; }
 
   jclass FindClass() override {
     {
@@ -60,7 +56,8 @@ class JvmClassReference : public ClassIndexer::Type {
         return nullptr;  // Element class hasn't been loaded yet.
       }
 
-      const string binary_name = BinaryNameFromJObjectSignature(signature_);
+      const std::string binary_name =
+          BinaryNameFromJObjectSignature(signature_);
       cls = JniNewGlobalRef(
           jniproxy::Class()->forName(binary_name)
           .Release(ExceptionAction::LOG_AND_IGNORE)
@@ -87,16 +84,14 @@ class JvmClassReference : public ClassIndexer::Type {
     }
   }
 
-  jfieldID FindField(
-      bool is_static,
-      const string& name,
-      const string& signature) override {
+  jfieldID FindField(bool is_static, const std::string& name,
+                     const std::string& signature) override {
     jclass cls = FindClass();
     if (cls == nullptr) {
       return nullptr;
     }
 
-    string key;
+    std::string key;
     key += (is_static ? 'S' : 'I');
     key += '/';
     key += name;
@@ -137,9 +132,9 @@ class JvmClassReference : public ClassIndexer::Type {
 
  private:
   ClassIndexer* const class_indexer_;
-  const string signature_;
+  const std::string signature_;
   JniGlobalRef cls_;
-  std::map<string, jfieldID> fields_;
+  std::map<std::string, jfieldID> fields_;
   absl::Mutex mu_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmClassReference);
@@ -157,9 +152,7 @@ class JvmPrimitiveType : public ClassIndexer::Type {
     return type_;
   }
 
-  const string& GetSignature() const override {
-    return signature_;
-  }
+  const std::string& GetSignature() const override { return signature_; }
 
   jclass FindClass() override {
     // TODO: implement for completeness.
@@ -167,16 +160,14 @@ class JvmPrimitiveType : public ClassIndexer::Type {
     return nullptr;
   }
 
-  jfieldID FindField(
-      bool is_static,
-      const string& name,
-      const string& signature) override {
+  jfieldID FindField(bool is_static, const std::string& name,
+                     const std::string& signature) override {
     return nullptr;  // Primitive types have no fields.
   }
 
  private:
   const JType type_;
-  const string signature_;
+  const std::string signature_;
 
   DISALLOW_COPY_AND_ASSIGN(JvmPrimitiveType);
 };
@@ -255,7 +246,7 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
     return;
   }
 
-  string class_signature(class_signature_buffer.get());
+  std::string class_signature(class_signature_buffer.get());
 
   // Try to insert the class into the set of all loaded classes. If it fails
   // the class was already discovered and no further action is necessary.
@@ -272,7 +263,8 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
     DCHECK(ref != nullptr);
   }
 
-  string type_name = TypeNameFromJObjectSignature(class_signature_buffer.get());
+  std::string type_name =
+      TypeNameFromJObjectSignature(class_signature_buffer.get());
 
   VLOG(1) << "Java class loaded, type name = " << type_name
           << ", signature: " << class_signature_buffer.get()
@@ -281,7 +273,7 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
   {
     absl::MutexLock lock(&mu_);
 
-    std::hash<string> string_hash;
+    std::hash<std::string> string_hash;
     name_map_.insert(std::make_pair(string_hash(type_name), ref));
   }
 
@@ -291,10 +283,9 @@ void JvmClassIndexer::JvmtiOnClassPrepare(jclass cls) {
   on_class_prepared_.Fire(type_name, class_signature);
 }
 
-
 JniLocalRef JvmClassIndexer::FindClassBySignature(
-    const string& class_signature) {
-  std::hash<string> string_hash;
+    const std::string& class_signature) {
+  std::hash<std::string> string_hash;
   return FindClassByHashCode(
       string_hash(TypeNameFromJObjectSignature(class_signature)),
       [class_signature] (const string& signature) {
@@ -302,9 +293,8 @@ JniLocalRef JvmClassIndexer::FindClassBySignature(
       });
 }
 
-
-JniLocalRef JvmClassIndexer::FindClassByName(const string& class_name) {
-  std::hash<string> string_hash;
+JniLocalRef JvmClassIndexer::FindClassByName(const std::string& class_name) {
+  std::hash<std::string> string_hash;
   return FindClassByHashCode(
       string_hash(class_name),
       [class_name] (const string& signature) {
@@ -312,10 +302,9 @@ JniLocalRef JvmClassIndexer::FindClassByName(const string& class_name) {
       });
 }
 
-
 JniLocalRef JvmClassIndexer::FindClassByHashCode(
     size_t hash_code,
-    std::function<bool(const string&)> fn_check_signature) {
+    std::function<bool(const std::string&)> fn_check_signature) {
   jvmtiError err = JVMTI_ERROR_NONE;
 
   absl::MutexLock lock(&mu_);
@@ -352,7 +341,6 @@ JniLocalRef JvmClassIndexer::FindClassByHashCode(
 
   return nullptr;
 }
-
 
 std::shared_ptr<ClassIndexer::Type> JvmClassIndexer::GetPrimitiveType(
     JType type) {
@@ -392,9 +380,8 @@ std::shared_ptr<ClassIndexer::Type> JvmClassIndexer::GetPrimitiveType(
   return nullptr;
 }
 
-
 std::shared_ptr<ClassIndexer::Type> JvmClassIndexer::GetReference(
-    const string& signature) {
+    const std::string& signature) {
   absl::MutexLock lock(&mu_);
 
   auto it = ref_cache_.find(signature);

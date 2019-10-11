@@ -240,8 +240,8 @@ ErrorOr<SafeMethodCaller::CallTarget> SafeMethodCaller::GetCallTarget(
     method_cls = GetMethodDeclaringClass(method_id);
   }
 
-  const string method_cls_signature = GetClassSignature(method_cls.get());
-  const string object_cls_signature = GetClassSignature(object_cls.get());
+  const std::string method_cls_signature = GetClassSignature(method_cls.get());
+  const std::string object_cls_signature = GetClassSignature(object_cls.get());
 
   const Config::Method& method_config = config_->GetMethodRule(
       method_cls_signature,
@@ -268,7 +268,7 @@ MethodCallResult SafeMethodCaller::MethodBlocked(
       << ", name: " << metadata.name
       << ", call stack:\n " << CurrentCallStack();
 
-  string name;
+  std::string name;
   name += TypeNameFromJObjectSignature(call_target.method_cls_signature);
   name += '.';
   name += metadata.name;
@@ -576,26 +576,23 @@ SafeMethodCaller::CacheLoadClassFile(jobject cls) {
   return std::move(class_file);
 }
 
-
-string SafeMethodCaller::GetCurrentMethodName() const {
+std::string SafeMethodCaller::GetCurrentMethodName() const {
   if (current_interpreter_ == nullptr) {
-    static const string kEmpty;
+    static const std::string kEmpty;
     return kEmpty;
   }
 
   return current_interpreter_->method_name();
 }
 
-
 // Format call stack of the interpreted methods.
-string SafeMethodCaller::CurrentCallStack() const {
+std::string SafeMethodCaller::CurrentCallStack() const {
   if (current_interpreter_ == nullptr) {
-    return string();
+    return std::string();
   }
 
   return current_interpreter_->FormatCallStack();
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

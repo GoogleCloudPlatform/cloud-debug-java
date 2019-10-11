@@ -44,7 +44,7 @@ class JavaExpression {
   // Tries to convert the expression subtree into a type name. For
   // example: Member("String", Member("lang", Identifier("java")) can be
   // converted to "java.lang.String". At the same time (a+b) cannot.
-  virtual bool TryGetTypeName(string* name) const = 0;
+  virtual bool TryGetTypeName(std::string* name) const = 0;
 
   // Compiles the expression into executable format. The caller owns the
   // returned instance. If a particular language feature is not yet supported,
@@ -64,7 +64,7 @@ class ConditionalJavaExpression : public JavaExpression {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -107,7 +107,7 @@ class BinaryJavaExpression : public JavaExpression {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -135,7 +135,7 @@ class UnaryJavaExpression : public JavaExpression {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -152,11 +152,11 @@ class JavaIntLiteral : public JavaExpression {
   JavaIntLiteral() : is_long_(false) { }
 
   // Parses an integer in the given base from the given string.
-  bool ParseString(const string& str, int base);
+  bool ParseString(const std::string& str, int base);
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -179,11 +179,11 @@ class JavaFloatLiteral : public JavaExpression {
   JavaFloatLiteral() : is_double_(true) { }
 
   // Parses a floating point number from the given string.
-  bool ParseString(const string& str);
+  bool ParseString(const std::string& str);
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -207,11 +207,11 @@ class JavaCharLiteral : public JavaExpression {
 
   // Decodes the potentially escaped character into a Unicode character.
   // Examples for encoding are: '\n', '\\', '\293', '\u5C7f'.
-  bool ParseString(const string& str);
+  bool ParseString(const std::string& str);
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -229,11 +229,11 @@ class JavaStringLiteral : public JavaExpression {
 
   // Decodes the potentially escaped characters sequence into Java string.
   // Example of encoded string: "This\n is\t an\" \u1E3B encoded \88 string".
-  bool ParseString(const string& str);
+  bool ParseString(const std::string& str);
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -251,7 +251,7 @@ class JavaBooleanLiteral : public JavaExpression {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -269,7 +269,7 @@ class JavaNullLiteral : public JavaExpression {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -281,18 +281,16 @@ class JavaNullLiteral : public JavaExpression {
 // Represents a local or a static variable.
 class JavaIdentifier : public JavaExpression {
  public:
-  explicit JavaIdentifier(string identifier)
-      : identifier_(identifier) {
-  }
+  explicit JavaIdentifier(std::string identifier) : identifier_(identifier) {}
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override;
+  bool TryGetTypeName(std::string* name) const override;
 
   CompiledExpression CreateEvaluator() override;
 
  private:
-  const string identifier_;
+  const std::string identifier_;
 
   DISALLOW_COPY_AND_ASSIGN(JavaIdentifier);
 };
@@ -301,19 +299,17 @@ class JavaIdentifier : public JavaExpression {
 // Represents a type cast for classes or interfaces.
 class TypeCastJavaExpression : public JavaExpression {
  public:
-  explicit TypeCastJavaExpression(string type, JavaExpression* source)
-      : type_(type),
-        source_(std::unique_ptr<JavaExpression>(source)) {
-  }
+  explicit TypeCastJavaExpression(std::string type, JavaExpression* source)
+      : type_(type), source_(std::unique_ptr<JavaExpression>(source)) {}
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
  private:
-  const string type_;
+  const std::string type_;
   std::unique_ptr<JavaExpression> source_;
 
   DISALLOW_COPY_AND_ASSIGN(TypeCastJavaExpression);
@@ -352,7 +348,7 @@ class JavaExpressionIndexSelector : public JavaExpressionSelector {
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
@@ -366,18 +362,17 @@ class JavaExpressionIndexSelector : public JavaExpressionSelector {
 // Selector for a class member.
 class JavaExpressionMemberSelector : public JavaExpressionSelector {
  public:
-  explicit JavaExpressionMemberSelector(const string& member)
-      : member_(member) {
-  }
+  explicit JavaExpressionMemberSelector(const std::string& member)
+      : member_(member) {}
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override;
+  bool TryGetTypeName(std::string* name) const override;
 
   CompiledExpression CreateEvaluator() override;
 
  private:
-  const string member_;
+  const std::string member_;
 
   DISALLOW_COPY_AND_ASSIGN(JavaExpressionMemberSelector);
 };
@@ -420,19 +415,18 @@ class MethodArguments {
 class MethodCallExpression : public JavaExpressionSelector {
  public:
   // Takes ownership over "method" and "arguments".
-  MethodCallExpression(const string& method, MethodArguments* arguments)
+  MethodCallExpression(const std::string& method, MethodArguments* arguments)
       : method_(method),
-        arguments_(std::unique_ptr<MethodArguments>(arguments)) {
-  }
+        arguments_(std::unique_ptr<MethodArguments>(arguments)) {}
 
   void Print(std::ostream* os, bool concise) override;
 
-  bool TryGetTypeName(string* name) const override { return false; }
+  bool TryGetTypeName(std::string* name) const override { return false; }
 
   CompiledExpression CreateEvaluator() override;
 
  private:
-  const string method_;
+  const std::string method_;
   std::unique_ptr<MethodArguments> arguments_;
 
   DISALLOW_COPY_AND_ASSIGN(MethodCallExpression);

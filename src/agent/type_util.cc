@@ -21,15 +21,12 @@
 namespace devtools {
 namespace cdbg {
 
-static Nullable<string> InsertExtraArgumentIntoDescriptor(
-    const string& descriptor,
-    size_t pos,
-    const string& extra_argument_descriptor) {
-  return Nullable<string>(string(descriptor).insert(
-      pos,
-      extra_argument_descriptor));
+static Nullable<std::string> InsertExtraArgumentIntoDescriptor(
+    const std::string& descriptor, size_t pos,
+    const std::string& extra_argument_descriptor) {
+  return Nullable<std::string>(
+      std::string(descriptor).insert(pos, extra_argument_descriptor));
 }
-
 
 JType JTypeFromSignature(char signature_prefix) {
   switch (signature_prefix) {
@@ -80,15 +77,13 @@ JType JTypeFromSignature(const char* signature) {
   return JTypeFromSignature(signature[0]);
 }
 
-
-JType JTypeFromSignature(const string& signature) {
+JType JTypeFromSignature(const std::string& signature) {
   if (signature.empty()) {
     return JTypeFromSignature('\0');
   }
 
   return JTypeFromSignature(signature[0]);
 }
-
 
 JSignature JSignatureFromSignature(const char* signature) {
   const JType type = JTypeFromSignature(signature);
@@ -100,8 +95,7 @@ JSignature JSignatureFromSignature(const char* signature) {
   }
 }
 
-
-JSignature JSignatureFromSignature(const string& signature) {
+JSignature JSignatureFromSignature(const std::string& signature) {
   const JType type = JTypeFromSignature(signature);
 
   if (type == JType::Object) {
@@ -111,8 +105,7 @@ JSignature JSignatureFromSignature(const string& signature) {
   }
 }
 
-
-string SignatureFromJSignature(JSignature signature) {
+std::string SignatureFromJSignature(JSignature signature) {
   switch (signature.type) {
     case JType::Void:
       return "V";
@@ -146,12 +139,12 @@ string SignatureFromJSignature(JSignature signature) {
   }
 }
 
-
-bool ParseJMethodSignature(const string& signature, JMethodSignature* result) {
+bool ParseJMethodSignature(const std::string& signature,
+                           JMethodSignature* result) {
   // The signature has the following format (arguments)return_type.
   *result = JMethodSignature();
 
-  string::const_iterator it = signature.begin();
+  std::string::const_iterator it = signature.begin();
 
   // Skip the opening parenthesis of the arguments list.
   if ((it == signature.end()) || (*it != '(')) {
@@ -191,10 +184,8 @@ bool ParseJMethodSignature(const string& signature, JMethodSignature* result) {
       }
 
       if (element_type != JType::Object) {
-        result->arguments.push_back({
-          JType::Object,
-          string(it, it_type + 1)
-        });
+        result->arguments.push_back(
+            {JType::Object, std::string(it, it_type + 1)});
 
         it = it_type + 1;
         continue;
@@ -211,10 +202,8 @@ bool ParseJMethodSignature(const string& signature, JMethodSignature* result) {
 
     ++it_next_argument;
 
-    result->arguments.push_back({
-      argument_type,
-      string(it, it_next_argument)
-    });
+    result->arguments.push_back(
+        {argument_type, std::string(it, it_next_argument)});
 
     it = it_next_argument;
   }
@@ -230,7 +219,7 @@ bool ParseJMethodSignature(const string& signature, JMethodSignature* result) {
   const JType return_type = JTypeFromSignature(*it);
 
   if (return_type == JType::Object) {
-    result->return_type = { return_type, string(it, signature.end()) };
+    result->return_type = {return_type, std::string(it, signature.end())};
   } else {
     result->return_type = { return_type };
   }
@@ -238,20 +227,18 @@ bool ParseJMethodSignature(const string& signature, JMethodSignature* result) {
   return true;
 }
 
-
-string TrimReturnType(const string& signature) {
+std::string TrimReturnType(const std::string& signature) {
   if (signature.empty() || (signature[0] != '(')) {
     return signature;  // Error, return original signature.
   }
 
   size_t pos = signature.find_last_of(')');
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     return signature;  // Error, return original signature.
   }
 
   return signature.substr(0, pos + 1);
 }
-
 
 WellKnownJClass WellKnownJClassFromSignature(const JSignature& signature) {
   if (IsArrayObjectType(signature)) {
@@ -266,11 +253,9 @@ WellKnownJClass WellKnownJClassFromSignature(const JSignature& signature) {
   return WellKnownJClass::Unknown;
 }
 
-
-bool IsArrayObjectSignature(const string& object_signature) {
+bool IsArrayObjectSignature(const std::string& object_signature) {
   return !object_signature.empty() && (object_signature[0] == '[');
 }
-
 
 bool IsArrayObjectType(const JSignature& signature) {
   return (signature.type == JType::Object) &&
@@ -281,7 +266,7 @@ bool IsArrayObjectType(const JSignature& signature) {
 JSignature GetArrayElementJSignature(const JSignature& array_signature) {
   DCHECK(IsArrayObjectType(array_signature)) << "Array expected";
 
-  const string& object_signature = array_signature.object_signature;
+  const std::string& object_signature = array_signature.object_signature;
   auto it_begin = object_signature.begin();
   auto it_end = object_signature.end();
 
@@ -296,19 +281,18 @@ JSignature GetArrayElementJSignature(const JSignature& array_signature) {
   const JType element_type = JTypeFromSignature(*it_begin);
 
   if (element_type == JType::Object) {
-    return { element_type, string(it_begin, it_end) };
+    return {element_type, std::string(it_begin, it_end)};
   } else {
     return { element_type };
   }
 }
 
-
-Nullable<string> AppendExtraArgumentToDescriptor(
-    const string& method_descriptor,
-    const string& extra_argument_descriptor) {
+Nullable<std::string> AppendExtraArgumentToDescriptor(
+    const std::string& method_descriptor,
+    const std::string& extra_argument_descriptor) {
   size_t arguments_end_pos = method_descriptor.find(')');
-  if (arguments_end_pos == string::npos) {
-    return Nullable<string>();
+  if (arguments_end_pos == std::string::npos) {
+    return Nullable<std::string>();
   }
 
   // We now assume that the descriptor is well constructed. If it is not, then
@@ -319,13 +303,12 @@ Nullable<string> AppendExtraArgumentToDescriptor(
       extra_argument_descriptor);
 }
 
-
-Nullable<string> PrependExtraArgumentToDescriptor(
-    const string& method_descriptor,
-    const string& instance_descriptor) {
+Nullable<std::string> PrependExtraArgumentToDescriptor(
+    const std::string& method_descriptor,
+    const std::string& instance_descriptor) {
   size_t arguments_end_pos = method_descriptor.find('(');
-  if (arguments_end_pos == string::npos) {
-    return Nullable<string>();
+  if (arguments_end_pos == std::string::npos) {
+    return Nullable<std::string>();
   }
 
   // We now assume that the descriptor is well constructed. If it is not, then
@@ -336,8 +319,7 @@ Nullable<string> PrependExtraArgumentToDescriptor(
       instance_descriptor);
 }
 
-
-string TypeNameFromSignature(const JSignature& signature) {
+std::string TypeNameFromSignature(const JSignature& signature) {
   switch (signature.type) {
     case JType::Void:
       return "void";
@@ -379,11 +361,10 @@ string TypeNameFromSignature(const JSignature& signature) {
       return TypeNameFromJObjectSignature(signature.object_signature);
   }
 
-  return string();
+  return std::string();
 }
 
-
-string TypeNameFromJObjectSignature(string object_signature) {
+std::string TypeNameFromJObjectSignature(std::string object_signature) {
   if (object_signature.empty()) {
     return object_signature;
   }
@@ -397,12 +378,12 @@ string TypeNameFromJObjectSignature(string object_signature) {
 
   // TODO: add support for non-ASCII UTF-8 encoded names.
 
-  string::const_iterator source = object_signature.begin();
+  std::string::const_iterator source = object_signature.begin();
   if (*source == 'L') {
     ++source;
   }
 
-  string::iterator target = object_signature.begin();
+  std::string::iterator target = object_signature.begin();
 
   while (source != object_signature.end()) {
     // ';' is a suffix appended at the end of class signature. We don't need
@@ -462,7 +443,7 @@ string TypeNameFromJObjectSignature(string object_signature) {
   return object_signature;
 }
 
-string TrimJObjectSignature(string object_signature) {
+std::string TrimJObjectSignature(std::string object_signature) {
   if (object_signature.empty()) {
     return object_signature;
   }
@@ -482,12 +463,12 @@ string TrimJObjectSignature(string object_signature) {
   return object_signature;
 }
 
-string BinaryNameFromJObjectSignature(const string& signature) {
+std::string BinaryNameFromJObjectSignature(const std::string& signature) {
   if (signature.size() < 2) {
     return signature;
   }
 
-  string binary_name;
+  std::string binary_name;
   if (signature.front() == '[') {
     // This is an array class. Binary names for array classes are identical
     // to JVMTI signature with the exception that '/' is replaced with '.'.
@@ -504,10 +485,8 @@ string BinaryNameFromJObjectSignature(const string& signature) {
   return binary_name;
 }
 
-
-string ConstructFilePath(
-    const char* class_signature,
-    const char* class_file_name) {
+std::string ConstructFilePath(const char* class_signature,
+                              const char* class_file_name) {
   if (*class_signature == '\0') {
     return class_file_name;
   }
@@ -550,7 +529,7 @@ string ConstructFilePath(
 
   const char* package_end = package_last + 1;
 
-  string path;
+  std::string path;
 
   int reserve_size = (package_end - class_path_first) + class_file_name_length;
   path.reserve(reserve_size);
@@ -562,7 +541,6 @@ string ConstructFilePath(
 
   return path;
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

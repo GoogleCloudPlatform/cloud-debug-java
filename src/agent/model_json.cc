@@ -72,10 +72,8 @@ template <typename TModel>
 static std::unique_ptr<TModel> DeserializeModel(const Json::Value& root);
 
 template <typename TElement>
-static void SerializeModel(
-    const std::vector<std::unique_ptr<TElement>>& model,
-    const string& array_name,
-    Json::Value* root) {
+static void SerializeModel(const std::vector<std::unique_ptr<TElement>>& model,
+                           const std::string& array_name, Json::Value* root) {
   if (model.empty()) {
     return;
   }
@@ -89,15 +87,12 @@ static void SerializeModel(
   (*root)[array_name].swap(array);
 }
 
-
-static void SerializeModel(
-    const std::map<string, string>& model,
-    Json::Value* root) {
+static void SerializeModel(const std::map<std::string, std::string>& model,
+                           Json::Value* root) {
   for (const auto& element : model) {
     (*root)[element.first] = Json::Value(element.second);
   }
 }
-
 
 template <typename TElement>
 static bool DeserializeModel(
@@ -118,10 +113,8 @@ static bool DeserializeModel(
   return true;
 }
 
-
-static bool DeserializeModel(
-    const Json::Value& root,
-    std::map<string, string>* model) {
+static bool DeserializeModel(const Json::Value& root,
+                             std::map<std::string, std::string>* model) {
   model->clear();
 
   if (root.isNull()) {
@@ -133,8 +126,8 @@ static bool DeserializeModel(
     return false;
   }
 
-  for (const string& key : root.getMemberNames()) {
-    string value = JsonCppGetString(root, key.c_str());
+  for (const std::string& key : root.getMemberNames()) {
+    std::string value = JsonCppGetString(root, key.c_str());
     if (value.empty()) {
       LOG(WARNING) << "Bad map entry for " << key;
       return false;
@@ -146,12 +139,9 @@ static bool DeserializeModel(
   return true;
 }
 
-
 template <typename TElement>
-static void SerializeModel(
-    const std::vector<TElement>& model,
-    const string& array_name,
-    Json::Value* root) {
+static void SerializeModel(const std::vector<TElement>& model,
+                           const std::string& array_name, Json::Value* root) {
   if (model.empty()) {
     return;
   }
@@ -161,7 +151,6 @@ static void SerializeModel(
     array.append(Json::Value(element));
   }
 }
-
 
 template <typename TElement>
 static bool DeserializeModel(
@@ -248,7 +237,7 @@ static void SerializeLogLevel(
 
 // Returns seconds and milliseconds formatted as an RFC3339 timestamp string.
 // Returns empty string in case of error.
-static string FormatTime(int64 seconds, int32 millis) {
+static std::string FormatTime(int64 seconds, int32 millis) {
   int64 total_millis = seconds * 1000 + millis;
 
   // Enforce formatting in UTC (e.g., 2015-10-06T20:37:19.212Z).
@@ -258,7 +247,7 @@ static string FormatTime(int64 seconds, int32 millis) {
       jniproxy::DateTime()->NewObject(total_millis, timeZoneShift)
       .Release(ExceptionAction::LOG_AND_IGNORE);
   if (datetime == nullptr) {
-    return string();
+    return std::string();
   }
 
   return jniproxy::DateTime()
@@ -266,11 +255,10 @@ static string FormatTime(int64 seconds, int32 millis) {
       .Release(ExceptionAction::LOG_AND_IGNORE);
 }
 
-
 static void SerializeTimestamp(
     const TimestampModel& model,
     Json::Value* root) {
-  string value = FormatTime(model.seconds, model.nanos / (1000 * 1000));
+  std::string value = FormatTime(model.seconds, model.nanos / (1000 * 1000));
   if (value.empty()) {
     LOG(ERROR) << "Failed to format timestamp value: "
                << " seconds=" << model.seconds
@@ -300,7 +288,7 @@ static void SerializeModel(
 
 
 StatusMessageModel::Context DeserializeRefersTo(const Json::Value& root) {
-  string refers_to = JsonCppGetString(root, "refersTo");
+  std::string refers_to = JsonCppGetString(root, "refersTo");
   if (refers_to.empty()) {
     return StatusMessageModel::Context::UNSPECIFIED;  // default
   }
@@ -317,7 +305,7 @@ StatusMessageModel::Context DeserializeRefersTo(const Json::Value& root) {
 
 
 BreakpointModel::Action DeserializeBreakpointAction(const Json::Value& root) {
-  const string& action = JsonCppGetString(root, "action");
+  const std::string& action = JsonCppGetString(root, "action");
   if (action.empty()) {
     return BreakpointModel::Action::CAPTURE;  // default
   }
@@ -334,7 +322,7 @@ BreakpointModel::Action DeserializeBreakpointAction(const Json::Value& root) {
 
 
 BreakpointModel::LogLevel DeserializeLogLevel(const Json::Value& root) {
-  const string& log_level = JsonCppGetString(root, "logLevel");
+  const std::string& log_level = JsonCppGetString(root, "logLevel");
   if (log_level.empty()) {
     return BreakpointModel::LogLevel::INFO;  // default
   }
@@ -352,7 +340,7 @@ BreakpointModel::LogLevel DeserializeLogLevel(const Json::Value& root) {
 
 // Parses RFC3339 timestamp string and convert it into the number of
 // milliseconds passed since Unix epoch. Returns 0 in case of error.
-static int64 ParseTime(const string& input) {
+static int64 ParseTime(const std::string& input) {
   JniLocalRef datetime = jniproxy::DateTime()->parseRfc3339(input).Release(
       ExceptionAction::LOG_AND_IGNORE);
   if (datetime == nullptr) {
@@ -365,13 +353,12 @@ static int64 ParseTime(const string& input) {
       .Release(ExceptionAction::LOG_AND_IGNORE);
 }
 
-
 TimestampModel DeserializeTimestamp(const Json::Value& root) {
   if (!root.isString()) {
     return kUnspecifiedTimestamp;
   }
 
-  string value = root.asString();
+  std::string value = root.asString();
 
   int64 total_millis = ParseTime(value);
   if (total_millis == 0) {
@@ -692,9 +679,8 @@ std::unique_ptr<BreakpointModel> BreakpointFromJson(
   return BreakpointFromJsonString(serialized_breakpoint.data);
 }
 
-
 std::unique_ptr<BreakpointModel> BreakpointFromJsonString(
-    const string& json_string) {
+    const std::string& json_string) {
   Json::Value root;
   Json::Reader reader;
   if (!reader.parse(json_string, root)) {
@@ -706,7 +692,6 @@ std::unique_ptr<BreakpointModel> BreakpointFromJsonString(
 
   return BreakpointFromJsonValue(root);
 }
-
 
 std::unique_ptr<BreakpointModel> BreakpointFromJsonValue(
     const Json::Value& json_value) {

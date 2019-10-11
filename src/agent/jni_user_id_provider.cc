@@ -40,8 +40,7 @@ void JniUserIdProvider::Collect() {
   provider_ = JniNewGlobalRef(provider.get());
 }
 
-
-bool JniUserIdProvider::Format(string* kind, string* id) {
+bool JniUserIdProvider::Format(std::string* kind, std::string* id) {
   if (provider_ == nullptr) {
     return false;  // User id not available.
   }
@@ -52,7 +51,7 @@ bool JniUserIdProvider::Format(string* kind, string* id) {
     return false;  // Failed to obtain user id.
   }
 
-  std::vector<string> result = JniToNativeStringArray(rc.GetData().get());
+  std::vector<std::string> result = JniToNativeStringArray(rc.GetData().get());
   if (result.size() != 2) {
     return false;
   }

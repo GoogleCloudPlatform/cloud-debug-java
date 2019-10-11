@@ -40,12 +40,12 @@ class CanaryControl {
   // The "fn_complete" argument is a function that will finalize and complete
   // the breakpoint (used when the breakpoint is determined to be unhealthy).
   bool RegisterBreakpointCanary(
-      const string& breakpoint_id,
+      const std::string& breakpoint_id,
       std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete);
 
   // Indicates that the breakpoint has been finalized. This automatically
   // takes out the breakpoint from a canary.
-  void BreakpointCompleted(const string& breakpoint_id);
+  void BreakpointCompleted(const std::string& breakpoint_id);
 
   // Approves all the canary breakpoints that have been tested for
   // the necessary period of time and the debuglet asserted to be harmless.
@@ -71,7 +71,7 @@ class CanaryControl {
   absl::Mutex mu_;
 
   // List of breakpoints currently in canary. The key is the breakpoint ID.
-  std::map<string, CanaryBreakpoint> canary_breakpoints_;
+  std::map<std::string, CanaryBreakpoint> canary_breakpoints_;
 
   DISALLOW_COPY_AND_ASSIGN(CanaryControl);
 };

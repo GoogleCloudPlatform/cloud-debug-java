@@ -19,10 +19,9 @@
 namespace devtools {
 namespace cdbg {
 
-static bool MatchMethodRule(
-    const Config::Method& rule,
-    const string& method_name,
-    const string& method_signature) {
+static bool MatchMethodRule(const Config::Method& rule,
+                            const std::string& method_name,
+                            const std::string& method_signature) {
   // Empty method name means "match all".
   if (!rule.name.empty() &&
       (rule.name != method_name)) {
@@ -38,7 +37,6 @@ static bool MatchMethodRule(
   return true;
 }
 
-
 Config::Config() {
 }
 
@@ -46,13 +44,11 @@ Config::Config() {
 Config::~Config() {
 }
 
-
 const Config::Method& Config::GetMethodRule(
-    const string& method_cls_signature,
-    const string& object_cls_signature,
-    const string& method_name,
-    const string& method_signature) const {
-  std::map<string, std::vector<Config::Method>>::const_iterator it;
+    const std::string& method_cls_signature,
+    const std::string& object_cls_signature, const std::string& method_name,
+    const std::string& method_signature) const {
+  std::map<std::string, std::vector<Config::Method>>::const_iterator it;
 
   it = classes_.find(object_cls_signature);
   if (it != classes_.end()) {
@@ -79,28 +75,22 @@ const Config::Method& Config::GetMethodRule(
   return default_rule_;
 }
 
-
 Config::Builder::Builder() {
 }
 
-
 Config::Builder& Config::Builder::SetClassConfig(
-      const string& class_signature,
-      std::vector<Config::Method> rules) {
+    const std::string& class_signature, std::vector<Config::Method> rules) {
   config_->classes_[class_signature] = std::move(rules);
   return *this;
 }
 
-
 Config::Builder& Config::Builder::AddMethodRule(
-    const string& class_signature,
-    Config::Method rule) {
+    const std::string& class_signature, Config::Method rule) {
   auto& methods = config_->classes_[class_signature];
   methods.insert(methods.begin(), std::move(rule));
 
   return *this;
 }
-
 
 Config::Builder& Config::Builder::SetDefaultMethodRule(Config::Method rule) {
   config_->default_rule_ = std::move(rule);

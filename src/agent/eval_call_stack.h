@@ -32,17 +32,17 @@ class EvalCallStack {
   // Formatted version of a single call stack frame.
   struct FrameInfo {
     // Signature of the parent class.
-    string class_signature;
+    std::string class_signature;
 
     // Generic signature of the parent class.
-    string class_generic;
+    std::string class_generic;
 
     // Method executing code at the call frame.
-    string method_name;
+    std::string method_name;
 
     // Name of the source code file or empty string if the Java class was
     // compiled without source debugging information.
-    string source_file_name;
+    std::string source_file_name;
 
     // Line number of the statement in the call frame or -1 if the Java class
     // was compiled without line number debugging information.

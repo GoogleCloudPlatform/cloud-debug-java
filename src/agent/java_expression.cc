@@ -37,11 +37,10 @@ namespace cdbg {
 
 // Single character de-escaping for "UnescapeJavaString". Returns the de-escaped
 // character and iterator to the next byte in the input sequence.
-static void UnescapeCharacter(
-    string::const_iterator it,
-    string::const_iterator end,
-    jchar* unicode_character,
-    string::const_iterator* next) {
+static void UnescapeCharacter(std::string::const_iterator it,
+                              std::string::const_iterator end,
+                              jchar* unicode_character,
+                              std::string::const_iterator* next) {
   DCHECK(it < end);
 
   if ((*it == '\\') && (it + 1 != end)) {
@@ -147,14 +146,15 @@ static void UnescapeCharacter(
 //    1. C-style escape codes: \r, \n, \\.
 //    2. Octal escape codes: \3, \71, \152.
 //    3. Uncode escape codes: \u883C.
-static std::vector<jchar> UnescapeJavaString(const string& escaped_string) {
+static std::vector<jchar> UnescapeJavaString(
+    const std::string& escaped_string) {
   std::vector<jchar> unicode_string;
   unicode_string.reserve(escaped_string.size());  // Pessimistic estimation.
 
   auto it = escaped_string.begin();
   while (it != escaped_string.end()) {
     jchar unicode_character = 0;
-    string::const_iterator next;
+    std::string::const_iterator next;
     UnescapeCharacter(it, escaped_string.end(), &unicode_character, &next);
 
     unicode_string.push_back(unicode_character);
@@ -163,7 +163,6 @@ static std::vector<jchar> UnescapeJavaString(const string& escaped_string) {
 
   return unicode_string;
 }
-
 
 // Prints single expression to a stream.
 static void SafePrintChild(
@@ -420,8 +419,7 @@ CompiledExpression UnaryJavaExpression::CreateEvaluator() {
   };
 }
 
-
-bool JavaIntLiteral::ParseString(const string& str, int base) {
+bool JavaIntLiteral::ParseString(const std::string& str, int base) {
   const char* node_cstr = str.c_str();
   char* literal_end = nullptr;
 
@@ -454,7 +452,6 @@ bool JavaIntLiteral::ParseString(const string& str, int base) {
   return true;
 }
 
-
 void JavaIntLiteral::Print(std::ostream* os, bool concise) {
   if (!concise) {
     if (is_long_) {
@@ -486,8 +483,7 @@ CompiledExpression JavaIntLiteral::CreateEvaluator() {
   }
 }
 
-
-bool JavaFloatLiteral::ParseString(const string& str) {
+bool JavaFloatLiteral::ParseString(const std::string& str) {
   const char* node_cstr = str.c_str();
   char* literal_end = nullptr;
 
@@ -506,7 +502,6 @@ bool JavaFloatLiteral::ParseString(const string& str) {
 
   return true;
 }
-
 
 void JavaFloatLiteral::Print(std::ostream* os, bool concise) {
   if (!concise) {
@@ -539,8 +534,7 @@ CompiledExpression JavaFloatLiteral::CreateEvaluator() {
   }
 }
 
-
-bool JavaCharLiteral::ParseString(const string& str) {
+bool JavaCharLiteral::ParseString(const std::string& str) {
   std::vector<jchar> java_str = UnescapeJavaString(str);
   if (java_str.size() != 1) {
     return false;
@@ -550,7 +544,6 @@ bool JavaCharLiteral::ParseString(const string& str) {
 
   return true;
 }
-
 
 void JavaCharLiteral::Print(std::ostream* os, bool concise) {
   if (!concise) {
@@ -576,12 +569,10 @@ CompiledExpression JavaCharLiteral::CreateEvaluator() {
   };
 }
 
-
-bool JavaStringLiteral::ParseString(const string& str) {
+bool JavaStringLiteral::ParseString(const std::string& str) {
   str_ = UnescapeJavaString(str);
   return true;
 }
-
 
 void JavaStringLiteral::Print(std::ostream* os, bool concise) {
   (*os) << '"';
@@ -654,12 +645,10 @@ CompiledExpression JavaIdentifier::CreateEvaluator() {
   };
 }
 
-
-bool JavaIdentifier::TryGetTypeName(string* name) const {
+bool JavaIdentifier::TryGetTypeName(std::string* name) const {
   *name = identifier_;
   return true;
 }
-
 
 void TypeCastJavaExpression::Print(std::ostream* os, bool concise) {
   if (concise) {
@@ -731,12 +720,12 @@ CompiledExpression JavaExpressionMemberSelector::CreateEvaluator() {
     return source_evaluator;
   }
 
-  string possible_class_name;
+  std::string possible_class_name;
   if (!source_->TryGetTypeName(&possible_class_name)) {
     possible_class_name.clear();
   }
 
-  string identifier_name;
+  std::string identifier_name;
   if (!TryGetTypeName(&identifier_name)) {
     identifier_name = member_;
   }
@@ -751,9 +740,7 @@ CompiledExpression JavaExpressionMemberSelector::CreateEvaluator() {
   };
 }
 
-
-bool JavaExpressionMemberSelector::TryGetTypeName(
-    string* name) const {
+bool JavaExpressionMemberSelector::TryGetTypeName(std::string* name) const {
   if (!source_->TryGetTypeName(name)) {
     return false;
   }
@@ -763,7 +750,6 @@ bool JavaExpressionMemberSelector::TryGetTypeName(
 
   return true;
 }
-
 
 void MethodCallExpression::Print(std::ostream* os, bool concise) {
   if (!concise) {
@@ -804,7 +790,7 @@ void MethodCallExpression::Print(std::ostream* os, bool concise) {
 
 CompiledExpression MethodCallExpression::CreateEvaluator() {
   CompiledExpression source_evaluator;
-  string possible_class_name;
+  std::string possible_class_name;
 
   if (source_ != nullptr) {
     source_evaluator = source_->CreateEvaluator();

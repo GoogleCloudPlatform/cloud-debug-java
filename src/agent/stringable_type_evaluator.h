@@ -38,7 +38,7 @@ class StringableTypeEvaluator : public TypeEvaluator {
   // long call stack).
   bool IsSupported(jclass cls) const;
 
-  string GetEvaluatorName() override { return "StringableTypeEvaluator"; }
+  std::string GetEvaluatorName() override { return "StringableTypeEvaluator"; }
 
   void Evaluate(MethodCaller* method_caller,
                 const ClassMetadataReader::Entry& class_metadata,

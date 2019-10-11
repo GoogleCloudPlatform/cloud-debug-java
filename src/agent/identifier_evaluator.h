@@ -31,7 +31,7 @@ class StaticFieldReader;
 // in Java expression.
 class IdentifierEvaluator : public ExpressionEvaluator {
  public:
-  explicit IdentifierEvaluator(string identifier_name);
+  explicit IdentifierEvaluator(std::string identifier_name);
 
   ~IdentifierEvaluator() override;
 
@@ -69,7 +69,7 @@ class IdentifierEvaluator : public ExpressionEvaluator {
 
  private:
   // Name of the identifier (whether it is local variable or something else).
-  string identifier_name_;
+  std::string identifier_name_;
 
   // Local variable reader.
   std::unique_ptr<LocalVariableReader> variable_reader_;

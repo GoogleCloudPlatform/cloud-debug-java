@@ -29,15 +29,13 @@ namespace devtools {
 namespace cdbg {
 
 TypeCastOperatorEvaluator::TypeCastOperatorEvaluator(
-    std::unique_ptr<ExpressionEvaluator> source,
-    const string& target_type)
+    std::unique_ptr<ExpressionEvaluator> source, const std::string& target_type)
     : source_(std::move(source)),
       target_type_(target_type),
       target_class_(nullptr),
       computer_(nullptr) {
   result_type_.type = JType::Object;
 }
-
 
 TypeCastOperatorEvaluator::~TypeCastOperatorEvaluator() {
   if (target_class_ != nullptr) {

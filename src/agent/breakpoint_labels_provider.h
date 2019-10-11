@@ -37,7 +37,7 @@ class BreakpointLabelsProvider {
 
   // Formats the breakpoint labels into breakpoint labels map. This function is
   // called from the debugger worker thread.
-  virtual std::map<string, string> Format() = 0;
+  virtual std::map<std::string, std::string> Format() = 0;
 };
 
 }  // namespace cdbg

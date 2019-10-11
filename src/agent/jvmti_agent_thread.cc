@@ -36,10 +36,8 @@ JvmtiAgentThread::~JvmtiAgentThread() {
   DCHECK(thread_ == nullptr) << "Agent thread abandoned";
 }
 
-
-bool JvmtiAgentThread::Start(
-    const string& thread_name,
-    std::function<void()> thread_proc) {
+bool JvmtiAgentThread::Start(const std::string& thread_name,
+                             std::function<void()> thread_proc) {
   if (thread_ != nullptr) {
     LOG(ERROR) << "Thread already running";
     return false;
@@ -51,7 +49,6 @@ bool JvmtiAgentThread::Start(
 
   return true;
 }
-
 
 void JvmtiAgentThread::Join() {
   if (thread_ == nullptr) {
@@ -67,10 +64,8 @@ void JvmtiAgentThread::Sleep(int ms) {
   jniproxy::Thread()->sleep(ms);
 }
 
-
-bool JvmtiAgentThread::StartAgentThread(
-    const string& thread_name,
-    std::function<void()> thread_proc) {
+bool JvmtiAgentThread::StartAgentThread(const std::string& thread_name,
+                                        std::function<void()> thread_proc) {
   thread_ = JniNewGlobalRef(
       jniproxy::Thread()->NewObject()
       .Release(ExceptionAction::LOG_AND_IGNORE)
@@ -80,8 +75,8 @@ bool JvmtiAgentThread::StartAgentThread(
     return false;
   }
 
-  std::pair<string, std::function<void()>>* agent_arg =
-      new std::pair<string, std::function<void()>>(
+  std::pair<std::string, std::function<void()>>* agent_arg =
+      new std::pair<std::string, std::function<void()>>(
           std::make_pair(thread_name, thread_proc));
 
   // Run the code in the newly created thread.
@@ -119,7 +114,6 @@ bool JvmtiAgentThread::StartAgentThread(
 
   return true;
 }
-
 
 bool JvmtiAgentThread::IsInAgentThread() {
   return g_is_agent_thread;

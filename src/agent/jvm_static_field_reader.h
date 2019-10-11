@@ -30,13 +30,9 @@ class JvmStaticFieldReader : public StaticFieldReader {
   //
   // If is_read_error == true, then read_error will be returned on any calls to
   // ReadValue().
-  JvmStaticFieldReader(
-      jclass cls,
-      const string& name,
-      jfieldID field_id,
-      const JSignature& signature,
-      bool is_read_error,
-      const FormatMessageModel& read_error);
+  JvmStaticFieldReader(jclass cls, const std::string& name, jfieldID field_id,
+                       const JSignature& signature, bool is_read_error,
+                       const FormatMessageModel& read_error);
 
   JvmStaticFieldReader(
       const JvmStaticFieldReader& jvm_static_field_reader);
@@ -47,7 +43,7 @@ class JvmStaticFieldReader : public StaticFieldReader {
 
   std::unique_ptr<StaticFieldReader> Clone() const override;
 
-  const string& GetName() const override { return name_; }
+  const std::string& GetName() const override { return name_; }
 
   const JSignature& GetStaticType() const override { return signature_; }
 
@@ -58,7 +54,7 @@ class JvmStaticFieldReader : public StaticFieldReader {
   jclass cls_;
 
   // Name of the member variable.
-  const string name_;
+  const std::string name_;
 
   // Member variable type.
   const JSignature signature_;

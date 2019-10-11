@@ -31,7 +31,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
   class GlobSet {
    public:
     // Adds a new pattern
-    void Add(const string& glob_pattern);
+    void Add(const std::string& glob_pattern);
 
     // Prepares the globset for matching.  Must be called once between calling
     // Add and calling Match().
@@ -39,7 +39,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
 
     // Returns true if at least one pattern in this GlobSet matches the given
     // path.
-    bool Matches(const string& path) const;
+    bool Matches(const std::string& path) const;
 
     // Returns true if at least one pattern in this GlobSet matches the prefix*
     // pattern.
@@ -59,7 +59,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     //
     // foo.bar.YourClass
     // java.util.*
-    bool PrefixCanMatch(const string& prefix) const;
+    bool PrefixCanMatch(const std::string& prefix) const;
 
     // Returns true if this GlobSet contains zero patterns.
     bool Empty() const {
@@ -73,7 +73,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
    private:
     // Patterns that do not contain a *.  These can be resolved with a direct
     // lookup.
-    std::set<string> exact_patterns_;
+    std::set<std::string> exact_patterns_;
 
     // Patterns that start with a string and end with a single *.  These can
     // be efficiently resolved in O(log n) time
@@ -81,13 +81,13 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     // Note: the '*' is not present in the data below.
     // Note: This is a vector because std::lower_bound, used in the prefix match
     // algorithm, requires a random-access container for O(log n) efficiency.
-    std::vector<string> prefix_patterns_;
+    std::vector<std::string> prefix_patterns_;
 
     // Patterns that contain one or more * characters and do not qualify for
     // membership in prefix_patterns_ above.  Optimizing these further is
     // possible, but seeminly in trade for additional complexity.  These
     // patterns are also expected to be more rarely used than the other cases.
-    std::set<string> generic_patterns_;
+    std::set<std::string> generic_patterns_;
 
     // Patterns that are inverted.  e.g. while all other patterns
     // would consider a* matching apple and b* not matching apple, these
@@ -98,8 +98,8 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     // inverse_patterns_ contain at least one *.  For a symbol to be considered
     // a match, it has to not be found in exact_inverse_patterns_ and not match
     // anything in inverse_patterns_.
-    std::set<string> exact_inverse_patterns_;
-    std::set<string> inverse_patterns_;
+    std::set<std::string> exact_inverse_patterns_;
+    std::set<std::string> inverse_patterns_;
 
     // Set to true if the GlobSet is ready for calls to Match().
     bool prepared_ = true;
@@ -110,7 +110,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
     GlobSet blacklists;
     GlobSet blacklist_exceptions;
     // This string is left empty if there was no parsing error.
-    string parse_error;
+    std::string parse_error;
   };
 
   // Initalizes with a configuration that blocks everything.  Call setConfig()
@@ -123,7 +123,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 
-  bool HasSetupError(string* error) const override;
+  bool HasSetupError(std::string* error) const override;
 
  private:
   Config config_;

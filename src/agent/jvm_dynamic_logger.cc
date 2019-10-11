@@ -58,17 +58,15 @@ bool JvmDynamicLogger::IsAvailable() const {
   return logger_ != nullptr;
 }
 
-
-void JvmDynamicLogger::Log(
-    BreakpointModel::LogLevel level,
-    const ResolvedSourceLocation& source_location,
-    const string& message) {
+void JvmDynamicLogger::Log(BreakpointModel::LogLevel level,
+                           const ResolvedSourceLocation& source_location,
+                           const std::string& message) {
   if (!IsAvailable()) {
     LOG(WARNING) << "Dynamic logger not available";
     return;
   }
 
-  const string source_class =
+  const std::string source_class =
       TypeNameFromJObjectSignature(source_location.class_signature);
 
   jobject level_obj = nullptr;

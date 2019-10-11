@@ -46,7 +46,7 @@ std::unique_ptr<BreakpointModel> BreakpointFromJson(
     const SerializedBreakpoint& serialized_breakpoint);
 
 std::unique_ptr<BreakpointModel> BreakpointFromJsonString(
-    const string& json_string);
+    const std::string& json_string);
 
 std::unique_ptr<BreakpointModel> BreakpointFromJsonValue(
     const Json::Value& json_value);

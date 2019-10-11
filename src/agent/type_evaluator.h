@@ -43,7 +43,7 @@ class TypeEvaluator {
 
   // Gets the name of this pretty evaluator. Only used for unit tests and
   // diagnostics.
-  virtual string GetEvaluatorName() = 0;
+  virtual std::string GetEvaluatorName() = 0;
 
   // Reads all the object's fields. "status" may be set to information or error
   // message. Example of such a message is: "only first 10 elements out of 1578

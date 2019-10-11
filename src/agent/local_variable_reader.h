@@ -42,7 +42,7 @@ class LocalVariableReader {
 
   // Gets the name of the variable (either name of local/static variable or
   // member variable name).
-  virtual const string& GetName() const = 0;
+  virtual const std::string& GetName() const = 0;
 
   // Gets the type of the variable as it is known at compile time.
   virtual const JSignature& GetStaticType() const = 0;

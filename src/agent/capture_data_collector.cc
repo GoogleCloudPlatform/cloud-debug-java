@@ -245,7 +245,7 @@ void CaptureDataCollector::FormatByteArray(
     std::unique_ptr<VariableModel> utf8(new VariableModel);
     utf8->name = "$utf8";
     utf8->type = "String";
-    utf8->value = "\"" + string(bytes.data(), valid_utf8_bytes) + "\"";
+    utf8->value = "\"" + std::string(bytes.data(), valid_utf8_bytes) + "\"";
     target->push_back(std::move(utf8));
   }
 
@@ -345,8 +345,8 @@ void CaptureDataCollector::Format(BreakpointModel* breakpoint) const {
 
   // Format the end user identity.
   if (absl::GetFlag(FLAGS_cdbg_capture_user_id)) {
-    string kind;
-    string id;
+    std::string kind;
+    std::string id;
     if (user_id_provider_->Format(&kind, &id)) {
       breakpoint->evaluated_user_id.reset(new UserIdModel());
       breakpoint->evaluated_user_id->kind = kind;
@@ -486,7 +486,7 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
         options.max_string_length = kExtendedMaxStringLength;
       }
 
-      string formatted_value;
+      std::string formatted_value;
       target->status = ValueFormatter::Format(
           source, options, &formatted_value, &target->type);
       target->value = std::move(formatted_value);
@@ -524,20 +524,18 @@ std::unique_ptr<VariableModel> CaptureDataCollector::FormatVariable(
   return target;
 }
 
-
-string CaptureDataCollector::GetFunctionName(int depth) const {
+std::string CaptureDataCollector::GetFunctionName(int depth) const {
   const int frame_info_key = call_frames_[depth].frame_info_key;
   const auto& frame_info =
       evaluators_->eval_call_stack->ResolveCallFrameKey(frame_info_key);
 
-  string function_name =
+  std::string function_name =
       TypeNameFromJObjectSignature(frame_info.class_signature);
   function_name += '.';
   function_name += frame_info.method_name;
 
   return function_name;
 }
-
 
 std::unique_ptr<SourceLocationModel>
 CaptureDataCollector::GetCallFrameSourceLocation(int depth) const {

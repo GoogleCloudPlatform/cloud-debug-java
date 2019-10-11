@@ -22,21 +22,17 @@
 namespace devtools {
 namespace cdbg {
 
-JvmStaticFieldReader::JvmStaticFieldReader(
-    jclass cls,
-    const string& name,
-    jfieldID field_id,
-    const JSignature& signature,
-    bool is_read_error,
-    const FormatMessageModel& read_error)
+JvmStaticFieldReader::JvmStaticFieldReader(jclass cls, const std::string& name,
+                                           jfieldID field_id,
+                                           const JSignature& signature,
+                                           bool is_read_error,
+                                           const FormatMessageModel& read_error)
     : cls_(static_cast<jclass>(jni()->NewGlobalRef(cls))),
       name_(name),
       signature_(signature),
       field_id_(field_id),
       is_read_error_(is_read_error),
-      read_error_(read_error) {
-}
-
+      read_error_(read_error) {}
 
 JvmStaticFieldReader::JvmStaticFieldReader(
     const JvmStaticFieldReader& jvm_static_field_reader)

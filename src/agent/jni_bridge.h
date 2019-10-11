@@ -66,9 +66,9 @@ class JniBridge : public Bridge {
 
   bool HasPendingMessages() const override;
 
-  bool RegisterBreakpointCanary(const string& breakpoint_id) override;
+  bool RegisterBreakpointCanary(const std::string& breakpoint_id) override;
 
-  bool ApproveBreakpointCanary(const string& breakpoint_id) override;
+  bool ApproveBreakpointCanary(const std::string& breakpoint_id) override;
 
   bool IsEnabled(bool* is_enabled) override;
 

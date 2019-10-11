@@ -16,11 +16,9 @@ static constexpr char kResourcePath[] = "debugger-blacklist.yaml";
 //   - Data for one file was found.  Sets config to file contents
 //   - No config file is found. Sets config to ""
 // Returns false (error) if there were multiple configurations found.
-static bool ReadYamlConfig(
-    ClassPathLookup* class_path_lookup,
-    string* config,
-    string* error) {
-  std::set<string> files =
+static bool ReadYamlConfig(ClassPathLookup* class_path_lookup,
+                           std::string* config, std::string* error) {
+  std::set<std::string> files =
       class_path_lookup->ReadApplicationResource(kResourcePath);
 
   if (files.size() > 1) {
@@ -43,17 +41,15 @@ static bool ReadYamlConfig(
   return true;
 }
 
-
 // Parses the string yaml_config that contains a yaml configuration.
 // Adds data to config.
 //
 // Does not alter config if a parsing error occurs.
 //
 // Returns true if parse was sucessful, false otherwise.
-static bool ParseYamlConfig(
-    const string& yaml_config,
-    GlobDataVisibilityPolicy::Config* config,
-    string* error) {
+static bool ParseYamlConfig(const std::string& yaml_config,
+                            GlobDataVisibilityPolicy::Config* config,
+                            std::string* error) {
   // Gather all needed data here.  Do not alter config until all data has been
   // collected without error.
   ExceptionOr<JniLocalRef> config_parser =
@@ -93,30 +89,29 @@ static bool ParseYamlConfig(
   // The code below, which does change the config, should have no error paths.
   // Otherwise we might leave the caller with a partially-modified
   // configuration.
-  std::vector<string> blacklist_patterns_cpp =
+  std::vector<std::string> blacklist_patterns_cpp =
       JniToNativeStringArray(blacklist_patterns.GetData().get());
 
-  for (const string& glob_pattern : blacklist_patterns_cpp) {
+  for (const std::string& glob_pattern : blacklist_patterns_cpp) {
     config->blacklists.Add(glob_pattern);
   }
 
-  std::vector<string> blacklist_exception_patterns_cpp =
+  std::vector<std::string> blacklist_exception_patterns_cpp =
       JniToNativeStringArray(blacklist_exception_patterns.GetData().get());
 
-  for (const string& glob_pattern : blacklist_exception_patterns_cpp) {
+  for (const std::string& glob_pattern : blacklist_exception_patterns_cpp) {
     config->blacklist_exceptions.Add(glob_pattern);
   }
 
   return true;
 }
 
-
 GlobDataVisibilityPolicy::Config ReadYamlDataVisibilityConfiguration(
     ClassPathLookup* class_path_lookup) {
   GlobDataVisibilityPolicy::Config config;
 
-  string yaml_config;
-  string error;
+  std::string yaml_config;
+  std::string error;
   if (!ReadYamlConfig(class_path_lookup, &yaml_config, &error)) {
     config.parse_error = error;
     return config;

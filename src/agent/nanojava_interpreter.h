@@ -108,10 +108,10 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
     const NanoJavaInterpreter* parent_frame() const { return parent_frame_; }
 
     // Gets the name of the associated method (for troubleshooting).
-    string method_name() const;
+    std::string method_name() const;
 
     // Format call stack of the interpreted methods.
-    string FormatCallStack() const;
+    std::string FormatCallStack() const;
 
    private:
     // Instance of "NanoJavaInterpreter" that owns this class.
@@ -160,12 +160,10 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
   const DiagState& diag_state() const { return diag_state_; }
 
   // Gets the name of the associated method (for troubleshooting).
-  string method_name() const override {
-    return diag_state_.method_name();
-  }
+  std::string method_name() const override { return diag_state_.method_name(); }
 
   // Format call stack of the interpreted methods.
-  string FormatCallStack() const override {
+  std::string FormatCallStack() const override {
     return diag_state_.FormatCallStack();
   }
 
@@ -234,7 +232,7 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
   bool CheckJavaException();
 
   // Sets "instruction not supported" error message.
-  void SetOpcodeNotSupportedError(string opcode);
+  void SetOpcodeNotSupportedError(std::string opcode);
 
   // If there is a pending exception, scans try-catch blocks and looks for
   // the exception handler. If exception handler is found, this function will

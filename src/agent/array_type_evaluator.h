@@ -51,22 +51,20 @@ class ArrayTypeEvaluator : public TypeEvaluator {
 
 ~ArrayTypeEvaluator() override {}
 
-  string GetEvaluatorName() override;
+std::string GetEvaluatorName() override;
 
-  // "method_caller" is not used.
-  void Evaluate(
-      MethodCaller* method_caller,
-      const ClassMetadataReader::Entry& class_metadata,
-      jobject obj,
-      bool is_watch_expression,
-      std::vector<NamedJVariant>* members) override;
+// "method_caller" is not used.
+void Evaluate(MethodCaller* method_caller,
+              const ClassMetadataReader::Entry& class_metadata, jobject obj,
+              bool is_watch_expression,
+              std::vector<NamedJVariant>* members) override;
 
- private:
-  const int max_capture_expression_elements_;
-  const int max_capture_local_object_elements_;
-  const int max_capture_local_primitive_elements_;
+private:
+const int max_capture_expression_elements_;
+const int max_capture_local_object_elements_;
+const int max_capture_local_primitive_elements_;
 
-  DISALLOW_COPY_AND_ASSIGN(ArrayTypeEvaluator);
+DISALLOW_COPY_AND_ASSIGN(ArrayTypeEvaluator);
 };
 
 
@@ -183,56 +181,48 @@ void ArrayTypeEvaluator<TArrayType>::Evaluate(
   (*members)[0].value = JVariant::Int(array_len);
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jboolean>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jboolean>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jboolean>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jchar>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jchar>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jchar>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jbyte>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jbyte>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jbyte>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jshort>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jshort>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jshort>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jint>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jint>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jint>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jlong>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jlong>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jlong>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jfloat>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jfloat>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jfloat>";
 }
 
-
 template <>
-inline string ArrayTypeEvaluator<jdouble>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jdouble>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jdouble>";
 }
 
 template <>
-inline string ArrayTypeEvaluator<jobject>::GetEvaluatorName() {
+inline std::string ArrayTypeEvaluator<jobject>::GetEvaluatorName() {
   return "ArrayTypeEvaluator<jobject>";
 }
 

@@ -86,8 +86,8 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
   absl::MutexLock lock_set_active_breakpoints_list(
       &mu_set_active_breakpoints_list_);
 
-  std::map<string, std::shared_ptr<Breakpoint>> updated_active_breakpoints;
-  std::set<string> updated_completed_breakpoints;
+  std::map<std::string, std::shared_ptr<Breakpoint>> updated_active_breakpoints;
+  std::set<std::string> updated_completed_breakpoints;
   std::vector<std::unique_ptr<BreakpointModel>> new_breakpoints;
 
   // Identify deleted and new breakpoints.
@@ -100,7 +100,7 @@ void JvmBreakpointsManager::SetActiveBreakpointsList(
     for (int i = 0; i < breakpoints.size(); ++i) {
       std::unique_ptr<BreakpointModel> breakpoint = std::move(breakpoints[i]);
 
-      const string& id = breakpoint->id;
+      const std::string& id = breakpoint->id;
 
       // Ignore completed breakpoints.
       if (completed_breakpoints_.find(id) != completed_breakpoints_.end()) {
@@ -248,8 +248,7 @@ void JvmBreakpointsManager::JvmtiOnBreakpoint(
   }
 }
 
-
-void JvmBreakpointsManager::CompleteBreakpoint(string breakpoint_id) {
+void JvmBreakpointsManager::CompleteBreakpoint(std::string breakpoint_id) {
   if (canary_control_ != nullptr) {
     canary_control_->BreakpointCompleted(breakpoint_id);
   }
@@ -272,7 +271,6 @@ void JvmBreakpointsManager::CompleteBreakpoint(string breakpoint_id) {
   // It is still possible that some other threads are processing breakpoint
   // hit or other events for the completed breakpoint.
 }
-
 
 bool JvmBreakpointsManager::SetJvmtiBreakpoint(
     jmethodID method,
@@ -386,15 +384,13 @@ JvmBreakpointsManager::GetActiveBreakpoints() {
 }
 
 void JvmBreakpointsManager::OnClassPrepared(
-    const string& type_name,
-    const string& class_signature) {
+    const std::string& type_name, const std::string& class_signature) {
   // Propagate the event to all active breakpoints. Let each breakpoint decide
   // whether it needs to take action.
   for (const auto& breakpoint : GetActiveBreakpoints()) {
     breakpoint->OnClassPrepared(type_name, class_signature);
   }
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

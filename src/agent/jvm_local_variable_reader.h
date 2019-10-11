@@ -48,7 +48,7 @@ class JvmLocalVariableReader : public LocalVariableReader {
 
   bool IsArgument() const override { return is_argument_; }
 
-  const string& GetName() const override  { return name_; }
+  const std::string& GetName() const override { return name_; }
 
   const JSignature& GetStaticType() const override { return signature_; }
 
@@ -64,7 +64,7 @@ class JvmLocalVariableReader : public LocalVariableReader {
   const bool is_argument_;
 
   // Name of the local variable.
-  const string name_;
+  const std::string name_;
 
   // Compile-time type of the local variable.
   const JSignature signature_;

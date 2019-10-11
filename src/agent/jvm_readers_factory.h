@@ -43,53 +43,47 @@ class JvmReadersFactory : public ReadersFactory {
       jmethodID method,
       jlocation location);
 
-  string GetEvaluationPointClassName() override;
+  std::string GetEvaluationPointClassName() override;
 
-  JniLocalRef FindClassByName(
-      const string& class_name,
-      FormatMessageModel* error_message) override;
+  JniLocalRef FindClassByName(const std::string& class_name,
+                              FormatMessageModel* error_message) override;
 
-  bool IsAssignable(
-      const string& from_signature,
-      const string& to_signature) override;
+  bool IsAssignable(const std::string& from_signature,
+                    const std::string& to_signature) override;
 
   std::unique_ptr<LocalVariableReader> CreateLocalVariableReader(
-      const string& variable_name,
+      const std::string& variable_name,
       FormatMessageModel* error_message) override;
 
   std::unique_ptr<LocalVariableReader> CreateLocalInstanceReader() override;
 
   std::unique_ptr<InstanceFieldReader> CreateInstanceFieldReader(
-      const string& class_signature,
-      const string& field_name,
+      const std::string& class_signature, const std::string& field_name,
       FormatMessageModel* error_message) override;
 
   std::unique_ptr<StaticFieldReader> CreateStaticFieldReader(
-      const string& field_name,
+      const std::string& field_name,
       FormatMessageModel* error_message) override;
 
   std::unique_ptr<StaticFieldReader> CreateStaticFieldReader(
-      const string& class_name,
-      const string& field_name,
+      const std::string& class_name, const std::string& field_name,
       FormatMessageModel* error_message) override;
 
   std::vector<ClassMetadataReader::Method> FindLocalInstanceMethods(
-      const string& method_name) override;
+      const std::string& method_name) override;
 
-  bool FindInstanceMethods(
-      const string& class_signature,
-      const string& method_name,
-      std::vector<ClassMetadataReader::Method>* methods,
-      FormatMessageModel* error_message) override;
+  bool FindInstanceMethods(const std::string& class_signature,
+                           const std::string& method_name,
+                           std::vector<ClassMetadataReader::Method>* methods,
+                           FormatMessageModel* error_message) override;
 
   std::vector<ClassMetadataReader::Method> FindStaticMethods(
-      const string& method_name) override;
+      const std::string& method_name) override;
 
-  bool FindStaticMethods(
-      const string& class_name,
-      const string& method_name,
-      std::vector<ClassMetadataReader::Method>* methods,
-      FormatMessageModel* error_message) override;
+  bool FindStaticMethods(const std::string& class_name,
+                         const std::string& method_name,
+                         std::vector<ClassMetadataReader::Method>* methods,
+                         FormatMessageModel* error_message) override;
 
   std::unique_ptr<ArrayReader> CreateArrayReader(
       const JSignature& array_signature) override;
@@ -97,14 +91,11 @@ class JvmReadersFactory : public ReadersFactory {
  private:
   // Common code for the two public versions of "CreateStaticFieldReader".
   std::unique_ptr<StaticFieldReader> CreateStaticFieldReader(
-      jclass cls,
-      const string& field_name);
+      jclass cls, const std::string& field_name);
 
   // Common code for the public versions of "FindXXXMethods".
   std::vector<ClassMetadataReader::Method> FindClassMethods(
-      jclass cls,
-      bool is_static,
-      const string& method_name);
+      jclass cls, bool is_static, const std::string& method_name);
 
  private:
   // Evaluation classes bundled together. Not owned by this class.

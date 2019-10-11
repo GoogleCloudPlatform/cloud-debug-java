@@ -20,7 +20,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
         class_config_(class_config) {
   }
 
-  bool IsFieldVisible(const string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
     if (class_invisible_) {
       return false;
     }
@@ -39,17 +39,14 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsFieldDataVisible(
-      const string& name,
-      int32 field_modifiers,
-      string* reason) override {
+  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+                          std::string* reason) override {
     return true;
   }
 
-  bool IsMethodVisible(
-      const string& method_name,
-      const string& method_signature,
-      int32 method_modifiers) override {
+  bool IsMethodVisible(const std::string& method_name,
+                       const std::string& method_signature,
+                       int32 method_modifiers) override {
     if (class_invisible_) {
       return false;
     }
@@ -58,10 +55,9 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsVariableVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name) override {
+  bool IsVariableVisible(const std::string& method_name,
+                         const std::string& method_signature,
+                         const std::string& variable_name) override {
     if (class_invisible_) {
       return false;
     }
@@ -90,11 +86,10 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsVariableDataVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name,
-      string* reason) override {
+  bool IsVariableDataVisible(const std::string& method_name,
+                             const std::string& method_signature,
+                             const std::string& variable_name,
+                             std::string* reason) override {
     return true;
   }
 
@@ -117,7 +112,7 @@ const StructuredDataVisibilityPolicy::Config::Class g_default_class_config = {};
 
 std::unique_ptr<DataVisibilityPolicy::Class>
 StructuredDataVisibilityPolicy::GetClassVisibility(jclass cls) {
-  string signature = GetClassSignature(cls);
+  std::string signature = GetClassSignature(cls);
   if ((signature.size() < 3) ||
       (signature.front() != 'L') || (signature.back() != ';')) {
     return nullptr;  // Invalid class signature.
@@ -125,12 +120,12 @@ StructuredDataVisibilityPolicy::GetClassVisibility(jclass cls) {
 
   size_t package_sep_pos = signature.find_last_of('/');
   size_t class_name_pos = package_sep_pos + 1;
-  if (package_sep_pos == string::npos) {
+  if (package_sep_pos == std::string::npos) {
     package_sep_pos = 1;  // Top level class (i.e. package name is empty).
     class_name_pos = 1;
   }
 
-  string package_name = signature.substr(1, package_sep_pos - 1);
+  std::string package_name = signature.substr(1, package_sep_pos - 1);
   auto it_package = config_.packages.find(package_name);
   if (it_package == config_.packages.end()) {
     return nullptr;  // No configuration in this package.
@@ -141,7 +136,7 @@ StructuredDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   std::stringstream ss(signature.substr(
       class_name_pos,
       signature.size() - class_name_pos - 1));  // Skip over the trailing ';'.
-  string class_name;
+  std::string class_name;
   const auto* parent_map = &it_package->second.classes;
   const Config::Class* class_config = nullptr;
   while (std::getline(ss, class_name, '$')) {

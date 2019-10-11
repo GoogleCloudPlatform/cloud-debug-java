@@ -31,8 +31,8 @@ Java_com_google_devtools_cdbg_debuglets_java_GcpEnvironment_getAgentFlag(
     jstring flag) {
   devtools::cdbg::set_thread_jni(jni);
 
-  string name = devtools::cdbg::JniToNativeString(flag);
-  string value;
+  std::string name = devtools::cdbg::JniToNativeString(flag);
+  std::string value;
   if (!GetCommandLineOption(name.c_str(), &value)) {
     LOG(WARNING) << "Flag " << name << " not found";
     return nullptr;  // Flag not found.

@@ -3,7 +3,7 @@
 namespace devtools {
 namespace cdbg {
 
-string Base64Encode(const char* in, size_t in_size) {
+std::string Base64Encode(const char* in, size_t in_size) {
   static const char kBase64Chars[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   static const char kBase64PadChar = '=';
@@ -11,7 +11,7 @@ string Base64Encode(const char* in, size_t in_size) {
   int in_i = 0;
   int out_i = 0;
   size_t out_size = ((in_size + 2) / 3) * 4;
-  string out(out_size, 0);
+  std::string out(out_size, 0);
 
   while (in_i + 2 < in_size) {
     uint32 in_bytes = in[in_i] << 16 | in[in_i + 1] << 8 | in[in_i + 2];

@@ -49,8 +49,8 @@ namespace cdbg {
 constexpr char kLogpointPrefix[] = "LOGPOINT: ";
 
 // Resolves method line in a loaded and prepared Java class.
-static bool FindMethodLine(jclass cls, const string& method_name,
-                           const string& method_signature, int line_number,
+static bool FindMethodLine(jclass cls, const std::string& method_name,
+                           const std::string& method_signature, int line_number,
                            jmethodID* method, jlocation* location) {
   *method = nullptr;
   *location = 0;
@@ -292,8 +292,8 @@ void JvmBreakpoint::ResetToPending() {
   compiled_breakpoint_ = nullptr;
 }
 
-void JvmBreakpoint::OnClassPrepared(const string& type_name,
-                                    const string& class_signature) {
+void JvmBreakpoint::OnClassPrepared(const std::string& type_name,
+                                    const std::string& class_signature) {
   if (compiled_breakpoint_ != nullptr) {
     return;  // The breakpoint is already active.
   }
@@ -414,7 +414,8 @@ void JvmBreakpoint::DoLogAction(jthread thread, CompiledBreakpoint* state) {
   collector.Collect(method_caller.get(), evaluators_->object_evaluator,
                     state->watches(), thread);
 
-  string log_message = string(kLogpointPrefix) + collector.Format(*definition_);
+  std::string log_message =
+      std::string(kLogpointPrefix) + collector.Format(*definition_);
 
   // TODO: Discuss if Log() below should be included in quota
   // accounting.  If so, this function can be changed to void.
@@ -525,7 +526,7 @@ bool JvmBreakpoint::DynamicLogPause::IsPaused() {
 
 void JvmBreakpoint::DynamicLogPause::OutOfQuota(
     DynamicLogger* logger, BreakpointModel::LogLevel log_level,
-    const string& message, const ResolvedSourceLocation& source_location) {
+    const std::string& message, const ResolvedSourceLocation& source_location) {
   // We are out of quota. Log warning when we transition from "normal" state
   // to "out of quota" state. Stick to the "out of quota" state for some time.
   bool log_out_of_quota_message = false;
@@ -539,7 +540,8 @@ void JvmBreakpoint::DynamicLogPause::OutOfQuota(
   }
 
   if (log_out_of_quota_message) {
-    logger->Log(log_level, source_location, string(kLogpointPrefix) + message);
+    logger->Log(log_level, source_location,
+                std::string(kLogpointPrefix) + message);
   }
 }
 
@@ -754,7 +756,7 @@ std::shared_ptr<CompiledBreakpoint> JvmBreakpoint::CompileBreakpointExpressions(
 
   // Compile watched expressions.
   std::vector<CompiledExpression> watches;
-  for (const string& watch : definition_->expressions) {
+  for (const std::string& watch : definition_->expressions) {
     watches.push_back(CompileExpression(watch, &readers_factory));
   }
 
@@ -843,7 +845,7 @@ void JvmBreakpoint::SendInterimBreakpointUpdate(
               .set_description(watch.error_message)
               .build());
     } else {
-      variable_builder.set_value(string());
+      variable_builder.set_value(std::string());
     }
 
     breakpoint_builder.add_evaluated_expression(variable_builder);

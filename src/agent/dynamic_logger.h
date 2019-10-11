@@ -35,10 +35,9 @@ class DynamicLogger {
   virtual bool IsAvailable() const = 0;
 
   // Synchronously writes a log entry to application log. Ignores any failures.
-  virtual void Log(
-      BreakpointModel::LogLevel level,
-      const ResolvedSourceLocation& source_location,
-      const string& message) = 0;
+  virtual void Log(BreakpointModel::LogLevel level,
+                   const ResolvedSourceLocation& source_location,
+                   const std::string& message) = 0;
 };
 
 }  // namespace cdbg

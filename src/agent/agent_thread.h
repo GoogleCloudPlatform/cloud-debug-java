@@ -34,9 +34,8 @@ class AgentThread {
   virtual ~AgentThread() { }
 
   // Starts the thread. The "thread_name" argument is only used for logging.
-  virtual bool Start(
-      const string& thread_name,
-      std::function<void()> thread_proc) = 0;
+  virtual bool Start(const std::string& thread_name,
+                     std::function<void()> thread_proc) = 0;
 
   // Checks whether "Start" has been previously called.
   virtual bool IsStarted() const = 0;

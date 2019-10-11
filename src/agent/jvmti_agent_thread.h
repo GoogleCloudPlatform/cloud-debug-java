@@ -30,9 +30,8 @@ class JvmtiAgentThread : public AgentThread {
   JvmtiAgentThread();
   ~JvmtiAgentThread() override;
 
-  bool Start(
-      const string& thread_name,
-      std::function<void()> thread_proc) override;
+  bool Start(const std::string& thread_name,
+             std::function<void()> thread_proc) override;
 
   bool IsStarted() const override { return thread_ != nullptr; }
 
@@ -46,9 +45,8 @@ class JvmtiAgentThread : public AgentThread {
 
  private:
   // Creates the thread objects and starts the agent thread.
-  bool StartAgentThread(
-      const string& thread_name,
-      std::function<void()> thread_proc);
+  bool StartAgentThread(const std::string& thread_name,
+                        std::function<void()> thread_proc);
 
  private:
   // Global reference to Java thread object.

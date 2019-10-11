@@ -49,30 +49,29 @@ static constexpr char kFormatMessageClassSignature[] =
 
 // Gets the absolute path to the Java Cloud Debugger agent directory. The
 // returned path does not have a trailing slash. Returns empty string on error.
-static string GetAgentDirectory() {
+static std::string GetAgentDirectory() {
   Dl_info dl_info = { 0 };
   if (!dladdr(reinterpret_cast<void*>(GetAgentDirectory), &dl_info)) {
     LOG(ERROR) << "Failed to determined agent directory";
-    return string();
+    return std::string();
   }
 
   if (dl_info.dli_fname == nullptr) {
     LOG(ERROR) << "Shared library location is missing";
-    return string();
+    return std::string();
   }
 
   const char* end = strrchr(dl_info.dli_fname, '/');
   if (end == nullptr) {
     LOG(ERROR) << "Invalid shared library location: " << dl_info.dli_fname;
-    return string();
+    return std::string();
   }
 
-  return string(dl_info.dli_fname, end);
+  return std::string(dl_info.dli_fname, end);
 }
 
-
 bool JvmInternals::LoadInternals() {
-  const string agent_directory = GetAgentDirectory();
+  const std::string agent_directory = GetAgentDirectory();
   if (agent_directory.empty()) {
     return false;
   }
@@ -164,11 +163,9 @@ void JvmInternals::ReleaseRefs() {
   format_message_.get_parameters_method = nullptr;
 }
 
-
-void JvmInternals::ResolveSourceLocation(
-    const string& source_path,
-    int line_number,
-    ResolvedSourceLocation* location) {
+void JvmInternals::ResolveSourceLocation(const std::string& source_path,
+                                         int line_number,
+                                         ResolvedSourceLocation* location) {
   *location = ResolvedSourceLocation();
 
   // Initialize error to "internal error", so that this function can just
@@ -273,8 +270,8 @@ void JvmInternals::ResolveSourceLocation(
   location->error_message = FormatMessageModel();
 }
 
-
-std::vector<string> JvmInternals::FindClassesByName(const string& class_name) {
+std::vector<std::string> JvmInternals::FindClassesByName(
+    const std::string& class_name) {
   if (!class_path_lookup_.instance) {
     LOG(ERROR) << "JvmInternals not initialized";
     return {};
@@ -292,13 +289,12 @@ std::vector<string> JvmInternals::FindClassesByName(const string& class_name) {
   return JniToNativeStringArray(signatures_array.get());;
 }
 
-
-string JvmInternals::ComputeDebuggeeUniquifier(const string& iv) {
+std::string JvmInternals::ComputeDebuggeeUniquifier(const std::string& iv) {
   Stopwatch stopwatch;
 
   if (!class_path_lookup_.instance) {
     LOG(ERROR) << "JvmInternals not initialized";
-    return string();
+    return std::string();
   }
 
   JniLocalRef uniquifier_jstr(jni()->CallObjectMethod(
@@ -307,7 +303,7 @@ string JvmInternals::ComputeDebuggeeUniquifier(const string& iv) {
       JniToJavaString(iv).get()));
 
   if (!JniCheckNoException("ClassPathLookup.computeDebuggeeUniquifier")) {
-    return string();
+    return std::string();
   }
 
   LOG(INFO) << "ComputeDebuggeeUniquifier time: "
@@ -316,12 +312,11 @@ string JvmInternals::ComputeDebuggeeUniquifier(const string& iv) {
   return JniToNativeString(uniquifier_jstr.get());
 }
 
-
-std::set<string> JvmInternals::ReadApplicationResource(
-    const string& resource_path) {
+std::set<std::string> JvmInternals::ReadApplicationResource(
+    const std::string& resource_path) {
   if (!class_path_lookup_.instance) {
     LOG(ERROR) << "JvmInternals not initialized";
-    return std::set<string>();
+    return std::set<std::string>();
   }
 
   JniLocalRef resources_jarray(jni()->CallObjectMethod(
@@ -330,17 +325,16 @@ std::set<string> JvmInternals::ReadApplicationResource(
       JniToJavaString(resource_path).get()));
 
   if (!JniCheckNoException("ClassPathLookup.readApplicationResource")) {
-    return std::set<string>();
+    return std::set<std::string>();
   }
 
-  std::vector<string> resources =
+  std::vector<std::string> resources =
       JniToNativeStringArray(resources_jarray.get());
 
-  return std::set<string>(resources.begin(), resources.end());
+  return std::set<std::string>(resources.begin(), resources.end());
 }
 
-
-bool JvmInternals::LoadClassLoader(const string& agentdir) {
+bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
   DCHECK(class_loader_obj_ == nullptr);
 
   // Load the class in JVM.
@@ -371,7 +365,7 @@ bool JvmInternals::LoadClassLoader(const string& agentdir) {
 
   // Create class loader instance exposing classes from
   // "cdbg_java_agent_internals.jar".
-  const string internals_jar_path =
+  const std::string internals_jar_path =
       agentdir + "/cdbg_java_agent_internals.jar";
   LOG(INFO) << "Loading internals from " << internals_jar_path;
   JniLocalRef jstr_internals_path(JniToJavaString(internals_jar_path));
@@ -396,7 +390,6 @@ bool JvmInternals::LoadClassLoader(const string& agentdir) {
 
   return true;
 }
-
 
 bool JvmInternals::LoadClasses() {
   //
@@ -463,7 +456,7 @@ bool JvmInternals::LoadClasses() {
     return false;
   }
 
-  string get_error_message_signature;
+  std::string get_error_message_signature;
   get_error_message_signature = "()";
   get_error_message_signature += kFormatMessageClassSignature;
 
@@ -554,7 +547,7 @@ FormatMessageModel JvmInternals::ConvertFormatMessage(
     return INTERNAL_ERROR_MESSAGE;
   }
 
-  string format = JniToNativeString(jobj.get());
+  std::string format = JniToNativeString(jobj.get());
 
   if (format.empty()) {
     LOG(ERROR) << "Empty error message format returned in FormatMessage";
@@ -569,7 +562,7 @@ FormatMessageModel JvmInternals::ConvertFormatMessage(
     return INTERNAL_ERROR_MESSAGE;
   }
 
-  std::vector<string> parameters;
+  std::vector<std::string> parameters;
   if (jobj != nullptr) {
     const jsize size = jni()->GetArrayLength(static_cast<jarray>(jobj.get()));
 

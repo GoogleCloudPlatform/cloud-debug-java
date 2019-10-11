@@ -30,11 +30,10 @@ namespace cdbg {
 static constexpr int kMaxInnerClassesDepth = 10;
 
 std::vector<std::unique_ptr<InstanceFieldReader>>
-CreateInstanceFieldReadersChain(
-    ReadersFactory* readers_factory,
-    const string& class_signature,
-    const string& field_name,
-    FormatMessageModel* error_message) {
+CreateInstanceFieldReadersChain(ReadersFactory* readers_factory,
+                                const std::string& class_signature,
+                                const std::string& field_name,
+                                FormatMessageModel* error_message) {
   std::vector<std::unique_ptr<InstanceFieldReader>> chain;
   std::unique_ptr<InstanceFieldReader> reader;
 
@@ -83,7 +82,7 @@ CreateInstanceFieldReadersChain(
     }
 
     if (inner_depth > 0) {
-      string this_name = "this$" + std::to_string(inner_depth - 1);
+      std::string this_name = "this$" + std::to_string(inner_depth - 1);
       reader = readers_factory->CreateInstanceFieldReader(
           chain.back()->GetStaticType().object_signature,
           this_name,
@@ -104,19 +103,15 @@ CreateInstanceFieldReadersChain(
   return {};
 }
 
-
 FieldEvaluator::FieldEvaluator(
     std::unique_ptr<ExpressionEvaluator> instance_source,
-    string identifier_name,
-    string possible_class_name,
-    string field_name)
+    std::string identifier_name, std::string possible_class_name,
+    std::string field_name)
     : instance_source_(std::move(instance_source)),
       identifier_name_(std::move(identifier_name)),
       possible_class_name_(std::move(possible_class_name)),
       field_name_(std::move(field_name)),
-      computer_(nullptr) {
-}
-
+      computer_(nullptr) {}
 
 FieldEvaluator::~FieldEvaluator() {
   if (static_field_reader_ != nullptr) {

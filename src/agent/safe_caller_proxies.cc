@@ -40,7 +40,7 @@ MethodCallResult ObjectClonePre(
     return MethodCallResult::Success(JVariant());
   }
 
-  string signature = GetObjectClassSignature(instance);
+  std::string signature = GetObjectClassSignature(instance);
   if (IsArrayObjectSignature(signature)) {
     jsize length = jni()->GetArrayLength(static_cast<jarray>(instance));
     if (length > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
@@ -145,7 +145,7 @@ MethodCallResult StringFormatPre(
     MethodCallResult rc;
     jobject replacement_element = ref.get();
     if (ref != nullptr) {
-      string signature = GetObjectClassSignature(ref.get());
+      std::string signature = GetObjectClassSignature(ref.get());
       if ((signature != "Ljava/lang/Boolean;") &&
           (signature != "Ljava/lang/Byte;") &&
           (signature != "Ljava/lang/Character;") &&

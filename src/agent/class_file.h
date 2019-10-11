@@ -61,12 +61,10 @@ class ConstantPool {
     int size() const { return buffer_.size(); }
 
     // Copies the UTF-8 string into a newly allocated C++ string.
-    string str() const {
-      return string(begin(), end());
-    }
+    std::string str() const { return std::string(begin(), end()); }
 
     // Compares to another string.
-    bool operator== (const string& other) const {
+    bool operator==(const std::string& other) const {
       if (size() != other.size()) {
         return false;
       }
@@ -122,7 +120,7 @@ class ConstantPool {
     const ClassRef* owner = nullptr;
 
     // FieldRef name.
-    string field_name;
+    std::string field_name;
 
     // Field type (signature and the class object).
     std::shared_ptr<ClassIndexer::Type> field_type;
@@ -503,9 +501,8 @@ class ClassFile {
 
   // Loads the class file from a BLOB. Returns nullptr if this is not a valid
   // class file.
-  static std::unique_ptr<ClassFile> LoadFromBlob(
-      ClassIndexer* class_indexer,
-      string blob);
+  static std::unique_ptr<ClassFile> LoadFromBlob(ClassIndexer* class_indexer,
+                                                 std::string blob);
 
   // Gets a class file data wrapper.
   ByteSource GetData() const { return ByteSource(buffer_); }
@@ -532,14 +529,12 @@ class ClassFile {
   Method* GetMethod(int method_index) { return &methods_[method_index]; }
 
   // Find a particular method in the class file.
-  Method* FindMethod(
-      bool is_static,
-      const string& name,
-      const string& signature);
+  Method* FindMethod(bool is_static, const std::string& name,
+                     const std::string& signature);
 
  private:
   // Does not take ownership of "class_indexer" which must outlive this object.
-  ClassFile(ClassIndexer* class_indexer, string buffer);
+  ClassFile(ClassIndexer* class_indexer, std::string buffer);
 
   // Reads the structure of the class file and prepares indexes.
   bool Initialize();
@@ -559,7 +554,7 @@ class ClassFile {
 
  private:
   // Class file BLOB.
-  const string buffer_;
+  const std::string buffer_;
 
   // Offset of the first byte beyond the constant pool in the class file.
   int constant_pool_end_offset_ { 0 };

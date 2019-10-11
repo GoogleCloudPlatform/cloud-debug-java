@@ -17,45 +17,40 @@ namespace {
 // reports that methods and fields have their data hidden.
 class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
-  explicit BlacklistedClassImpl(const string& reason) : reason_(reason) {}
+  explicit BlacklistedClassImpl(const std::string& reason) : reason_(reason) {}
 
-  bool IsFieldVisible(const string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
     return true;
   }
 
-  bool IsFieldDataVisible(
-      const string& name,
-      int32 field_modifiers,
-      string* reason) override {
+  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+                          std::string* reason) override {
     *reason = reason_;
     return false;
   }
 
-  bool IsMethodVisible(
-      const string& method_name,
-      const string& method_signature,
-      int32 method_modifiers) override {
+  bool IsMethodVisible(const std::string& method_name,
+                       const std::string& method_signature,
+                       int32 method_modifiers) override {
     return false;
   }
 
-  bool IsVariableVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name) override {
+  bool IsVariableVisible(const std::string& method_name,
+                         const std::string& method_signature,
+                         const std::string& variable_name) override {
     return true;
   }
 
-  bool IsVariableDataVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name,
-      string* reason) override {
+  bool IsVariableDataVisible(const std::string& method_name,
+                             const std::string& method_signature,
+                             const std::string& variable_name,
+                             std::string* reason) override {
     *reason = reason_;
     return false;
   }
 
  private:
-  const string reason_;
+  const std::string reason_;
 };
 
 }  // namespace
@@ -64,7 +59,7 @@ GlobDataVisibilityPolicy::GlobDataVisibilityPolicy() {
   config_.parse_error = "Internal Error: visibility policy not initialized.";
 }
 
-bool GlobDataVisibilityPolicy::HasSetupError(string* error) const {
+bool GlobDataVisibilityPolicy::HasSetupError(std::string* error) const {
   if (config_.parse_error.empty()) {
     return false;
   }
@@ -81,13 +76,13 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
         new BlacklistedClassImpl(config_.parse_error));
   }
 
-  string signature = GetClassSignature(cls);
+  std::string signature = GetClassSignature(cls);
   if ((signature.size() < 3) ||
       (signature.front() != 'L') || (signature.back() != ';')) {
     return nullptr;  // Invalid class signature.
   }
 
-  string path = TypeNameFromJObjectSignature(signature);
+  std::string path = TypeNameFromJObjectSignature(signature);
   // replace $ with . in paths.  Without this replacement, someone
   // could try and blacklist all class members with a rule like
   //
@@ -115,19 +110,17 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
 
 
 // Returns true if path can be matched by the wildcard pattern.
-static bool WildcardMatches(const string& path, const string& pattern) {
+static bool WildcardMatches(const std::string& path,
+                            const std::string& pattern) {
   constexpr int kFlags = 0;
   return fnmatch(pattern.c_str(), path.c_str(), kFlags) == 0;
 }
 
-
 // GenericMatches works in all cases but uses a slow O(n) algorithm.  Due to
 // it's performance, it's intended to process the generic_patterns_ set.
-static bool GenericMatches(
-    const string& path,
-    const std::set<string>& generic_match) {
-
-  for (const string& pattern : generic_match) {
+static bool GenericMatches(const std::string& path,
+                           const std::set<std::string>& generic_match) {
+  for (const std::string& pattern : generic_match) {
     if (WildcardMatches(path, pattern)) {
       return true;
     }
@@ -137,10 +130,9 @@ static bool GenericMatches(
 
 // Returns true if a path does not match anything is exact_inverse_patterns or
 // inverse_patterns.
-static bool InverseMatches(
-    const string& path,
-    const std::set<string>& exact_inverse_patterns,
-    const std::set<string>& inverse_patterns) {
+static bool InverseMatches(const std::string& path,
+                           const std::set<std::string>& exact_inverse_patterns,
+                           const std::set<std::string>& inverse_patterns) {
   if (inverse_patterns.empty() && exact_inverse_patterns.empty()) {
     // inverse matches are not being used
     return false;
@@ -149,7 +141,6 @@ static bool InverseMatches(
   return exact_inverse_patterns.find(path) == exact_inverse_patterns.end() &&
       !GenericMatches(path, inverse_patterns);
 }
-
 
 // PrefixMatches uses a fast O(log n) algorithm to match globs that
 // end with *.
@@ -160,9 +151,8 @@ static bool InverseMatches(
 // removed (i.e. with RemoveRedundantPrefixes).  Each pattern is implicitly
 // assumed to end with a *.  There should not be any '*' characters in the
 // actual data.
-static bool PrefixMatches(
-    const string& path,
-    const std::vector<string>& prefix_match) {
+static bool PrefixMatches(const std::string& path,
+                          const std::vector<std::string>& prefix_match) {
   // Find the lower bound, but only consider the matching prefixes in
   // each comparison
   auto lower_bound = std::lower_bound(
@@ -183,7 +173,6 @@ static bool PrefixMatches(
   return std::equal(lower_bound->begin(), lower_bound->end(), path.begin());
 }
 
-
 // Removes redundant prefixes in place.  Removing these is necessary for
 // PrefixMatches() to function correctly.
 //
@@ -192,7 +181,7 @@ static bool PrefixMatches(
 // For example, if searching for AB inside [A AA B], the AA redundant prefix
 // would incorrectly pivot the search toward B.  Removing the redundant
 // prefix resolves the issue.
-static void RemoveRedundantPrefixes(std::vector<string>* prefixes) {
+static void RemoveRedundantPrefixes(std::vector<std::string>* prefixes) {
   if (prefixes->size() <= 1) {
     // Nothing to do
     return;
@@ -219,15 +208,13 @@ static void RemoveRedundantPrefixes(std::vector<string>* prefixes) {
   prefixes->resize(base + 1);
 }
 
-
 void GlobDataVisibilityPolicy::GlobSet::Prepare() {
   std::sort(prefix_patterns_.begin(), prefix_patterns_.end());
   RemoveRedundantPrefixes(&prefix_patterns_);
   prepared_ = true;
 }
 
-
-bool GlobDataVisibilityPolicy::GlobSet::Matches(const string& path) const {
+bool GlobDataVisibilityPolicy::GlobSet::Matches(const std::string& path) const {
   DCHECK(prepared_) << "Match() called before Prepare()";
   if (exact_patterns_.find(path) != exact_patterns_.end()) {
     return true;
@@ -244,8 +231,7 @@ bool GlobDataVisibilityPolicy::GlobSet::Matches(const string& path) const {
   return GenericMatches(path, generic_patterns_);
 }
 
-
-void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
+void GlobDataVisibilityPolicy::GlobSet::Add(const std::string& glob_pattern) {
   prepared_ = false;
 
   if (glob_pattern.empty()) {
@@ -257,9 +243,9 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
   // Check for an inverted pattern (patterns that start with a !)
   if (glob_pattern[0] == '!') {
     // Drop the leading ! character
-    const string inverse_pattern = glob_pattern.substr(1);
+    const std::string inverse_pattern = glob_pattern.substr(1);
 
-    if (index == string::npos) {
+    if (index == std::string::npos) {
       // For exact match, also add the path extension.  This allows a user
       // to say
       //
@@ -275,7 +261,7 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
     return;
   }
 
-  if (index == string::npos) {
+  if (index == std::string::npos) {
     exact_patterns_.insert(glob_pattern);
 
     // All patterns that don't end with * must have '.*'
@@ -300,7 +286,6 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const string& glob_pattern) {
     generic_patterns_.insert(glob_pattern);
   }
 }
-
 
 }  // namespace cdbg
 }  // namespace devtools

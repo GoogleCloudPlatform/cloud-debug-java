@@ -39,7 +39,7 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
   struct Config {
     struct Variable {
       // Name of the local variable or the argument.
-      string name;
+      std::string name;
 
       // If true, the value value of this variable will not be captured by the
       // Cloud Debugger.
@@ -48,7 +48,7 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
 
     struct Field {
       // Name of the field (e.g. "myField").
-      string name;
+      std::string name;
 
       // If true, the value of this field will be omitted by the Cloud Debugger.
       bool invisible = false;
@@ -56,10 +56,10 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
 
     struct Method {
       // Name of the method (e.g. "myMethod").
-      string name;
+      std::string name;
 
       // JVMTI signature of the method (e.g. "(IIJ)V").
-      string signature;
+      std::string signature;
 
       // Configuration of method variables.
       std::vector<Variable> variables;
@@ -79,7 +79,7 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
 
       // The key is a simple name of the class (e.g. "MyStaticClass"). It does
       // not include name of the parent class or a package.
-      std::map<string, Class> nested_classes;
+      std::map<std::string, Class> nested_classes;
     };
 
     struct Package {
@@ -90,11 +90,11 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
       // Configuration of top level classes in this package.
       // The key is a simple name of the class (e.g. "MyClass"). It does
       // not include name of the parent class or a package.
-      std::map<string, Class> classes;
+      std::map<std::string, Class> classes;
     };
 
     // The key is an internal name of the package (e.g. "com/google/common").
-    std::map<string, Package> packages;
+    std::map<std::string, Package> packages;
   };
 
   // Initializes with an empty config that blocks nothing.
@@ -107,9 +107,7 @@ class StructuredDataVisibilityPolicy : public DataVisibilityPolicy {
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 
-  bool HasSetupError(string* error) const override {
-    return false;
-  }
+  bool HasSetupError(std::string* error) const override { return false; }
 
  private:
   // Raw visibility configuration. It is equivalent to the format stored in

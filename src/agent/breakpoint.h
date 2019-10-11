@@ -51,7 +51,7 @@ class Breakpoint {
   virtual ~Breakpoint() {}
 
   // Getter for breakpoint ID.
-  virtual const string& id() const = 0;
+  virtual const std::string& id() const = 0;
 
   // Initializes the breakpoint to either active or pending state. If the
   // breakpoint is invalid, sends a final breakpoint update and completes
@@ -64,9 +64,8 @@ class Breakpoint {
 
   // Callback invoked when JVM initialized (aka prepared) a Java class. The
   // class might be unrelated to this breakpoint.
-  virtual void OnClassPrepared(
-      const string& type_name,
-      const string& class_signature) = 0;
+  virtual void OnClassPrepared(const std::string& type_name,
+                               const std::string& class_signature) = 0;
 
   // Takes action on a hit over a single breakpoint.
   virtual void OnJvmBreakpointHit(

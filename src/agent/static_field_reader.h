@@ -38,7 +38,7 @@ class StaticFieldReader {
   virtual std::unique_ptr<StaticFieldReader> Clone() const = 0;
 
   // Gets the name of the static variable.
-  virtual const string& GetName() const = 0;
+  virtual const std::string& GetName() const = 0;
 
   // Gets the type of the member variable.
   virtual const JSignature& GetStaticType() const = 0;

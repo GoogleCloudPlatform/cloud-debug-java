@@ -39,11 +39,11 @@ class ClassMetadataReader {
     JSignature class_signature;
 
     // Name of the method (without arguments and return type).
-    string name;
+    std::string name;
 
     // Java method signature. Argument types and return type can be deduced
     // from the signature.
-    string signature;
+    std::string signature;
 
     // Method modifiers. The most important is JVM_ACC_STATIC to distinguish
     // instance methods from static methods.
@@ -86,9 +86,8 @@ class ClassMetadataReader {
 
 // Helper method to build ClassMetadataReader::Method for instance method.
 inline ClassMetadataReader::Method InstanceMethod(
-    string class_signature,
-    string method_name,
-    string method_signature) {
+    std::string class_signature, std::string method_name,
+    std::string method_signature) {
   ClassMetadataReader::Method metadata;
   metadata.class_signature = { JType::Object, std::move(class_signature) };
   metadata.name = std::move(method_name);
@@ -99,12 +98,10 @@ inline ClassMetadataReader::Method InstanceMethod(
   return metadata;
 }
 
-
 // Helper method to build ClassMetadataReader::Method for instance method.
-inline ClassMetadataReader::Method StaticMethod(
-    string class_signature,
-    string method_name,
-    string method_signature) {
+inline ClassMetadataReader::Method StaticMethod(std::string class_signature,
+                                                std::string method_name,
+                                                std::string method_signature) {
   ClassMetadataReader::Method metadata;
   metadata.class_signature = { JType::Object, std::move(class_signature) };
   metadata.name = std::move(method_name);

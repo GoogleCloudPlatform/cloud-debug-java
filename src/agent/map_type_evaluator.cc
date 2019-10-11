@@ -131,7 +131,7 @@ void MapTypeEvaluator::TryInlineMap(
 
     // We don't need to include the type information as the type is only
     // associated with the value, never with the key.
-    string key;
+    std::string key;
     ValueFormatter::Format(entry_key, ValueFormatter::Options(), &key, nullptr);
 
     member.name.clear();

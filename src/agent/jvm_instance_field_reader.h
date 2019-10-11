@@ -30,12 +30,9 @@ class JvmInstanceFieldReader : public InstanceFieldReader {
   //
   // If is_read_error == true, then read_error will be returned
   // on any calls to ReadValue()
-  JvmInstanceFieldReader(
-      const string& name,
-      jfieldID field_id,
-      const JSignature& signature,
-      bool is_read_error,
-      const FormatMessageModel& read_error);
+  JvmInstanceFieldReader(const std::string& name, jfieldID field_id,
+                         const JSignature& signature, bool is_read_error,
+                         const FormatMessageModel& read_error);
 
   JvmInstanceFieldReader(
       const JvmInstanceFieldReader& jvm_instance_field_reader);
@@ -45,7 +42,7 @@ class JvmInstanceFieldReader : public InstanceFieldReader {
         new JvmInstanceFieldReader(*this));
   }
 
-  const string& GetName() const override { return name_; }
+  const std::string& GetName() const override { return name_; }
 
   const JSignature& GetStaticType() const override { return signature_; }
 
@@ -56,7 +53,7 @@ class JvmInstanceFieldReader : public InstanceFieldReader {
 
  private:
   // Name of the member variable.
-  const string name_;
+  const std::string name_;
 
   // Member variable type.
   const JSignature signature_;

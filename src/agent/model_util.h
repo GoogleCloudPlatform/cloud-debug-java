@@ -104,12 +104,12 @@ class StatusMessageBuilder {
     return *this;
   }
 
-  StatusMessageBuilder& set_format(string format) {
+  StatusMessageBuilder& set_format(std::string format) {
     data_->description.format = std::move(format);
     return *this;
   }
 
-  StatusMessageBuilder& set_parameters(std::vector<string> parameters) {
+  StatusMessageBuilder& set_parameters(std::vector<std::string> parameters) {
     data_->description.parameters.swap(parameters);
     return *this;
   }
@@ -119,7 +119,7 @@ class StatusMessageBuilder {
     return *this;
   }
 
-  StatusMessageBuilder& add_parameter(string parameter) {
+  StatusMessageBuilder& add_parameter(std::string parameter) {
     data_->description.parameters.push_back(std::move(parameter));
     return *this;
   }
@@ -140,7 +140,7 @@ class SourceLocationBuilder {
 
   SourceLocationBuilder() { }
 
-  SourceLocationBuilder(string path, int32 line) {
+  SourceLocationBuilder(std::string path, int32 line) {
     set_path(std::move(path));
     set_line(line);
   }
@@ -150,7 +150,7 @@ class SourceLocationBuilder {
     set_line(source.line);
   }
 
-  SourceLocationBuilder& set_path(string path) {
+  SourceLocationBuilder& set_path(std::string path) {
     data_->path = std::move(path);
     return *this;
   }
@@ -202,12 +202,12 @@ class VariableBuilder {
         .build();
   }
 
-  VariableBuilder& set_name(string name) {
+  VariableBuilder& set_name(std::string name) {
     data_->name = std::move(name);
     return *this;
   }
 
-  VariableBuilder& set_value(string value) {
+  VariableBuilder& set_value(std::string value) {
     data_->value = std::move(value);
     return *this;
   }
@@ -217,7 +217,7 @@ class VariableBuilder {
     return *this;
   }
 
-  VariableBuilder& set_type(string type) {
+  VariableBuilder& set_type(std::string type) {
     data_->type = std::move(type);
     return *this;
   }
@@ -300,7 +300,7 @@ class StackFrameBuilder {
     }
   }
 
-  StackFrameBuilder& set_function(string function) {
+  StackFrameBuilder& set_function(std::string function) {
     data_->function = std::move(function);
     return *this;
   }
@@ -311,7 +311,7 @@ class StackFrameBuilder {
     return *this;
   }
 
-  StackFrameBuilder& set_location(string path, int32 line) {
+  StackFrameBuilder& set_location(std::string path, int32 line) {
     return set_location(SourceLocationBuilder(path, line).build());
   }
 
@@ -372,12 +372,12 @@ class UserIdBuilder {
     data_->id = source.id;
   }
 
-  UserIdBuilder& set_kind(string kind) {
+  UserIdBuilder& set_kind(std::string kind) {
     data_->kind = std::move(kind);
     return *this;
   }
 
-  UserIdBuilder& set_id(string id) {
+  UserIdBuilder& set_id(std::string id) {
     data_->id = std::move(id);
     return *this;
   }
@@ -440,7 +440,7 @@ class BreakpointBuilder {
     set_labels(source.labels);
   }
 
-  BreakpointBuilder& set_id(string id) {
+  BreakpointBuilder& set_id(std::string id) {
     data_->id = std::move(id);
     return *this;
   }
@@ -461,21 +461,21 @@ class BreakpointBuilder {
     return *this;
   }
 
-  BreakpointBuilder& set_location(string path, int32 line) {
+  BreakpointBuilder& set_location(std::string path, int32 line) {
     return set_location(SourceLocationBuilder(path, line).build());
   }
 
-  BreakpointBuilder& set_condition(string condition) {
+  BreakpointBuilder& set_condition(std::string condition) {
     data_->condition = std::move(condition);
     return *this;
   }
 
-  BreakpointBuilder& add_expression(string expression) {
+  BreakpointBuilder& add_expression(std::string expression) {
     data_->expressions.push_back(std::move(expression));
     return *this;
   }
 
-  BreakpointBuilder& set_expressions(std::vector<string> expressions) {
+  BreakpointBuilder& set_expressions(std::vector<std::string> expressions) {
     data_->expressions.swap(expressions);
     return *this;
   }
@@ -569,12 +569,13 @@ class BreakpointBuilder {
     return *this;
   }
 
-  BreakpointBuilder& set_labels(std::map<string, string> labels) {
+  BreakpointBuilder& set_labels(std::map<std::string, std::string> labels) {
     data_->labels = std::move(labels);
     return *this;
   }
 
-  BreakpointBuilder& add_label(const string& key, const string& value) {
+  BreakpointBuilder& add_label(const std::string& key,
+                               const std::string& value) {
     data_->labels[key] = value;
     return *this;
   }
@@ -685,7 +686,7 @@ inline std::ostream& operator<< (
   os << "(\"" << message.format << '"';
 
   // Parameters (if any).
-  for (const string& parameter : message.parameters) {
+  for (const std::string& parameter : message.parameters) {
     os << ", \"" << parameter << '"';
   }
 

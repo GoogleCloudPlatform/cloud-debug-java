@@ -34,9 +34,7 @@ class MapEntryTypeEvaluator : public TypeEvaluator {
   // interface.
   bool IsMapEntry(jclass cls) const;
 
-  string GetEvaluatorName() override {
-    return "MapEntryTypeEvaluator";
-  }
+  std::string GetEvaluatorName() override { return "MapEntryTypeEvaluator"; }
 
   void Evaluate(
       MethodCaller* method_caller,

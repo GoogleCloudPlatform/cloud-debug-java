@@ -41,8 +41,7 @@ void JniBreakpointLabelsProvider::Collect() {
   labels_ = JniNewGlobalRef(labels.get());
 }
 
-
-std::map<string, string> JniBreakpointLabelsProvider::Format() {
+std::map<std::string, std::string> JniBreakpointLabelsProvider::Format() {
   if (labels_ == nullptr) {
     return {};  // Breakpoint labels not available.
   }
@@ -53,11 +52,12 @@ std::map<string, string> JniBreakpointLabelsProvider::Format() {
     return {};  // Failed to obtain breakpoint labels.
   }
 
-  std::vector<string> labels_array = JniToNativeStringArray(rc.GetData().get());
+  std::vector<std::string> labels_array =
+      JniToNativeStringArray(rc.GetData().get());
 
   // "labels_array" serializes map into a flat array. Every even entry is a key
   // and every odd entry is value.
-  std::map<string, string> labels;
+  std::map<std::string, std::string> labels;
   for (int i = 0; i < labels_array.size() / 2; ++i) {
     labels[labels_array[i * 2]] = labels_array[i * 2 + 1];
   }

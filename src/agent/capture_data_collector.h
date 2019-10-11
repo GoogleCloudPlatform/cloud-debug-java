@@ -127,7 +127,7 @@ class CaptureDataCollector {
   //        compile_error_message.format is non-empty
   struct EvaluatedExpression {
     // Original expression string to populate in variable name.
-    string expression;
+    std::string expression;
 
     // Compilation error message or empty if expression was compiled
     // successfully.
@@ -139,7 +139,7 @@ class CaptureDataCollector {
 
   // Decodes call frame key into a user friendly function name (like
   // "MyOrg.MyClass.MyMethod").
-  string GetFunctionName(int depth) const;
+  std::string GetFunctionName(int depth) const;
 
   // Retrieves the location of the source code at the specified call frame.
   std::unique_ptr<SourceLocationModel> GetCallFrameSourceLocation(

@@ -65,7 +65,7 @@ WellKnownJClass MapEntryTypeEvaluator::GetKeyWellKnownJClass(
   jobject key_obj = nullptr;
   key.value().get<jobject>(&key_obj);
 
-  string signature = GetObjectClassSignature(key_obj);
+  std::string signature = GetObjectClassSignature(key_obj);
   if (signature.empty()) {
     return WellKnownJClass::Unknown;
   }

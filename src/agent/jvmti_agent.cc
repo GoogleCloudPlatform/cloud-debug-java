@@ -366,7 +366,7 @@ bool JvmtiAgent::OnWorkerReady() {
             << jniproxy::GcpDebugletVersion()->getVersion().GetData();
 
   // Split the extra class path into individual components.
-  std::vector<string> extra_class_path;
+  std::vector<std::string> extra_class_path;
   std::stringstream extra_class_path_stream(
       absl::GetFlag(FLAGS_cdbg_extra_class_path));
   std::string item;
@@ -415,7 +415,7 @@ void JvmtiAgent::OnBreakpointsUpdated(
 // StatusMessageModel.  Returns nullptr if no there is no error.
 static std::unique_ptr<StatusMessageModel> GetSetupErrorOrNull(
     const DataVisibilityPolicy& policy) {
-  string error;
+  std::string error;
   return policy.HasSetupError(&error) ?
       StatusMessageBuilder()
           .set_error()

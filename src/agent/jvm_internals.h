@@ -48,23 +48,22 @@ class JvmInternals : public ClassPathLookup {
   // Releases all global references held by this class.
   void ReleaseRefs();
 
-  void ResolveSourceLocation(
-      const string& source_path,
-      int line_number,
-      ResolvedSourceLocation* location) override;
+  void ResolveSourceLocation(const std::string& source_path, int line_number,
+                             ResolvedSourceLocation* location) override;
 
-  std::vector<string> FindClassesByName(const string& class_name) override;
+  std::vector<std::string> FindClassesByName(
+      const std::string& class_name) override;
 
-  string ComputeDebuggeeUniquifier(const string& iv) override;
+  std::string ComputeDebuggeeUniquifier(const std::string& iv) override;
 
-  std::set<string> ReadApplicationResource(
-      const string& resource_path) override;
+  std::set<std::string> ReadApplicationResource(
+      const std::string& resource_path) override;
 
   jobject class_loader_obj() const { return class_loader_obj_; }
 
  private:
   // Loads and instantiates "InternalsClassLoader".
-  bool LoadClassLoader(const string& agentdir);
+  bool LoadClassLoader(const std::string& agentdir);
 
   // Loads Java classes from "cdbg_java_agent_internals.jar".
   bool LoadClasses();

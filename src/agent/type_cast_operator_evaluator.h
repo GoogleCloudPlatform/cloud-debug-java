@@ -30,9 +30,8 @@ namespace cdbg {
 class TypeCastOperatorEvaluator : public ExpressionEvaluator {
  public:
   // Class constructor. The instance will own "source".
-  TypeCastOperatorEvaluator(
-      std::unique_ptr<ExpressionEvaluator> source,
-      const string& target_type);
+  TypeCastOperatorEvaluator(std::unique_ptr<ExpressionEvaluator> source,
+                            const std::string& target_type);
 
   ~TypeCastOperatorEvaluator() override;
 
@@ -75,7 +74,7 @@ class TypeCastOperatorEvaluator : public ExpressionEvaluator {
   JSignature result_type_;
 
   // Target type of the expression.
-  const string target_type_;
+  const std::string target_type_;
 
   // Target class derived by looking up the target_type_;
   jobject target_class_ = { nullptr };

@@ -42,15 +42,14 @@ JvmReadersFactory::JvmReadersFactory(
       location_(location) {
 }
 
-
-string JvmReadersFactory::GetEvaluationPointClassName() {
+std::string JvmReadersFactory::GetEvaluationPointClassName() {
   jvmtiError err = JVMTI_ERROR_NONE;
 
   jclass cls = nullptr;
   err = jvmti()->GetMethodDeclaringClass(method_, &cls);
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "GetMethodDeclaringClass failed, error: " << err;
-    return string();
+    return std::string();
   }
 
   JniLocalRef auto_cls(cls);
@@ -62,16 +61,14 @@ string JvmReadersFactory::GetEvaluationPointClassName() {
       nullptr);
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "GetClassSignature failed, error: " << err;
-    return string();
+    return std::string();
   }
 
   return TypeNameFromJObjectSignature(class_signature_buffer.get());
 }
 
-
 JniLocalRef JvmReadersFactory::FindClassByName(
-    const string& class_name,
-    FormatMessageModel* error_message) {
+    const std::string& class_name, FormatMessageModel* error_message) {
   ClassIndexer* class_indexer = evaluators_->class_indexer;
   JniLocalRef cls;
 
@@ -92,9 +89,9 @@ JniLocalRef JvmReadersFactory::FindClassByName(
   }
 
   // Case 3: class name is relative to the current scope.
-  string current_class_name = GetEvaluationPointClassName();
+  std::string current_class_name = GetEvaluationPointClassName();
   size_t name_pos = current_class_name.find_last_of('.');
-  if ((name_pos > 0) && (name_pos != string::npos)) {
+  if ((name_pos > 0) && (name_pos != std::string::npos)) {
     cls = class_indexer->FindClassByName(
         current_class_name.substr(0, name_pos + 1) + class_name);
     if (cls != nullptr) {
@@ -106,7 +103,7 @@ JniLocalRef JvmReadersFactory::FindClassByName(
   // name) or hasn't been loaded yet. Note that this will not include JDK
   // classes (like java.lang.String). These classes are usually loaded very
   // eary and we don't want to waste resources indexing all of them.
-  std::vector<string> candidates =
+  std::vector<std::string> candidates =
       evaluators_->class_path_lookup->FindClassesByName(class_name);
   std::sort(candidates.begin(), candidates.end());
   switch (candidates.size()) {
@@ -167,10 +164,8 @@ JniLocalRef JvmReadersFactory::FindClassByName(
   }
 }
 
-
-bool JvmReadersFactory::IsAssignable(
-    const string& from_signature,
-    const string& to_signature) {
+bool JvmReadersFactory::IsAssignable(const std::string& from_signature,
+                                     const std::string& to_signature) {
   ClassIndexer* class_indexer = evaluators_->class_indexer;
 
   // Currently array types not supported in this function.
@@ -196,11 +191,9 @@ bool JvmReadersFactory::IsAssignable(
       static_cast<jclass>(to_cls.get()));
 }
 
-
 std::unique_ptr<LocalVariableReader>
 JvmReadersFactory::CreateLocalVariableReader(
-    const string& variable_name,
-    FormatMessageModel* error_message) {
+    const std::string& variable_name, FormatMessageModel* error_message) {
   std::shared_ptr<const MethodLocals::Entry> method =
       evaluators_->method_locals->GetLocalVariables(method_);
 
@@ -214,7 +207,6 @@ JvmReadersFactory::CreateLocalVariableReader(
   return nullptr;
 }
 
-
 std::unique_ptr<LocalVariableReader>
 JvmReadersFactory::CreateLocalInstanceReader() {
   std::shared_ptr<const MethodLocals::Entry> method =
@@ -227,11 +219,9 @@ JvmReadersFactory::CreateLocalInstanceReader() {
   return method->local_instance->Clone();
 }
 
-
 std::unique_ptr<InstanceFieldReader>
 JvmReadersFactory::CreateInstanceFieldReader(
-    const string& class_signature,
-    const string& field_name,
+    const std::string& class_signature, const std::string& field_name,
     FormatMessageModel* error_message) {
   JniLocalRef cls =
       evaluators_->class_indexer->FindClassBySignature(class_signature);
@@ -265,10 +255,8 @@ JvmReadersFactory::CreateInstanceFieldReader(
   return nullptr;  // No instance field named "field_name" found Java class.
 }
 
-
 std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
-    const string& field_name,
-    FormatMessageModel* error_message) {
+    const std::string& field_name, FormatMessageModel* error_message) {
   jvmtiError err = JVMTI_ERROR_NONE;
 
   jclass cls = nullptr;
@@ -290,10 +278,8 @@ std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
   return reader;
 }
 
-
 std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
-    const string& class_name,
-    const string& field_name,
+    const std::string& class_name, const std::string& field_name,
     FormatMessageModel* error_message) {
   JniLocalRef cls = FindClassByName(class_name, error_message);
   if (cls == nullptr) {
@@ -310,10 +296,8 @@ std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
   return reader;
 }
 
-
 std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
-    jclass cls,
-    const string& field_name) {
+    jclass cls, const std::string& field_name) {
   const ClassMetadataReader::Entry& metadata =
       evaluators_->class_metadata_reader->GetClassMetadata(cls);
 
@@ -326,10 +310,8 @@ std::unique_ptr<StaticFieldReader> JvmReadersFactory::CreateStaticFieldReader(
   return nullptr;  // No static field named "field_name" found Java class.
 }
 
-
 std::vector<ClassMetadataReader::Method>
-JvmReadersFactory::FindLocalInstanceMethods(
-    const string& method_name) {
+JvmReadersFactory::FindLocalInstanceMethods(const std::string& method_name) {
   std::shared_ptr<const MethodLocals::Entry> method =
       evaluators_->method_locals->GetLocalVariables(method_);
 
@@ -351,10 +333,8 @@ JvmReadersFactory::FindLocalInstanceMethods(
   return methods;
 }
 
-
 bool JvmReadersFactory::FindInstanceMethods(
-    const string& class_signature,
-    const string& method_name,
+    const std::string& class_signature, const std::string& method_name,
     std::vector<ClassMetadataReader::Method>* methods,
     FormatMessageModel* error_message) {
   JniLocalRef cls =
@@ -373,10 +353,8 @@ bool JvmReadersFactory::FindInstanceMethods(
   return true;
 }
 
-
-std::vector<ClassMetadataReader::Method>
-JvmReadersFactory::FindStaticMethods(
-    const string& method_name) {
+std::vector<ClassMetadataReader::Method> JvmReadersFactory::FindStaticMethods(
+    const std::string& method_name) {
   JniLocalRef cls = GetMethodDeclaringClass(method_);
   if (cls == nullptr) {
     // This should not happen. The current class should always be loaded.
@@ -386,10 +364,8 @@ JvmReadersFactory::FindStaticMethods(
   return FindClassMethods(static_cast<jclass>(cls.get()), true, method_name);
 }
 
-
 bool JvmReadersFactory::FindStaticMethods(
-    const string& class_name,
-    const string& method_name,
+    const std::string& class_name, const std::string& method_name,
     std::vector<ClassMetadataReader::Method>* methods,
     FormatMessageModel* error_message) {
   JniLocalRef cls = FindClassByName(class_name, error_message);
@@ -402,11 +378,8 @@ bool JvmReadersFactory::FindStaticMethods(
   return true;
 }
 
-
 std::vector<ClassMetadataReader::Method> JvmReadersFactory::FindClassMethods(
-    jclass cls,
-    bool is_static,
-    const string& method_name) {
+    jclass cls, bool is_static, const std::string& method_name) {
   const ClassMetadataReader::Entry& class_metadata =
       evaluators_->class_metadata_reader->GetClassMetadata(cls);
 
@@ -420,7 +393,6 @@ std::vector<ClassMetadataReader::Method> JvmReadersFactory::FindClassMethods(
 
   return matches;
 }
-
 
 std::unique_ptr<ArrayReader> JvmReadersFactory::CreateArrayReader(
     const JSignature& array_signature) {

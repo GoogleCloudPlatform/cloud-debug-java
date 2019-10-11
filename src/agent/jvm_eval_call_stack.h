@@ -48,16 +48,16 @@ class JvmEvalCallStack : public EvalCallStack {
   // contain anything that requires "JNIEnv*" in destructor (e.g. "JVariant").
   struct MethodCache {
     // Signature of the parent class.
-    string class_signature;
+    std::string class_signature;
 
     // Generic signature of the parent class.
-    string class_generic;
+    std::string class_generic;
 
     // Method executing code at the call frame.
-    string method_name;
+    std::string method_name;
 
     // Name of the source code file.
-    string source_file_name;
+    std::string source_file_name;
 
     // Caches FrameInfo for a given location.
     std::map<jlocation, int> frames_cache;

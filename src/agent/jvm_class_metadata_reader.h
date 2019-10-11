@@ -51,31 +51,27 @@ class JvmClassMetadataReader : public ClassMetadataReader {
   // Loads metadata of all implemented interfaces of a class.
   void LoadImplementedInterfacesMetadata(
       jclass parent,
-      std::set<std::pair<string, string>>* registered_methods,
+      std::set<std::pair<std::string, std::string>>* registered_methods,
       Entry* metadata);
 
   // Loads metadata of a single Java class ignoring overloaded methods.
   void LoadSingleClassMetadata(
       jclass cls,
-      std::set<std::pair<string, string>>* registered_methods,
+      std::set<std::pair<std::string, std::string>>* registered_methods,
       Entry* metadata);
 
   // Loads class field and appends it to the appropriate list in "metadata".
   // In case of error, the field is skipped and "metadata" is not changed.
-  void LoadFieldInfo(
-      jclass cls,
-      const string& class_signature,
-      jfieldID field_id,
-      DataVisibilityPolicy::Class* class_visibility,
-      Entry* metadata);
+  void LoadFieldInfo(jclass cls, const std::string& class_signature,
+                     jfieldID field_id,
+                     DataVisibilityPolicy::Class* class_visibility,
+                     Entry* metadata);
 
   // Loads metadata of a method. In case of error returns "Method" with empty
   // name.
-  Method LoadMethodInfo(
-      jclass cls,
-      const string& class_signature,
-      jmethodID method_id,
-      DataVisibilityPolicy::Class* class_visibility);
+  Method LoadMethodInfo(jclass cls, const std::string& class_signature,
+                        jmethodID method_id,
+                        DataVisibilityPolicy::Class* class_visibility);
 
  private:
   // Callback to decide whether a particular field or a method should

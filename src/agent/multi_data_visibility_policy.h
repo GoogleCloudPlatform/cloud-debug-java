@@ -46,7 +46,7 @@ class MultiDataVisibilityPolicy : public DataVisibilityPolicy {
 
   // Returns the error of the first found policy error, or false
   // if no policies have an error.
-  bool HasSetupError(string* error) const override;
+  bool HasSetupError(std::string* error) const override;
 
  private:
   std::vector<std::unique_ptr<DataVisibilityPolicy>> policy_list_;

@@ -19,17 +19,16 @@
 namespace devtools {
 namespace cdbg {
 
-string JsonCppGetString(const Json::Value& value, const char* name) {
+std::string JsonCppGetString(const Json::Value& value, const char* name) {
   Json::Value attr = value.get(name, Json::Value());
   if (!attr.isString()) {
     LOG_IF(WARNING, attr.type() != Json::nullValue)
         << "Invalid type of JSON attribute " << name << ": " << attr.type();
-    return string();
+    return std::string();
   }
 
   return attr.asString();
 }
-
 
 bool JsonCppGetBool(const Json::Value& value, const char* name, bool def) {
   Json::Value attr = value.get(name, Json::Value());

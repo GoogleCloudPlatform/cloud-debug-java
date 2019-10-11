@@ -27,23 +27,21 @@
 namespace devtools {
 namespace cdbg {
 
-string JniToNativeString(jobject jstr) {
+std::string JniToNativeString(jobject jstr) {
   if (jstr == nullptr) {
-    return string();
+    return std::string();
   }
 
   const char* cstr = jni()->GetStringUTFChars(static_cast<jstring>(jstr), 0);
-  string str(cstr);
+  std::string str(cstr);
   jni()->ReleaseStringUTFChars(static_cast<jstring>(jstr), cstr);
 
   return str;
 }
 
-
-JniLocalRef JniToJavaString(const string& s) {
+JniLocalRef JniToJavaString(const std::string& s) {
   return JniToJavaString(s.c_str());
 }
-
 
 JniLocalRef JniToJavaString(const char* s) {
   if (s == nullptr) {
@@ -56,8 +54,7 @@ JniLocalRef JniToJavaString(const char* s) {
   return JniLocalRef(jni()->NewStringUTF(s));
 }
 
-
-JniLocalRef JniToByteArray(const string& data) {
+JniLocalRef JniToByteArray(const std::string& data) {
   JniLocalRef byte_array(jni()->NewByteArray(data.size()));
   if (byte_array == nullptr) {
     LOG(ERROR) << "Failed to allocate byte array, size: " << data.size();
@@ -73,24 +70,22 @@ JniLocalRef JniToByteArray(const string& data) {
   return byte_array;
 }
 
-
-string JniToNativeBlob(jobject byte_array_obj) {
+std::string JniToNativeBlob(jobject byte_array_obj) {
   if (byte_array_obj == nullptr) {
-    return string();
+    return std::string();
   }
 
   jbyteArray byte_array = static_cast<jbyteArray>(byte_array_obj);
 
   jsize length = jni()->GetArrayLength(byte_array);
   jbyte* elements = jni()->GetByteArrayElements(byte_array, nullptr);
-  string data(elements, elements + length);
+  std::string data(elements, elements + length);
   jni()->ReleaseByteArrayElements(byte_array, elements, JNI_ABORT);
 
   return data;
 }
 
-
-std::vector<string> JniToNativeStringArray(jobject string_array_obj) {
+std::vector<std::string> JniToNativeStringArray(jobject string_array_obj) {
   if (string_array_obj == nullptr) {
     return {};
   }
@@ -98,7 +93,7 @@ std::vector<string> JniToNativeStringArray(jobject string_array_obj) {
   const jsize size =
       jni()->GetArrayLength(static_cast<jarray>(string_array_obj));
 
-  std::vector<string> elements;
+  std::vector<std::string> elements;
   elements.reserve(size);
 
   for (int i = 0; i < size; ++i) {
@@ -112,8 +107,7 @@ std::vector<string> JniToNativeStringArray(jobject string_array_obj) {
   return elements;
 }
 
-
-JniLocalRef JniToJavaStringArray(const std::vector<string>& arr) {
+JniLocalRef JniToJavaStringArray(const std::vector<std::string>& arr) {
   const size_t size = arr.size();
 
   // TODO: use JNI proxy generated code.
@@ -141,7 +135,6 @@ JniLocalRef JniToJavaStringArray(const std::vector<string>& arr) {
 
   return string_array;
 }
-
 
 JniLocalRef JniNewLocalRef(jobject obj) {
   return JniLocalRef(jni()->NewLocalRef(obj));
@@ -184,9 +177,9 @@ JniLocalRef GetObjectClass(jobject obj) {
 
 
 // Gets JVMTI signature of a class.
-string GetClassSignature(jobject cls) {
+std::string GetClassSignature(jobject cls) {
   if (cls == nullptr) {
-    return string();
+    return std::string();
   }
 
   JvmtiBuffer<char> class_signature_buffer;
@@ -197,17 +190,15 @@ string GetClassSignature(jobject cls) {
 
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "GetClassSignature failed, error: " << err;
-    return string();
+    return std::string();
   }
 
   return class_signature_buffer.get();
 }
 
-
-string GetObjectClassSignature(jobject obj) {
+std::string GetObjectClassSignature(jobject obj) {
   return GetClassSignature(GetObjectClass(obj).get());
 }
-
 
 static JavaExceptionInfo JniGetExceptionInfo(
     JniLocalRef exception_obj,
@@ -293,8 +284,7 @@ bool JniCheckNoException(const char* debug_context) {
   return false;  // Exception was thrown.
 }
 
-
-string FormatException(jobject exception) {
+std::string FormatException(jobject exception) {
   // C++ equivalent of this Java code:
   //   try {
   //     StringWriter stringWriter = new StringWriter();
@@ -338,14 +328,14 @@ string FormatException(jobject exception) {
     return kError;
   }
 
-  ExceptionOr<string> msg = jniproxy::Object()->toString(string_writer.get());
+  ExceptionOr<std::string> msg =
+      jniproxy::Object()->toString(string_writer.get());
   if (msg.HasException()) {
     return kError;
   }
 
   return msg.Release(ExceptionAction::IGNORE);
 }
-
 
 JniLocalRef JniGetEnumValue(jclass enum_cls, const char* value_name) {
   JvmtiBuffer<char> class_signature_buffer;
@@ -508,13 +498,10 @@ jmethodID JavaClass::GetStaticMethod(
   return method;
 }
 
-
 jmethodID JavaClass::GetStaticMethod(
-    const string& method_name,
-    const string& method_signature) const {
+    const std::string& method_name, const std::string& method_signature) const {
   return GetStaticMethod(method_name.c_str(), method_signature.c_str());
 }
-
 
 jmethodID JavaClass::GetInstanceMethod(
     const char* method_name,
@@ -544,13 +531,10 @@ jmethodID JavaClass::GetInstanceMethod(
   return method;
 }
 
-
 jmethodID JavaClass::GetInstanceMethod(
-    const string& method_name,
-    const string& method_signature) const {
+    const std::string& method_name, const std::string& method_signature) const {
   return GetInstanceMethod(method_name.c_str(), method_signature.c_str());
 }
-
 
 jmethodID JavaClass::GetConstructor(const char* constructor_signature) const {
   return GetInstanceMethod("<init>", constructor_signature);

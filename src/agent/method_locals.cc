@@ -85,8 +85,8 @@ std::shared_ptr<MethodLocals::Entry> MethodLocals::LoadEntry(
 
   // Get name and signature of the current method. Optimization: we only
   // need it if we have a non-default visibility policy.
-  string method_name;
-  string method_signature;
+  std::string method_name;
+  std::string method_signature;
   if (class_visibility != nullptr) {
     JvmtiBuffer<char> method_name_buffer;
     JvmtiBuffer<char> method_signature_buffer;

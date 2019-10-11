@@ -13,7 +13,7 @@ namespace {
 // some ineffieincies in regards to memory use and (slightly) cpu time.
 class ClassImpl : public DataVisibilityPolicy::Class {
  public:
-  bool IsFieldVisible(const string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsFieldVisible(name, field_modifiers)) {
         return false;
@@ -23,10 +23,8 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsFieldDataVisible(
-      const string& name,
-      int32 field_modifiers,
-      string* reason) override {
+  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+                          std::string* reason) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsFieldDataVisible(name, field_modifiers, reason)) {
         return false;
@@ -36,10 +34,9 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsMethodVisible(
-      const string& method_name,
-      const string& method_signature,
-      int32 method_modifiers) override {
+  bool IsMethodVisible(const std::string& method_name,
+                       const std::string& method_signature,
+                       int32 method_modifiers) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsMethodVisible(
           method_name,
@@ -52,10 +49,9 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsVariableVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name) override {
+  bool IsVariableVisible(const std::string& method_name,
+                         const std::string& method_signature,
+                         const std::string& variable_name) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsVariableVisible(
           method_name,
@@ -68,11 +64,10 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsVariableDataVisible(
-      const string& method_name,
-      const string& method_signature,
-      const string& variable_name,
-      string* reason) override {
+  bool IsVariableDataVisible(const std::string& method_name,
+                             const std::string& method_signature,
+                             const std::string& variable_name,
+                             std::string* reason) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsVariableDataVisible(
           method_name,
@@ -148,7 +143,7 @@ MultiDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   return std::move(class_impl);
 }
 
-bool MultiDataVisibilityPolicy::HasSetupError(string* error) const {
+bool MultiDataVisibilityPolicy::HasSetupError(std::string* error) const {
   for (const auto& policy : policy_list_) {
     if (policy->HasSetupError(error)) {
       return true;

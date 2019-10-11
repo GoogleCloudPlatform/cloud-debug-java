@@ -259,15 +259,15 @@ static void TrySetDefaultLogDirectory() {
 static void InitEnvironment(const char* options) {
   // Split agent options to command line argument style data structure.
   std::stringstream ss((options != nullptr) ? options : "");
-  string cur_option;
-  std::vector<string> split_options;
+  std::string cur_option;
+  std::vector<std::string> split_options;
   while (std::getline(ss, cur_option, ',')) {
     split_options.push_back(std::move(cur_option));
   }
 
   std::vector<char*> argv_vector;
   argv_vector.push_back(const_cast<char*>("cdbg_java_agent"));
-  for (const string& split_option : split_options) {
+  for (const std::string& split_option : split_options) {
     argv_vector.push_back(const_cast<char*>(split_option.c_str()));
   }
 

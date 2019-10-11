@@ -35,7 +35,7 @@ class ByteSource {
  public:
   ByteSource() : ByteSource(nullptr, 0) {}
 
-  explicit ByteSource(const string& s) : ByteSource(&s[0], s.size()) {}
+  explicit ByteSource(const std::string& s) : ByteSource(&s[0], s.size()) {}
 
   ByteSource(const void* data, int size)
     : data_(reinterpret_cast<const uint8*>(data)),

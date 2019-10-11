@@ -49,29 +49,26 @@ class ReadersFactory {
   virtual ~ReadersFactory() { }
 
   // Gets the class type name (not signature) of the current class.
-  virtual string GetEvaluationPointClassName() = 0;
+  virtual std::string GetEvaluationPointClassName() = 0;
 
   // Finds Java class by name. Returns appropriate error if not found,
   // if class not loaded yet or if the name is ambiguous.
-  virtual JniLocalRef FindClassByName(
-      const string& class_name,
-      FormatMessageModel* error_message) = 0;
+  virtual JniLocalRef FindClassByName(const std::string& class_name,
+                                      FormatMessageModel* error_message) = 0;
 
   // Checks whether an object of "from_signature" class can be assigned to
   // "to_signature" class without explicit casting. For example
   // "java.lang.String" is assignable to "java.lang.Object". If any of these
   // classes haven't been indexed yet, returns false.
-  virtual bool IsAssignable(
-      const string& from_signature,
-      const string& to_signature) = 0;
+  virtual bool IsAssignable(const std::string& from_signature,
+                            const std::string& to_signature) = 0;
 
   // Creates the object capable of reading the value of the specified local
   // variable when the expression is going to be evaluated. The caller owns the
   // returned instance. Returns null if no local variable with this name exist
   // in the context represented by "ReadersFactory".
   virtual std::unique_ptr<LocalVariableReader> CreateLocalVariableReader(
-      const string& variable_name,
-      FormatMessageModel* error_message) = 0;
+      const std::string& variable_name, FormatMessageModel* error_message) = 0;
 
   // Factory method for reader of "this" local variable. While it is possible
   // to locate "this" by calling CreateLocalVariableReader("this"), that is not
@@ -82,8 +79,7 @@ class ReadersFactory {
   // determines the Java class. The caller owns the returned instance. Returns
   // null if the specified class does not have instance variable "field_name".
   virtual std::unique_ptr<InstanceFieldReader> CreateInstanceFieldReader(
-      const string& class_signature,
-      const string& field_name,
+      const std::string& class_signature, const std::string& field_name,
       FormatMessageModel* error_message) = 0;
 
   // Creates the object to read static field from the current evaluation point.
@@ -93,8 +89,7 @@ class ReadersFactory {
   // static field "field_name" is found in the class containing the evaluation
   // point.
   virtual std::unique_ptr<StaticFieldReader> CreateStaticFieldReader(
-      const string& field_name,
-      FormatMessageModel* error_message) = 0;
+      const std::string& field_name, FormatMessageModel* error_message) = 0;
 
   // Creates the object to read static field from the specified class.
   // "class_name" is a fully qualified name (like "com.my.Green"). Unlike
@@ -102,36 +97,33 @@ class ReadersFactory {
   // matter here. Returns nullptr if no static field "field_name" is found in
   // "class_signature" class.
   virtual std::unique_ptr<StaticFieldReader> CreateStaticFieldReader(
-      const string& class_name,
-      const string& field_name,
+      const std::string& class_name, const std::string& field_name,
       FormatMessageModel* error_message) = 0;
 
   // Finds signatures of all local instance methods named "method_name" in
   // the "this".
   virtual std::vector<ClassMetadataReader::Method> FindLocalInstanceMethods(
-      const string& method_name) = 0;
+      const std::string& method_name) = 0;
 
   // Finds signatures of all instance methods named "method_name" in the
   // specified class.
   // Returns false if the class for class_signature is not loaded, true
   // otherwise.
   virtual bool FindInstanceMethods(
-      const string& class_signature,
-      const string& method_name,
+      const std::string& class_signature, const std::string& method_name,
       std::vector<ClassMetadataReader::Method>* methods,
       FormatMessageModel* error_message) = 0;
 
   // Finds signatures of all static methods named "method_name" in the current
   // class.
   virtual std::vector<ClassMetadataReader::Method> FindStaticMethods(
-      const string& method_name) = 0;
+      const std::string& method_name) = 0;
 
   // Finds signatures of all static methods named "method_name" in the current
   // class. Populates "MethodCaller" instances for each such method.
   // Returns false if the class for class_name is not loaded, true otherwise.
   virtual bool FindStaticMethods(
-      const string& class_name,
-      const string& method_name,
+      const std::string& class_name, const std::string& method_name,
       std::vector<ClassMetadataReader::Method>* methods,
       FormatMessageModel* error_message) = 0;
 

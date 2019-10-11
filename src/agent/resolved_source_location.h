@@ -35,13 +35,13 @@ struct ResolvedSourceLocation {
   FormatMessageModel error_message;
 
   // Class signature (like "com/prod/MyClass$MyInnerClass").
-  string class_signature;
+  std::string class_signature;
 
   // Short method name (does not include the class name).
-  string method_name;
+  std::string method_name;
 
   // Method signature (like "(Lcom/prod/MyClass$MyInnerClass;)Z").
-  string method_signature;
+  std::string method_signature;
 
   // Line number pointing to the beginning of the statement.
   int adjusted_line_number { -1 };

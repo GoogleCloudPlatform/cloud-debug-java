@@ -103,7 +103,7 @@ Bridge::HangingGetResult JniBridge::ListActiveBreakpoints(
     return HangingGetResult::TIMEOUT;
   }
 
-  ExceptionOr<string> format =
+  ExceptionOr<std::string> format =
       jniproxy::HubClient_ListActiveBreakpointsResult()->getFormat(
           rc.GetData().get());
   if (format.HasException()) {
@@ -193,8 +193,7 @@ bool JniBridge::HasPendingMessages() const {
   return !transmit_queue_.empty();
 }
 
-
-bool JniBridge::RegisterBreakpointCanary(const string& breakpoint_id) {
+bool JniBridge::RegisterBreakpointCanary(const std::string& breakpoint_id) {
   auto rc = jniproxy::HubClient()->registerBreakpointCanary(
       jni_hub_.get(),
       breakpoint_id);
@@ -206,8 +205,7 @@ bool JniBridge::RegisterBreakpointCanary(const string& breakpoint_id) {
   return true;
 }
 
-
-bool JniBridge::ApproveBreakpointCanary(const string& breakpoint_id) {
+bool JniBridge::ApproveBreakpointCanary(const std::string& breakpoint_id) {
   auto rc = jniproxy::HubClient()->approveBreakpointCanary(
       jni_hub_.get(),
       breakpoint_id);
@@ -218,7 +216,6 @@ bool JniBridge::ApproveBreakpointCanary(const string& breakpoint_id) {
 
   return true;
 }
-
 
 bool JniBridge::IsEnabled(bool* is_enabled) {
   auto rc = jniproxy::HubClient()->isEnabled(jni_hub_.get());

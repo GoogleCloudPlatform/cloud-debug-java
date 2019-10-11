@@ -35,7 +35,7 @@ class UserIdProvider {
 
   // Populates user identity in kind and id. Returns false if user id cannot be
   // read.
-  virtual bool Format(string* kind, string* id) = 0;
+  virtual bool Format(std::string* kind, std::string* id) = 0;
 };
 
 }  // namespace cdbg

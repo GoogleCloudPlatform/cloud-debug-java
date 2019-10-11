@@ -31,9 +31,7 @@ class GenericTypeEvaluator : public TypeEvaluator {
  public:
   GenericTypeEvaluator() { }
 
-  string GetEvaluatorName() override {
-    return "GenericTypeEvaluator";
-  }
+  std::string GetEvaluatorName() override { return "GenericTypeEvaluator"; }
 
   void Evaluate(
       MethodCaller* method_caller,

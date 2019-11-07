@@ -19,6 +19,9 @@
 
 #include "leaky_bucket.h"
 
+#include "third_party/absl/time/clock.h"
+#include "third_party/absl/time/time.h"
+
 #ifndef NACL_BUILD
 #include <sys/time.h>
 #include <time.h>

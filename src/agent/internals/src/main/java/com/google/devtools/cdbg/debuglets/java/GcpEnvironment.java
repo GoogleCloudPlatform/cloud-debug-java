@@ -14,8 +14,6 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,17 +53,10 @@ final class GcpEnvironment {
   /** The environment variable store. Public for testing. */
   public static EnvironmentStore environmentStore = new SystemEnvironmentStore();
 
-  /** Gets the URL of the Debuglet Controller API. */
-  static URL getControllerBaseUrl() {
-    String url =
-        System.getProperty(
-            "com.google.cdbg.controller",
-            "https://clouddebugger.googleapis.com/v2/controller/"); // Default
-    try {
-      return new URL(url);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
+  /** Gets the URL String of the Debuglet Controller API. */
+  static String getControllerBaseUrlString() {
+    return System.getProperty(
+        "com.google.cdbg.controller", "https://clouddebugger.googleapis.com/v2/controller/");
   }
 
   /** Lazily creates and returns the class to get access token and project information. */
@@ -99,11 +90,7 @@ final class GcpEnvironment {
           throw new RuntimeException("Failed to initialize service account authentication", e);
         }
       } else {
-        try {
-          metadataQuery = new GceMetadataQuery();
-        } catch (MalformedURLException e) {
-          throw new RuntimeException(e);
-        }
+        metadataQuery = new GceMetadataQuery();
       }
     }
 

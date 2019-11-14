@@ -442,7 +442,7 @@ DefaultMethodsConfig() {
           Allow("entrySet"),
           Allow("get"),
           Allow("isEmpty"),
-          Allow("iterator"),
+          Allow("iterator").returns_temporary_object(),
           Allow("keySet"),
           Allow("size")
         });

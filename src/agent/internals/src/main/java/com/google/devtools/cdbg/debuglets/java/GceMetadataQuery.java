@@ -79,7 +79,7 @@ public final class GceMetadataQuery implements MetadataQuery {
    * Base URL for metadata service. Specific attributes are appended to this URL. Unit test may
    * override it to inject a mock HTTP client.
    */
-  private final URL localMetadataServiceBaseUrl;
+  private URL localMetadataServiceBaseUrl = null;
 
   /** Shutdown flag blocking all outgoing HTTP calls to metadata service. */
   private boolean isShutdown = false;
@@ -99,13 +99,9 @@ public final class GceMetadataQuery implements MetadataQuery {
   /** Absolute expiration time of the "access_token_" in seconds since Unix epoch. */
   private long accessTokenExpirationTime = 0;
 
-  public GceMetadataQuery() throws MalformedURLException {
-    this(
-        new URL(
-            System.getProperty(
-                "com.google.cdbg.metadataservicebase", DEFAULT_LOCAL_METADATA_SERVICE_BASE)));
-  }
+  public GceMetadataQuery() {}
 
+  /** Visible for testing */
   public GceMetadataQuery(URL localMetadataServiceBaseUrl) {
     this.localMetadataServiceBaseUrl = localMetadataServiceBaseUrl;
   }
@@ -117,6 +113,9 @@ public final class GceMetadataQuery implements MetadataQuery {
         projectId = queryMetadataAttribute("project/project-id");
       } catch (IOException e) {
         warnfmt(e, "Failed to query GCE metadata service");
+        return "";
+      } catch (IllegalStateException e) {
+        warnfmt(e, "GCE metadata attribute is in illegal state");
         return "";
       }
     }
@@ -131,6 +130,9 @@ public final class GceMetadataQuery implements MetadataQuery {
         projectNumber = queryMetadataAttribute("project/numeric-project-id");
       } catch (IOException e) {
         warnfmt(e, "Failed to query GCE metadata service");
+        return "";
+      } catch (IllegalStateException e) {
+        warnfmt(e, "GCE metadata attribute is in illegal state");
         return "";
       }
     }
@@ -175,6 +177,9 @@ public final class GceMetadataQuery implements MetadataQuery {
     } catch (IOException e) {
       warnfmt(e, "Failed to query access token in GCE metadata service");
       return;
+    } catch (IllegalStateException e) {
+      warnfmt(e, "GCE metadata attribute is in illegal state");
+      return;
     }
 
     Token token;
@@ -201,12 +206,38 @@ public final class GceMetadataQuery implements MetadataQuery {
   }
 
   /**
+   * Lazily initializes the base URL from system property. If the URL string is a place holder
+   * string "#", then defer the initialization by throwing an IllegalStateException. Note that the
+   * place holder "#" is only for testing purposes.
+   *
+   * @throws IllegalStateException when Metadata Service Base URL has not initialized
+   * @throws MalformedURLException when the base URL string does not meet standard URL format
+   */
+  private void requireMetadataBaseUrl() throws MalformedURLException {
+    if (localMetadataServiceBaseUrl != null) {
+      return;
+    }
+
+    String baseUrlString =
+        System.getProperty(
+            "com.google.cdbg.metadataservicebase", DEFAULT_LOCAL_METADATA_SERVICE_BASE);
+    if (baseUrlString.equals("#")) {
+      throw new IllegalStateException("Metadata Service Base URL not yet set");
+    }
+    localMetadataServiceBaseUrl = new URL(baseUrlString);
+  }
+
+  /**
    * Queries a single attribute of a local metadata service.
    *
    * @param attributePath relative URL to the queried attribute
    * @return value of the metadata attribute
+   *
+   * @throws IOException when URL construction or connection fails
+   * @throws IllegalStateException when Metadata Service Base URL has not initialized
    */
   private String queryMetadataAttribute(String attributePath) throws IOException {
+    requireMetadataBaseUrl();
     URL url = new URL(localMetadataServiceBaseUrl, attributePath);
 
     // Open HTTP connection to the metadata service. We deliberately don't call disconnect

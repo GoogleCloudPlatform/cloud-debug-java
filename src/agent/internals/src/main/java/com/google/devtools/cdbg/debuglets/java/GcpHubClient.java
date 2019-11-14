@@ -40,6 +40,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Paths;
@@ -251,7 +252,7 @@ class GcpHubClient implements HubClient {
           .create();
 
   /** Base URL of Debuglet Controller service. */
-  private final URL controllerBaseUrl;
+  private URL controllerBaseUrl = null;
 
   /** GCP project information and access token. */
   private final MetadataQuery metadata;
@@ -288,16 +289,14 @@ class GcpHubClient implements HubClient {
 
   /** Default constructor using environment provided by {@link GcpEnvironment}. */
   public GcpHubClient() {
-    this(
-        GcpEnvironment.getControllerBaseUrl(),
-        GcpEnvironment.getMetadataQuery(),
-        ClassPathLookup.defaultInstance,
-        GcpEnvironment.getDebuggeeLabels());
+    this.metadata = GcpEnvironment.getMetadataQuery();
+    this.classPathLookup = ClassPathLookup.defaultInstance;
+    this.labels = GcpEnvironment.getDebuggeeLabels();
   }
 
   /**
    * Class constructor
-   *
+   * Visible for testing
    * @param controllerBaseUrl base URL of Debuglet Controller service
    * @param metadata GCP project information and access token
    * @param classPathLookup read and explore application resources
@@ -509,6 +508,26 @@ class GcpHubClient implements HubClient {
   }
 
   /**
+   * Lazily initializes the base URL from GcpEnvironment. If the URL string is a place holder string
+   * "#", then defer the initialization by throwing an IllegalStateException. Note that the place
+   * holder "#" is only for testing purposes.
+   *
+   * @throws IllegalStateException when Controller Base URL has not initialized
+   * @throws MalformedURLException when the base URL string does not meet standard URL format
+   */
+  private void requireControllerBaseUrl() throws MalformedURLException {
+    if (controllerBaseUrl != null) {
+      return;
+    }
+
+    String baseUrlString = GcpEnvironment.getControllerBaseUrlString();
+    if (baseUrlString.equals("#")) {
+      throw new IllegalStateException("Controller Base URL not yet set");
+    }
+    controllerBaseUrl = new URL(baseUrlString);
+  }
+
+  /**
    * Fills in the debuggee registration request message.
    *
    * @return debuggee registration request message
@@ -617,8 +636,11 @@ class GcpHubClient implements HubClient {
    *
    * @param path request URI relative to {@link GcpHubClient#controllerBaseUrl}
    * @return new HTTP connection
+   * @throws IOException when URL construction or connection fails
+   * @throws IllegalStateException when Controller Service Base URL has not initialized
    */
   private ActiveConnection openConnection(String path) throws IOException {
+    requireControllerBaseUrl();
     URL url = new URL(controllerBaseUrl, path);
 
     ActiveConnection connection = new ActiveConnection((HttpURLConnection) url.openConnection());

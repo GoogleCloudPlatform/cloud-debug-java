@@ -48,6 +48,7 @@ tokens {
   // tree walking.
   STATEMENT;
   BINARY_EXPRESSION;
+  INSTANCEOF_BINARY_EXPRESSION;
   UNARY_EXPRESSION;
   PARENTHESES_EXPRESSION;
   TYPE_CAST;
@@ -60,6 +61,7 @@ tokens {
   JNULL         = "null";
   TRUE          = "true";
   FALSE         = "false";
+  INSTANCEOF     = "instanceof";
 
   // No explicit lexer rule exists for DOT. See NumericLiteral lexer rule for
   // details.
@@ -308,11 +310,19 @@ andExpression
   ;
 
 equalityExpression
-  : relationalExpression
+  : instanceofExpression
     (
       { #equalityExpression = #([BINARY_EXPRESSION, "binary_expression"], #equalityExpression); }
-      (EQUAL | NOTEQUAL) relationalExpression
+      (EQUAL | NOTEQUAL) instanceofExpression
     )*
+  ;
+
+instanceofExpression
+  : relationalExpression
+    (
+      { #instanceofExpression = #([INSTANCEOF_BINARY_EXPRESSION, "instanceof_binary_expression"], #instanceofExpression); }
+      INSTANCEOF classOrInterfaceType
+    )?
   ;
 
 relationalExpression
@@ -549,6 +559,15 @@ expression returns [JavaExpression* je] {
       je = nullptr;
     } else {
       je = new BinaryJavaExpression(binary_expression_type, a, b);
+    }
+  }
+  | #(INSTANCEOF_BINARY_EXPRESSION a=expression INSTANCEOF type=type_name) {
+    if (a == nullptr)  {
+      reportError("NULL argument in instanceof binary expression");
+      delete a;
+      je = nullptr;
+    } else {
+      je = new InstanceofBinaryJavaExpression(a, type);
     }
   }
   | #(UNARY_EXPRESSION unary_expression_type=unary_expression_token a=expression) {

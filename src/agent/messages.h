@@ -50,6 +50,8 @@ constexpr char TypeCastCompileInvalid[] =
 constexpr char TypeCastEvaluateInvalid[] =
     "$0 cannot be cast to $1";
 
+constexpr char ReferenceTypeNotFound[] = "Reference type required, found $0";
+
 constexpr char TypeMismatch[] =
     "Type mismatch";
 

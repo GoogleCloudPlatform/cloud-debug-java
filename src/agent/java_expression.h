@@ -76,8 +76,7 @@ class ConditionalJavaExpression : public JavaExpression {
   DISALLOW_COPY_AND_ASSIGN(ConditionalJavaExpression);
 };
 
-
-// Represents any kind of binary expression (like a + b).
+// Represents any kind of binary expression except instanceof (like a + b).
 class BinaryJavaExpression : public JavaExpression {
  public:
   enum class Type {
@@ -119,6 +118,26 @@ class BinaryJavaExpression : public JavaExpression {
   DISALLOW_COPY_AND_ASSIGN(BinaryJavaExpression);
 };
 
+// Represents instanceof binary expression.
+class InstanceofBinaryJavaExpression : public JavaExpression {
+ public:
+  explicit InstanceofBinaryJavaExpression(JavaExpression* source,
+                                          std::string reference_type)
+      : source_(std::unique_ptr<JavaExpression>(source)),
+        reference_type_(reference_type) {}
+
+  void Print(std::ostream* os, bool concise) override;
+
+  bool TryGetTypeName(std::string* name) const override { return false; }
+
+  CompiledExpression CreateEvaluator() override;
+
+ private:
+  std::unique_ptr<JavaExpression> source_;
+  const std::string reference_type_;
+
+  DISALLOW_COPY_AND_ASSIGN(InstanceofBinaryJavaExpression);
+};
 
 // Represents unary expression (like ~a).
 class UnaryJavaExpression : public JavaExpression {

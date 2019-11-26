@@ -24,6 +24,7 @@
 #include "expression_evaluator.h"
 #include "field_evaluator.h"
 #include "identifier_evaluator.h"
+#include "instanceof_binary_expression_evaluator.h"
 #include "literal_evaluator.h"
 #include "messages.h"
 #include "method_call_evaluator.h"
@@ -368,15 +369,34 @@ CompiledExpression BinaryJavaExpression::CreateEvaluator() {
     return arg2;
   }
 
-  return {
-    std::unique_ptr<ExpressionEvaluator>(
-        new BinaryExpressionEvaluator(
-            type_,
-            std::move(arg1.evaluator),
-            std::move(arg2.evaluator)))
-  };
+  return {std::unique_ptr<ExpressionEvaluator>(new BinaryExpressionEvaluator(
+      type_, std::move(arg1.evaluator), std::move(arg2.evaluator)))};
 }
 
+void InstanceofBinaryJavaExpression::Print(std::ostream* os, bool concise) {
+  if (!concise) {
+    (*os) << '(';
+  }
+
+  SafePrintChild(os, source_.get(), concise);
+
+  (*os) << " instanceof " << reference_type_;
+
+  if (!concise) {
+    (*os) << ')';
+  }
+}
+
+CompiledExpression InstanceofBinaryJavaExpression::CreateEvaluator() {
+  CompiledExpression arg = source_->CreateEvaluator();
+  if (arg.evaluator == nullptr) {
+    return arg;
+  }
+
+  return {std::unique_ptr<ExpressionEvaluator>(
+      new InstanceofBinaryExpressionEvaluator(std::move(arg.evaluator),
+                                              reference_type_))};
+}
 
 UnaryJavaExpression::UnaryJavaExpression(Type type, JavaExpression* a)
     : type_(type),

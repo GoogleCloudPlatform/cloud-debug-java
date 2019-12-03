@@ -19,12 +19,8 @@
 
 #include "leaky_bucket.h"
 
-#ifndef NACL_BUILD
 #include <sys/time.h>
 #include <time.h>
-#else   // NACL_BUILD
-#include "third_party/apphosting/nacl/chromium/base/time.h"
-#endif  // NACL_BUILD
 
 #include <algorithm>
 #include <limits>
@@ -33,13 +29,9 @@ namespace devtools {
 namespace cdbg {
 
 static int64 NowInNanoseconds() {
-#ifndef NACL_BUILD
   timespec time;
   clock_gettime(CLOCK_MONOTONIC, &time);
   return 1000000000LL * time.tv_sec + time.tv_nsec;
-#else   // NACL_BUILD
-  return (base::Time::Now() - base::Time::UnixEpoch()).InMicroseconds() * 1000;
-#endif  // NACL_BUILD
 }
 
 

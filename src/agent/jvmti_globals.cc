@@ -37,6 +37,7 @@
 #include "base/logging_extensions.h"
 #include "base/init_google.h"
 #include "base/process_state.h"
+#include "base/signal-handler.h"
 #endif
 
 #ifdef GCP_HUB_CLIENT

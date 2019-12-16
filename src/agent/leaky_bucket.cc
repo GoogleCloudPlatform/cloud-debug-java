@@ -19,9 +19,6 @@
 
 #include "leaky_bucket.h"
 
-#include <sys/time.h>
-#include <time.h>
-
 #include <algorithm>
 #include <limits>
 

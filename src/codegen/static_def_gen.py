@@ -75,6 +75,7 @@ Syntax:
   and pattern is a regular expression selecting the files
 """
 
+from __future__ import print_function
 import os
 import re
 import sys
@@ -157,7 +158,7 @@ def Generate(cc_file_path, inputs):
 
 def main():
   if len(sys.argv) < 3 or sys.argv[1] in ['-?', '--?', '-h', '--help']:
-    print __doc__
+    print(__doc__)
     sys.exit(-1)
 
   Generate(sys.argv[1], sys.argv[2:])

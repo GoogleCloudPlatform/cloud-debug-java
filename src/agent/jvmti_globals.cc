@@ -241,7 +241,7 @@ static void TrySetDefaultLogDirectory() {
     DIR* dir = opendir(tomcat_log_dir.c_str());
     if (dir) {
       closedir(dir);
-      FLAGS_log_dir = tomcat_log_dir;
+      absl::SetFlag(&FLAGS_log_dir, tomcat_log_dir);
       return;
     }
   }
@@ -252,7 +252,7 @@ static void TrySetDefaultLogDirectory() {
       "java.io.tmpdir",
       tmpdir_buffer.ref());
   if (err == JVMTI_ERROR_NONE) {
-    FLAGS_log_dir = tmpdir_buffer.get();
+    absl::SetFlag(&FLAGS_log_dir, tmpdir_buffer.get());
   }
 }
 

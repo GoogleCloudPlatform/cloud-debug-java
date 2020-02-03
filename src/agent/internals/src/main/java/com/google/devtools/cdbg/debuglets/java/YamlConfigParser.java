@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 
 /** Finds, loads and parses debugger configuration file. */
@@ -161,26 +162,21 @@ public class YamlConfigParser {
    * structure.
    */
   private void parseYaml(InputStream yamlConfig) throws YamlConfigParserException {
-    Yaml yaml = new Yaml();
+    Yaml yaml = new Yaml(new SafeConstructor());
     Set<String> blacklistPatternSet = new HashSet<>();
     Set<String> blacklistExceptionPatternSet = new HashSet<>();
 
     try {
-      // Note that the cast below could be unsafe, but the code that follows
-      // checks types before acting on them to avoid casting errors.
-      Map<String, Object> data = (Map<String, Object>) yaml.loadAs(yamlConfig, Map.class);
+      // We always expect a Map<String, List<Object>>. Invalid casts are handled in the catch clause
+      Map<String, List<Object>> data = yaml.load(yamlConfig);
 
       if (data == null) {
         // Nothing was loaded
         return;
       }
 
-      for (Map.Entry<String, Object> entry : data.entrySet()) {
-        if (!(entry.getValue() instanceof List)) {
-          throw new YamlConfigParserException("Unexpected non-list content for: " + entry.getKey());
-        }
-
-        List<Object> value = (List<Object>) entry.getValue();
+      for (Map.Entry<String, List<Object>> entry : data.entrySet()) {
+        List<Object> value = entry.getValue();
 
         switch (entry.getKey()) {
           case "blacklist":
@@ -193,7 +189,7 @@ public class YamlConfigParser {
             throw new YamlConfigParserException("Unrecognized key in config: " + entry.getKey());
         }
       }
-    } catch (YAMLException e) {
+    } catch (YAMLException | ClassCastException e) {
       // Yaml failed to parse
       throw new YamlConfigParserException(e.toString());
     }

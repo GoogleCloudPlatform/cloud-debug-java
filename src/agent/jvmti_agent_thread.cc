@@ -88,8 +88,9 @@ bool JvmtiAgentThread::StartAgentThread(const std::string& thread_name,
         DCHECK(!g_is_agent_thread);
         g_is_agent_thread = true;
 
-        auto* agent_arg = reinterpret_cast<
-            std::pair<string, std::function<bool()>>*>(arg);
+        auto* agent_arg =
+            reinterpret_cast<std::pair<std::string, std::function<bool()>>*>(
+                arg);
 
         LOG(INFO) << "Agent thread started: " << agent_arg->first;
 

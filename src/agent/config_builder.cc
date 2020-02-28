@@ -367,24 +367,17 @@ DefaultMethodsConfig() {
   }();
 
   [&classes]() {
-      const string wrapper_types[] = {
-        "Boolean",
-        "Byte",
-        "Short",
-        "Character",
-        "Integer",
-        "Long",
-        "Float",
-        "Double"
-      };
+    const std::string wrapper_types[] = {"Boolean",   "Byte",    "Short",
+                                         "Character", "Integer", "Long",
+                                         "Float",     "Double"};
 
-      for (const string& wrapper_type : wrapper_types) {
-        classes["java/lang/" + wrapper_type] = ToMethods({ AllowAll() });
-      }
+    for (const std::string& wrapper_type : wrapper_types) {
+      classes["java/lang/" + wrapper_type] = ToMethods({AllowAll()});
+    }
   }();
 
   [&classes]() {
-      const string collection_classes[] = {
+    const std::string collection_classes[] = {
         "com/google/common/collect/ImmutableMapEntrySet$RegularEntrySet",
         "com/google/common/collect/RegularImmutableList",
         "com/google/common/collect/RegularImmutableMap",
@@ -435,22 +428,18 @@ DefaultMethodsConfig() {
         "java/util/Vector",
         "java/util/WeakHashMap",
         "java/util/WeakHashMap$EntrySet",
-      };
+    };
 
-      for (const string& collection_class : collection_classes) {
-        classes[collection_class] = ToMethods({
-          Allow("entrySet"),
-          Allow("get"),
-          Allow("isEmpty"),
-          Allow("iterator").returns_temporary_object(),
-          Allow("keySet"),
-          Allow("size")
-        });
-      }
+    for (const std::string& collection_class : collection_classes) {
+      classes[collection_class] =
+          ToMethods({Allow("entrySet"), Allow("get"), Allow("isEmpty"),
+                     Allow("iterator").returns_temporary_object(),
+                     Allow("keySet"), Allow("size")});
+    }
   }();
 
   [&classes]() {
-      const string iterator_classes[] = {
+    const std::string iterator_classes[] = {
         "com/google/common/collect/ImmutableMultiset$1",
         "java/util/AbstractList$Itr",
         "java/util/ArrayDeque$DeqIterator",
@@ -479,22 +468,21 @@ DefaultMethodsConfig() {
         "java/util/concurrent/CopyOnWriteArrayList$COWIterator",
         "java/util/concurrent/LinkedBlockingDeque$Itr",
         "java/util/concurrent/LinkedBlockingQueue$Itr",
-      };
+    };
 
-      for (const string& iterator_class : iterator_classes) {
-        classes[iterator_class] = ToMethods({
-          Allow("hasNext").signature("()Z"),
-          Allow("next").signature("()Ljava/lang/Object;")
-        });
-      }
+    for (const std::string& iterator_class : iterator_classes) {
+      classes[iterator_class] =
+          ToMethods({Allow("hasNext").signature("()Z"),
+                     Allow("next").signature("()Ljava/lang/Object;")});
+    }
   }();
 
   [&classes]() {
-    const string iterator_classes[] = {
+    const std::string iterator_classes[] = {
         "com/google/common/collect/AbstractIndexedListIterator",
     };
 
-    for (const string& iterator_class : iterator_classes) {
+    for (const std::string& iterator_class : iterator_classes) {
       classes[iterator_class] = ToMethods({
         Allow("hasNext")
             .signature("()Z")
@@ -507,28 +495,27 @@ DefaultMethodsConfig() {
   }();
 
   [&classes]() {
-      const string map_entry_classes[] = {
+    const std::string map_entry_classes[] = {
         "com/google/common/collect/ImmutableEntry",
         "com/google/common/collect/ImmutableMapEntry",
-        "com/google/common/collect/ImmutableMapEntry$NonTerminalImmutableMapEntry",
+        "com/google/common/collect/"
+        "ImmutableMapEntry$NonTerminalImmutableMapEntry",
         "java/util/AbstractMap$SimpleImmutableEntry",
-        "java/util/Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntry",
+        "java/util/"
+        "Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntry",
         "java/util/HashMap$Entry",  // Java 7.
-        "java/util/HashMap$Node",  // Java 8.
+        "java/util/HashMap$Node",   // Java 8.
         "java/util/Hashtable$Entry",
         "java/util/LinkedHashMap$Entry",
         "java/util/TreeMap$Entry",
         "java/util/WeakHashMap$Entry",
         "java/util/concurrent/ConcurrentHashMap$WriteThroughEntry",
-        "java/util/concurrent/ConcurrentHashMap$MapEntry"
-      };
+        "java/util/concurrent/ConcurrentHashMap$MapEntry"};
 
-      for (const string& map_entry_class : map_entry_classes) {
-        classes[map_entry_class] = ToMethods({
-          Allow("getKey"),
-          Allow("getValue")
-        });
-      }
+    for (const std::string& map_entry_class : map_entry_classes) {
+      classes[map_entry_class] =
+          ToMethods({Allow("getKey"), Allow("getValue")});
+    }
   }();
 
   [&classes]() {

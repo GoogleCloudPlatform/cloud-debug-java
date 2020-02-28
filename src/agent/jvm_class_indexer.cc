@@ -288,7 +288,7 @@ JniLocalRef JvmClassIndexer::FindClassBySignature(
   std::hash<std::string> string_hash;
   return FindClassByHashCode(
       string_hash(TypeNameFromJObjectSignature(class_signature)),
-      [class_signature] (const string& signature) {
+      [class_signature](const std::string& signature) {
         return class_signature == signature;
       });
 }
@@ -296,8 +296,7 @@ JniLocalRef JvmClassIndexer::FindClassBySignature(
 JniLocalRef JvmClassIndexer::FindClassByName(const std::string& class_name) {
   std::hash<std::string> string_hash;
   return FindClassByHashCode(
-      string_hash(class_name),
-      [class_name] (const string& signature) {
+      string_hash(class_name), [class_name](const std::string& signature) {
         return class_name == TypeNameFromJObjectSignature(signature);
       });
 }

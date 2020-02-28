@@ -156,10 +156,8 @@ static bool PrefixMatches(const std::string& path,
   // Find the lower bound, but only consider the matching prefixes in
   // each comparison
   auto lower_bound = std::lower_bound(
-      prefix_match.begin(),
-      prefix_match.end(),
-      path,
-      [] (const string& prefix, const string& path) {
+      prefix_match.begin(), prefix_match.end(), path,
+      [](const std::string& prefix, const std::string& path) {
         const size_t min_size = std::min(prefix.length(), path.length());
         return path.compare(0, min_size, prefix) > 0;
       });

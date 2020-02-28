@@ -406,16 +406,13 @@ int ValueFormatter::GetTotalDataSize(const NamedJVariant& data) {
 
   // Include size of error message if evaluation failed.
   if (!data.status.description.format.empty()) {
-    return
-      name_size +
-      data.status.description.format.size() +
-      std::accumulate(
-          data.status.description.parameters.begin(),
-          data.status.description.parameters.end(),
-          0,
-          [] (int accumulated_total, const string& parameter) {
-            return accumulated_total + parameter.size();
-          });
+    return name_size + data.status.description.format.size() +
+           std::accumulate(
+               data.status.description.parameters.begin(),
+               data.status.description.parameters.end(), 0,
+               [](int accumulated_total, const std::string& parameter) {
+                 return accumulated_total + parameter.size();
+               });
   }
 
   // Compute length of a string.

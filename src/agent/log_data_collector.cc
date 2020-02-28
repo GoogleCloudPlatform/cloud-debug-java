@@ -71,13 +71,12 @@ static std::string SubstitutePlaceholders(
 // TODO: retain the message as is once we have structured log messages.
 static std::string FormatMessage(const FormatMessageModel& message) {
   return SubstitutePlaceholders(
-      message.format,
-      [&message] (int parameter_index) -> string {
+      message.format, [&message](int parameter_index) -> std::string {
         if ((parameter_index < 0) ||
             (parameter_index >= message.parameters.size())) {
           DCHECK(false) << "Bad parameter index " << parameter_index
                         << ", format: " << message.format;
-          return string();
+          return std::string();
         }
 
         return message.parameters[parameter_index];
@@ -249,8 +248,7 @@ NamedJVariant LogDataCollector::EvaluateWatchedExpression(
 
 std::string LogDataCollector::Format(const BreakpointModel& breakpoint) const {
   return SubstitutePlaceholders(
-      breakpoint.log_message_format,
-      [this] (int watch_index) -> string {
+      breakpoint.log_message_format, [this](int watch_index) -> std::string {
         if ((watch_index < 0) || (watch_index >= watch_results_.size())) {
           return FormatMessage({
             InvalidParameterIndex,

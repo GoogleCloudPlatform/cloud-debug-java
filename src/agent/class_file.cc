@@ -626,7 +626,7 @@ const ConstantPool::ClassRef* ConstantPool::GetClass(int index) {
           return nullptr;
         }
 
-        string signature = internal_name->str();
+        std::string signature = internal_name->str();
         if ((signature.size() > 1) && (signature.front() != '[')) {
           signature.insert(signature.begin(), 'L');
           signature.insert(signature.end(), ';');
@@ -822,8 +822,8 @@ const ConstantPool::MethodRef* ConstantPool::GetMethod(int index) {
         }
 
         // The name and signature of the method to search for.
-        string method_name = names->name.str();
-        string method_signature = names->type.str();
+        std::string method_name = names->name.str();
+        std::string method_signature = names->type.str();
 
         // Search for the JVM method ID using name and signature. Use "c_str()"
         // to append the NULL terminator. We can't tell at this point if the

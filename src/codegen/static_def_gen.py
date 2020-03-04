@@ -1,4 +1,4 @@
-#
+# Lint as: python2, python3
 # Copyright 2015 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,7 +96,7 @@ def EnumerateInputs(inputs):
           if pattern.match(relative_path):
             yield {
                 'path': relative_path,
-                'open': lambda full_path=full_path: open(full_path)
+                'open': lambda full_path=full_path: open(full_path, 'rb')
             }
     else:
       jar = zipfile.ZipFile(entry, 'r')
@@ -127,6 +127,7 @@ def Generate(cc_file_path, inputs):
     with binary_file['open']() as f:
       byte = f.read(1)
       while byte:
+        # Convert the byte read to a 8-bit unsigned integer.
         cc_file.write('%s, ' % str(ord(byte)))
         byte = f.read(1)
     cc_file.write('};\n')

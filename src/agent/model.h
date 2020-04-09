@@ -56,6 +56,7 @@ struct StatusMessageModel {
     BREAKPOINT_CONDITION = 4,
     BREAKPOINT_EXPRESSION = 7,
     BREAKPOINT_AGE = 8,
+    BREAKPOINT_CANARY_FAILED = 9,
     VARIABLE_NAME = 5,
     VARIABLE_VALUE = 6
   };
@@ -78,6 +79,8 @@ struct StatusMessageModel {
       case Context::BREAKPOINT_CONDITION : return "BREAKPOINT_CONDITION";
       case Context::BREAKPOINT_EXPRESSION : return "BREAKPOINT_EXPRESSION";
       case Context::BREAKPOINT_AGE : return "BREAKPOINT_AGE";
+      case Context::BREAKPOINT_CANARY_FAILED:
+        return "BREAKPOINT_CANARY_FAILED";
       case Context::VARIABLE_NAME : return "VARIABLE_NAME";
       case Context::VARIABLE_VALUE : return "VARIABLE_VALUE";
       default : return "UNKNOWN";

@@ -19,6 +19,18 @@ import java.util.Map;
 
 final class GcpEnvironment {
   /**
+   * The enum contains one-to-one mapping to the values of Debuggee.canaryMode in Cloud
+   * Debugger's V2 API.
+   */
+  public enum DebuggeeCanaryMode {
+    CANARY_MODE_UNSPECIFIED,
+    CANARY_MODE_DEFAULT_ENABLED,
+    CANARY_MODE_ALWAYS_ENABLED,
+    CANARY_MODE_DEFAULT_DISABLED,
+    CANARY_MODE_ALWAYS_DISABLED
+  }
+
+  /**
    * String to concatenate to project ID to form debuggee description. Provided for backward
    * compatibility only.
    */
@@ -157,6 +169,35 @@ final class GcpEnvironment {
     }
 
     return labels;
+  }
+
+  /**
+   * Gets the Debuggee.canaryMode from the corresponding System properties.
+   */
+  static DebuggeeCanaryMode getDebuggeeCanaryMode() {
+    String enableCanaryString = System.getProperty("com.google.cdbg.breakpoints.enable_canary");
+    String allowCanaryOverrideString =
+        System.getProperty("com.google.cdbg.breakpoints.allow_canary_override");
+    if (enableCanaryString == null) {
+      // Return UNSPECIFIED if enable_canary is not configured.
+      return DebuggeeCanaryMode.CANARY_MODE_UNSPECIFIED;
+    }
+
+    boolean enableCanary = Boolean.parseBoolean(enableCanaryString);
+    boolean allowCanaryOverride = Boolean.parseBoolean(allowCanaryOverrideString);
+    if (enableCanary && allowCanaryOverride) {
+      return DebuggeeCanaryMode.CANARY_MODE_DEFAULT_ENABLED;
+    } else if (enableCanary && !allowCanaryOverride) {
+      return DebuggeeCanaryMode.CANARY_MODE_ALWAYS_ENABLED;
+    } else if (!enableCanary && allowCanaryOverride) {
+      return DebuggeeCanaryMode.CANARY_MODE_DEFAULT_DISABLED;
+    } else if (!enableCanary && !allowCanaryOverride) {
+      return DebuggeeCanaryMode.CANARY_MODE_ALWAYS_DISABLED;
+    }
+
+    // Above if-else statements should include all execution pathes, so reaching here is impossible,
+    // unless something went really wrong.
+    throw new IllegalStateException("Unexpected code execution path in getDebuggeeCanaryMode()");
   }
 
   /** Gets configuration flag from a system property falling back to agent flags. */

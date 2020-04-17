@@ -237,6 +237,33 @@ Alternatively, you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment
 variable to the JSON file path instead of adding the
 `auth.serviceaccount.jsonfile` system property.
 
+### Breakpoint Canary
+
+This feature protects large jobs from any potential bug in the Debugger agent
+which can take the entire job down when a snapshot or a logpoint is applied.
+
+When enabled, new snapshots and logpoints are rolled out to a subset of the
+application's instances (roughly 10% of the instances) first. The subset is
+called the canary set, and this canary set is decided upon every time a new
+snapshot or logpoint is created. This means that the canary set might be
+different for each individual snapshot/logpoint. The verification takes around
+40 seconds to finish. Once the verification on the canary set is finished, the
+snapshot or logpoint is applied to the remaining tasks. However, sometimes a
+snapshot hits before it is rolled out to the entire job, saving the need to
+apply it to all.
+
+Note that this feature can be enabled/disabled on the application at
+registration time or on the snapshot/logpoint when being created. Currently, the
+later part (individual snapshot/logpoint when being created) is not surfaced
+through any tools yet.
+
+Currently this feature is not enabled by default. To enable this feature, set
+the following property:
+
+<pre>
+-Dcom.google.cdbg.breakpoints.enable_canary=true
+</pre>
+
 ### Other JVM Languages
 
 #### Scala

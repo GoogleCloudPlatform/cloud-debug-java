@@ -65,9 +65,13 @@ class GcpHubClient implements HubClient {
       private String agentVersion;
       private JsonElement[] sourceContexts;
       private Boolean isDisabled;
+      private String canaryMode;
     }
 
     private Debuggee debuggee = new Debuggee();
+
+    // The field will be set by the gson serialization, so no need for a setter.
+    private String agentId = null;
 
     public void setProject(String project) {
       debuggee.project = project;
@@ -109,6 +113,10 @@ class GcpHubClient implements HubClient {
       debuggee.sourceContexts = sourceContextsList.toArray(new JsonElement[0]);
     }
 
+    public void setCanaryMode(String canaryMode) {
+      debuggee.canaryMode = canaryMode;
+    }
+
     public String getDebuggeeId() {
       return (debuggee == null) ? null : debuggee.id;
     }
@@ -123,6 +131,14 @@ class GcpHubClient implements HubClient {
       }
 
       return debuggee.isDisabled;
+    }
+
+    public String getCanaryMode() {
+      return (debuggee == null) ? null : debuggee.canaryMode;
+    }
+
+    public String getAgentId() {
+      return agentId;
     }
   }
 
@@ -284,6 +300,9 @@ class GcpHubClient implements HubClient {
   /** Registered debuggee ID. Use getter/setter to access. */
   private String debuggeeId = "not-registered-yet";
 
+  /** Registered agent's ID. Use getter/setter to access. */
+  private String agentId = "";
+
   /** The last wait_token returned in the ListActiveBreakpoints response. */
   private String lastWaitToken = "init";
 
@@ -355,9 +374,10 @@ class GcpHubClient implements HubClient {
     }
 
     setDebuggeeId(response.getDebuggeeId());
+    setAgentId(response.getAgentId());
     infofmt(
-        "Debuggee %s registered: %s, agent version: %s",
-        getDebuggeeId(), responseJson, GcpDebugletVersion.VERSION);
+        "Debuggee %s, agentId %s, registered: %s, agent version: %s",
+        getDebuggeeId(), getAgentId(), responseJson, GcpDebugletVersion.VERSION);
 
     return true;
   }
@@ -372,6 +392,10 @@ class GcpHubClient implements HubClient {
     if (lastWaitToken != null) {
       path.append("&waitToken=");
       path.append(URLEncoder.encode(lastWaitToken, UTF_8.name()));
+    }
+    if (getAgentId() != null && !getAgentId().isEmpty()) {
+      path.append("&agentId=");
+      path.append(URLEncoder.encode(getAgentId(), UTF_8.name()));
     }
 
     ListActiveBreakpointsResponse response;
@@ -507,6 +531,14 @@ class GcpHubClient implements HubClient {
     debuggeeId = id;
   }
 
+  public String getAgentId() {
+    return agentId;
+  }
+
+  private void setAgentId(String id) {
+    agentId = id;
+  }
+
   /**
    * Lazily initializes the base URL from GcpEnvironment. If the URL string is a place holder string
    * "#", then defer the initialization by throwing an IllegalStateException. Note that the place
@@ -602,6 +634,7 @@ class GcpHubClient implements HubClient {
     request.setAgentVersion(
         String.format("google.com/java-gcp/@%d", GcpDebugletVersion.MAJOR_VERSION));
     request.setSourceContexts(sourceContextFiles);
+    request.setCanaryMode(GcpEnvironment.getDebuggeeCanaryMode().toString());
 
     return request;
   }

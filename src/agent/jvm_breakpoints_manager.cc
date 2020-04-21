@@ -240,7 +240,7 @@ void JvmBreakpointsManager::JvmtiOnBreakpoint(
   }
 
   // Process the breakpoint hits.
-  for (std::shared_ptr<Breakpoint> breakpoint : breakpoints) {
+  for (const std::shared_ptr<Breakpoint>& breakpoint : breakpoints) {
     breakpoint->OnJvmBreakpointHit(
           thread,
           method,

@@ -22,7 +22,7 @@
 # The build script assumes some dependencies.
 # To install those on Debian, run this command:
 # sudo apt-get -y -q --no-install-recommends install \
-#     curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
+#     curl gcc build-essential libssl-dev unzip openjdk-8-jdk \
 #     cmake python maven
 #
 # The Java Cloud Debugger agent uses glog, gflags and jsoncpp libraries.

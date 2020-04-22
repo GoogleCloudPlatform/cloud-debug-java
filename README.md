@@ -66,18 +66,7 @@ ls cdbg_java_agent_gce.tar.gz
 ```
 
 Note that the build script assumes some dependencies. To install these
-dependencies, run this command:
-
-
-**On Debian 8:**
-
-```shell
-sudo apt-get -y -q --no-install-recommends install \
-    curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
-    cmake python maven
-```
-
-**On Debian 9:**
+dependencies on Debian, run this command:
 
 ```shell
 sudo apt-get -y -q --no-install-recommends install \

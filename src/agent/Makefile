@@ -38,7 +38,7 @@ ASM_COMMONS_JAR_PATH ?= /usr/lib/asm-8.0/lib/asm-commons-8.0.jar
 ASM_UTIL_JAR_PATH ?= /usr/lib/asm-8.0/lib/asm-util-8.0.jar
 GOOGLE_API_JAVA_CLIENT_PATH ?= /usr/lib/google-api-java-client
 JAVA_BUILD ?= maven
-JAVAC=javac -source 1.7 -target 1.7
+JAVAC=javac -source 1.8 -target 1.8
 BUILD_TARGET_PATH ?= .
 
 OPT_FLAGS = -O3 -D NDEBUG

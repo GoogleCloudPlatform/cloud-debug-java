@@ -167,8 +167,9 @@ public class YamlConfigParser {
     Set<String> blacklistExceptionPatternSet = new HashSet<>();
 
     try {
-      // We always expect a Map<String, List<Object>>. Invalid casts are handled in the catch clause
-      Map<String, List<Object>> data = yaml.load(yamlConfig);
+      // We always expect a Map<String, List<Object>>. Invalid cast is handled in the catch clause.
+      @SuppressWarnings("unchecked")
+      Map<String, List<Object>> data = (Map<String, List<Object>>) yaml.load(yamlConfig);
 
       if (data == null) {
         // Nothing was loaded

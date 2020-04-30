@@ -29,13 +29,13 @@ Cloud Debugger consists of 3 primary components:
 1.  The Java debugger agent (requires Java 7 and above).
 2.  Cloud Debugger service storing and managing snapshots/logpoints. Explore the
     API's using
-    [APIs Explorer](https://developers.google.com/apis-explorer/#p/clouddebugger/v2/).
+    [APIs Explorer](https://cloud.google.com/debugger/api/reference/rest/).
 3.  User interface, including a command line interface
     [`gcloud debug`](https://cloud.google.com/sdk/gcloud/reference/debug/) and a
     Web interface on
     [Google Cloud Console](https://console.cloud.google.com/debug/). See the
-    [online help](https://cloud.google.com/debugger/docs/debugging) on how to
-    use Google Cloud Console Debug page.
+    [online help](https://cloud.google.com/debugger/docs/using/snapshots) on how
+    to use Google Cloud Console Debug page.
 
 ## Getting Help
 

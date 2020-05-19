@@ -279,6 +279,7 @@ target_version_txt: internals_jar
 #    (Identical to #2, retained for legacy purposes).
 packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT) target_version_txt
 	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
-	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT) $(TARGET_VERSION_TXT)
-	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(TARGET_VERSION_TXT)
-	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(TARGET_VERSION_TXT)
+	cp $(TARGET_VERSION_TXT) version.txt
+	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT) version.txt
+	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar version.txt
+	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar version.txt

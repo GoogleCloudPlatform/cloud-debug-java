@@ -229,7 +229,7 @@ options {
     setASTFactory(&fact_);
   }
 
-  void reportError(const std::string& s) {
+  void reportError(const string& s) {
     errors_.push_back(s);
   }
 
@@ -239,10 +239,10 @@ options {
 
   int num_errors() { return errors_.size(); }
 
-  const std::vector<std::string>& errors() { return errors_; }
+  const std::vector<string>& errors() { return errors_; }
 
  private:
-  std::vector<std::string> errors_;
+  std::vector<string> errors_;
   antlr::ASTFactory fact_;
 }
 
@@ -535,7 +535,7 @@ expression returns [JavaExpression* je] {
     BinaryJavaExpression::Type binary_expression_type;
     UnaryJavaExpression::Type unary_expression_type;
     std::list<std::vector<jchar>> string_sequence;
-    std::string type;
+    string type;
 
     je = nullptr;
   }
@@ -796,8 +796,8 @@ arguments returns [MethodArguments* args] {
   }
   ;
 
-type_name returns [std::string t] {
-    std::string tail;
+type_name returns [string t] {
+    string tail;
   }
   : #(TYPE_NAME n1:Identifier tail=type_name) {
     t = n1->getText();

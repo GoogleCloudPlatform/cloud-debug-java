@@ -88,7 +88,7 @@ public class JniProxyCodeGen {
       }
 
       if ((cls == String.class) || (cls == byte[].class)) {
-        return "::devtools::cdbg::ExceptionOr<string>";
+        return "::devtools::cdbg::ExceptionOr<std::string>";
       }
 
       return "::devtools::cdbg::ExceptionOr< ::devtools::cdbg::JniLocalRef >";
@@ -101,7 +101,7 @@ public class JniProxyCodeGen {
       }
 
       if ((cls == String.class) || (cls == byte[].class)) {
-        return "const string&";
+        return "const std::string&";
       }
 
       return "jobject";

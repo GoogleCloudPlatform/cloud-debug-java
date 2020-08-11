@@ -145,7 +145,16 @@ void Worker::MainThreadProc() {
     main_thread_event_->Wait(100);  // Wait for 100ms to lower CPU usage
   }
 
-  if (!is_enabled) {
+  if (g_is_enabled_attempts > 0) {
+    LOG(INFO) << "Debugger had " << g_is_enabled_attempts
+              << " unsuccessful IsEnabled attempts.";
+  }
+
+  // This log message only makes sense if the jvm is not being shutdown, ie
+  // is_unloading_ is false, it is misleading otherwise. This situation can
+  // occur in very short lived tasks where the debugger did not have enough time
+  // to initialize before the JVM gets shutdown.
+  if (!is_unloading_ && !is_enabled) {
     LOG(WARNING) << "The debugger is disabled on this process.";
     return;
   }

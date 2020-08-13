@@ -468,9 +468,8 @@ ErrorOr<JVariant> BinaryExpressionEvaluator::Evaluate(
     return arg1_value;
   }
 
-  // TODO: evaluate second argument on demand. For example in this one:
-  //    (true || exp)
-  // "exp" should never be evaluated.
+  // TODO: support short-circuit evaluation.
+  // For example in this one: (true || exp), "exp" should never be evaluated.
   ErrorOr<JVariant> arg2_value = arg2_->Evaluate(evaluation_context);
   if (arg2_value.is_error()) {
     return arg2_value;

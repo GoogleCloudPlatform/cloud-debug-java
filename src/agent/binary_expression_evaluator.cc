@@ -468,8 +468,22 @@ ErrorOr<JVariant> BinaryExpressionEvaluator::Evaluate(
     return arg1_value;
   }
 
-  // TODO: support short-circuit evaluation.
-  // For example in this one: (true || exp), "exp" should never be evaluated.
+  // Short-circuit the evaluation for "&&" or "||": don't evaluate arg2_ when
+  // arg1_ can decide the value of the expression.
+  if (type_ == BinaryJavaExpression::Type::conditional_and ||
+      type_ == BinaryJavaExpression::Type::conditional_or) {
+    jboolean arg1_value_boolean;
+    if (!arg1_value.value().get<jboolean>(&arg1_value_boolean)) {
+      return INTERNAL_ERROR_MESSAGE;
+    }
+    if ((type_ == BinaryJavaExpression::Type::conditional_and &&
+         arg1_value_boolean == false) ||
+        (type_ == BinaryJavaExpression::Type::conditional_or &&
+         arg1_value_boolean == true)) {
+      return JVariant::Boolean(arg1_value_boolean);
+    }
+  }
+
   ErrorOr<JVariant> arg2_value = arg2_->Evaluate(evaluation_context);
   if (arg2_value.is_error()) {
     return arg2_value;

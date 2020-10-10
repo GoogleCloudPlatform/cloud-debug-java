@@ -1,5 +1,7 @@
 # Java Cloud Debugger Agent
 
+![Build](https://github.com/GoogleCloudPlatform/cloud-debug-java/workflows/Build/badge.svg)
+
 Google [Cloud Debugger](https://cloud.google.com/debugger/) for Java.
 
 ## Overview

@@ -1,0 +1,21 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+    build:
+      name: Build
+      runs-on: ubuntu-latest
+      steps:
+
+        - name: Install dependencies
+          run: |
+            sudo apt-get -y -q --no-install-recommends install \
+            curl gcc build-essential libssl-dev unzip openjdk-8-jdk \
+            cmake python maven
+
+        - name: Build
+          run: ./build.sh
+
+        - name: Check for artifact
+          run: ls cdbg_java_agent_gce.tar.gz

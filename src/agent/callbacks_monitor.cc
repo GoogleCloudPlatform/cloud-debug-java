@@ -18,6 +18,8 @@
 
 #include <time.h>
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 
@@ -41,13 +43,11 @@ CallbacksMonitor* CallbacksMonitor::GetInstance() {
   return g_instance;
 }
 
-
-int64 CallbacksMonitor::MonotonicClockMillis() {
+int64_t CallbacksMonitor::MonotonicClockMillis() {
   struct timespec tp;
   clock_gettime(CLOCK_MONOTONIC, &tp);
   return tp.tv_sec * 1000L + tp.tv_nsec / 1000000L;
 }
-
 
 CallbacksMonitor::Id CallbacksMonitor::RegisterCall(const char* tag) {
   OngoingCall ongoing_call { GetCurrentTimeMillis(), tag };
@@ -58,7 +58,7 @@ CallbacksMonitor::Id CallbacksMonitor::RegisterCall(const char* tag) {
 
 
 void CallbacksMonitor::CompleteCall(CallbacksMonitor::Id id) {
-  int64 current_time_ms = GetCurrentTimeMillis();
+  int64_t current_time_ms = GetCurrentTimeMillis();
 
   std::lock_guard<std::mutex> lock(mu_);
 
@@ -72,10 +72,9 @@ void CallbacksMonitor::CompleteCall(CallbacksMonitor::Id id) {
   ongoing_calls_.erase(id);
 }
 
-
-bool CallbacksMonitor::IsHealthy(int64 timestamp) const {
+bool CallbacksMonitor::IsHealthy(int64_t timestamp) const {
   bool rc = true;
-  int64 current_time_ms = GetCurrentTimeMillis();
+  int64_t current_time_ms = GetCurrentTimeMillis();
 
   std::lock_guard<std::mutex> lock(mu_);
 
@@ -86,7 +85,7 @@ bool CallbacksMonitor::IsHealthy(int64 timestamp) const {
   }
 
   for (auto it = ongoing_calls_.begin(); it != ongoing_calls_.end(); ++it) {
-    int64 duration_ms = current_time_ms - it->start_time_ms;
+    int64_t duration_ms = current_time_ms - it->start_time_ms;
     if (duration_ms > max_call_duration_ms_) {
       LOG(WARNING) << "Cloud Debugger call \"" << it->tag
                    << "\" hasn't completed in " << duration_ms

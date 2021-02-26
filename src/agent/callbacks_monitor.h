@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_COMMON_CALLBACKS_MONITOR_H_
 #define DEVTOOLS_CDBG_COMMON_CALLBACKS_MONITOR_H_
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <mutex>  // NOLINT
@@ -34,7 +35,7 @@ namespace cdbg {
 class CallbacksMonitor {
  public:
   struct OngoingCall {
-    int64 start_time_ms;
+    int64_t start_time_ms;
     const char* tag;
   };
 
@@ -42,7 +43,7 @@ class CallbacksMonitor {
 
   explicit CallbacksMonitor(
       int max_call_duration_ms,
-      std::function<int64()> fn_gettime = MonotonicClockMillis)
+      std::function<int64_t()> fn_gettime = MonotonicClockMillis)
       : max_call_duration_ms_(max_call_duration_ms),
         fn_gettime_(fn_gettime),
         last_unhealthy_time_ms_(-1) {}
@@ -70,7 +71,7 @@ class CallbacksMonitor {
   static CallbacksMonitor* GetInstance();
 
   // Gets the current time.
-  int64 GetCurrentTimeMillis() const { return fn_gettime_(); }
+  int64_t GetCurrentTimeMillis() const { return fn_gettime_(); }
 
   // Notifies start of an operation to monitor. The "tag" is a human readable
   // name of this callback. It is only used for logging purposes.
@@ -82,17 +83,17 @@ class CallbacksMonitor {
   // Returns true if there are no ongoing calls that already take more than
   // "max_interval_ms_" and that no completed call took more than
   // "max_interval_ms_" after "timestamp" time.
-  bool IsHealthy(int64 timestamp) const;
+  bool IsHealthy(int64_t timestamp) const;
 
   // Returns the current time in milliseconds.
-  static int64 MonotonicClockMillis();
+  static int64_t MonotonicClockMillis();
 
  private:
   // Maximum allowed duration of the healthy callback.
   const int max_call_duration_ms_;
 
   // Function to get the current time. Defined explicitly for unit tests.
-  std::function<int64()> fn_gettime_;
+  std::function<int64_t()> fn_gettime_;
 
   // Protects access to "ongoing_calls_" and "last_unhealthy_timestamp_".
   mutable std::mutex mu_;
@@ -102,7 +103,7 @@ class CallbacksMonitor {
 
   // Timestamp of the completion of last callback that lasted more than
   // "max_interval_ms_".
-  int64 last_unhealthy_time_ms_;
+  int64_t last_unhealthy_time_ms_;
 
   DISALLOW_COPY_AND_ASSIGN(CallbacksMonitor);
 };

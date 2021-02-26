@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_COMMON_LEAKY_BUCKET_H_
 
 #include <atomic>
+#include <cstdint>
 #include <mutex>  // NOLINT
 
 #include "common.h"
@@ -32,7 +33,7 @@ class LeakyBucket {
  public:
   // "capacity":  The max number of tokens the bucket can hold at any point.
   // "fill_rate": The rate which the bucket fills in tokens per second.
-  LeakyBucket(int64 capacity, int64 fill_rate);
+  LeakyBucket(int64_t capacity, int64_t fill_rate);
 
   ~LeakyBucket() {}
 
@@ -46,30 +47,30 @@ class LeakyBucket {
   // tokens are being acquired. Suddenly, infinite demand arrives.
   // At most "capacity_" tokens will be granted immediately. Subsequent
   // requests will only be admitted based on the fill rate.
-  inline bool RequestTokens(int64 requested_tokens);
+  inline bool RequestTokens(int64_t requested_tokens);
 
   // Takes tokens from bucket, possibly sending the number of tokens in the
   // bucket negative.
-  void TakeTokens(int64 tokens);
+  void TakeTokens(int64_t tokens);
 
  private:
   // The slow path of RequestTokens. Grabs a lock and may refill tokens_
   // using the fill rate and time passed since last fill.
-  bool RequestTokensSlow(int64 requested_tokens);
+  bool RequestTokensSlow(int64_t requested_tokens);
 
   // Refills the bucket with newly added tokens since last update and returns
   // the current amount of tokens in the bucket. 'available_tokens' indicates
   // the number of tokens in the bucket before refilling. 'current_time_ns'
   // indicates the current time in nanoseconds.
-  int64 RefillBucket(int64 available_tokens, int64 current_time_ns);
+  int64_t RefillBucket(int64_t available_tokens, int64_t current_time_ns);
 
   // Atomically increment "tokens_".
-  inline int64 AtomicIncrementTokens(int64 increment) {
+  inline int64_t AtomicIncrementTokens(int64_t increment) {
     return tokens_.fetch_add(increment, std::memory_order_relaxed) + increment;
   }
 
   // Atomically load the value of "tokens_".
-  inline int64 AtomicLoadTokens() const {
+  inline int64_t AtomicLoadTokens() const {
     return tokens_.load(std::memory_order_relaxed);
   }
 
@@ -84,33 +85,33 @@ class LeakyBucket {
   //
   // Tokens can be momentarily negative, either via TakeTokens or
   // during a normal RequestTokens that was not satisfied.
-  std::atomic<int64> tokens_;
+  std::atomic<int64_t> tokens_;
 
   // Capacity of the bucket.
-  const int64 capacity_;
+  const int64_t capacity_;
 
   // Although the main token count is an integer we also track fractional tokens
   // for increased precision.
   double fractional_tokens_;
 
   // Fill rate in tokens per second.
-  const int64 fill_rate_;
+  const int64_t fill_rate_;
 
   // Time in nanoseconds of the last refill.
-  int64 fill_time_ns_;
+  int64_t fill_time_ns_;
 
   DISALLOW_COPY_AND_ASSIGN(LeakyBucket);
 };
 
 // Inline fast-path.
-inline bool LeakyBucket::RequestTokens(int64 requested_tokens) {
+inline bool LeakyBucket::RequestTokens(int64_t requested_tokens) {
   if (requested_tokens > capacity_) {
     return false;
   }
 
   // Try and grab some tokens. remaining is how many tokens are
   // left after subtracting out requested tokens.
-  int64 remaining = AtomicIncrementTokens(-requested_tokens);
+  int64_t remaining = AtomicIncrementTokens(-requested_tokens);
   if (remaining >= 0) {
     // We had at least as much as we needed.
     return true;

@@ -50,6 +50,7 @@
 #endif
 
 #ifdef GCP_HUB_CLIENT
+using std::string;
 // TODO: retire this flag in favor of debuggee labels
 // set through system properties.
 ABSL_FLAG(string, cdbg_description_suffix, "",
@@ -235,7 +236,7 @@ static void TrySetDefaultLogDirectory() {
       "catalina.base",
       catalina_base_buffer.ref());
   if (err == JVMTI_ERROR_NONE) {
-    string tomcat_log_dir = catalina_base_buffer.get();
+    std::string tomcat_log_dir = catalina_base_buffer.get();
     tomcat_log_dir += "/logs";
 
     DIR* dir = opendir(tomcat_log_dir.c_str());

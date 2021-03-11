@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_LOCALS_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_LOCALS_H_
 
+#include <cstdint>
+
 #include "common.h"
 #include "jvariant.h"
 #include "nanojava_internal_error_builder.h"
@@ -47,10 +49,10 @@ class NanoJavaLocals {
 
   // Set local variable to a single slot primitive value. Sets error if the
   // local variable index is beyond the locals size.
-  void SetLocal(int local_index, Slot::Type type, int32 value);
+  void SetLocal(int local_index, Slot::Type type, int32_t value);
 
   // Set local variable to a double slot primitive value.
-  void SetLocal2(int local_index, Slot::Type type, int64 value);
+  void SetLocal2(int local_index, Slot::Type type, int64_t value);
 
   // Reads local variable of JType::Object type. Does not allocate a new local
   // reference. Sets error if variable index is invalid or if the local
@@ -59,11 +61,11 @@ class NanoJavaLocals {
 
   // Reads single slot primitive local variable. Sets error if variable index
   // is invalid.
-  int32 GetLocal(int local_index, Slot::Type expected_type);
+  int32_t GetLocal(int local_index, Slot::Type expected_type);
 
   // Reads double slot primitive local variable. Sets error if variable index
   // is invalid.
-  int64 GetLocal2(int local_index, Slot::Type expected_type);
+  int64_t GetLocal2(int local_index, Slot::Type expected_type);
 
  private:
   // Gets the interface to construct internal error messages.

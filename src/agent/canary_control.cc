@@ -16,6 +16,8 @@
 
 #include "canary_control.h"
 
+#include <cstdint>
+
 #include "messages.h"
 #include "model_util.h"
 
@@ -45,7 +47,7 @@ CanaryControl::CanaryControl(
 bool CanaryControl::RegisterBreakpointCanary(
     const std::string& breakpoint_id,
     std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete) {
-  int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
+  int64_t current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
 
   {
     absl::MutexLock lock(&mu_);
@@ -85,8 +87,8 @@ void CanaryControl::ApproveHealtyBreakpoints() {
   std::vector<std::string> healthy_ids;
   std::map<std::string, CanaryBreakpoint> unhealthy_ids;
   {
-    int64 current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
-    int64 cutoff =
+    int64_t current_timestamp_ms = callbacks_monitor_->GetCurrentTimeMillis();
+    int64_t cutoff =
         current_timestamp_ms - absl::GetFlag(FLAGS_min_canary_duration_ms);
 
     absl::MutexLock lock(&mu_);

@@ -17,6 +17,7 @@
 #include "binary_expression_evaluator.h"
 
 #include <cmath>
+#include <cstdint>
 #include <limits>
 
 #include "messages.h"
@@ -408,14 +409,15 @@ bool BinaryExpressionEvaluator::CompileShift(
 
   switch (arg1_->GetStaticType().type) {
     case JType::Int:
-      computer_ = &BinaryExpressionEvaluator::ShiftComputer<jint, uint32, 0x1f>;
+      computer_ =
+          &BinaryExpressionEvaluator::ShiftComputer<jint, uint32_t, 0x1f>;
       result_type_ = { JType::Int };
 
       return true;
 
     case JType::Long:
       computer_ =
-          &BinaryExpressionEvaluator::ShiftComputer<jlong, uint64, 0x3f>;
+          &BinaryExpressionEvaluator::ShiftComputer<jlong, uint64_t, 0x3f>;
       result_type_ = { JType::Long };
 
       return true;
@@ -570,11 +572,9 @@ ErrorOr<JVariant> BinaryExpressionEvaluator::BitwiseComputer(
   }
 }
 
-
-template <typename T, typename TUnsigned, uint16 Bitmask>
+template <typename T, typename TUnsigned, uint16_t Bitmask>
 ErrorOr<JVariant> BinaryExpressionEvaluator::ShiftComputer(
-    const JVariant& arg1,
-    const JVariant& arg2) const {
+    const JVariant& arg1, const JVariant& arg2) const {
   T value1 = T();
   if (!arg1.get<T>(&value1)) {
     return INTERNAL_ERROR_MESSAGE;
@@ -618,7 +618,6 @@ ErrorOr<JVariant> BinaryExpressionEvaluator::ShiftComputer(
       return INTERNAL_ERROR_MESSAGE;
   }
 }
-
 
 ErrorOr<JVariant> BinaryExpressionEvaluator::ConditionalObjectComputer(
     const JVariant& arg1,

@@ -16,6 +16,8 @@
 
 #include "worker.h"
 
+#include <cstdint>
+
 #include "callbacks_monitor.h"
 #include "agent_thread.h"
 #include "bridge.h"

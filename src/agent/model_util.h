@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_UTIL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_UTIL_H_
 
+#include <cstdint>
 #include <memory>
 #include <numeric>
 
@@ -42,7 +43,7 @@ class TimestampBuilder {
     return timestamp;
   }
 
-  static TimestampModel Build(int64 seconds, int32 nanos) {
+  static TimestampModel Build(int64_t seconds, int32_t nanos) {
     TimestampModel timestamp;
     timestamp.seconds = seconds;
     timestamp.nanos = nanos;
@@ -61,7 +62,7 @@ class DurationBuilder {
     return duration;
   }
 
-  static DurationModel Build(int64 seconds, int32 nanos) {
+  static DurationModel Build(int64_t seconds, int32_t nanos) {
     DurationModel duration;
     duration.seconds = seconds;
     duration.nanos = nanos;
@@ -140,7 +141,7 @@ class SourceLocationBuilder {
 
   SourceLocationBuilder() { }
 
-  SourceLocationBuilder(std::string path, int32 line) {
+  SourceLocationBuilder(std::string path, int32_t line) {
     set_path(std::move(path));
     set_line(line);
   }
@@ -155,7 +156,7 @@ class SourceLocationBuilder {
     return *this;
   }
 
-  SourceLocationBuilder& set_line(int32 line) {
+  SourceLocationBuilder& set_line(int32_t line) {
     data_->line = line;
     return *this;
   }
@@ -311,7 +312,7 @@ class StackFrameBuilder {
     return *this;
   }
 
-  StackFrameBuilder& set_location(std::string path, int32 line) {
+  StackFrameBuilder& set_location(std::string path, int32_t line) {
     return set_location(SourceLocationBuilder(path, line).build());
   }
 
@@ -461,7 +462,7 @@ class BreakpointBuilder {
     return *this;
   }
 
-  BreakpointBuilder& set_location(std::string path, int32 line) {
+  BreakpointBuilder& set_location(std::string path, int32_t line) {
     return set_location(SourceLocationBuilder(path, line).build());
   }
 

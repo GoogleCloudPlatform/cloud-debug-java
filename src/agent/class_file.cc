@@ -16,6 +16,8 @@
 
 #include "class_file.h"
 
+#include <cstdint>
+
 #include "jni_proxy_classpathlookup.h"
 #include "jvmti_buffer.h"
 
@@ -227,7 +229,7 @@ std::unique_ptr<ClassFile> ClassFile::LoadFromBlob(ClassIndexer* class_indexer,
 Nullable<int> ClassFile::GetClassModifiers() const {
   ByteSource reader = GetData();
 
-  uint16 modifiers = reader.ReadUInt16BE(constant_pool_end_offset_);
+  uint16_t modifiers = reader.ReadUInt16BE(constant_pool_end_offset_);
   if (reader.is_error()) {
     return nullptr;
   }
@@ -264,7 +266,7 @@ bool ClassFile::CheckClassFileVersion() {
   ByteSource reader(buffer_);
 
   // Check class file version.
-  int16 version = reader.ReadInt16BE(6);
+  int16_t version = reader.ReadInt16BE(6);
   if (version > 55) {
     LOG(ERROR) << "Unsupported class file version " << version;
     return false;
@@ -285,7 +287,7 @@ bool ClassFile::CalculateMethodsOffset(
   *methods_offset += 8 + 2 * reader.ReadUInt16BE(*methods_offset + 6);
 
   // Skip class fields.
-  uint16 fields_count = reader.ReadUInt16BE(*methods_offset);
+  uint16_t fields_count = reader.ReadUInt16BE(*methods_offset);
   *methods_offset += 2;
 
   if (reader.is_error()) {
@@ -293,7 +295,7 @@ bool ClassFile::CalculateMethodsOffset(
   }
 
   for (int i = 0; i < fields_count; ++i) {
-    uint16 attributes_count = reader.ReadUInt16BE(*methods_offset + 6);
+    uint16_t attributes_count = reader.ReadUInt16BE(*methods_offset + 6);
     *methods_offset += 8;
 
     if (reader.is_error()) {
@@ -320,7 +322,7 @@ bool ClassFile::IndexMethods() {
 
   // Loop through class methods.
   int offset = methods_offset;
-  const uint16 methods_count = reader.ReadUInt16BE(offset);
+  const uint16_t methods_count = reader.ReadUInt16BE(offset);
   offset += 2;
 
   methods_.reserve(methods_count);
@@ -395,7 +397,7 @@ bool ConstantPool::Initialize(ByteSource class_file, int* end_offset) {
 
   *end_offset = 10;
 
-  const uint16 constant_pool_count = class_file.ReadUInt16BE(8);
+  const uint16_t constant_pool_count = class_file.ReadUInt16BE(8);
   items_ = std::vector<Item>(constant_pool_count);
 
   for (int i = 1; i < constant_pool_count; ++i) {
@@ -463,7 +465,7 @@ bool ConstantPool::InitializeConstantPoolItem(
 template <typename T>
 const T* ConstantPool::Fetch(
     ConstantPool::Item* item,
-    std::function<std::unique_ptr<T>(uint8, ByteSource)> resolver) {
+    std::function<std::unique_ptr<T>(uint8_t, ByteSource)> resolver) {
   if (item == nullptr) {
     LOG(ERROR) << "Null constant pool item";
     return nullptr;  // Error occurred.
@@ -491,10 +493,8 @@ const T* ConstantPool::Fetch(
   return reinterpret_cast<T*>(expected);
 }
 
-
 ConstantPool::Item* ConstantPool::GetConstantPoolItem(
-    int index,
-    Nullable<uint8> expected_type) {
+    int index, Nullable<uint8_t> expected_type) {
   if ((index < 0) || (index >= items_.size())) {
     LOG(ERROR) << "Bad constant pool item " << index;
     return nullptr;
@@ -510,7 +510,6 @@ ConstantPool::Item* ConstantPool::GetConstantPoolItem(
 
   return &item;
 }
-
 
 int ConstantPool::GetType(int index) const {
   if ((index < 0) || (index >= items_.size())) {
@@ -548,7 +547,7 @@ Nullable<jint> ConstantPool::GetInteger(int index) {
 
   ByteSource data = item->data;
 
-  const int32 value = data.ReadInt32BE(1);
+  const int32_t value = data.ReadInt32BE(1);
   if (data.is_error()) {
     return nullptr;
   }
@@ -565,7 +564,7 @@ Nullable<jfloat> ConstantPool::GetFloat(int index) {
 
   ByteSource data = item->data;
 
-  const int32 value = data.ReadInt32BE(1);
+  const int32_t value = data.ReadInt32BE(1);
   if (data.is_error()) {
     return nullptr;
   }
@@ -584,7 +583,7 @@ Nullable<jlong> ConstantPool::GetLong(int index) {
 
   ByteSource data = item->data;
 
-  const int64 value = data.ReadInt64BE(1);
+  const int64_t value = data.ReadInt64BE(1);
   if (data.is_error()) {
     return nullptr;
   }
@@ -601,7 +600,7 @@ Nullable<jdouble> ConstantPool::GetDouble(int index) {
 
   ByteSource data = item->data;
 
-  const int64 value = data.ReadInt64BE(1);
+  const int64_t value = data.ReadInt64BE(1);
   if (data.is_error()) {
     return nullptr;
   }
@@ -937,7 +936,7 @@ bool ClassFile::Method::Load(int offset, int* method_size) {
     return false;
   }
 
-  const uint16 attributes_count = data.ReadUInt16BE(offset + 6);
+  const uint16_t attributes_count = data.ReadUInt16BE(offset + 6);
   *method_size += 8;
 
   for (int j = 0; j < attributes_count; ++j) {
@@ -975,7 +974,7 @@ Nullable<ClassFile::TryCatchBlock> ClassFile::Method::GetTryCatchBlock(
   ByteSource entry_reader = exception_table_.sub(index * kExceptionTableRowSize,
                                                  kExceptionTableRowSize);
 
-  const uint16 type_constant_pool_index = entry_reader.ReadUInt16BE(6);
+  const uint16_t type_constant_pool_index = entry_reader.ReadUInt16BE(6);
 
   const ConstantPool::ClassRef* type = nullptr;
   if (type_constant_pool_index != 0) {
@@ -1014,11 +1013,11 @@ Nullable<ClassFile::Instruction> ClassFile::Method::GetInstruction(int offset) {
     case InstructionType::IMPLICIT_LOCAL_VAR_INDEX:
       // Convert instructions like istore_3 to istore(3).
       if (instruction.opcode > JVM_OPC_istore) {
-        uint8 d = instruction.opcode - JVM_OPC_istore_0;
+        uint8_t d = instruction.opcode - JVM_OPC_istore_0;
         instruction.int_operand = d & 0x03;
         instruction.opcode = JVM_OPC_istore + (d >> 2);
       } else {
-        uint8 d = instruction.opcode - JVM_OPC_iload_0;
+        uint8_t d = instruction.opcode - JVM_OPC_iload_0;
         instruction.int_operand = d & 0x03;
         instruction.opcode = JVM_OPC_iload + (d >> 2);
       }
@@ -1053,10 +1052,10 @@ Nullable<ClassFile::Instruction> ClassFile::Method::GetInstruction(int offset) {
 
       // Skips opcode and 0 to 3 padding bytes.
       const int operand_offset = 4 - (offset & 3);
-      int32 low = code.ReadInt32BE(operand_offset + 4);
-      int32 high = code.ReadInt32BE(operand_offset + 8);
-      int32 table_offset = operand_offset + 12;
-      int32 table_size = (high - low + 1) * 4;
+      int32_t low = code.ReadInt32BE(operand_offset + 4);
+      int32_t high = code.ReadInt32BE(operand_offset + 8);
+      int32_t table_offset = operand_offset + 12;
+      int32_t table_size = (high - low + 1) * 4;
 
       operand.low = low;
       operand.default_handler_offset = code.ReadInt32BE(operand_offset);
@@ -1070,8 +1069,8 @@ Nullable<ClassFile::Instruction> ClassFile::Method::GetInstruction(int offset) {
 
       // Skips opcode and 0 to 3 padding bytes.
       const int operand_offset = 4 - (offset & 3);
-      int32 table_offset = operand_offset + 8;
-      int32 table_size = code.ReadInt32BE(operand_offset + 4) * 8;
+      int32_t table_offset = operand_offset + 8;
+      int32_t table_size = code.ReadInt32BE(operand_offset + 4) * 8;
 
       operand.default_handler_offset = code.ReadInt32BE(operand_offset);
       operand.table = LookupSwitchTable(code.sub(table_offset, table_size));
@@ -1180,9 +1179,8 @@ Nullable<ClassFile::Instruction> ClassFile::Method::GetInstruction(int offset) {
   return instruction;
 }
 
-
 ClassFile::InstructionType ClassFile::Method::GetInstructionType(
-    uint8 opcode) {
+    uint8_t opcode) {
   static InstructionType* map = BuildInstructionTypeMap();
   return map[opcode];
 }

@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_RATE_LIMIT_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_RATE_LIMIT_H_
 
+#include <cstdint>
 #include <memory>
 #include <queue>
 
@@ -71,9 +72,9 @@ std::unique_ptr<LeakyBucket> CreatePerBreakpointCostLimiter(CostLimitType type);
 // Thread safe moving average computation.
 class MovingAverage {
  public:
-  void Add(int64 value);
+  void Add(int64_t value);
 
-  int64 Average() const;
+  int64_t Average() const;
 
   int IsFilled() const;
 
@@ -88,10 +89,10 @@ class MovingAverage {
   mutable absl::Mutex mu_;
 
   // Last k values.
-  std::queue<int64> window_;
+  std::queue<int64_t> window_;
 
   // Total of last k values.
-  int64 sum_ { 0 };
+  int64_t sum_{0};
 };
 
 }  // namespace cdbg

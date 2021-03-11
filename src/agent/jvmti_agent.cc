@@ -17,6 +17,7 @@
 #include "jvmti_agent.h"
 
 #include <atomic>
+#include <cstdint>
 #include <sstream>
 
 #include "callbacks_monitor.h"
@@ -135,9 +136,8 @@ JvmtiAgent::~JvmtiAgent() {
 
 // Loads numeric value from the specified system property. Returns the
 // "default_value" if the system property was not found.
-int32 JvmtiAgent::GetSystemPropertyInt32(
-    const char* name,
-    int32 default_value) {
+int32_t JvmtiAgent::GetSystemPropertyInt32(const char* name,
+                                           int32_t default_value) {
   JvmtiBuffer<char> value;
   jvmtiError err = jvmti()->GetSystemProperty(name, value.ref());
   if (err != JVMTI_ERROR_NONE) {
@@ -151,7 +151,6 @@ int32 JvmtiAgent::GetSystemPropertyInt32(
 
   return atoi(value.get());  // NOLINT(runtime/deprecated_fn)
 }
-
 
 bool JvmtiAgent::OnLoad() {
   int err = 0;

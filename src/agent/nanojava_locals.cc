@@ -16,6 +16,8 @@
 
 #include "nanojava_locals.h"
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 namespace nanojava {
@@ -48,11 +50,7 @@ void NanoJavaLocals::SetLocalObject(int local_index, jobject ref) {
   slot.ref = JniNewLocalRef(ref).release();
 }
 
-
-void NanoJavaLocals::SetLocal(
-    int local_index,
-    Slot::Type type,
-    int32 value) {
+void NanoJavaLocals::SetLocal(int local_index, Slot::Type type, int32_t value) {
   DCHECK(IsSingleSlotPrimitive(type));
 
   if ((local_index < 0) || (local_index >= max_locals_)) {
@@ -68,11 +66,8 @@ void NanoJavaLocals::SetLocal(
   slot.primitive = value;
 }
 
-
-void NanoJavaLocals::SetLocal2(
-    int local_index,
-    Slot::Type type,
-    int64 value) {
+void NanoJavaLocals::SetLocal2(int local_index, Slot::Type type,
+                               int64_t value) {
   DCHECK(IsDoubleSlotPrimitive(type));
 
   if ((local_index < 0) || (local_index + 1 >= max_locals_)) {
@@ -91,10 +86,9 @@ void NanoJavaLocals::SetLocal2(
   slot1.type = type;
   slot2.type = Slot::Type::Empty;
 
-  slot1.primitive = static_cast<int32>(value);
-  slot2.primitive = static_cast<int32>(value >> 32);
+  slot1.primitive = static_cast<int32_t>(value);
+  slot2.primitive = static_cast<int32_t>(value >> 32);
 }
-
 
 jobject NanoJavaLocals::GetLocalObject(int local_index) {
   if ((local_index < 0) || (local_index >= max_locals_)) {
@@ -115,8 +109,7 @@ jobject NanoJavaLocals::GetLocalObject(int local_index) {
   return locals_[local_index].ref;
 }
 
-
-int32 NanoJavaLocals::GetLocal(int local_index, Slot::Type expected_type) {
+int32_t NanoJavaLocals::GetLocal(int local_index, Slot::Type expected_type) {
   DCHECK(IsSingleSlotPrimitive(expected_type));
 
   if ((local_index < 0) || (local_index >= max_locals_)) {
@@ -138,8 +131,7 @@ int32 NanoJavaLocals::GetLocal(int local_index, Slot::Type expected_type) {
   return locals_[local_index].primitive;
 }
 
-
-int64 NanoJavaLocals::GetLocal2(int local_index, Slot::Type expected_type) {
+int64_t NanoJavaLocals::GetLocal2(int local_index, Slot::Type expected_type) {
   DCHECK(IsDoubleSlotPrimitive(expected_type));
 
   if ((local_index < 0) || (local_index + 1 >= max_locals_)) {
@@ -161,7 +153,7 @@ int64 NanoJavaLocals::GetLocal2(int local_index, Slot::Type expected_type) {
     return 0;
   }
 
-  return static_cast<uint64>(locals_[local_index + 1].primitive) << 32 |
+  return static_cast<uint64_t>(locals_[local_index + 1].primitive) << 32 |
          locals_[local_index].primitive;
 }
 

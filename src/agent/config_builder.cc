@@ -16,6 +16,7 @@
 
 #include "config_builder.h"
 
+#include <cstdint>
 #include <sstream>
 
 #include "safe_caller_proxies.h"

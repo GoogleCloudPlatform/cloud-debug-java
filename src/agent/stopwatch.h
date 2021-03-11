@@ -19,6 +19,7 @@
 
 #include <time.h>
 
+#include <cstdint>
 #include <functional>
 
 #include "common.h"
@@ -51,22 +52,20 @@ class Stopwatch {
   }
 
   // Gets elapsed time in nanoseconds.
-  int64 GetElapsedNanos() const {
+  int64_t GetElapsedNanos() const {
     timespec end_time;
     fn_gettime_(&end_time);
 
-    return
-        static_cast<int64>(end_time.tv_sec - start_time_.tv_sec) * 1000000000 +
-        static_cast<int64>(end_time.tv_nsec - start_time_.tv_nsec);
+    return static_cast<int64_t>(end_time.tv_sec - start_time_.tv_sec) *
+               1000000000 +
+           static_cast<int64_t>(end_time.tv_nsec - start_time_.tv_nsec);
   }
 
   // Gets elapsed time in microseconds.
-  int64 GetElapsedMicros() const {
-    return (GetElapsedNanos() + 500) / 1000;
-  }
+  int64_t GetElapsedMicros() const { return (GetElapsedNanos() + 500) / 1000; }
 
   // Gets elapsed time in milliseconds.
-  int64 GetElapsedMillis() const {
+  int64_t GetElapsedMillis() const {
     return (GetElapsedNanos() + 500000) / 1000000;
   }
 

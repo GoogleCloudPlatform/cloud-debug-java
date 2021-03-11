@@ -16,6 +16,8 @@
 
 #include "safe_method_caller.h"
 
+#include <cstdint>
+
 #include "jni_proxy_nullpointerexception.h"
 #include "jni_method_caller.h"
 #include "type_util.h"
@@ -434,9 +436,8 @@ SafeMethodCaller::IsNextInstructionAllowed() {
   return nullptr;
 }
 
-
 std::unique_ptr<FormatMessageModel> SafeMethodCaller::IsNewArrayAllowed(
-    int32 count) {
+    int32_t count) {
   if (count > absl::GetFlag(FLAGS_safe_caller_max_array_elements)) {
     return std::unique_ptr<FormatMessageModel>(new FormatMessageModel {
         MethodNotSafeNewArrayTooLarge,

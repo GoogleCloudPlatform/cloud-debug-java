@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_CANARY_CONTROL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_CANARY_CONTROL_H_
 
+#include <cstdint>
 #include <functional>
 #include <map>
 
@@ -54,7 +55,7 @@ class CanaryControl {
  private:
   struct CanaryBreakpoint {
     // Time (in milliseconds) when the breakpoint was registered for canary.
-    int64 register_time;
+    int64_t register_time;
 
     // Callback to complete the breakpoint with the specified status.
     std::function<void(std::unique_ptr<StatusMessageModel>)> fn_complete;

@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_BINARY_EXPRESSION_EVALUATOR_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_BINARY_EXPRESSION_EVALUATOR_H_
 
+#include <cstdint>
+
 #include "common.h"
 #include "expression_evaluator.h"
 #include "java_expression.h"
@@ -103,10 +105,9 @@ class BinaryExpressionEvaluator : public ExpressionEvaluator {
   // Specification section 15.19), "T" can only be jint or jlong. The type of
   // the second argument is either int or long. "Bitmask" is applied to the
   // second argument as per specifications (also section 15.19).
-  template <typename T, typename TUnsigned, uint16 Bitmask>
-  ErrorOr<JVariant> ShiftComputer(
-      const JVariant& arg1,
-      const JVariant& arg2) const;
+  template <typename T, typename TUnsigned, uint16_t Bitmask>
+  ErrorOr<JVariant> ShiftComputer(const JVariant& arg1,
+                                  const JVariant& arg2) const;
 
   // Implements comparison operator on Java objects. JNI method IsSameObject
   // is used to actually compare the two objects.

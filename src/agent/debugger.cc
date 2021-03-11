@@ -16,6 +16,7 @@
 
 #include "debugger.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "jni_utils.h"

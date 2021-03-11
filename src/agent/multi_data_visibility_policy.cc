@@ -1,5 +1,7 @@
 #include "multi_data_visibility_policy.h"
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 
@@ -13,7 +15,8 @@ namespace {
 // some ineffieincies in regards to memory use and (slightly) cpu time.
 class ClassImpl : public DataVisibilityPolicy::Class {
  public:
-  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name,
+                      int32_t field_modifiers) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsFieldVisible(name, field_modifiers)) {
         return false;
@@ -23,7 +26,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+  bool IsFieldDataVisible(const std::string& name, int32_t field_modifiers,
                           std::string* reason) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsFieldDataVisible(name, field_modifiers, reason)) {
@@ -36,7 +39,7 @@ class ClassImpl : public DataVisibilityPolicy::Class {
 
   bool IsMethodVisible(const std::string& method_name,
                        const std::string& method_signature,
-                       int32 method_modifiers) override {
+                       int32_t method_modifiers) override {
     for (const auto& policy : class_list_) {
       if (!policy->IsMethodVisible(
           method_name,

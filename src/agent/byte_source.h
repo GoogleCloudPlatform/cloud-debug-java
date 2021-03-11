@@ -17,7 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_BYTE_SOURCE_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_BYTE_SOURCE_H_
 
-
+#include <cstdint>
 #ifdef __APPLE__
 #include <libkern/OSByteOrder.h>
 #else
@@ -38,9 +38,7 @@ class ByteSource {
   explicit ByteSource(const std::string& s) : ByteSource(&s[0], s.size()) {}
 
   ByteSource(const void* data, int size)
-    : data_(reinterpret_cast<const uint8*>(data)),
-      size_(size) {
-  }
+      : data_(reinterpret_cast<const uint8_t*>(data)), size_(size) {}
 
   ByteSource(const ByteSource& other) = default;
 
@@ -79,20 +77,16 @@ class ByteSource {
 
   // Reads signed 8 bit integer from the class file BLOB. Raises error and
   // returns 0 on invalid offset.
-  int8 ReadInt8(int offset) {
-    return ReadRaw<int8>(offset);
-  }
+  int8_t ReadInt8(int offset) { return ReadRaw<int8_t>(offset); }
 
   // Reads unsigned 8 bit integer from the class file BLOB. Raises error and
   // returns 0 on invalid offset.
-  uint8 ReadUInt8(int offset) {
-    return ReadRaw<uint8>(offset);
-  }
+  uint8_t ReadUInt8(int offset) { return ReadRaw<uint8_t>(offset); }
 
   // Reads signed 16 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
-  int16 ReadInt16BE(int offset) {
-    int16 raw_data = ReadRaw<int16>(offset);
+  int16_t ReadInt16BE(int offset) {
+    int16_t raw_data = ReadRaw<int16_t>(offset);
 #ifdef __APPLE__
     return OSSwapBigToHostInt16(raw_data);
 #else
@@ -102,8 +96,8 @@ class ByteSource {
 
   // Reads unsigned 16 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
-  uint16 ReadUInt16BE(int offset) {
-    uint16 raw_data = ReadRaw<uint16>(offset);
+  uint16_t ReadUInt16BE(int offset) {
+    uint16_t raw_data = ReadRaw<uint16_t>(offset);
 #ifdef __APPLE__
     return OSSwapBigToHostInt16(raw_data);
 #else
@@ -113,8 +107,8 @@ class ByteSource {
 
   // Reads signed 32 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
-  int32 ReadInt32BE(int offset) {
-    int32 raw_data = ReadRaw<int32>(offset);
+  int32_t ReadInt32BE(int offset) {
+    int32_t raw_data = ReadRaw<int32_t>(offset);
 #ifdef __APPLE__
     return OSSwapBigToHostInt32(raw_data);
 #else
@@ -124,8 +118,8 @@ class ByteSource {
 
   // Reads signed 64 bit integer from the class file BLOB as big-endian.
   // Raises error and returns 0 on invalid offset.
-  int64 ReadInt64BE(int offset) {
-    int64 raw_data = ReadRaw<int64>(offset);
+  int64_t ReadInt64BE(int offset) {
+    int64_t raw_data = ReadRaw<int64_t>(offset);
 #ifdef __APPLE__
     return OSSwapBigToHostInt64(raw_data);
 #else
@@ -149,7 +143,7 @@ class ByteSource {
 
  private:
   // Pointer to the wrapped buffer. Not owned by this class.
-  const uint8* data_;
+  const uint8_t* data_;
 
   // Size of the wrapped buffer in bytes.
   int size_;

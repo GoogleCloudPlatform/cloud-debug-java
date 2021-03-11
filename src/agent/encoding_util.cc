@@ -1,5 +1,7 @@
 #include "encoding_util.h"
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 
@@ -14,7 +16,7 @@ std::string Base64Encode(const char* in, size_t in_size) {
   std::string out(out_size, 0);
 
   while (in_i + 2 < in_size) {
-    uint32 in_bytes = in[in_i] << 16 | in[in_i + 1] << 8 | in[in_i + 2];
+    uint32_t in_bytes = in[in_i] << 16 | in[in_i + 1] << 8 | in[in_i + 2];
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64Chars[(in_bytes >> 6) & 0x3F];
@@ -23,13 +25,13 @@ std::string Base64Encode(const char* in, size_t in_size) {
   }
 
   if (in_i + 1 == in_size) {
-    uint32 in_bytes = in[in_i] << 16;
+    uint32_t in_bytes = in[in_i] << 16;
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64PadChar;
     out[out_i++] = kBase64PadChar;
   } else if (in_i + 2 == in_size) {
-    uint32 in_bytes = in[in_i] << 16 | in[in_i + 1] << 8;
+    uint32_t in_bytes = in[in_i] << 16 | in[in_i + 1] << 8;
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64Chars[(in_bytes >> 6) & 0x3F];
@@ -41,7 +43,7 @@ std::string Base64Encode(const char* in, size_t in_size) {
 
 int ValidateUtf8(const char* in, size_t in_size) {
   int valid_bytes_read = 0;
-  uint32 code_point = 0;
+  uint32_t code_point = 0;
   int code_point_length_remaining = 0;
   for (int i = 0; i < in_size; i++) {
     char cur = in[i];

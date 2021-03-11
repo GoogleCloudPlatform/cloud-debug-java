@@ -16,6 +16,7 @@
 
 #include "rate_limit.h"
 
+#include <cstdint>
 #include <thread>  // NOLINT
 
 #include "leaky_bucket.h"
@@ -74,8 +75,7 @@ constexpr double kConditionCostCapacityFactor = 0.1;
 constexpr double kDynamicLogCapacityFactor = 2;  // allow short bursts.
 constexpr double kDynamicLogBytesCapacityFactor = 2;  // allow very short burst.
 
-
-void MovingAverage::Add(int64 value) {
+void MovingAverage::Add(int64_t value) {
   absl::MutexLock lock(&mu_);
 
   if (window_.size() >= max_size_) {   // make room
@@ -87,8 +87,7 @@ void MovingAverage::Add(int64 value) {
   sum_ += value;
 }
 
-
-int64 MovingAverage::Average() const {
+int64_t MovingAverage::Average() const {
   absl::MutexLock lock(&mu_);
 
   if (window_.empty()) {
@@ -97,7 +96,6 @@ int64 MovingAverage::Average() const {
 
   return sum_ / window_.size();
 }
-
 
 int MovingAverage::IsFilled() const {
   absl::MutexLock lock(&mu_);
@@ -108,7 +106,7 @@ int MovingAverage::IsFilled() const {
 void MovingAverage::Reset() {
   absl::MutexLock lock(&mu_);
 
-  window_ = std::queue<int64>();
+  window_ = std::queue<int64_t>();
   sum_ = 0.;
 }
 
@@ -153,8 +151,7 @@ static int GetCpuCount() {
   return cpu_count_cache;
 }
 
-
-static int64 GetBaseFillRate(CostLimitType type) {
+static int64_t GetBaseFillRate(CostLimitType type) {
   switch (type) {
     case CostLimitType::BreakpointCondition:
       return absl::GetFlag(FLAGS_max_condition_cost) * 1000000000L;
@@ -169,8 +166,7 @@ static int64 GetBaseFillRate(CostLimitType type) {
   return 0;
 }
 
-
-static int64 GetBaseCapacity(CostLimitType type) {
+static int64_t GetBaseCapacity(CostLimitType type) {
   switch (type) {
     case CostLimitType::BreakpointCondition:
       return GetBaseFillRate(type) * kConditionCostCapacityFactor;
@@ -185,22 +181,21 @@ static int64 GetBaseCapacity(CostLimitType type) {
   return 0;
 }
 
-
 std::unique_ptr<LeakyBucket> CreateGlobalCostLimiter(CostLimitType type) {
   // Logs are I/O bound, not CPU bound.
   int cpu_factor =
       ((type == CostLimitType::BreakpointCondition) ? GetCpuCount() : 1);
 
-  int64 capacity = GetBaseCapacity(type) * cpu_factor;
-  int64 fill_rate = GetBaseFillRate(type) * cpu_factor;
+  int64_t capacity = GetBaseCapacity(type) * cpu_factor;
+  int64_t fill_rate = GetBaseFillRate(type) * cpu_factor;
   return std::unique_ptr<LeakyBucket>(new LeakyBucket(capacity, fill_rate));
 }
 
 
 std::unique_ptr<LeakyBucket> CreatePerBreakpointCostLimiter(
     CostLimitType type) {
-  int64 capacity = GetBaseCapacity(type);
-  int64 fill_rate = GetBaseFillRate(type) / 2;
+  int64_t capacity = GetBaseCapacity(type);
+  int64_t fill_rate = GetBaseFillRate(type) / 2;
   return std::unique_ptr<LeakyBucket>(new LeakyBucket(capacity, fill_rate));
 }
 

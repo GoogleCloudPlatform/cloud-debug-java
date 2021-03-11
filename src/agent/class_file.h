@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_CLASS_FILE_H_
 
 #include <atomic>
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -216,7 +217,7 @@ class ConstantPool {
   // Constant pool item.
   struct Item {
     // Type of this constant pool entry or 0 if this is not a valid item.
-    uint8 type { 0 };
+    uint8_t type{0};
 
     // Pointer to the raw constant pool item data in the class file.
     ByteSource data;
@@ -229,7 +230,7 @@ class ConstantPool {
   // Gets the buffer of the specified constant pool entry. Returns nullptr
   // if the index is invalid or if the entry has a type different from
   // "expected_type". If "expected_type" is null, the type is not checked.
-  Item* GetConstantPoolItem(int index, Nullable<uint8> expected_type);
+  Item* GetConstantPoolItem(int index, Nullable<uint8_t> expected_type);
 
   // Initializes constant pool item with no cache.
   bool InitializeConstantPoolItem(Item* item, ByteSource data);
@@ -240,7 +241,7 @@ class ConstantPool {
   template <typename T>
   static const T* Fetch(
       Item* item,
-      std::function<std::unique_ptr<T>(uint8, ByteSource)> resolver);
+      std::function<std::unique_ptr<T>(uint8_t, ByteSource)> resolver);
 
  private:
   // Resolves class signatures to class objects. Not owned by this class.
@@ -278,10 +279,12 @@ class ClassFile {
     explicit TableSwitchTable(ByteSource table) : table_(table) {}
 
     // Gets the number of rows in the table.
-    int size() const { return table_.size() / sizeof(int32); }
+    int size() const { return table_.size() / sizeof(int32_t); }
 
     // Reads the specified row from the table.
-    int32 offset(int row) { return table_.ReadInt32BE(row * sizeof(int32)); }
+    int32_t offset(int row) {
+      return table_.ReadInt32BE(row * sizeof(int32_t));
+    }
 
     // Returns true if previous read operations failed.
     bool is_error() const { return table_.is_error(); }
@@ -302,10 +305,10 @@ class ClassFile {
     int size() const { return table_.size() / 8; }
 
     // Reads value in the specified row from the table.
-    int32 value(int row) { return table_.ReadInt32BE(row * 8); }
+    int32_t value(int row) { return table_.ReadInt32BE(row * 8); }
 
     // Reads offset in the specified row from the table.
-    int32 offset(int row) { return table_.ReadInt32BE(row * 8 + 4); }
+    int32_t offset(int row) { return table_.ReadInt32BE(row * 8 + 4); }
 
     // Returns true if previous read operations failed.
     bool is_error() const { return table_.is_error(); }
@@ -321,7 +324,7 @@ class ClassFile {
     }
 
     // Instruction opcode.
-    uint8 opcode;
+    uint8_t opcode;
 
     // Offset of this instruction relative to first instruction.
     int offset;
@@ -330,21 +333,21 @@ class ClassFile {
     union {
       // Integer operand used for instructions like ISTORE and branch. Index of
       // a constant pool for LDC instruction.
-      int32 int_operand;
+      int32_t int_operand;
 
       // Operand for IINC instruction.
       struct {
         // Index of the incremented local variable.
-        uint16 local_index;
+        uint16_t local_index;
 
         // Increment value.
-        int16 increment;
+        int16_t increment;
       } iinc_operand;
 
       // Operand for TABLE_SWITCH instruction.
       struct {
         // Switch value corresponding to the first entry in the table.
-        int32 low;
+        int32_t low;
 
         // Branch table. Each row is an offset from the current instruction.
         // First first row corresponds to value of "low". The second row
@@ -419,7 +422,7 @@ class ClassFile {
     bool Load(int offset, int* method_size);
 
     // Returns method modifiers (e.g. static, public, native).
-    uint16 method_modifiers() const { return method_modifiers_; }
+    uint16_t method_modifiers() const { return method_modifiers_; }
 
     // Returns true if the method was declared as static.
     bool IsStatic() const { return (method_modifiers_ & JVM_ACC_STATIC) != 0; }
@@ -442,10 +445,10 @@ class ClassFile {
     int GetCodeSize() const { return code_.size(); }
 
     // Gets the maximum number of stack slots that this method uses.
-    uint16 GetMaxStack() const { return max_stack_; }
+    uint16_t GetMaxStack() const { return max_stack_; }
 
     // Gets the maximum number of local variable slots that this method uses.
-    uint16 GetMaxLocals() const { return max_locals_; }
+    uint16_t GetMaxLocals() const { return max_locals_; }
 
     // Gets the number of elements in exception table.
     int GetExceptionTableSize() const { return exception_table_.size() / 8; }
@@ -458,14 +461,14 @@ class ClassFile {
     Nullable<Instruction> GetInstruction(int offset);
 
     // Gets classification of an instruction by opcode.
-    static InstructionType GetInstructionType(uint8 opcode);
+    static InstructionType GetInstructionType(uint8_t opcode);
 
    private:
     // Class file that defined this method. Not owned by this class.
     ClassFile* const class_file_;
 
     // Method modifiers (e.g. static, native, etc.).
-    uint16 method_modifiers_ { 0xFFFF };
+    uint16_t method_modifiers_{0xFFFF};
 
     // MethodRef name (e.g. "toString").
     ConstantPool::Utf8Ref name_;
@@ -477,10 +480,10 @@ class ClassFile {
     std::shared_ptr<ClassIndexer::Type> return_type_;
 
     // Maximum number of stack slots that this method uses.
-    uint16 max_stack_ { 0 };
+    uint16_t max_stack_{0};
 
     // Maximum number of local variable slots that this method uses.
-    uint16 max_locals_ { 0 };
+    uint16_t max_locals_{0};
 
     // Code buffer. Not owned by this class.
     ByteSource code_;

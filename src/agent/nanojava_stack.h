@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_STACK_H_
 
 #include <algorithm>
+#include <cstdint>
 
 #include "common.h"
 #include "jvariant.h"
@@ -51,11 +52,11 @@ class NanoJavaStack {
 
   // Pushes a primitive single stop value onto the stack. Sets error in case
   // of stack overflow.
-  void PushStack(Slot::Type type, int32 value);
+  void PushStack(Slot::Type type, int32_t value);
 
   // Pushes a primitive double slot value (either Long or Double types) onto
   // the stack. Sets error in case of stack overflow.
-  void PushStack2(Slot::Type type, int64 value);
+  void PushStack2(Slot::Type type, int64_t value);
 
   // Pushes primitive or object value onto the stack. If "value" has Void type,
   // this function has no effect. Sets error in case of stack overflow.
@@ -78,11 +79,11 @@ class NanoJavaStack {
 
   // Pops a primitive single slot value from the stack. Sets error and
   // returns 0 in case of stack underflow.
-  int32 PopStack(Slot::Type expected_type);
+  int32_t PopStack(Slot::Type expected_type);
 
   // Pops a primitive double slot value (either Long or Double types) from the
   // stack. Sets error and returns 0 in case of stack underflow.
-  int64 PopStack2(Slot::Type expected_type);
+  int64_t PopStack2(Slot::Type expected_type);
 
   // Pops object, single primitive or double primitive from the stack depending
   // on "signature". Sets error and returns JType::Void on failure.

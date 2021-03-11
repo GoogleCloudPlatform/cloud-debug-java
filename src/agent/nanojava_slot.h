@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_SLOT_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_SLOT_H_
 
+#include <cstdint>
+
 #include "common.h"
 
 namespace devtools {
@@ -45,7 +47,7 @@ struct Slot {
 
   Type type { Type::Empty };
   union {
-    uint32 primitive;
+    uint32_t primitive;
     jobject ref;
   };
 };

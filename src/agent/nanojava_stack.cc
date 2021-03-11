@@ -16,6 +16,8 @@
 
 #include "nanojava_stack.h"
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 namespace nanojava {
@@ -49,8 +51,7 @@ void NanoJavaStack::PushStackObject(jobject ref) {
   ++stack_pointer_;
 }
 
-
-void NanoJavaStack::PushStack(Slot::Type type, int32 value) {
+void NanoJavaStack::PushStack(Slot::Type type, int32_t value) {
   DCHECK(IsSingleSlotPrimitive(type));
 
   if (stack_pointer_ >= max_stack_) {
@@ -65,8 +66,7 @@ void NanoJavaStack::PushStack(Slot::Type type, int32 value) {
   ++stack_pointer_;
 }
 
-
-void NanoJavaStack::PushStack2(Slot::Type type, int64 value) {
+void NanoJavaStack::PushStack2(Slot::Type type, int64_t value) {
   DCHECK(IsDoubleSlotPrimitive(type));
 
   if (stack_pointer_ + 1 >= max_stack_) {
@@ -75,14 +75,13 @@ void NanoJavaStack::PushStack2(Slot::Type type, int64 value) {
   }
 
   stack_[stack_pointer_].type = type;
-  stack_[stack_pointer_].primitive = static_cast<int32>(value);
+  stack_[stack_pointer_].primitive = static_cast<int32_t>(value);
   ++stack_pointer_;
 
   stack_[stack_pointer_].type = Slot::Type::Empty;
-  stack_[stack_pointer_].primitive = static_cast<int32>(value >> 32);
+  stack_[stack_pointer_].primitive = static_cast<int32_t>(value >> 32);
   ++stack_pointer_;
 }
-
 
 void NanoJavaStack::PushStackAny(const JVariant& value) {
   switch (value.type()) {
@@ -127,7 +126,7 @@ void NanoJavaStack::PushStackAny(const JVariant& value) {
     case JType::Float: {
       jfloat float_value = 0;
       value.get<jfloat>(&float_value);
-      PushStack(Slot::Type::Float, as<int32>(float_value));
+      PushStack(Slot::Type::Float, as<int32_t>(float_value));
       return;
     }
 
@@ -141,7 +140,7 @@ void NanoJavaStack::PushStackAny(const JVariant& value) {
     case JType::Double: {
       jdouble double_value = 0;
       value.get<jdouble>(&double_value);
-      PushStack2(Slot::Type::Double, as<int64>(double_value));
+      PushStack2(Slot::Type::Double, as<int64_t>(double_value));
       return;
     }
 
@@ -215,8 +214,7 @@ JniLocalRef NanoJavaStack::PopStackObjectInstanceOf(jclass cls) {
   return ref;
 }
 
-
-int32 NanoJavaStack::PopStack(Slot::Type expected_type) {
+int32_t NanoJavaStack::PopStack(Slot::Type expected_type) {
   DCHECK(IsSingleSlotPrimitive(expected_type));
 
   if (stack_pointer_ <= 0) {
@@ -241,8 +239,7 @@ int32 NanoJavaStack::PopStack(Slot::Type expected_type) {
   return slot->primitive;
 }
 
-
-int64 NanoJavaStack::PopStack2(Slot::Type expected_type) {
+int64_t NanoJavaStack::PopStack2(Slot::Type expected_type) {
   DCHECK(IsDoubleSlotPrimitive(expected_type));
 
   if (stack_pointer_ <= 1) {
@@ -267,9 +264,8 @@ int64 NanoJavaStack::PopStack2(Slot::Type expected_type) {
 
   slot1->type = Slot::Type::Empty;
 
-  return static_cast<uint64>(slot2->primitive) << 32 | slot1->primitive;
+  return static_cast<uint64_t>(slot2->primitive) << 32 | slot1->primitive;
 }
-
 
 JVariant NanoJavaStack::PopStackAny(JType type) {
   switch (type) {
@@ -281,7 +277,7 @@ JVariant NanoJavaStack::PopStackAny(JType type) {
     case JType::Char:
     case JType::Short:
     case JType::Int: {
-      const int32 value = PopStack(Slot::Type::Int);
+      const int32_t value = PopStack(Slot::Type::Int);
 
       switch (type) {
         case JType::Boolean:

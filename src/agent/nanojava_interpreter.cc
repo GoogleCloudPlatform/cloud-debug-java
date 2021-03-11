@@ -17,6 +17,7 @@
 #include "nanojava_interpreter.h"
 
 #include <cmath>
+#include <cstdint>
 #include <limits>
 
 #include "jni_proxy_arithmeticexception.h"
@@ -147,7 +148,8 @@ void NanoJavaInterpreter::InitializeLocals() {
         break;
 
       case JType::Double:
-        locals_.SetLocal2(local_index, Slot::Type::Double, as<int64>(value.d));
+        locals_.SetLocal2(local_index, Slot::Type::Double,
+                          as<int64_t>(value.d));
         local_index += 2;
         break;
 
@@ -210,7 +212,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
   const ClassFile::Instruction& instruction = nullable_instruction.value();
   int next_ip = instruction.next_instruction_offset;
 
-  const uint8 opcode = instruction.opcode;
+  const uint8_t opcode = instruction.opcode;
   switch (opcode) {
     case JVM_OPC_nop:
       break;
@@ -247,14 +249,14 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     case JVM_OPC_fconst_1:
     case JVM_OPC_fconst_2: {
       const float value = instruction.opcode - JVM_OPC_fconst_0;
-      stack_.PushStack(Slot::Type::Float, as<int32>(value));
+      stack_.PushStack(Slot::Type::Float, as<int32_t>(value));
       break;
     }
 
     case JVM_OPC_dconst_0:
     case JVM_OPC_dconst_1: {
       const double value = instruction.opcode - JVM_OPC_dconst_0;
-      stack_.PushStack2(Slot::Type::Double, as<int64>(value));
+      stack_.PushStack2(Slot::Type::Double, as<int64_t>(value));
       break;
     }
 
@@ -322,8 +324,8 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_bastore: {
-      const int32 value = stack_.PopStack(Slot::Type::Int);
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t value = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -358,7 +360,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_castore: {
       const jchar value = stack_.PopStack(Slot::Type::Int);
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[C");
       if (IsErrorOrException()) {
         break;
@@ -375,7 +377,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_sastore: {
       const jshort value = stack_.PopStack(Slot::Type::Int);
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[S");
       if (IsErrorOrException()) {
         break;
@@ -392,7 +394,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_iastore: {
       const jint value = stack_.PopStack(Slot::Type::Int);
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[I");
       if (IsErrorOrException()) {
         break;
@@ -409,7 +411,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_lastore: {
       const jlong value = stack_.PopStack2(Slot::Type::Long);
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[J");
       if (IsErrorOrException()) {
         break;
@@ -426,7 +428,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_fastore: {
       const jfloat value = as<float>(stack_.PopStack(Slot::Type::Float));
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[F");
       if (IsErrorOrException()) {
         break;
@@ -443,7 +445,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_dastore: {
       const jdouble value = as<double>(stack_.PopStack2(Slot::Type::Double));
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = PopModifiablePrimitiveArray("[D");
       if (IsErrorOrException()) {
         break;
@@ -460,7 +462,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
 
     case JVM_OPC_aastore: {
       JniLocalRef value = stack_.PopStackObject();
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -486,7 +488,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_baload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -525,7 +527,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_caload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -552,7 +554,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_saload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -579,7 +581,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_iaload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -606,7 +608,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_laload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -633,7 +635,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_faload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -651,7 +653,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
           break;
         }
 
-        stack_.PushStack(Slot::Type::Float, as<int32>(value));
+        stack_.PushStack(Slot::Type::Float, as<int32_t>(value));
       } else {
         SET_INTERNAL_ERROR("$0 is not a float array", signature);
       }
@@ -660,7 +662,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_daload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -678,7 +680,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
           break;
         }
 
-        stack_.PushStack2(Slot::Type::Double, as<int64>(value));
+        stack_.PushStack2(Slot::Type::Double, as<int64_t>(value));
       } else {
         SET_INTERNAL_ERROR("$0 is not a double array", signature);
       }
@@ -687,7 +689,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_aaload: {
-      const int32 index = stack_.PopStack(Slot::Type::Int);
+      const int32_t index = stack_.PopStack(Slot::Type::Int);
       JniLocalRef ref = stack_.PopStackObjectNonNull();
       if (IsErrorOrException()) {
         break;
@@ -711,21 +713,18 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_iadd:
-      PrimitiveBinaryOperation(
-          Slot::Type::Int,
-          &NanoJavaInterpreter::add<int32>);
+      PrimitiveBinaryOperation(Slot::Type::Int,
+                               &NanoJavaInterpreter::add<int32_t>);
       break;
 
     case JVM_OPC_isub:
-      PrimitiveBinaryOperation(
-          Slot::Type::Int,
-          &NanoJavaInterpreter::sub<int32>);
+      PrimitiveBinaryOperation(Slot::Type::Int,
+                               &NanoJavaInterpreter::sub<int32_t>);
       break;
 
     case JVM_OPC_imul:
-      PrimitiveBinaryOperation(
-          Slot::Type::Int,
-          &NanoJavaInterpreter::mul<int32>);
+      PrimitiveBinaryOperation(Slot::Type::Int,
+                               &NanoJavaInterpreter::mul<int32_t>);
       break;
 
     case JVM_OPC_idiv:
@@ -825,21 +824,18 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_ladd:
-      PrimitiveBinaryOperation2(
-          Slot::Type::Long,
-          &NanoJavaInterpreter::add<int64>);
+      PrimitiveBinaryOperation2(Slot::Type::Long,
+                                &NanoJavaInterpreter::add<int64_t>);
       break;
 
     case JVM_OPC_lsub:
-      PrimitiveBinaryOperation2(
-          Slot::Type::Long,
-          &NanoJavaInterpreter::sub<int64>);
+      PrimitiveBinaryOperation2(Slot::Type::Long,
+                                &NanoJavaInterpreter::sub<int64_t>);
       break;
 
     case JVM_OPC_lmul:
-      PrimitiveBinaryOperation2(
-          Slot::Type::Long,
-          &NanoJavaInterpreter::mul<int64>);
+      PrimitiveBinaryOperation2(Slot::Type::Long,
+                                &NanoJavaInterpreter::mul<int64_t>);
       break;
 
     case JVM_OPC_ldiv:
@@ -855,23 +851,23 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_lshl: {
-      int32 n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
-      int64 n2 = stack_.PopStack2(Slot::Type::Long);
+      int32_t n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
+      int64_t n2 = stack_.PopStack2(Slot::Type::Long);
       stack_.PushStack2(Slot::Type::Long, n2 << n1);
       break;
     }
 
     case JVM_OPC_lshr: {
-      int32 n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
-      int64 n2 = stack_.PopStack2(Slot::Type::Long);
+      int32_t n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
+      int64_t n2 = stack_.PopStack2(Slot::Type::Long);
       stack_.PushStack2(Slot::Type::Long, n2 >> n1);
       break;
     }
 
     case JVM_OPC_lushr: {
-      int32 n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
-      uint64 n2 = static_cast<uint64>(stack_.PopStack2(Slot::Type::Long));
-      stack_.PushStack2(Slot::Type::Long, as<int64>(n2 >> n1));
+      int32_t n1 = stack_.PopStack(Slot::Type::Int) & 0x3F;
+      uint64_t n2 = static_cast<uint64_t>(stack_.PopStack2(Slot::Type::Long));
+      stack_.PushStack2(Slot::Type::Long, as<int64_t>(n2 >> n1));
       break;
     }
 
@@ -894,8 +890,8 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_lcmp: {
-      int64 n1 = stack_.PopStack2(Slot::Type::Long);
-      int64 n2 = stack_.PopStack2(Slot::Type::Long);
+      int64_t n1 = stack_.PopStack2(Slot::Type::Long);
+      int64_t n2 = stack_.PopStack2(Slot::Type::Long);
       stack_.PushStack(Slot::Type::Int, (n2 > n1) - (n2 < n1));
       break;
     }
@@ -945,13 +941,13 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     case JVM_OPC_fneg:
       stack_.PushStack(
           Slot::Type::Float,
-          as<int32>(-as<float>(stack_.PopStack(Slot::Type::Float))));
+          as<int32_t>(-as<float>(stack_.PopStack(Slot::Type::Float))));
       break;
 
     case JVM_OPC_dneg:
       stack_.PushStack2(
           Slot::Type::Double,
-          as<int64>(-as<double>(stack_.PopStack2(Slot::Type::Double))));
+          as<int64_t>(-as<double>(stack_.PopStack2(Slot::Type::Double))));
       break;
 
     case JVM_OPC_dcmpl: {
@@ -1050,71 +1046,67 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     case JVM_OPC_i2f:
       stack_.PushStack(
           Slot::Type::Float,
-          as<int32>(static_cast<float>(stack_.PopStack(Slot::Type::Int))));
+          as<int32_t>(static_cast<float>(stack_.PopStack(Slot::Type::Int))));
       break;
 
     case JVM_OPC_i2d:
       stack_.PushStack2(
           Slot::Type::Double,
-          as<int64>(static_cast<double>(stack_.PopStack(Slot::Type::Int))));
+          as<int64_t>(static_cast<double>(stack_.PopStack(Slot::Type::Int))));
       break;
 
     case JVM_OPC_l2i:
       stack_.PushStack(
           Slot::Type::Int,
-          static_cast<int32>(stack_.PopStack2(Slot::Type::Long)));
+          static_cast<int32_t>(stack_.PopStack2(Slot::Type::Long)));
       break;
 
     case JVM_OPC_l2f:
       stack_.PushStack(
           Slot::Type::Float,
-          as<int32>(static_cast<float>(stack_.PopStack2(Slot::Type::Long))));
+          as<int32_t>(static_cast<float>(stack_.PopStack2(Slot::Type::Long))));
       break;
 
     case JVM_OPC_l2d:
       stack_.PushStack2(
           Slot::Type::Double,
-          as<int64>(static_cast<double>(stack_.PopStack2(Slot::Type::Long))));
+          as<int64_t>(static_cast<double>(stack_.PopStack2(Slot::Type::Long))));
       break;
 
     case JVM_OPC_f2i:
       stack_.PushStack(
           Slot::Type::Int,
-          static_cast<int32>(as<float>(stack_.PopStack(Slot::Type::Float))));
+          static_cast<int32_t>(as<float>(stack_.PopStack(Slot::Type::Float))));
       break;
 
     case JVM_OPC_f2l:
       stack_.PushStack2(
           Slot::Type::Long,
-          static_cast<int64>(as<float>(stack_.PopStack(Slot::Type::Float))));
+          static_cast<int64_t>(as<float>(stack_.PopStack(Slot::Type::Float))));
       break;
 
     case JVM_OPC_f2d:
-      stack_.PushStack2(
-          Slot::Type::Double,
-          as<int64>(static_cast<double>(
-              as<float>(stack_.PopStack(Slot::Type::Float)))));
+      stack_.PushStack2(Slot::Type::Double,
+                        as<int64_t>(static_cast<double>(
+                            as<float>(stack_.PopStack(Slot::Type::Float)))));
       break;
 
     case JVM_OPC_d2i:
-      stack_.PushStack(
-          Slot::Type::Int,
-          static_cast<int32>(as<double>(
-              stack_.PopStack2(Slot::Type::Double))));
+      stack_.PushStack(Slot::Type::Int,
+                       static_cast<int32_t>(
+                           as<double>(stack_.PopStack2(Slot::Type::Double))));
       break;
 
     case JVM_OPC_d2l:
-      stack_.PushStack2(
-          Slot::Type::Long,
-          static_cast<int64>(as<double>(
-              stack_.PopStack2(Slot::Type::Double))));
+      stack_.PushStack2(Slot::Type::Long,
+                        static_cast<int64_t>(
+                            as<double>(stack_.PopStack2(Slot::Type::Double))));
       break;
 
     case JVM_OPC_d2f:
-      stack_.PushStack(
-          Slot::Type::Float,
-          as<int32>(static_cast<float>(
-              as<double>(stack_.PopStack2(Slot::Type::Double)))));
+      stack_.PushStack(Slot::Type::Float,
+                       as<int32_t>(static_cast<float>(
+                           as<double>(stack_.PopStack2(Slot::Type::Double)))));
       break;
 
     case JVM_OPC_i2b:
@@ -1165,7 +1157,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_anewarray: {
-      int32 count = stack_.PopStack(Slot::Type::Int);
+      int32_t count = stack_.PopStack(Slot::Type::Int);
       if (count < 0) {
         RaiseException(jniproxy::NegativeArraySizeException());
         break;
@@ -1253,9 +1245,8 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_iinc: {
-      const int32 n = locals_.GetLocal(
-          instruction.iinc_operand.local_index,
-          Slot::Type::Int);
+      const int32_t n = locals_.GetLocal(instruction.iinc_operand.local_index,
+                                         Slot::Type::Int);
       locals_.SetLocal(
           instruction.iinc_operand.local_index,
           Slot::Type::Int,
@@ -1300,37 +1291,37 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_if_icmpeq:
-      if (IfICmpOperation<std::equal_to<int32>>()) {
+      if (IfICmpOperation<std::equal_to<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
 
     case JVM_OPC_if_icmpne:
-      if (IfICmpOperation<std::not_equal_to<int32>>()) {
+      if (IfICmpOperation<std::not_equal_to<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
 
     case JVM_OPC_if_icmplt:
-      if (IfICmpOperation<std::less<int32>>()) {
+      if (IfICmpOperation<std::less<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
 
     case JVM_OPC_if_icmple:
-      if (IfICmpOperation<std::less_equal<int32>>())  {
+      if (IfICmpOperation<std::less_equal<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
 
     case JVM_OPC_if_icmpgt:
-      if (IfICmpOperation<std::greater<int32>>())  {
+      if (IfICmpOperation<std::greater<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
 
     case JVM_OPC_if_icmpge:
-      if (IfICmpOperation<std::greater_equal<int32>>())  {
+      if (IfICmpOperation<std::greater_equal<int32_t>>()) {
         next_ip = instruction.offset + instruction.int_operand;
       }
       break;
@@ -1441,8 +1432,8 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       break;
 
     case JVM_OPC_tableswitch: {
-      const int32 index = stack_.PopStack(Slot::Type::Int) -
-                          instruction.table_switch_operand.low;
+      const int32_t index = stack_.PopStack(Slot::Type::Int) -
+                            instruction.table_switch_operand.low;
 
       if ((index >= 0) &&
           (index < instruction.table_switch_operand.table.size())) {
@@ -1462,7 +1453,7 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
     }
 
     case JVM_OPC_lookupswitch: {
-      const int32 key = stack_.PopStack(Slot::Type::Int);
+      const int32_t key = stack_.PopStack(Slot::Type::Int);
 
       next_ip = instruction.offset +
                 instruction.lookup_switch_operand.default_handler_offset;
@@ -1649,8 +1640,7 @@ bool NanoJavaInterpreter::CheckNextInstructionAllowed() {
   return true;
 }
 
-
-bool NanoJavaInterpreter::CheckNewArrayAllowed(int32 count) {
+bool NanoJavaInterpreter::CheckNewArrayAllowed(int32_t count) {
   std::unique_ptr<FormatMessageModel> error_message =
       supervisor_->IsNewArrayAllowed(count);
   if (error_message != nullptr) {
@@ -1660,7 +1650,6 @@ bool NanoJavaInterpreter::CheckNewArrayAllowed(int32 count) {
 
   return true;
 }
-
 
 bool NanoJavaInterpreter::CheckArrayModifyAllowed(jobject array) {
   std::unique_ptr<FormatMessageModel> error_message =
@@ -1701,7 +1690,7 @@ bool NanoJavaInterpreter::CheckJavaException() {
 void NanoJavaInterpreter::LdcOperation(int constant_pool_index) {
   ConstantPool* constant_pool = method_->class_file()->constant_pool();
 
-  const uint8 type = constant_pool->GetType(constant_pool_index);
+  const uint8_t type = constant_pool->GetType(constant_pool_index);
   switch (type) {
     case JVM_CONSTANT_Integer: {
       Nullable<jint> value = constant_pool->GetInteger(constant_pool_index);
@@ -1725,7 +1714,7 @@ void NanoJavaInterpreter::LdcOperation(int constant_pool_index) {
         return;
       }
 
-      stack_.PushStack(Slot::Type::Float, as<int32>(value.value()));
+      stack_.PushStack(Slot::Type::Float, as<int32_t>(value.value()));
       return;
     }
 
@@ -1751,7 +1740,7 @@ void NanoJavaInterpreter::LdcOperation(int constant_pool_index) {
         return;
       }
 
-      stack_.PushStack2(Slot::Type::Double, as<int64>(value.value()));
+      stack_.PushStack2(Slot::Type::Double, as<int64_t>(value.value()));
       return;
     }
 
@@ -1794,10 +1783,8 @@ void NanoJavaInterpreter::LdcOperation(int constant_pool_index) {
       std::to_string(static_cast<int>(type)));
 }
 
-
 void NanoJavaInterpreter::InvokeOperation(
-    uint8 opcode,
-    const ConstantPool::MethodRef& operand) {
+    uint8_t opcode, const ConstantPool::MethodRef& operand) {
   if (!operand.is_found) {
     SetResult(MethodCallResult::Error({
         ClassNotLoaded,
@@ -1839,7 +1826,6 @@ void NanoJavaInterpreter::InvokeOperation(
     stack_.PushStackAny(rc.return_value());
   }
 }
-
 
 void NanoJavaInterpreter::CheckFieldFound(const ConstantPool::FieldRef& field) {
   if (!field.is_found) {
@@ -1903,15 +1889,14 @@ void NanoJavaInterpreter::GetStaticFieldOperation(
       return;
 
     case JType::Float:
-      stack_.PushStack(
-          Slot::Type::Float,
-          as<int32>(jni()->GetStaticFloatField(cls, field_id)));
+      stack_.PushStack(Slot::Type::Float,
+                       as<int32_t>(jni()->GetStaticFloatField(cls, field_id)));
       return;
 
     case JType::Double:
       stack_.PushStack2(
           Slot::Type::Double,
-          as<int64>(jni()->GetStaticDoubleField(cls, field_id)));
+          as<int64_t>(jni()->GetStaticDoubleField(cls, field_id)));
       return;
 
     case JType::Object: {
@@ -1981,15 +1966,13 @@ void NanoJavaInterpreter::GetInstanceFieldOperation(
       return;
 
     case JType::Float:
-      stack_.PushStack(
-          Slot::Type::Float,
-          as<int32>(jni()->GetFloatField(instance.get(), field_id)));
+      stack_.PushStack(Slot::Type::Float, as<int32_t>(jni()->GetFloatField(
+                                              instance.get(), field_id)));
       return;
 
     case JType::Double:
-      stack_.PushStack2(
-          Slot::Type::Double,
-          as<int64>(jni()->GetDoubleField(instance.get(), field_id)));
+      stack_.PushStack2(Slot::Type::Double, as<int64_t>(jni()->GetDoubleField(
+                                                instance.get(), field_id)));
       return;
 
     case JType::Object: {
@@ -2137,7 +2120,7 @@ void NanoJavaInterpreter::SetInstanceFieldOperation(
 
 
 void NanoJavaInterpreter::NewArrayOperation(int array_type) {
-  int32 count = stack_.PopStack(Slot::Type::Int);
+  int32_t count = stack_.PopStack(Slot::Type::Int);
   if (count < 0) {
     RaiseException(jniproxy::NegativeArraySizeException());
     return;

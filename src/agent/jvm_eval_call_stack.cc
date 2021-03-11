@@ -17,6 +17,7 @@
 #include "jvm_eval_call_stack.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "common.h"
 #include "jni_utils.h"

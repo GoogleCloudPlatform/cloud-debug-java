@@ -18,13 +18,14 @@
 
 #include <float.h>
 
+#include <cstdint>
 #include <iostream>  // NOLINT
 #include <sstream>
 
 namespace devtools {
 namespace cdbg {
 
-static_assert(sizeof(JVariant) <= sizeof(uint64) * 2, "size_of_JVariant");
+static_assert(sizeof(JVariant) <= sizeof(uint64_t) * 2, "size_of_JVariant");
 
 // Number of floating point digits to print.
 constexpr int kFloatPrecision = FLT_DIG;

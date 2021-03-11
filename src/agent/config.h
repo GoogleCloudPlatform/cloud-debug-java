@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_CONFIG_H_
 
 #include <algorithm>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <set>
@@ -96,12 +97,12 @@ class Config {
   struct MethodCallQuota {
     // Maximum number of classes that the code is allowed to load during
     // method execution. Each class load takes between 100-400 microseconds.
-    int32 max_classes_load { 0 };
+    int32_t max_classes_load{0};
 
     // Maximum number of instructions that the NanoJava interpreter is allowed
     // to execute. Note that each instruction has a different cost, so this
     // limit does not provide exact timing guarantees.
-    int32 max_interpreter_instructions { 0 };
+    int32_t max_interpreter_instructions{0};
   };
 
   // Defines the type of quota (i.e. where the quota is used).

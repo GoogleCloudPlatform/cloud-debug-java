@@ -16,6 +16,8 @@
 
 #include "safe_caller_proxies.h"
 
+#include <cstdint>
+
 #include "class_metadata_reader.h"
 #include "jni_proxy_object.h"
 #include "safe_method_caller.h"

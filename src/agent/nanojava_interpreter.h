@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_INTERPRETER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_NANOJAVA_INTERPRETER_H_
 
+#include <cstdint>
+
 #include "class_file.h"
 #include "common.h"
 #include "jvariant.h"
@@ -76,7 +78,7 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
     // Called just before a new array is allocated. Returns error code if the
     // operation should be blocked. Returns nullptr to proceed.
     virtual std::unique_ptr<FormatMessageModel> IsNewArrayAllowed(
-        int32 count) = 0;
+        int32_t count) = 0;
 
     // Called before execution of opcodes that change array objects. Returns
     // error code if the operation should be blocked. Returns nullptr if the
@@ -208,7 +210,7 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
 
   // Called just before a new array is allocated. Returns false if the
   // operation should be blocked and sets method result to error.
-  bool CheckNewArrayAllowed(int32 count);
+  bool CheckNewArrayAllowed(int32_t count);
 
   // Called before execution of opcodes that change array objects. Returns
   // false if the operation should be blocked and sets method result to
@@ -247,28 +249,28 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
   void ReturnOperation(JType return_opcode_type);
 
   // Single slot binary operation on two values from the top of the stack.
-  void PrimitiveBinaryOperation(
-      Slot::Type type,
-      int32 (NanoJavaInterpreter::*fn)(int32, int32)) {
-    int32 n2 = stack_.PopStack(type);
-    int32 n1 = stack_.PopStack(type);
+  void PrimitiveBinaryOperation(Slot::Type type,
+                                int32_t (NanoJavaInterpreter::*fn)(int32_t,
+                                                                   int32_t)) {
+    int32_t n2 = stack_.PopStack(type);
+    int32_t n1 = stack_.PopStack(type);
     stack_.PushStack(type, (this->*fn)(n2, n1));
   }
 
   // Double slot binary operation on two values from the top of the stack.
-  void PrimitiveBinaryOperation2(
-      Slot::Type type,
-      int64 (NanoJavaInterpreter::*fn)(int64, int64)) {
-    int64 n2 = stack_.PopStack2(type);
-    int64 n1 = stack_.PopStack2(type);
+  void PrimitiveBinaryOperation2(Slot::Type type,
+                                 int64_t (NanoJavaInterpreter::*fn)(int64_t,
+                                                                    int64_t)) {
+    int64_t n2 = stack_.PopStack2(type);
+    int64_t n1 = stack_.PopStack2(type);
     stack_.PushStack2(type, (this->*fn)(n2, n1));
   }
 
   // Implements IF_ICMPXX instructions.
   template <class Compare>
   bool IfICmpOperation() {
-    int32 n2 = stack_.PopStack(Slot::Type::Int);
-    int32 n1 = stack_.PopStack(Slot::Type::Int);
+    int32_t n2 = stack_.PopStack(Slot::Type::Int);
+    int32_t n1 = stack_.PopStack(Slot::Type::Int);
     return Compare()(n1, n2);
   }
 
@@ -276,9 +278,7 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
   void LdcOperation(int constant_pool_index);
 
   // Implements INVOKExxx instructions.
-  void InvokeOperation(
-      uint8 opcode,
-      const ConstantPool::MethodRef& operand);
+  void InvokeOperation(uint8_t opcode, const ConstantPool::MethodRef& operand);
 
   // Implements NEWARRAY instruction.
   void NewArrayOperation(int array_type);
@@ -346,16 +346,12 @@ class NanoJavaInterpreter : public NanoJavaInternalErrorProvider {
     return n2 ^ n1;
   }
 
-  int32 ishl(int32 n1, int32 n2) {
-    return n2 << (n1 & 0x1F);
-  }
+  int32_t ishl(int32_t n1, int32_t n2) { return n2 << (n1 & 0x1F); }
 
-  int32 ishr(int32 n1, int32 n2) {
-    return n2 >> (n1 & 0x1F);
-  }
+  int32_t ishr(int32_t n1, int32_t n2) { return n2 >> (n1 & 0x1F); }
 
-  int32 iushr(int32 n1, int32 n2) {
-    return as<int32>(static_cast<uint32>(n2) >> (n1 & 0x1F));
+  int32_t iushr(int32_t n1, int32_t n2) {
+    return as<int32_t>(static_cast<uint32_t>(n2) >> (n1 & 0x1F));
   }
 
  private:

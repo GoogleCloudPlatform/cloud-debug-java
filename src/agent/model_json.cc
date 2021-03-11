@@ -16,6 +16,8 @@
 
 #include "model_json.h"
 
+#include <cstdint>
+
 #include "jni_proxy_api_client_datetime.h"
 #include "jsoncpp_util.h"
 #include "model_util.h"
@@ -237,11 +239,11 @@ static void SerializeLogLevel(
 
 // Returns seconds and milliseconds formatted as an RFC3339 timestamp string.
 // Returns empty string in case of error.
-static std::string FormatTime(int64 seconds, int32 millis) {
-  int64 total_millis = seconds * 1000 + millis;
+static std::string FormatTime(int64_t seconds, int32_t millis) {
+  int64_t total_millis = seconds * 1000 + millis;
 
   // Enforce formatting in UTC (e.g., 2015-10-06T20:37:19.212Z).
-  int32 timeZoneShift = 0;
+  int32_t timeZoneShift = 0;
 
   JniLocalRef datetime =
       jniproxy::DateTime()->NewObject(total_millis, timeZoneShift)
@@ -340,7 +342,7 @@ BreakpointModel::LogLevel DeserializeLogLevel(const Json::Value& root) {
 
 // Parses RFC3339 timestamp string and convert it into the number of
 // milliseconds passed since Unix epoch. Returns 0 in case of error.
-static int64 ParseTime(const std::string& input) {
+static int64_t ParseTime(const std::string& input) {
   JniLocalRef datetime = jniproxy::DateTime()->parseRfc3339(input).Release(
       ExceptionAction::LOG_AND_IGNORE);
   if (datetime == nullptr) {
@@ -360,7 +362,7 @@ TimestampModel DeserializeTimestamp(const Json::Value& root) {
 
   std::string value = root.asString();
 
-  int64 total_millis = ParseTime(value);
+  int64_t total_millis = ParseTime(value);
   if (total_millis == 0) {
     return kUnspecifiedTimestamp;
   }

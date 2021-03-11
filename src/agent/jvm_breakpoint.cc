@@ -16,6 +16,8 @@
 
 #include "jvm_breakpoint.h"
 
+#include <cstdint>
+
 #include "breakpoints_manager.h"
 #include "capture_data_collector.h"
 #include "class_indexer.h"
@@ -211,12 +213,12 @@ void JvmBreakpoint::Initialize() {
     expiration_time_base = definition_->create_time.seconds;
   }
 
-  int32 expiration_seconds = absl::GetFlag(FLAGS_breakpoint_expiration_sec);
+  int32_t expiration_seconds = absl::GetFlag(FLAGS_breakpoint_expiration_sec);
   if (definition_->expires_in != nullptr) {
     // Truncate if per-breakpoint expiration exceeds the agent maximum limit.
     // Ignore the nanos field, we don't need that precision.
     expiration_seconds =
-        std::min<int64>(definition_->expires_in->seconds, expiration_seconds);
+        std::min<int64_t>(definition_->expires_in->seconds, expiration_seconds);
   }
 
   scheduler_id_ =
@@ -330,7 +332,7 @@ void JvmBreakpoint::OnJvmBreakpointHit(jthread thread, jmethodID method,
   // Evaluate breakpoint condition (if defined).
   if (state->condition().evaluator != nullptr) {
     bool condition_result = EvaluateCondition(state->condition(), thread);
-    int64 current_condition_nanos = stopwatch.GetElapsedNanos();
+    int64_t current_condition_nanos = stopwatch.GetElapsedNanos();
     condition_cost_ns_.Add(current_condition_nanos);
 
     statConditionEvaluationTime->add(current_condition_nanos / 1000);
@@ -474,7 +476,7 @@ void JvmBreakpoint::ApplyConditionQuota() {
     return;
   }
 
-  const int64 tokens = condition_cost_ns_.Average();
+  const int64_t tokens = condition_cost_ns_.Average();
 
   // Apply per-breakpoint cost limit.
   if (!breakpoint_condition_cost_limiter_->RequestTokens(tokens)) {

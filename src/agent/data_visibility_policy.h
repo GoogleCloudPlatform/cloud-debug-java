@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_DATA_VISIBILITY_POLICY_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_DATA_VISIBILITY_POLICY_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "common.h"
@@ -36,21 +37,21 @@ class DataVisibilityPolicy {
     // Returns false if the field (or the entire class) is marked as invisible
     // for debugging.
     virtual bool IsFieldVisible(const std::string& name,
-                                int32 field_modifiers) = 0;
+                                int32_t field_modifiers) = 0;
 
     // Returns false if the field data is invisible.
     //
     // If IsFieldVisible() == false, then the return value from this method can
     // not be trusted as we assume that it will never be called in that case.
     virtual bool IsFieldDataVisible(const std::string& name,
-                                    int32 field_modifiers,
+                                    int32_t field_modifiers,
                                     std::string* reason) = 0;
 
     // Returns false if calling the specified method must not be allowed, even
     // if the method is immutable (e.g. simple getter).
     virtual bool IsMethodVisible(const std::string& method_name,
                                  const std::string& method_signature,
-                                 int32 method_modifiers) = 0;
+                                 int32_t method_modifiers) = 0;
 
     // Returns false if the local variable or an argument is effectively
     // invisible for debugging.

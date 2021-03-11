@@ -3,6 +3,7 @@
 #include <fnmatch.h>
 
 #include <algorithm>
+#include <cstdint>
 
 #include "type_util.h"
 
@@ -19,11 +20,12 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
  public:
   explicit BlacklistedClassImpl(const std::string& reason) : reason_(reason) {}
 
-  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name,
+                      int32_t field_modifiers) override {
     return true;
   }
 
-  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+  bool IsFieldDataVisible(const std::string& name, int32_t field_modifiers,
                           std::string* reason) override {
     *reason = reason_;
     return false;
@@ -31,7 +33,7 @@ class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
 
   bool IsMethodVisible(const std::string& method_name,
                        const std::string& method_signature,
-                       int32 method_modifiers) override {
+                       int32_t method_modifiers) override {
     return false;
   }
 

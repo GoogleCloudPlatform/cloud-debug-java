@@ -16,6 +16,7 @@
 
 #include "value_formatter.h"
 
+#include <cstdint>
 #include <numeric>
 #include <queue>
 
@@ -50,8 +51,8 @@ static void ScrubEmbeddedZeroCharacters(std::string* data_ptr) {
   std::vector<int> zeros;
   for (int i = 0; i + 1 < data.size(); ++i) {
     // Check if the next two characters represent an embedded zero.
-    if (static_cast<uint8>(data[i]) == 0xC0 &&
-        static_cast<uint8>(data[i + 1]) == 0x80) {
+    if (static_cast<uint8_t>(data[i]) == 0xC0 &&
+        static_cast<uint8_t>(data[i + 1]) == 0x80) {
       zeros.push_back(i);
       ++i;  // Skip the next byte (0x80).
       continue;
@@ -142,7 +143,7 @@ static void ScrubSupplementaryCharacters(std::string* data_ptr) {
   std::string& data = *data_ptr;
 
   // Make a pass to identify all supplementary characters (6 bytes).
-  std::queue<std::pair<int, int32>> supplementaries;
+  std::queue<std::pair<int, int32_t>> supplementaries;
   for (int i = 0; i + 5 < data.size(); ++i) {
     // Check if the next 6 bytes represent a supplementary character.
     // Modified UTF8 encodes a supplementary character as a UTF16 high/low
@@ -173,12 +174,12 @@ static void ScrubSupplementaryCharacters(std::string* data_ptr) {
         (data[i + 4] & 0xF0) == 0xB0 &&   // 1011xxxx
         (data[i + 5] & 0xC0) == 0x80) {   // 10xxxxxx
       // Extract the values of the high/low surrogates.
-      uint16 high_surrogate = ((data[i + 0] & 0x0F) << 12) |  // 1110xxxx
-                              ((data[i + 1] & 0x3F) << 6) |   // 10xxxxxx
-                              ((data[i + 2] & 0x3F));         // 10xxxxxx
-      uint16 low_surrogate = ((data[i + 3] & 0x0F) << 12) |   // 1110xxxx
-                             ((data[i + 4] & 0x3F) << 6) |    // 10xxxxxx
-                             ((data[i + 5] & 0x3F));          // 10xxxxxx
+      uint16_t high_surrogate = ((data[i + 0] & 0x0F) << 12) |  // 1110xxxx
+                                ((data[i + 1] & 0x3F) << 6) |   // 10xxxxxx
+                                ((data[i + 2] & 0x3F));         // 10xxxxxx
+      uint16_t low_surrogate = ((data[i + 3] & 0x0F) << 12) |   // 1110xxxx
+                               ((data[i + 4] & 0x3F) << 6) |    // 10xxxxxx
+                               ((data[i + 5] & 0x3F));          // 10xxxxxx
 
       // Extract the unicode value from the high/low surrogates. Given a
       // unicode point, the high/low surrogate pair can be obtained using these
@@ -191,10 +192,10 @@ static void ScrubSupplementaryCharacters(std::string* data_ptr) {
       //
       // Here, we apply the inverse of the above steps to recover the unicode
       // point from the high/low surrogates.
-      uint16 top_ten_bits = high_surrogate - 0xD800;
-      uint16 low_ten_bits = low_surrogate - 0xDC00;
-      int32 unicode_value = 0x10000 + ((top_ten_bits << 10) | low_ten_bits);
-      supplementaries.push(std::pair<int, int32>(i, unicode_value));
+      uint16_t top_ten_bits = high_surrogate - 0xD800;
+      uint16_t low_ten_bits = low_surrogate - 0xDC00;
+      int32_t unicode_value = 0x10000 + ((top_ten_bits << 10) | low_ten_bits);
+      supplementaries.push(std::pair<int, int32_t>(i, unicode_value));
       i += 5;  // Skip the next 5 bytes of the supplementary character.
       continue;
     }
@@ -218,14 +219,14 @@ static void ScrubSupplementaryCharacters(std::string* data_ptr) {
     // Replace supplementary character in the input.
     if (!supplementaries.empty() &&
         old_index == supplementaries.front().first) {
-      int32 value = supplementaries.front().second;
+      int32_t value = supplementaries.front().second;
 
       // Split the unicode point into its bit ranges that will be needed when
       // encoding it in UTF8.
-      uint8 bits_5_0 = value & 0x3F;
-      uint8 bits_11_6 = (value >> 6) & 0x3F;
-      uint8 bits_17_12 = (value >> 12) & 0x3F;
-      uint8 bits_20_18 = (value >> 18) & 0x07;
+      uint8_t bits_5_0 = value & 0x3F;
+      uint8_t bits_11_6 = (value >> 6) & 0x3F;
+      uint8_t bits_17_12 = (value >> 12) & 0x3F;
+      uint8_t bits_20_18 = (value >> 18) & 0x07;
 
       // Encode the unicode point using a 4-byte UTF8 sequence. The standard
       // says:

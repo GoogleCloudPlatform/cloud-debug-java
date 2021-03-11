@@ -18,6 +18,8 @@
 
 #include <math.h>
 
+#include <cstdint>
+
 ABSL_FLAG(int32, cdbg_log_stats_time_micros,
           15 * 60 * 1000 * 1000,  // 15 minutes
           "How often to log debugger performance stats. "
@@ -97,7 +99,7 @@ void Statistician::add(double sample) {
 
     ++count_;
 
-    const int32 log_stats_time_micros =
+    const int32_t log_stats_time_micros =
         absl::GetFlag(FLAGS_cdbg_log_stats_time_micros);
 
     if (log_stats_time_micros > 0 &&

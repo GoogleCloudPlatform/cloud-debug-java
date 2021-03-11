@@ -16,6 +16,8 @@
 
 #include "jsoncpp_util.h"
 
+#include <cstdint>
+
 namespace devtools {
 namespace cdbg {
 
@@ -41,8 +43,7 @@ bool JsonCppGetBool(const Json::Value& value, const char* name, bool def) {
   return attr.asBool();
 }
 
-
-int32 JsonCppGetInt(const Json::Value& value, const char* name, int def) {
+int32_t JsonCppGetInt(const Json::Value& value, const char* name, int def) {
   Json::Value attr = value.get(name, Json::Value());
   if (!attr.isInt()) {
     LOG_IF(WARNING, attr.type() != Json::nullValue)

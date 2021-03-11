@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MODEL_H_
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>
@@ -29,14 +30,14 @@ namespace cdbg {
 
 // See google/protobuf/timestamp.proto for explanation of this structure.
 struct TimestampModel {
-  int64 seconds = 0;
-  int32 nanos = 0;
+  int64_t seconds = 0;
+  int32_t nanos = 0;
 };
 
 // See google/protobuf/duration.proto for explanation of this structure.
 struct DurationModel {
-  int64 seconds = 0;
-  int32 nanos = 0;
+  int64_t seconds = 0;
+  int32_t nanos = 0;
 };
 
 struct FormatMessageModel {
@@ -90,14 +91,14 @@ struct StatusMessageModel {
 
 struct SourceLocationModel {
   std::string path;
-  int32 line = -1;
+  int32_t line = -1;
 };
 
 struct VariableModel {
   std::string name;
   Nullable<std::string> value;
   std::string type;
-  Nullable<uint64> var_table_index;
+  Nullable<uint64_t> var_table_index;
   std::vector<std::unique_ptr<VariableModel>> members;
   std::unique_ptr<StatusMessageModel> status;
 };

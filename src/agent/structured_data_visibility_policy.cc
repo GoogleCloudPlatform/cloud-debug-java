@@ -1,5 +1,6 @@
 #include "structured_data_visibility_policy.h"
 
+#include <cstdint>
 #include <sstream>
 
 #include "jni_utils.h"
@@ -20,7 +21,8 @@ class ClassImpl : public DataVisibilityPolicy::Class {
         class_config_(class_config) {
   }
 
-  bool IsFieldVisible(const std::string& name, int32 field_modifiers) override {
+  bool IsFieldVisible(const std::string& name,
+                      int32_t field_modifiers) override {
     if (class_invisible_) {
       return false;
     }
@@ -39,14 +41,14 @@ class ClassImpl : public DataVisibilityPolicy::Class {
     return true;
   }
 
-  bool IsFieldDataVisible(const std::string& name, int32 field_modifiers,
+  bool IsFieldDataVisible(const std::string& name, int32_t field_modifiers,
                           std::string* reason) override {
     return true;
   }
 
   bool IsMethodVisible(const std::string& method_name,
                        const std::string& method_signature,
-                       int32 method_modifiers) override {
+                       int32_t method_modifiers) override {
     if (class_invisible_) {
       return false;
     }

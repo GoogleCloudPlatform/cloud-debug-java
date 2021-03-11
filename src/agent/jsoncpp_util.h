@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JSONCPP_UTIL_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JSONCPP_UTIL_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "common.h"
@@ -35,7 +36,7 @@ bool JsonCppGetBool(const Json::Value& value, const char* name, bool def);
 
 // Gets the value of JSON integer element. Returns "def" if the attribute
 // does not exist or if it is not an integer type.
-int32 JsonCppGetInt(const Json::Value& value, const char* name, int def);
+int32_t JsonCppGetInt(const Json::Value& value, const char* name, int def);
 
 }  // namespace cdbg
 }  // namespace devtools

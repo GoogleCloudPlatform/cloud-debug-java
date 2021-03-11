@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVMTI_AGENT_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JVMTI_AGENT_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -65,7 +66,8 @@ class JvmtiAgent : public Worker::Provider {
 
   // Loads numeric value from the specified system property. Returns the
   // "default_value" if the system property was not found.
-  static int32 GetSystemPropertyInt32(const char* name, int32 default_value);
+  static int32_t GetSystemPropertyInt32(const char* name,
+                                        int32_t default_value);
 
   // Very first callback from JVM when the shared library is loaded.
   bool OnLoad();

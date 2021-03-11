@@ -17,6 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JOBJECT_MAP_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JOBJECT_MAP_H_
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <unordered_map>
@@ -44,7 +45,7 @@ class JobjectMap {
   // We could use hash table from jobject to TData and override hash function
   // and equality operations to go to JNI. Benchmark showed no significant
   // difference in performance between the two approaches.
-  typedef std::unordered_map<int32, std::list<std::pair<jobject, TData>>> Map;
+  typedef std::unordered_map<int32_t, std::list<std::pair<jobject, TData>>> Map;
 
  public:
   // Default constructor (no explicit cleanup of element values on removal).

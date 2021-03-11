@@ -17,6 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_SAFE_METHOD_CALLER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_SAFE_METHOD_CALLER_H_
 
+#include <cstdint>
+
 #include "class_file.h"
 #include "class_files_cache.h"
 #include "class_indexer.h"
@@ -98,7 +100,7 @@ class SafeMethodCaller
 
   void NewObjectAllocated(jobject obj) override;
 
-  std::unique_ptr<FormatMessageModel> IsNewArrayAllowed(int32 count) override;
+  std::unique_ptr<FormatMessageModel> IsNewArrayAllowed(int32_t count) override;
 
   std::unique_ptr<FormatMessageModel> IsArrayModifyAllowed(
       jobject array) override;

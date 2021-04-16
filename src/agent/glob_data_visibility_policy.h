@@ -24,7 +24,7 @@
 namespace devtools {
 namespace cdbg {
 
-// Specifies lists of glob patterns that can act as blacklists and blacklist
+// Specifies lists of glob patterns that can act as blocklists and blocklist
 // exceptions.
 class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
  public:
@@ -63,11 +63,9 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
 
     // Returns true if this GlobSet contains zero patterns.
     bool Empty() const {
-      return exact_patterns_.empty() &&
-          prefix_patterns_.empty() &&
-          generic_patterns_.empty() &&
-          inverse_patterns_.empty() &&
-          exact_inverse_patterns_.empty();
+      return exact_patterns_.empty() && prefix_patterns_.empty() &&
+             generic_patterns_.empty() && inverse_patterns_.empty() &&
+             exact_inverse_patterns_.empty();
     }
 
    private:
@@ -107,8 +105,8 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
 
   // Configuration
   struct Config {
-    GlobSet blacklists;
-    GlobSet blacklist_exceptions;
+    GlobSet blocklists;
+    GlobSet blocklist_exceptions;
     // This string is left empty if there was no parsing error.
     std::string parse_error;
   };
@@ -117,9 +115,7 @@ class GlobDataVisibilityPolicy : public DataVisibilityPolicy {
   // to change the configuration.
   explicit GlobDataVisibilityPolicy();
 
-  void SetConfig(Config config) {
-      config_ = std::move(config);
-  }
+  void SetConfig(Config config) { config_ = std::move(config); }
 
   std::unique_ptr<Class> GetClassVisibility(jclass cls) override;
 

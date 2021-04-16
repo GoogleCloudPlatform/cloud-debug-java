@@ -88,8 +88,8 @@ final class SourceFileMapper {
 
       isSyntheticClass = (access & Opcodes.ACC_SYNTHETIC) != 0;
 
-      // Blacklisted classes themselves are also unsafe.
-      if (blacklistedClasses.contains(name)) {
+      // Blocked classes themselves are also unsafe.
+      if (blockedClasses.contains(name)) {
         isUnsafeClass = true;
       }
     }
@@ -112,7 +112,7 @@ final class SourceFileMapper {
         @Override
         public void visitMethodInsn(
             int opcode, String owner, String name, String desc, boolean itf) {
-          if (!isUnsafeClass && blacklistedClasses.contains(owner)) {
+          if (!isUnsafeClass && blockedClasses.contains(owner)) {
             isUnsafeClass = true;
           }
         }
@@ -143,19 +143,19 @@ final class SourceFileMapper {
    * List of statements in the mapped source file sorted by line number. This includes all the class
    * resources provided in the constructor.
    */
-  private SortedMap<Integer, ResolvedSourceLocation> statements = new TreeMap<>();
+  private final SortedMap<Integer, ResolvedSourceLocation> statements = new TreeMap<>();
 
   /**
    * Classes whose methods are known to potentially create unsafe Java objects. Any class that calls
    * methods of these classes is also potentially unsafe, and hence, setting breakpoints inside such
    * a class will also not allowed.
    */
-  private static final Set<String> blacklistedClasses =
+  private static final Set<String> blockedClasses =
       new HashSet<>(Arrays.asList("sun/misc/Unsafe", "com/google/protobuf/UnsafeUtil"));
 
   /**
    * Signatures of all the unsafe classes found in the mapped source file. We only record classes
-   * that directly invoke methods from the blacklisted classes. This does not guarantee
+   * that directly invoke methods from the blocklisted classes. This does not guarantee
    * safety/unsafety, but it is a good heuristic that covers most of the common cases.
    */
   private final Set<String> unsafeClassSignatures = new HashSet<>();
@@ -179,8 +179,7 @@ final class SourceFileMapper {
   }
 
   private void loadClass(InputStream resource) throws IOException {
-    ClassReader classReader;
-    classReader = new ClassReader(resource);
+    ClassReader classReader = new ClassReader(resource);
 
     // We don't need to parse any attributes while loading the class.
     Attribute[] attributes = new Attribute[0];

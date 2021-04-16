@@ -15,11 +15,11 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +30,11 @@ import org.yaml.snakeyaml.error.YAMLException;
 
 /** Finds, loads and parses debugger configuration file. */
 public class YamlConfigParser {
-  /** A set of blacklist patterns found in the parsed config. */
-  private String[] blacklistPatterns;
+  /** A set of blocklist patterns found in the parsed config. */
+  private String[] blocklistPatterns;
 
-  /** A set of blacklist pattern exceptions. */
-  private String[] blacklistExceptionPatterns;
+  /** A set of blocklist pattern exceptions. */
+  private String[] blocklistExceptionPatterns;
 
   /**
    * Parses the given InputStream as YAML with an expected structure.
@@ -44,16 +44,15 @@ public class YamlConfigParser {
    *
    * <p>An example of legal structure would be:
    *
-   * <p>blacklist: - com.secure.* - com.foo.MyClass blacklist_exception: - com.secure.testing.*
+   * <p>blocklist: - com.secure.* - com.foo.MyClass blocklist_exception: - com.secure.testing.*
    *
    * <p>An empty config is also legal.
    */
   public YamlConfigParser(String yamlConfig) throws YamlConfigParserException {
-    blacklistPatterns = new String[0];
-    blacklistExceptionPatterns = new String[0];
+    blocklistPatterns = new String[0];
+    blocklistExceptionPatterns = new String[0];
 
-    try (InputStream inputStream =
-        new ByteArrayInputStream(yamlConfig.getBytes(StandardCharsets.UTF_8))) {
+    try (InputStream inputStream = new ByteArrayInputStream(yamlConfig.getBytes(UTF_8))) {
       parseYaml(inputStream);
     } catch (YamlConfigParserException e) {
       warnfmt("%s", e.toString());
@@ -62,22 +61,32 @@ public class YamlConfigParser {
       // IOException is not expected on a string reader, but the API contract
       // requires we catch it anyway.
       warnfmt("%s", e.toString());
-      throw new YamlConfigParserException("IOException: " + e.toString());
+      throw new YamlConfigParserException("IOException: " + e);
     }
 
     infofmt(
-        "Config Load OK. Added %d blacklist and %d blacklist exception patterns",
-        blacklistPatterns.length, blacklistExceptionPatterns.length);
+        "Config Load OK. Added %d blocklist and %d blocklist exception patterns",
+        blocklistPatterns.length, blocklistExceptionPatterns.length);
   }
 
-  /** Returns blacklists found in config. */
+  /**
+   * Returns blocklists found in config.
+   *
+   * TODO: Finalize the conversion to blocklist by renaming this
+   * method.
+   */
   public String[] getBlacklistPatterns() {
-    return blacklistPatterns;
+    return blocklistPatterns;
   }
 
-  /** Returns blacklist exceptions found in config. */
+  /**
+   * Returns blocklist exceptions found in config.
+   *
+   * TODO: Finalize the conversion to blocklist by renaming this
+   * method.
+   */
   public String[] getBlacklistExceptionPatterns() {
-    return blacklistExceptionPatterns;
+    return blocklistExceptionPatterns;
   }
 
   /**
@@ -163,8 +172,8 @@ public class YamlConfigParser {
    */
   private void parseYaml(InputStream yamlConfig) throws YamlConfigParserException {
     Yaml yaml = new Yaml(new SafeConstructor());
-    Set<String> blacklistPatternSet = new HashSet<>();
-    Set<String> blacklistExceptionPatternSet = new HashSet<>();
+    Set<String> blocklistPatternSet = new HashSet<>();
+    Set<String> blocklistExceptionPatternSet = new HashSet<>();
 
     try {
       // We always expect a Map<String, List<Object>>. Invalid cast is handled in the catch clause.
@@ -180,11 +189,19 @@ public class YamlConfigParser {
         List<Object> value = entry.getValue();
 
         switch (entry.getKey()) {
+          /**
+           * TODO: Finalize the conversion to blocklist
+           */
           case "blacklist":
-            addPatternsToSet(blacklistPatternSet, value);
+          case "blocklist":
+            addPatternsToSet(blocklistPatternSet, value);
             break;
+          /**
+           * TODO: Finalize the conversion to blocklist
+           */
           case "blacklist_exception":
-            addPatternsToSet(blacklistExceptionPatternSet, value);
+          case "blocklist_exception":
+            addPatternsToSet(blocklistExceptionPatternSet, value);
             break;
           default:
             throw new YamlConfigParserException("Unrecognized key in config: " + entry.getKey());
@@ -195,7 +212,7 @@ public class YamlConfigParser {
       throw new YamlConfigParserException(e.toString());
     }
 
-    blacklistPatterns = blacklistPatternSet.toArray(new String[0]);
-    blacklistExceptionPatterns = blacklistExceptionPatternSet.toArray(new String[0]);
+    blocklistPatterns = blocklistPatternSet.toArray(new String[0]);
+    blocklistExceptionPatterns = blocklistExceptionPatternSet.toArray(new String[0]);
   }
 }

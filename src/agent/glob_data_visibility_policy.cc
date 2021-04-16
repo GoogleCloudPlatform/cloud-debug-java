@@ -10,15 +10,15 @@
 namespace devtools {
 namespace cdbg {
 
-static constexpr char kReasonIsBlacklisted[] = "blocked by admin";
+static constexpr char kReasonIsBlocked[] = "blocked by admin";
 
 namespace {
 
 // A simple implementation of DataVisibilityPolicy::Class which always
 // reports that methods and fields have their data hidden.
-class BlacklistedClassImpl : public DataVisibilityPolicy::Class {
+class BlockedClassImpl : public DataVisibilityPolicy::Class {
  public:
-  explicit BlacklistedClassImpl(const std::string& reason) : reason_(reason) {}
+  explicit BlockedClassImpl(const std::string& reason) : reason_(reason) {}
 
   bool IsFieldVisible(const std::string& name,
                       int32_t field_modifiers) override {
@@ -75,18 +75,18 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   if (!config_.parse_error.empty()) {
     // There was a parsing error while trying to load the debugger config.
     return std::unique_ptr<Class>(
-        new BlacklistedClassImpl(config_.parse_error));
+        new BlockedClassImpl(config_.parse_error));
   }
 
   std::string signature = GetClassSignature(cls);
-  if ((signature.size() < 3) ||
-      (signature.front() != 'L') || (signature.back() != ';')) {
+  if ((signature.size() < 3) || (signature.front() != 'L') ||
+      (signature.back() != ';')) {
     return nullptr;  // Invalid class signature.
   }
 
   std::string path = TypeNameFromJObjectSignature(signature);
   // replace $ with . in paths.  Without this replacement, someone
-  // could try and blacklist all class members with a rule like
+  // could try and blocklist all class members with a rule like
   //
   // com.foo.MyClass.*
   //
@@ -95,21 +95,20 @@ GlobDataVisibilityPolicy::GetClassVisibility(jclass cls) {
   // com.foo.MyClass$Inner (visible)
   std::replace(path.begin(), path.end(), '$', '.');
 
-  // If this class matches an exception, it can not be blacklisted
-  if (config_.blacklist_exceptions.Matches(path)) {
+  // If this class matches an exception, it can not be blocked
+  if (config_.blocklist_exceptions.Matches(path)) {
     return nullptr;
   }
 
-  // Blacklist this class if it matches a pattern
-  if (config_.blacklists.Matches(path)) {
+  // Blocklist this class if it matches a pattern
+  if (config_.blocklists.Matches(path)) {
     return std::unique_ptr<Class>(
-        new BlacklistedClassImpl(kReasonIsBlacklisted));
+        new BlockedClassImpl(kReasonIsBlocked));
   }
 
   // Nothing was matched
   return nullptr;
 }
-
 
 // Returns true if path can be matched by the wildcard pattern.
 static bool WildcardMatches(const std::string& path,
@@ -141,7 +140,7 @@ static bool InverseMatches(const std::string& path,
   }
 
   return exact_inverse_patterns.find(path) == exact_inverse_patterns.end() &&
-      !GenericMatches(path, inverse_patterns);
+         !GenericMatches(path, inverse_patterns);
 }
 
 // PrefixMatches uses a fast O(log n) algorithm to match globs that
@@ -188,10 +187,9 @@ static void RemoveRedundantPrefixes(std::vector<std::string>* prefixes) {
   }
   int base = 0;
   for (int compare = 1; compare < prefixes->size(); ++compare) {
-    const bool keep_prefix = !std::equal(
-        prefixes->at(base).begin(),
-        prefixes->at(base).end(),
-        prefixes->at(compare).begin());
+    const bool keep_prefix =
+        !std::equal(prefixes->at(base).begin(), prefixes->at(base).end(),
+                    prefixes->at(compare).begin());
 
     if (keep_prefix) {
       // prefix becomes the new base
@@ -265,9 +263,9 @@ void GlobDataVisibilityPolicy::GlobSet::Add(const std::string& glob_pattern) {
     exact_patterns_.insert(glob_pattern);
 
     // All patterns that don't end with * must have '.*'
-    // added for consistent heirarchy propagation
+    // added for consistent hierarchy propagation
     //
-    // Otherwise, someone could, for example, blacklist a class:
+    // Otherwise, someone could, for example, blocklist a class:
     //
     // foo.bar.MyClass
     //

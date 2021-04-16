@@ -54,7 +54,7 @@ public final class SafeCallerException extends Error {
         new String[] {getCallerName(), field});
   }
 
-  public static void throwMethodBlacklisted(String method) {
+  public static void throwMethodBlocked(String method) {
     throw new SafeCallerException("Calling $0 is not allowed", new String[] {method});
   }
 

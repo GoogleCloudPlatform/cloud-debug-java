@@ -291,10 +291,10 @@
                     "methodName": "<init>"
                 },
                 {
-                    "methodName": "getBlacklistPatterns"
+                    "methodName": "getBlocklistPatterns"
                 },
                 {
-                    "methodName": "getBlacklistExceptionPatterns"
+                    "methodName": "getBlocklistExceptionPatterns"
                 }
             ],
             "nativeNamespace": "jniproxy"

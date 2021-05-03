@@ -71,21 +71,15 @@ public class YamlConfigParser {
 
   /**
    * Returns blocklists found in config.
-   *
-   * TODO: Finalize the conversion to blocklist by renaming this
-   * method.
    */
-  public String[] getBlacklistPatterns() {
+  public String[] getBlocklistPatterns() {
     return blocklistPatterns;
   }
 
   /**
    * Returns blocklist exceptions found in config.
-   *
-   * TODO: Finalize the conversion to blocklist by renaming this
-   * method.
    */
-  public String[] getBlacklistExceptionPatterns() {
+  public String[] getBlocklistExceptionPatterns() {
     return blocklistExceptionPatterns;
   }
 

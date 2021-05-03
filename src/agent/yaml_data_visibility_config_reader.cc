@@ -97,7 +97,7 @@ static bool ParseYamlConfig(const std::string& yaml_config,
   }
 
   ExceptionOr<JniLocalRef> blocklist_patterns =
-      jniproxy::YamlConfigParser()->getBlacklistPatterns(
+      jniproxy::YamlConfigParser()->getBlocklistPatterns(
           config_parser.GetData().get());
 
   if (blocklist_patterns.HasException()) {
@@ -110,7 +110,7 @@ static bool ParseYamlConfig(const std::string& yaml_config,
   }
 
   ExceptionOr<JniLocalRef> blocklist_exception_patterns =
-      jniproxy::YamlConfigParser()->getBlacklistExceptionPatterns(
+      jniproxy::YamlConfigParser()->getBlocklistExceptionPatterns(
           config_parser.GetData().get());
 
   if (blocklist_exception_patterns.HasException()) {

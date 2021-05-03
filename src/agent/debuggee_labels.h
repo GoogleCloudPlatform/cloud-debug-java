@@ -31,6 +31,11 @@ class DebuggeeLabels {
   static constexpr char kBlocklistSourceNone[] = "none";
 
   void Set(const std::string& name, const std::string& value);
+
+  JniLocalRef Get() const;
+
+ private:
+  std::map<std::string, std::string> labels_;
 };
 
 }  // namespace cdbg

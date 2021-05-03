@@ -332,7 +332,7 @@ void JvmtiAgent::EnableJvmtiDebuggerNotifications(jvmtiEventMode mode) {
 }
 
 
-bool JvmtiAgent::OnWorkerReady() {
+bool JvmtiAgent::OnWorkerReady(DebuggeeLabels* debuggee_labels) {
   // Connect to Java internals implementation.
   {
     if (!internals_->LoadInternals()) {
@@ -381,13 +381,9 @@ bool JvmtiAgent::OnWorkerReady() {
     return false;
   }
 
-  // TODO The labels will be wired up and passed out in a follow on
-  // CL.
-  DebuggeeLabels debuggee_labels;
-
   // Load data visibility configuration.
   data_visibility_policy_ =
-      data_visibility_policy_fn_(internals_, &debuggee_labels);
+      data_visibility_policy_fn_(internals_, debuggee_labels);
 
   return true;
 }

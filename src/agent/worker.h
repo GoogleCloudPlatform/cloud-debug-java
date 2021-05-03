@@ -24,6 +24,7 @@
 #include "auto_reset_event.h"
 #include "canary_control.h"
 #include "common.h"
+#include "debuggee_labels.h"
 #include "format_queue.h"
 #include "model.h"
 #include "stopwatch.h"
@@ -50,7 +51,7 @@ class Worker {
     // callbacks, actions done from this function don't impact the start up
     // time of the application. If this function returns false, "Worker" will
     // stop and the debugger will not be functioning.
-    virtual bool OnWorkerReady() = 0;
+    virtual bool OnWorkerReady(DebuggeeLabels* debuggee_labels) = 0;
 
     // Called periodically by the worker thread to give opportunity to the
     // agent to perform routine tasks. Examples: flushing logs, garbage
@@ -147,6 +148,16 @@ class Worker {
 
   // Result of last call to "RegisterDebuggee".
   bool is_registered_ { false };
+
+  // Debuggee labels gathered from the native code to be included in the set of
+  // labels for the Debuggee in the RegisterDebuggee call.
+  //
+  // NOTE: Once the label are gathered before the first call to
+  // RegisterDebuggee, we must be sure not to update it again, the same set of
+  // labels should be used in every subsequent call since the labels are used in
+  // the debuggee ID generation, so we don't want to cause duplicate IDs for the
+  // same agent.
+  DebuggeeLabels debuggee_labels_;
 
   DISALLOW_COPY_AND_ASSIGN(Worker);
 };

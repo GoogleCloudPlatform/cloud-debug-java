@@ -19,7 +19,6 @@
 #include "jni_proxy_classloader.h"
 #include "jni_proxy_hubclient.h"
 #include "jni_proxy_hubclient_listactivebreakpointsresult.h"
-#include "jni_proxy_ju_hashmap.h"
 
 namespace devtools {
 namespace cdbg {
@@ -67,19 +66,19 @@ void JniBridge::EnqueueBreakpointUpdate(
   }
 }
 
-
-bool JniBridge::RegisterDebuggee(bool* is_enabled) {
+bool JniBridge::RegisterDebuggee(bool* is_enabled,
+                                 const DebuggeeLabels& debuggee_labels) {
   *is_enabled = false;
 
-  // TODO Follow on CL will be getting actual labels wired in.
-  ExceptionOr<JniLocalRef> labels = jniproxy::HashMap()->NewObject();
-  if (labels.HasException()) {
-    // This means an error occurred trying to allocate the HashMap in the JVM.
-    return false;  // No registration occurred
+  JniLocalRef java_labels = debuggee_labels.Get();
+
+  if (!java_labels) {
+    LOG(ERROR) << "Failed to create the Debuggee labels Java map.";
+    return false;
   }
 
   auto rc = jniproxy::HubClient()->registerDebuggee(jni_hub_.get(),
-                                                    labels.GetData().get());
+                                                    java_labels.get());
 
   if (rc.HasException()) {
     // The Java code logs important errors.
@@ -90,7 +89,6 @@ bool JniBridge::RegisterDebuggee(bool* is_enabled) {
 
   return true;
 }
-
 
 Bridge::HangingGetResult JniBridge::ListActiveBreakpoints(
     std::vector<std::unique_ptr<BreakpointModel>>* breakpoints) {

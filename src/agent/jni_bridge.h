@@ -23,6 +23,7 @@
 #include "nullable.h"
 #include "bridge.h"
 #include "common.h"
+#include "debuggee_labels.h"
 #include "jni_utils.h"
 #include "mutex.h"
 #include "transmit_queue.h"
@@ -54,7 +55,8 @@ class JniBridge : public Bridge {
 
   void Shutdown() override;
 
-  bool RegisterDebuggee(bool* is_enabled) override;
+  bool RegisterDebuggee(bool* is_enabled,
+                        const DebuggeeLabels& debuggee_labels) override;
 
   HangingGetResult ListActiveBreakpoints(
       std::vector<std::unique_ptr<BreakpointModel>>* breakpoints) override;

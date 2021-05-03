@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "common.h"
+#include "debuggee_labels.h"
 #include "model.h"
 
 namespace devtools {
@@ -52,7 +53,8 @@ class Bridge {
   // Registers the debuggee with the controller. Returns true if the request
   // was successful. When registration succeeds "is_enabled" will usually be
   // set to true (unless the Hub remotely disables the debuglet).
-  virtual bool RegisterDebuggee(bool* is_enabled) = 0;
+  virtual bool RegisterDebuggee(bool* is_enabled,
+                                const DebuggeeLabels& debugee_labels) = 0;
 
   // Queries for the list of currently active breakpoints. Returns false if the
   // network call failed.

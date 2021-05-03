@@ -121,7 +121,7 @@ void Worker::MainThreadProc() {
   // application startup time.
 
   // Deferred initialization of the agent.
-  if (!provider_->OnWorkerReady()) {
+  if (!provider_->OnWorkerReady(&debuggee_labels_)) {
     LOG(ERROR) << "Agent initialization failed: "
                   "debugger thread can't continue.";
     return;  // Signal to stop the main debugger thread.
@@ -215,7 +215,7 @@ void Worker::TransmissionThreadProc() {
 
 void Worker::RegisterDebuggee() {
   bool new_is_enabled = false;
-  is_registered_ = bridge_->RegisterDebuggee(&new_is_enabled);
+  is_registered_ = bridge_->RegisterDebuggee(&new_is_enabled, debuggee_labels_);
 
   if (is_registered_) {
     provider_->EnableDebugger(new_is_enabled);

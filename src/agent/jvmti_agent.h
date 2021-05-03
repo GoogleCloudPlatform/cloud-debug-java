@@ -121,7 +121,7 @@ class JvmtiAgent : public Worker::Provider {
   // Implementation of Worker::Provider interface
   //
 
-  bool OnWorkerReady() override;
+  bool OnWorkerReady(DebuggeeLabels* debuggee_labels) override;
 
   void OnIdle() override;
 

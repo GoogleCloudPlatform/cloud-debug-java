@@ -1,5 +1,6 @@
 #include "yaml_data_visibility_config_reader.h"
 
+#include "debuggee_labels.h"
 #include "jni_proxy_yamlconfigparser.h"
 #include "jni_utils.h"
 
@@ -18,10 +19,16 @@ static constexpr char kResourcePathDeprecated[] = "debugger-blacklist.yaml";
 //   - No config file is found. Sets config to ""
 // Returns false (error) if there were multiple configurations found.
 static bool ReadYamlConfig(ClassPathLookup* class_path_lookup,
-                           std::string* config_file_name, std::string* config,
+                           std::string* config_file_name,
+                           std::string* blocklist_source, std::string* config,
                            std::string* error) {
   std::set<std::string> files =
       class_path_lookup->ReadApplicationResource(kResourcePath);
+
+  if (!files.empty()) {
+    *config_file_name = kResourcePath;
+    *blocklist_source = DebuggeeLabels::kBlocklistSourceFile;
+  }
 
   if (files.size() > 1) {
     LOG(ERROR) << "Multiple " << kResourcePath << " files found."
@@ -33,12 +40,17 @@ static bool ReadYamlConfig(ClassPathLookup* class_path_lookup,
     return false;
   }
 
-  if (files.size() == 1) {
-    *config_file_name = kResourcePath;
-  } else {
-    // TODO: Finalize the conversion to blocklist, this else block
-    //                    can be removed.
+  // TODO: Finalize the conversion to blocklist, this block can be
+  // removed.
+  if (files.empty()) {
     files = class_path_lookup->ReadApplicationResource(kResourcePathDeprecated);
+
+    if (!files.empty()) {
+      *config_file_name = kResourcePathDeprecated;
+      *blocklist_source = DebuggeeLabels::kBlocklistSourceDeprecatedFile;
+      LOG(WARNING) << "The use of debugger-blacklist.yaml has been deprecated, "
+                      "please use debugger-blocklist instead";
+    }
 
     if (files.size() > 1) {
       LOG(ERROR) << "Multiple " << kResourcePathDeprecated << " files found."
@@ -48,18 +60,13 @@ static bool ReadYamlConfig(ClassPathLookup* class_path_lookup,
           "Please contact your system administrator.";
       return false;
     }
-
-    if (files.size() == 1) {
-      *config_file_name = kResourcePathDeprecated;
-      LOG(WARNING) << "The use of debugger-blacklist.yaml has been deprecated, "
-                      "please use debugger-blocklist instead";
-    }
   }
 
   if (files.empty()) {
     // No configuration file was provided
     LOG(INFO) << kResourcePath << " was not found.  Using default settings.";
     *config = "";
+    *blocklist_source = DebuggeeLabels::kBlocklistSourceNone;
   } else {
     *config = *files.begin();
   }
@@ -136,14 +143,14 @@ static bool ParseYamlConfig(const std::string& yaml_config,
 }
 
 GlobDataVisibilityPolicy::Config ReadYamlDataVisibilityConfiguration(
-    ClassPathLookup* class_path_lookup) {
+    ClassPathLookup* class_path_lookup, std::string* blocklist_source) {
   GlobDataVisibilityPolicy::Config config;
 
   std::string yaml_config;
   std::string config_file_name;
   std::string error;
-  if (!ReadYamlConfig(class_path_lookup, &config_file_name, &yaml_config,
-                      &error)) {
+  if (!ReadYamlConfig(class_path_lookup, &config_file_name,
+                      blocklist_source, &yaml_config, &error)) {
     config.parse_error = error;
     return config;
   }

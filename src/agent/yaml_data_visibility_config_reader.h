@@ -10,7 +10,7 @@ namespace cdbg {
 
 // Loads .yaml visibility configuration.
 GlobDataVisibilityPolicy::Config ReadYamlDataVisibilityConfiguration(
-    ClassPathLookup* class_path_lookup);
+    ClassPathLookup* class_path_lookup, std::string* yaml_source);
 
 }  // namespace cdbg
 }  // namespace devtools

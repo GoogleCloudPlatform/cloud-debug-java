@@ -22,6 +22,7 @@
 
 #include "callbacks_monitor.h"
 #include "common.h"
+#include "debuggee_labels.h"
 #include "jvm_eval_call_stack.h"
 #include "jvm_internals.h"
 #include "jvmti_buffer.h"
@@ -383,10 +384,15 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
         // There is no user id provider in GCE environment.
         return nullptr;
       },
-      [glob_policy] (devtools::cdbg::ClassPathLookup* class_path_lookup) {
+      [glob_policy](devtools::cdbg::ClassPathLookup* class_path_lookup,
+                    devtools::cdbg::DebuggeeLabels* debuggee_labels) {
+        std::string yaml_config_source;
         glob_policy->SetConfig(
             devtools::cdbg::ReadYamlDataVisibilityConfiguration(
-                class_path_lookup));
+                class_path_lookup, &yaml_config_source));
+        debuggee_labels->Set(
+            devtools::cdbg::DebuggeeLabels::kBlocklistSourceLabel,
+            yaml_config_source);
         return std::unique_ptr<devtools::cdbg::DataVisibilityPolicy>(
             glob_policy);
       },

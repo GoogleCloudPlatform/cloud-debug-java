@@ -99,7 +99,8 @@ JvmtiAgent::JvmtiAgent(
     std::unique_ptr<Bridge> bridge,
     std::function<JniLocalRef()> breakpoint_labels_provider_factory,
     std::function<JniLocalRef()> user_id_provider_factory,
-    std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*)>
+    std::function<std::unique_ptr<DataVisibilityPolicy>(ClassPathLookup*,
+                                                        DebuggeeLabels*)>
         data_visibility_policy_fn,
     bool enable_capabilities,
     bool enable_jvmti_events)
@@ -380,8 +381,13 @@ bool JvmtiAgent::OnWorkerReady() {
     return false;
   }
 
+  // TODO The labels will be wired up and passed out in a follow on
+  // CL.
+  DebuggeeLabels debuggee_labels;
+
   // Load data visibility configuration.
-  data_visibility_policy_ = data_visibility_policy_fn_(internals_);
+  data_visibility_policy_ =
+      data_visibility_policy_fn_(internals_, &debuggee_labels);
 
   return true;
 }

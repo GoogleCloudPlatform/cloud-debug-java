@@ -13,6 +13,8 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
+import java.util.Map;
+
 /**
  * Communication layer with the Cloud Debugger backend.
  *
@@ -75,10 +77,15 @@ public interface HubClient {
   /**
    * Registers the debuggee with the controller.
    *
+   * @param extraDebuggeeLabels Extra labels to include in the Debuggee in the RegisterDebuggee call
+   * to the Hub. These are to be in addition to any labels the Hub client itself may include. NOTE,
+   * it's important this list of labels stay the same from call to call, since the labels are used
+   * to generate the debuggee ID and it would lead to duplicate IDs for the same agent instance.
+   *
    * @return true unless the hub remotely disabled the debuglet
    * @throws Exception if the registration request failed
    */
-  boolean registerDebuggee() throws Exception;
+  boolean registerDebuggee(Map<String, String> extraDebuggeeLabels) throws Exception;
 
   /**
    * Queries for the list of currently active breakpoints.

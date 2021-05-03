@@ -24,6 +24,7 @@
 #include "jni_proxy_classloader.h"
 #include "jni_proxy_exception.h"
 #include "jni_proxy_iterable.h"
+#include "jni_proxy_ju_hashmap.h"
 #include "jni_proxy_ju_map.h"
 #include "jni_proxy_ju_map_entry.h"
 #include "jni_proxy_jul_logger.h"
@@ -76,6 +77,7 @@ bool BindSystemClasses() {
       !jniproxy::BindClassCastException() ||
       !jniproxy::BindClassLoader() ||
       !jniproxy::BindException() ||
+      !jniproxy::BindHashMap() ||
       !jniproxy::BindIterable() ||
       !jniproxy::BindLogger() ||
       !jniproxy::BindMap() ||
@@ -113,6 +115,7 @@ void CleanupSystemClasses() {
   jniproxy::CleanupClassCastException();
   jniproxy::CleanupClassLoader();
   jniproxy::CleanupException();
+  jniproxy::CleanupHashMap();
   jniproxy::CleanupIterable();
   jniproxy::CleanupLogger();
   jniproxy::CleanupMap();

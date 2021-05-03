@@ -196,6 +196,18 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "java.util.HashMap",
+      "methods": [
+        {
+          "methodName": "<init>"
+        },
+        {
+          "methodName": "put"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "java.util.Map",
       "methods": [
       ],

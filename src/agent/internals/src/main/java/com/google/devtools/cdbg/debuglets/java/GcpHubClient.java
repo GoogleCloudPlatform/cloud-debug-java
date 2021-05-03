@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 class GcpHubClient implements HubClient {
@@ -333,14 +334,14 @@ class GcpHubClient implements HubClient {
   }
 
   @Override
-  public boolean registerDebuggee() throws Exception {
+  public boolean registerDebuggee(Map<String, String> extraDebuggeeLabels) throws Exception {
     // No point going on if we don't have environment information.
     if (metadata.getProjectId().isEmpty() || metadata.getProjectNumber().isEmpty()) {
       throw new Exception("Environment not available");
     }
 
     // Send the request.
-    RegisterDebuggeeMessage request = getDebuggeeInfo();
+    RegisterDebuggeeMessage request = getDebuggeeInfo(extraDebuggeeLabels);
     JsonElement responseJson;
     String errorResponse = "";
     try (ActiveConnection connection = openConnection("debuggees/register")) {
@@ -562,9 +563,13 @@ class GcpHubClient implements HubClient {
   /**
    * Fills in the debuggee registration request message.
    *
+   * @param extraDebuggeeLabels Extra labels to include in the Debuggee. These are to be in addition
+   *     to the labels already collected locally that are to be included.
+   *
    * @return debuggee registration request message
    */
-  private RegisterDebuggeeMessage getDebuggeeInfo() throws NoSuchAlgorithmException, IOException {
+  private RegisterDebuggeeMessage getDebuggeeInfo(Map<String, String> extraDebuggeeLabels)
+      throws NoSuchAlgorithmException, IOException {
     String property;
 
     property = System.getProperty("com.google.cdbg.debuggee.file");
@@ -611,13 +616,17 @@ class GcpHubClient implements HubClient {
       sourceContextFiles = resources.toArray(new String[0]);
     }
 
+    Map<String, String> allLabels = new TreeMap<>();
+    allLabels.putAll(extraDebuggeeLabels);
+    allLabels.putAll(labels);
+
     if (uniquifier == null) {
       boolean hasSourceContext = ((sourceContextFiles != null) && (sourceContextFiles.length > 0));
 
       // Compute uniquifier of debuggee properties. Start with an initial 20B sha-1 hash value.
       uniquifier = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
 
-      if (!labels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {
+      if (!allLabels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {
         // There is no source context and minor version. It means that different versions of the
         // application may be running with the same debuggee properties. Hash of application
         // binaries to generate different debuggees in this case.
@@ -630,7 +639,7 @@ class GcpHubClient implements HubClient {
     request.setProject(metadata.getProjectNumber());
     request.setUniquifier(uniquifier);
     request.setDescription(getDebuggeeDescription());
-    request.setLabels(labels);
+    request.setLabels(allLabels);
     request.setAgentVersion(
         String.format("google.com/java-gcp/@%d", GcpDebugletVersion.MAJOR_VERSION));
     request.setSourceContexts(sourceContextFiles);

@@ -320,7 +320,7 @@ class ClassFile {
 
   struct Instruction {
     Instruction() {
-      memset(this, 0, sizeof(*this));
+      memset(reinterpret_cast<void*>(this), 0, sizeof(*this));
     }
 
     // Instruction opcode.

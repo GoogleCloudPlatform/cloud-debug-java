@@ -100,11 +100,10 @@ class GcpHubClient implements HubClient {
         return;
       }
 
-      JsonParser parser = new JsonParser();
       List<JsonElement> sourceContextsList = new ArrayList<>();
       for (int i = 0; i < files.length; ++i) {
         try {
-          sourceContextsList.add(parser.parse(files[i]));
+          sourceContextsList.add(JsonParser.parseString(files[i]));
         } catch (JsonSyntaxException e) {
           warnfmt(e, "Source context file could not be parsed as JSON: %s", files[i]);
           continue;
@@ -351,8 +350,7 @@ class GcpHubClient implements HubClient {
       }
 
       try (Reader reader = new InputStreamReader(connection.get().getInputStream(), UTF_8)) {
-        JsonParser parser = new JsonParser();
-        responseJson = parser.parse(reader);
+        responseJson = JsonParser.parseReader(reader);
       } catch (IOException e) {
         errorResponse = readErrorStream(connection.get());
         throw e;

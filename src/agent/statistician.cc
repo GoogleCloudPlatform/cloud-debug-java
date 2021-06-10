@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-ABSL_FLAG(int32, cdbg_log_stats_time_micros,
+ABSL_FLAG(int32_t, cdbg_log_stats_time_micros,
           15 * 60 * 1000 * 1000,  // 15 minutes
           "How often to log debugger performance stats. "
           "Set to zero to never logs stats.");

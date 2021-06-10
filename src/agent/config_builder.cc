@@ -36,42 +36,42 @@ ABSL_FLAG(string, extra_allowed_methods, "",
 ABSL_FLAG(string, extra_whitelisted_classes, "",
           "Internal names of additional classes to allow for testing purposes");
 
-ABSL_FLAG(int32, expression_max_classes_load_quota, 5,
+ABSL_FLAG(int32_t, expression_max_classes_load_quota, 5,
           "Maximum number of classes that the NanoJava interpreter is allowed "
           "to load while evaluating a single breakpoint expression");
 
 ABSL_FLAG(
-    int32, expression_max_interpreter_instructions_quota, 1000,
+    int32_t, expression_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while evaluating a single breakpoint expression");
 
-ABSL_FLAG(int32, pretty_printers_max_classes_load_quota, 5,
+ABSL_FLAG(int32_t, pretty_printers_max_classes_load_quota, 5,
           "Maximum number of classes that the NanoJava interpreter is allowed "
           "to load while formatting some well known data structures");
 
 ABSL_FLAG(
-    int32, pretty_printers_max_interpreter_instructions_quota, 1000,
+    int32_t, pretty_printers_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while formatting some well known data structures");
 
-ABSL_FLAG(int32, dynamic_log_max_classes_load_quota, 5,
+ABSL_FLAG(int32_t, dynamic_log_max_classes_load_quota, 5,
           "Maximum number of classes that the NanoJava interpreter is allowed "
           "to load while evaluating all expressions in a single dynamic log "
           "statement");
 
 ABSL_FLAG(
-    int32, dynamic_log_max_interpreter_instructions_quota, 1000,
+    int32_t, dynamic_log_max_interpreter_instructions_quota, 1000,
     "Maximum number of instructions that the NanoJava interpreter is allowed "
     "to execute while evaluating all expressions in a single dynamic log "
     "statement");
 
 ABSL_FLAG(
-    int32, safe_caller_max_array_elements, 65536,
+    int32_t, safe_caller_max_array_elements, 65536,
     "Maximum allowed size of the array to copy or allocate in safe caller"
     "(copying or allocating larger arrays is considered to be too expensive "
     "and will be blocked)");
 
-ABSL_FLAG(int32, safe_caller_max_interpreter_stack_depth, 20,
+ABSL_FLAG(int32_t, safe_caller_max_interpreter_stack_depth, 20,
           "Maximum stack depth that safe caller will allow");
 
 namespace devtools {

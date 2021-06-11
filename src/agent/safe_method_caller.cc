@@ -23,8 +23,8 @@
 #include "type_util.h"
 
 ABSL_DECLARE_FLAG(bool, enable_safe_caller);
-ABSL_DECLARE_FLAG(int32_t, safe_caller_max_array_elements);
-ABSL_DECLARE_FLAG(int32_t, safe_caller_max_interpreter_stack_depth);
+ABSL_DECLARE_FLAG(int32, safe_caller_max_array_elements);
+ABSL_DECLARE_FLAG(int32, safe_caller_max_interpreter_stack_depth);
 
 namespace devtools {
 namespace cdbg {

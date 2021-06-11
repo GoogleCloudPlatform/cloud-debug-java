@@ -26,7 +26,7 @@
 #include "statistician.h"
 #include "stopwatch.h"
 
-ABSL_FLAG(int32_t, cdbg_class_files_cache_size,
+ABSL_FLAG(int32, cdbg_class_files_cache_size,
           1024 * 1024,  // 1 MB.
           "Cache size for class files used in safe method caller");
 

@@ -23,7 +23,7 @@
 #include "jni_utils.h"
 #include "jvmti_buffer.h"
 
-ABSL_FLAG(int32_t, cdbg_max_stack_depth, 20,
+ABSL_FLAG(int32, cdbg_max_stack_depth, 20,
           "Maximum number of stack frames to unwind");
 
 namespace devtools {

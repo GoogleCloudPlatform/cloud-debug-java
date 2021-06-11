@@ -23,7 +23,7 @@
 #include "safe_method_caller.h"
 #include "type_util.h"
 
-ABSL_DECLARE_FLAG(int32_t, safe_caller_max_array_elements);
+ABSL_DECLARE_FLAG(int32, safe_caller_max_array_elements);
 
 namespace devtools {
 namespace cdbg {

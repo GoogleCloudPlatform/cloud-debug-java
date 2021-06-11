@@ -26,7 +26,7 @@
 // constant of 35 seconds is deliberately a bit shorter than that so that the
 // canary period fits in one such cycle.
 ABSL_FLAG(
-    int32_t, min_canary_duration_ms, 35000,
+    int32, min_canary_duration_ms, 35000,
     "Time interval after which an enabled canary breakpoint is considered as "
     "safe for a global rollout (from this debuglet's perspective)");
 

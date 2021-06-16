@@ -13,11 +13,16 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
-import java.lang.reflect.Constructor;
+import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
+
 import java.util.HashMap;
 import java.util.Map;
 
 final class GcpEnvironment {
+
+  /** Private constructor; class should not be instantiated. */
+  private GcpEnvironment() {}
+
   /**
    * The enum contains one-to-one mapping to the values of Debuggee.canaryMode in Cloud
    * Debugger's V2 API.
@@ -75,34 +80,22 @@ final class GcpEnvironment {
   static synchronized MetadataQuery getMetadataQuery() {
     // Lazy initialization.
     if (metadataQuery == null) {
-      String jsonFile = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
-      if (jsonFile == null) {
-        jsonFile = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
-      }
-      if (jsonFile != null && !jsonFile.isEmpty()) {
-        try {
-          // Use reflection to create a new instance of "ServiceAccountAuth" class. This way this
-          // class has no explicit dependency on "com.google.api.client" package that can be
-          // removed if we don't need it.
-          Class<? extends MetadataQuery> serviceAccountAuthClass =
-              Class.forName(
-                      GcpEnvironment.class.getPackage().getName() + ".ServiceAccountAuth",
-                      true,
-                      GcpEnvironment.class.getClassLoader())
-                  .asSubclass(MetadataQuery.class);
-          Constructor<? extends MetadataQuery> constructor =
-              serviceAccountAuthClass.getConstructor(String.class);
-          // Note that we are passing projectId instead of projectNumber here, as the Cloud Debugger
-          // service is able to translate projectId into projectNumber.
-          metadataQuery = constructor.newInstance(new Object[] {jsonFile});
-        } catch (ReflectiveOperationException e) {
-          // The constructor of ServiceAccountAuth doesn't do any IO. It can fail if something
-          // in the environment is broken (for example no trusted root certificates). If such
-          // a problem happens, there is no point retrying.
-          throw new RuntimeException("Failed to initialize service account authentication", e);
+      try {
+        String jsonFileGAC = environmentStore.get("GOOGLE_APPLICATION_CREDENTIALS");
+        String jsonFileFlag = getFlag("auth.serviceaccount.jsonfile", "service_account_json_file");
+        if (jsonFileGAC != null && !jsonFileGAC.isEmpty()) {
+          info("Using credentials from GOOGLE_APPLICATION_CREDENTIALS");
+          metadataQuery = new ServiceAccountAuth(jsonFileGAC);
+        } else if (jsonFileFlag != null && !jsonFileFlag.isEmpty()) {
+          info("Using credentials from user's json file");
+          metadataQuery = new ServiceAccountAuth(jsonFileFlag);
+        } else {
+          info("Using credentials from GCE metadata server");
+          metadataQuery = new GceMetadataQuery();
         }
-      } else {
-        metadataQuery = new GceMetadataQuery();
+      } catch (Exception e) {
+        throw new SecurityException(
+            "Failed to initialize service account authentication", e);
       }
     }
 

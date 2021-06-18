@@ -11,12 +11,12 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>7.0</version>
+      <version>9.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>30.1.1-jre</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.18</version>
+      <version>1.29</version>
     </dependency>
     <dependency>
       <groupId>com.google.devtools.cdbg.debuglets.java</groupId>

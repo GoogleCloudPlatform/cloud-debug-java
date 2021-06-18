@@ -13,73 +13,60 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.json.JsonParser;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Key;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Objects;
 
 /** Exchanges service account private key for OAuth access token. */
 final class ServiceAccountAuth implements MetadataQuery {
 
-  /** The JSON Service Account file gets parsed into an object of this type. */
-  public static class ServiceAccountAuthJsonFile {
-    /** The only field we are interested in is project_id, the rest will be ignored. */
-    @Key("project_id")
-    private String projectId = null;
-
-    String getProjectId() {
-      return projectId;
-    }
-  }
-
   /** OAuth scope requested. */
   private static final String CLOUD_PLATFORM_SCOPE =
       "https://www.googleapis.com/auth/cloud-platform";
 
   /** Time to refresh the token before it expires. */
-  private static final int TOKEN_EXPIRATION_BUFFER_SEC = 60;
-
-  /** GCP project ID that created the service account. */
-  private final String projectId;
-
-  /** GCP project number corresponding to projectId. */
-  private final String projectNumber;
+  private static final Duration TOKEN_EXPIRATION_BUFFER = Duration.ofSeconds(60);
 
   /** Runs OAuth flow to obtain the access token. */
-  private final GoogleCredential credential;
+  private final ServiceAccountCredentials credential;
 
   /**
    * Class constructor
    *
    * @param serviceAccountJsonFile json file with the private key of the service account
+   * @throws IOException if the file is missing, incomplete, or invalid.
    */
-  public ServiceAccountAuth(String serviceAccountJsonFile)
-      throws GeneralSecurityException, IOException {
+  public ServiceAccountAuth(String serviceAccountJsonFile) throws IOException {
     Objects.requireNonNull(serviceAccountJsonFile);
 
-    this.projectId = parseServiceAccountAuthJsonFile(serviceAccountJsonFile).getProjectId();
-    this.projectNumber = this.projectId;
-
     InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
-    this.credential =
-        GoogleCredential.fromStream(serviceAccountJsonStream)
+    GoogleCredentials credentials =
+        GoogleCredentials.fromStream(serviceAccountJsonStream)
             .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
+
+    if (!(credentials instanceof ServiceAccountCredentials)) {
+      throw new SecurityException("Cannot create service account credentials from file");
+    }
+    this.credential = (ServiceAccountCredentials) credentials;
+
+    // A refresh is required to populate the access token and expiration fields.
+    credential.refreshIfExpired();
   }
 
   @Override
   public String getProjectId() {
-    return projectId;
+    return credential.getProjectId();
   }
 
   @Override
   public String getProjectNumber() {
-    return projectNumber;
+    return credential.getProjectId();
   }
 
   /**
@@ -89,17 +76,18 @@ final class ServiceAccountAuth implements MetadataQuery {
    */
   @Override
   public synchronized String getAccessToken() {
-    Long expiresIn = credential.getExpiresInSeconds();
-    if ((expiresIn == null) || (expiresIn < TOKEN_EXPIRATION_BUFFER_SEC)) {
+    // Refresh the token before it expires.
+    Instant expirationTime = credential.getAccessToken().getExpirationTime().toInstant();
+    if (Instant.now().plus(TOKEN_EXPIRATION_BUFFER).isAfter(expirationTime)) {
       try {
-        credential.refreshToken();
+        credential.refresh();
       } catch (IOException e) {
         // Nothing we can do here.
         // Don't log since logger is not available in standalone service account auth utility.
       }
     }
 
-    String accessToken = credential.getAccessToken();
+    String accessToken = credential.getAccessToken().getTokenValue();
     return (accessToken == null) ? "" : accessToken;
   }
 
@@ -108,23 +96,4 @@ final class ServiceAccountAuth implements MetadataQuery {
     // TODO: implement if not handled properly by JVM shutdown.
   }
 
-  /**
-   * Parses the given JSON auth file.
-   *
-   * <p>TODO: Remove this method when a new version of the google-api-java-client
-   * library is released (newer than v22), and replace it with the new
-   * GoogleCredential.getServiceAccountProjectId() method.
-   */
-  private static ServiceAccountAuthJsonFile parseServiceAccountAuthJsonFile(
-      String serviceAccountJsonFile) throws IOException {
-    JsonParser parser =
-        JacksonFactory.getDefaultInstance()
-            .createJsonParser(new FileInputStream(serviceAccountJsonFile));
-    ServiceAccountAuthJsonFile parsedFile = parser.parse(ServiceAccountAuthJsonFile.class);
-    if (parsedFile.getProjectId() == null) {
-      throw new IllegalArgumentException("Service account JSON file is missing project_id field");
-    }
-
-    return parsedFile;
-  }
 }

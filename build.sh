@@ -36,7 +36,8 @@
 
 GFLAGS_URL=https://github.com/gflags/gflags/archive/v2.1.2.tar.gz
 GLOG_URL=https://github.com/google/glog/archive/v0.3.4.tar.gz
-JSONCPP_URL=https://github.com/open-source-parsers/jsoncpp/tarball/3a0c4fcc82d25d189b8107e07462effbab9f8e1b
+JSONCPP_URL=https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.7.4.tar.gz
+
 
 ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 

@@ -38,7 +38,6 @@ ASM_COMMONS_JAR_PATH ?= /usr/lib/asm-9.1/lib/asm-commons-9.1.jar
 ASM_UTIL_JAR_PATH ?= /usr/lib/asm-9.1/lib/asm-util-9.1.jar
 GOOGLE_API_JAVA_CLIENT_PATH ?= /usr/lib/google-api-java-client
 GOOGLE_AUTH_OAUTH2_JAR_PATH ?= /usr/lib/google-auth-library-java/oauth2-http.jar
-GOOGLE_AUTH_GSON_JAR_PATH ?= /usr/lib/google-auth-library-java/gson.jar
 GOOGLE_AUTH_CREDENTIALS_JAR_PATH ?= /usr/lib/google-auth-library-java/credentials.jar
 JAVA_BUILD ?= maven
 JAVAC=javac -source 1.7 -target 1.7
@@ -185,6 +184,7 @@ GOOGLE_API_CLIENT_JARS = \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/commons-logging-1.1.1.jar \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/google-api-client-1.19.0.jar \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/google-http-client-1.19.0.jar \
+	$(GOOGLE_API_JAVA_CLIENT_PATH)/google-http-client-gson-1.19.0.jar \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/google-http-client-jackson2-1.19.0.jar \
 	$(GOOGLE_API_JAVA_CLIENT_PATH)/jackson-core-2.1.3.jar \
 
@@ -252,7 +252,6 @@ else
 	cd internals/target ; jar xf $(GSON_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(SNAKE_YAML_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GOOGLE_AUTH_OAUTH2_JAR_PATH) ; rm -rf META-INF
-	cd internals/target ; jar xf $(GOOGLE_AUTH_GSON_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GOOGLE_AUTH_CREDENTIALS_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; echo "$(GOOGLE_API_CLIENT_JARS)" | xargs -n 1 jar xf
 	jar cvf $(INTERNALS_JAR) -C internals/target/ .

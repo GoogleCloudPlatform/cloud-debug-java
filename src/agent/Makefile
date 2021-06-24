@@ -250,6 +250,7 @@ else
 	cd internals/target ; jar xf $(ASM_COMMONS_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(ASM_UTIL_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GSON_JAR_PATH) ; rm -rf META-INF
+	cd internals/target ; jar xf $(GUAVA_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(SNAKE_YAML_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GOOGLE_AUTH_OAUTH2_JAR_PATH) ; rm -rf META-INF
 	cd internals/target ; jar xf $(GOOGLE_AUTH_CREDENTIALS_JAR_PATH) ; rm -rf META-INF

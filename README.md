@@ -269,12 +269,12 @@ the following property:
 #### Scala
 
 Debugging Scala applications is supported; however, expressions and conditions
-conditions must be written using the Java programming language syntax.
+must be written using the Java programming language syntax.
 
 #### Kotlin
 
 Debugging Kotlin applications is supported; however, expressions and conditions
-conditions must be written using the Java programming language syntax.
+must be written using the Java programming language syntax.
 
 Many Kotlin-specific features can be used in conditions and expressions with
 simple workarounds:

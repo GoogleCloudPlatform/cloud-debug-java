@@ -1419,6 +1419,8 @@ int NanoJavaInterpreter::ExecuteSingleInstruction() {
       SetOpcodeNotSupportedError("MULTIANEWARRAY");
       break;
 
+    // TODO: Look at supporting this, as it is used by String
+    // concatention, http://openjdk.java.net/jeps/280
     case JVM_OPC_invokedynamic:
       SetOpcodeNotSupportedError("INVOKEDYNAMIC");
       break;

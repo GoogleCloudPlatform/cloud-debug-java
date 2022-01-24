@@ -37,7 +37,7 @@ class JvmObjectArrayReader : public ArrayReader {
   ErrorOr<JVariant> ReadValue(
       const JVariant& source,
       const JVariant& index) const override {
-    jobject obj = 0;
+    jobject obj = nullptr;
     if (!source.get<jobject>(&obj)) {
       return INTERNAL_ERROR_MESSAGE;
     }

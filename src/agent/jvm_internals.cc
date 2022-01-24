@@ -50,7 +50,7 @@ static constexpr char kFormatMessageClassSignature[] =
 // Gets the absolute path to the Java Cloud Debugger agent directory. The
 // returned path does not have a trailing slash. Returns empty string on error.
 static std::string GetAgentDirectory() {
-  Dl_info dl_info = { 0 };
+  Dl_info dl_info = {nullptr};
   if (!dladdr(reinterpret_cast<void*>(GetAgentDirectory), &dl_info)) {
     LOG(ERROR) << "Failed to determined agent directory";
     return std::string();

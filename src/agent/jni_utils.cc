@@ -32,7 +32,8 @@ std::string JniToNativeString(jobject jstr) {
     return std::string();
   }
 
-  const char* cstr = jni()->GetStringUTFChars(static_cast<jstring>(jstr), 0);
+  const char* cstr =
+      jni()->GetStringUTFChars(static_cast<jstring>(jstr), nullptr);
   std::string str(cstr);
   jni()->ReleaseStringUTFChars(static_cast<jstring>(jstr), cstr);
 

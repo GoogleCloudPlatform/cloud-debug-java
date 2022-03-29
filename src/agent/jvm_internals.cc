@@ -286,7 +286,7 @@ std::vector<std::string> JvmInternals::FindClassesByName(
     return {};
   }
 
-  return JniToNativeStringArray(signatures_array.get());;
+  return JniToNativeStringArray(signatures_array.get());
 }
 
 std::string JvmInternals::ComputeDebuggeeUniquifier(const std::string& iv) {

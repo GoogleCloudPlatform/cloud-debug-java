@@ -13,6 +13,7 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
+import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severefmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -100,6 +101,11 @@ public final class GceMetadataQuery implements MetadataQuery {
   private long accessTokenExpirationTime = 0;
 
   public GceMetadataQuery() {}
+
+  public GceMetadataQuery(String projectId, String projectNumber) {
+    this.projectId = projectId;
+    this.projectNumber = projectNumber;
+  }
 
   /** Visible for testing */
   public GceMetadataQuery(URL localMetadataServiceBaseUrl) {

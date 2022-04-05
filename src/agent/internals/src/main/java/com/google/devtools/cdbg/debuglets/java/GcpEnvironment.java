@@ -91,7 +91,15 @@ final class GcpEnvironment {
           metadataQuery = new ServiceAccountAuth(jsonFileFlag);
         } else {
           info("Using credentials from GCE metadata server");
-          metadataQuery = new GceMetadataQuery();
+          String projectIdOverride = getFlag("auth.project_id", "project_id");
+          String projectNumberOverride = getFlag("auth.project_number", "project_number");
+          if (!projectIdOverride.isEmpty() && !projectNumberOverride.isEmpty()) {
+            info("Using provided project id " + projectIdOverride);
+            info("Using provided project number " + projectNumberOverride);
+            metadataQuery = new GceMetadataQuery(projectIdOverride, projectNumberOverride);
+          } else {
+            metadataQuery = new GceMetadataQuery();
+          }
         }
       } catch (Exception e) {
         throw new SecurityException(

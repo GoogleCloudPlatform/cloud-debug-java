@@ -35,8 +35,8 @@
 
 #ifndef STANDALONE_BUILD
 #include "base/commandlineflags.h"
-#include "base/logging_extensions.h"
 #include "base/init_google.h"
+#include "base/logging_extensions.h"
 #include "base/process_state.h"
 #include "base/signal-handler.h"
 #endif
@@ -413,4 +413,3 @@ JNIEXPORT void JNICALL Agent_OnUnload(JavaVM* vm) {
   devtools::cdbg::CallbacksMonitor::CleanupSingleton();
   devtools::cdbg::CleanupStatisticians();
 }
-

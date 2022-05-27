@@ -73,8 +73,6 @@ Syntax:
   where each entry is either a directory with .class files or a .jar file
   and pattern is a regular expression selecting the files
 """
-
-from __future__ import print_function
 import os
 import re
 import sys

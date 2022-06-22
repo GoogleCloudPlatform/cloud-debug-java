@@ -15,6 +15,7 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -248,6 +249,7 @@ final class ResourcesDatabase {
      *
      * @param path full path to the indexed file.
      */
+    @CanIgnoreReturnValue
     public Builder add(String path) {
       if ((path == null) || path.endsWith("/") || path.startsWith("/")) {
         throw new IllegalArgumentException("invalid file path");

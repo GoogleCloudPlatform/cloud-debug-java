@@ -34,9 +34,9 @@
 # Home page of jsoncpp: http://sourceforge.net/projects/libjson/files/?source=navbar
 #
 
-GFLAGS_URL=https://github.com/gflags/gflags/archive/v2.1.2.tar.gz
-GLOG_URL=https://github.com/google/glog/archive/v0.3.4.tar.gz
-JSONCPP_URL=https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.7.4.tar.gz
+GFLAGS_URL=https://github.com/gflags/gflags/archive/v2.2.2.tar.gz
+GLOG_URL=https://github.com/google/glog/archive/v0.4.0.tar.gz
+JSONCPP_URL=https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.7.6.tar.gz
 
 
 ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
@@ -45,56 +45,59 @@ ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
 
 # Clean up any previous build files.
-rm -rf ${ROOT}/third_party/gflags* \
-       ${ROOT}/third_party/glog* \
-       ${ROOT}/third_party/*jsoncpp* \
-       ${ROOT}/third_party/install
+rm -rf "${ROOT}"/third_party/gflags* \
+       "${ROOT}"/third_party/glog* \
+       "${ROOT}"/third_party/*jsoncpp* \
+       "${ROOT}"/third_party/install
 
 # Build and install gflags to third_party/.
-pushd ${ROOT}/third_party
-curl -Lk ${GFLAGS_URL} -o gflags.tar.gz
+pushd "${ROOT}"/third_party
+curl -Lk "${GFLAGS_URL}" -o gflags.tar.gz
 tar xzf gflags.tar.gz
 cd gflags-*
 mkdir build
 cd build
 cmake -DCMAKE_CXX_FLAGS=-fpic \
       -DGFLAGS_NAMESPACE=google \
-      -DCMAKE_INSTALL_PREFIX:PATH=${ROOT}/third_party/install \
+      -DCMAKE_INSTALL_PREFIX:PATH="${ROOT}"/third_party/install \
       ..
 make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
 # Build and install glog to third_party/.
-pushd ${ROOT}/third_party
-curl -L ${GLOG_URL} -o glog.tar.gz
+pushd "${ROOT}"/third_party
+curl -L "${GLOG_URL}" -o glog.tar.gz
 tar xzf glog.tar.gz
 cd glog-*
-./configure --with-pic \
-            --prefix=${ROOT}/third_party/install \
-            --with-gflags=${ROOT}/third_party/install
+mkdir build
+cd build
+cmake -DCMAKE_CXX_FLAGS=-fpic \
+      -DCMAKE_PREFIX_PATH="${ROOT}"/third_party/install \
+      -DCMAKE_INSTALL_PREFIX:PATH="${ROOT}"/third_party/install \
+      ..
 make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
 # Build and install jsoncpp to third_party/.
-pushd ${ROOT}/third_party
+pushd "${ROOT}"/third_party
 curl -L ${JSONCPP_URL} -o jsoncpp.tar.gz
 tar xzf jsoncpp.tar.gz
 cd *jsoncpp-*
 mkdir build
 cd build
 cmake -DCMAKE_CXX_FLAGS=-fpic \
-      -DCMAKE_INSTALL_PREFIX:PATH=${ROOT}/third_party/install \
+      -DCMAKE_INSTALL_PREFIX:PATH="${ROOT}"/third_party/install \
       ..
 make ${PARALLEL_BUILD_OPTION}
 make install
 popd
 
 # Build the debugger agent.
-pushd ${ROOT}/src/agent
+pushd "${ROOT}"/src/agent
 make ${PARALLEL_BUILD_OPTION} \
-     BUILD_TARGET_PATH=${ROOT} \
-     THIRD_PARTY_LIB_PATH=${ROOT}/third_party/install/lib \
-     THIRD_PARTY_INCLUDE_PATH=${ROOT}/third_party/install/include
+     BUILD_TARGET_PATH="${ROOT}" \
+     THIRD_PARTY_LIB_PATH="${ROOT}"/third_party/install/lib \
+     THIRD_PARTY_INCLUDE_PATH="${ROOT}"/third_party/install/include
 popd

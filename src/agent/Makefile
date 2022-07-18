@@ -237,7 +237,7 @@ endif
 	cp internals-class-loader/target/com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $(INTERNALS_CLASS_LOADER)
 
 internals_class_loader_static_defs: internals_class_loader
-	python ../codegen/static_def_gen.py $(INTERNALS_CLASS_LOADER_STATIC_DEFS) .:^$(INTERNALS_CLASS_LOADER)$
+	python3 ../codegen/static_def_gen.py $(INTERNALS_CLASS_LOADER_STATIC_DEFS) .:^$(INTERNALS_CLASS_LOADER)$
 
 internals_jar:
 ifeq ($(JAVA_BUILD),maven)

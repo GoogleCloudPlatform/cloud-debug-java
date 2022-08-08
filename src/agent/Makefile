@@ -198,7 +198,7 @@ all: \
 	target_version_txt \
 
 antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
-	mkdir antlrgen
+	mkdir -p antlrgen
 	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE)
 
 $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen

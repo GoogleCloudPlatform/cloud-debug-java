@@ -76,6 +76,11 @@ final class GcpEnvironment {
         "com.google.cdbg.controller", "https://clouddebugger.googleapis.com/v2/controller/");
   }
 
+  /** Gets the URL String of the Firebase RTDB instance. */
+  static String getFirebaseDatabaseUrlString() {
+    return getFlag("firebase_db_url", "firebase_db_url");
+  }
+
   /** Lazily creates and returns the class to get access token and project information. */
   static synchronized MetadataQuery getMetadataQuery() {
     // Lazy initialization.

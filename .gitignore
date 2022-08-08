@@ -1,0 +1,16 @@
+*.class
+*.gz
+*.jar
+*.o
+*.so
+src/agent/antlrgen
+src/agent/internals/target
+src/agent/internals-class-loader/target/
+src/agent/internals_class_loader_static_defs.inl
+src/agent/service-account-auth/target
+src/agent/version.txt
+src/codegen/target
+src/codegen/*.cc
+src/codegen/*.h
+third_party/
+version.txt

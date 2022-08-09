@@ -655,6 +655,8 @@ class FirebaseClient implements HubClient {
 
         Object value = getDbValue(app, "cdbg/schema_version", 10, TimeUnit.SECONDS);
         if (value != null) {
+          // For our purposes, we don't care what the data is, as long long as it's not null it
+          // indicates the DB exists and has been initialized for Snapshot Debugger use.
           infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
           this.firebaseApp = app;
           app = null; // Otherwise the finally check will call delete!
@@ -779,6 +781,9 @@ class FirebaseClient implements HubClient {
     infofmt("Firebase Database write operation to '%s' was successful", path);
   }
 
+  /**
+   * TODO: Add comment.
+   */
   static Object getDbValue(FirebaseApp app, final String path, long timeout, TimeUnit units)
       throws Exception {
     DatabaseReference dbRef = FirebaseDatabase.getInstance(app).getReference(path);
@@ -797,7 +802,8 @@ class FirebaseClient implements HubClient {
             public void onDataChange(DataSnapshot dataSnapshot) {
               Object value = dataSnapshot.getValue();
               infofmt(
-                  "Response obtained, data was%sfound at %s", value == null ? "not" : " ", path);
+                  "Response obtained, data was %s found at %s", value == null ? "not" : "", path);
+
               obtainedValue.add(value);
               resultObtained.offer(Boolean.TRUE);
             }

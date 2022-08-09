@@ -652,8 +652,8 @@ class FirebaseClient implements HubClient {
         infofmt(
             "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
             databaseUrl);
-        Object value = getDbValue(app, "cdbg/schema_version", 10, TimeUnit.SECONDS);
 
+        Object value = getDbValue(app, "cdbg/schema_version", 10, TimeUnit.SECONDS);
         if (value != null) {
           infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
           this.firebaseApp = app;
@@ -787,8 +787,8 @@ class FirebaseClient implements HubClient {
 
     ValueEventListener listener = null;
 
-    Object obtainedValue = null;
     final ArrayBlockingQueue<Boolean> resultObtained = new ArrayBlockingQueue<>(1);
+    final ArrayList<Object> obtainedValue = new ArrayList<>();
 
     try {
       dbRef.addValueEventListener(
@@ -798,6 +798,7 @@ class FirebaseClient implements HubClient {
               Object value = dataSnapshot.getValue();
               infofmt(
                   "Response obtained, data was%sfound at %s", value == null ? "not" : " ", path);
+              obtainedValue.add(value);
               resultObtained.offer(Boolean.TRUE);
             }
 
@@ -818,12 +819,12 @@ class FirebaseClient implements HubClient {
       } else if (!isSuccess) {
         throw new Exception("Error occured attempting to read from the DB");
       }
-
-      return obtainedValue;
     } finally {
       if (listener != null) {
         dbRef.removeEventListener(listener);
       }
     }
+
+    return obtainedValue.get(0);
   }
 }

@@ -160,13 +160,8 @@ class FirebaseClient implements HubClient {
   /** Debuggee labels (such as version and module) */
   private final Map<String, String> labels;
 
-  /**
-   * Flag to track if FirebaseApp.initializeApp() has yet been called. This is required as
-   * initializeApp() can only be called once.
-   * TODO: This will change as we're going to pass in a name for the firebase app and have to
-   * track/use the returned handle instead.
-   */
-  private boolean isFirebaseAppInitialized = false;
+  /** Handle to the FirebaseApp as returned by FirebaseApp.initializeApp. */
+  private FirebaseApp firebaseApp = null;
 
   /** Shutdown flag. Prevents any new resources that need to be cleaned up from being created. */
   private boolean isShutdown = false;
@@ -481,10 +476,12 @@ class FirebaseClient implements HubClient {
 
   @Override
   public void shutdown() {
-    infofmt("shutdown() has been called");
+    infofmt("FirebaseClient::shutdown() begin");
     isShutdown = true;
     metadata.shutdown();
     unregisterActiveBreakpointListener();
+    deleteFirebaseApp();
+    infofmt("FirebaseClient::shutdown() end");
   }
 
   public String getDebuggeeId() {
@@ -493,14 +490,6 @@ class FirebaseClient implements HubClient {
 
   private void setDebuggeeId(String id) {
     debuggeeId = id;
-  }
-
-  public String getFirebaseDatabaseUrl() {
-    return firebaseDatabaseUrl;
-  }
-
-  private void setFirebaseDatabaseUrl(String url) {
-    firebaseDatabaseUrl = url;
   }
 
   /**
@@ -625,41 +614,89 @@ class FirebaseClient implements HubClient {
     }
   }
 
-  void initializeFirebaseApp() {
-    // A special guard, once we've successfully called FirebaseApp.initializeApp() it shouldn't be
-    // called again, it will throw an exception.
-    if (isFirebaseAppInitialized) {
+  void initializeFirebaseApp() throws Exception {
+    // Once we've successfully called FirebaseApp.initializeApp, there's no need to call it again.
+    // Also unless we call delete on the FirebaseApp, it will throw an exception.
+    if (firebaseApp != null) {
       return;
     }
 
-    try {
-      String databaseUrl = GcpEnvironment.getFirebaseDatabaseUrlString();
-      if (databaseUrl.isEmpty()) {
-        databaseUrl = "https://" + metadata.getProjectId() + "-cdbg.firebaseio.com";
+    ArrayList<String> urls = new ArrayList<>();
+    String configuredUrl = GcpEnvironment.getFirebaseDatabaseUrlString();
+    if (!configuredUrl.isEmpty()) {
+      urls.add(configuredUrl);
+    } else {
+      urls.add("https://" + metadata.getProjectId() + "-cdbg.firebaseio.com");
+      urls.add("https://" + metadata.getProjectId() + "-default-rtdb.firebaseio.com");
+    }
+
+    for (String databaseUrl : urls) {
+      FirebaseApp app = null;
+
+      try {
+        // Based on the documentation, setting the read and connect timeouts does not affect the
+        // FirebaseDatabase APIs, but it still seems reasonable to set the values to a know value,
+        // just as a precaution.
+        // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setconnecttimeout-int-connecttimeout
+        // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setreadtimeout-int-readtimeout
+        FirebaseOptions options =
+            FirebaseOptions.builder()
+                .setCredentials(this.metadata.getGoogleCredential())
+                .setDatabaseUrl(databaseUrl)
+                .setConnectTimeout(30 * 1000)
+                .setReadTimeout(30 * 1000)
+                .build();
+
+        app = FirebaseApp.initializeApp(options, "SnapshotDebugger");
+
+        infofmt(
+            "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
+            databaseUrl);
+        Object value = getDbValue(app, "cdbg/schema_version", 10, TimeUnit.SECONDS);
+
+        if (value != null) {
+          infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
+          this.firebaseApp = app;
+          app = null; // Otherwise the finally check will call delete!
+          return;
+        }
+
+      } catch (Exception e) {
+        infofmt(
+            "Failed to find a Snapshot Debugger configured db at '%s', error: %s", databaseUrl, e);
+      } finally {
+        if (app != null) {
+          // The delete is important, otherwise subsequant calls to FirebaseApp.initializeApp()
+          // using the same app instance name will throw an IllegalStateException.
+          app.delete();
+        }
       }
-      setFirebaseDatabaseUrl(databaseUrl);
+    }
 
-      // Based on the documentation, setting the read and connect timeouts does not affect the
-      // FirebaseDatabase APIs, but it still seems reasonable to set the values to a know value,
-      // just as a precaution.
-      // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setconnecttimeout-int-connecttimeout
-      // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setreadtimeout-int-readtimeout
-      FirebaseOptions options =
-          FirebaseOptions.builder()
-              .setCredentials(this.metadata.getGoogleCredential())
-              .setDatabaseUrl(databaseUrl)
-              .setConnectTimeout(30 * 1000)
-              .setReadTimeout(30 * 1000)
-              .build();
+    String errorMessage = "Failed to initialize FirebaseApp, attempted URls: " + urls;
+    warnfmt(errorMessage);
+    throw new Exception(errorMessage);
+  }
 
-      FirebaseApp.initializeApp(options);
-      isFirebaseAppInitialized = true;
+  synchronized FirebaseApp getFirebaseApp() throws RuntimeException {
+    // If we've been shutdown, don't create any new resources, the shutdown() will be calling
+    // unregisterActiveBreakpointListener(), we don't want to inadvertently create a new listener
+    // after this.
+    if (isShutdown) {
+      throw new RuntimeException("Shutdown in progress");
+    }
 
-      infofmt("Initialized FirebaseApp with db '%s'", getFirebaseDatabaseUrl());
-    } catch (Exception e) {
-      warnfmt(
-          "FirebaseApp.initializeApp() failed, URL: %s, error: %s", getFirebaseDatabaseUrl(), e);
-      throw e;
+    // Note, it may seem there is still a race here with shutdown() and deleteFirebaseApp(),
+    // however, even if another piece of code got a reference to the app, then the delete occurred,
+    // and the code then attempted to use the reference, the call will simply thrown an exception:
+    // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseApp#public-void-delete
+    return firebaseApp;
+  }
+
+  synchronized void deleteFirebaseApp() {
+    if (firebaseApp != null) {
+      firebaseApp.delete();
+      firebaseApp = null;
     }
   }
 
@@ -674,7 +711,7 @@ class FirebaseClient implements HubClient {
     unregisterActiveBreakpointListener();
 
     String path = "cdbg/breakpoints/" + getDebuggeeId() + "/active";
-    activeBreakpointsRef = FirebaseDatabase.getInstance().getReference(path);
+    activeBreakpointsRef = FirebaseDatabase.getInstance(getFirebaseApp()).getReference(path);
     activeBreakpointsListener =
         activeBreakpointsRef.addValueEventListener(
             new ValueEventListener() {
@@ -682,7 +719,6 @@ class FirebaseClient implements HubClient {
               public void onDataChange(DataSnapshot dataSnapshot) {
                 Object document = dataSnapshot.getValue();
                 Map<String, Object> snapshotMap = (Map<String, Object>) dataSnapshot.getValue();
-                System.out.println(document);
                 infofmt("Active breakpoint snapshot from the Firebase RTDB: %s", document);
                 for (Map.Entry<String, Object> entry : snapshotMap.entrySet()) {
                   currentBreakpoints.putIfAbsent(entry.getKey(), entry.getValue());
@@ -713,7 +749,7 @@ class FirebaseClient implements HubClient {
   }
 
   void setDbValue(String path, Object value, long timeout, TimeUnit units) throws Exception {
-    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(path);
+    DatabaseReference dbRef = FirebaseDatabase.getInstance(getFirebaseApp()).getReference(path);
 
     // A value of empty string indicates success, otherwise the string is an error message.
     final ArrayBlockingQueue<String> result = new ArrayBlockingQueue<>(1);
@@ -741,5 +777,53 @@ class FirebaseClient implements HubClient {
     }
 
     infofmt("Firebase Database write operation to '%s' was successful", path);
+  }
+
+  static Object getDbValue(FirebaseApp app, final String path, long timeout, TimeUnit units)
+      throws Exception {
+    DatabaseReference dbRef = FirebaseDatabase.getInstance(app).getReference(path);
+
+    infofmt("Beginning Firebase Database read operation at '%s'", path);
+
+    ValueEventListener listener = null;
+
+    Object obtainedValue = null;
+    final ArrayBlockingQueue<Boolean> resultObtained = new ArrayBlockingQueue<>(1);
+
+    try {
+      dbRef.addValueEventListener(
+          new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+              Object value = dataSnapshot.getValue();
+              infofmt(
+                  "Response obtained, data was%sfound at %s", value == null ? "not" : " ", path);
+              resultObtained.offer(Boolean.TRUE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+              warnfmt("Database subscription error: %s", error.getMessage());
+              resultObtained.offer(Boolean.FALSE);
+            }
+          });
+
+      // Returns null on timeout.
+      Boolean isSuccess = resultObtained.poll(timeout, units);
+
+      // null will be returned on read timeout.
+      if (isSuccess == null) {
+        infofmt("Read from %s timed out after %d %s", path, timeout, units);
+        throw new Exception("Read timed out");
+      } else if (!isSuccess) {
+        throw new Exception("Error occured attempting to read from the DB");
+      }
+
+      return obtainedValue;
+    } finally {
+      if (listener != null) {
+        dbRef.removeEventListener(listener);
+      }
+    }
   }
 }

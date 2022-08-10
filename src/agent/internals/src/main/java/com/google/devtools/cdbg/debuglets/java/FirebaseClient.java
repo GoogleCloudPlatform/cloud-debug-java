@@ -328,11 +328,18 @@ class FirebaseClient implements HubClient {
     try {
       int i = 0;
       for (Map.Entry<String, Object> entry : snapshot.entrySet()) {
-        // TODO: Ensure the 'id' field is in the breakpoint, and if not add it.
-        infofmt("Serializing breakpoint id: %s.", entry.getKey());
+        String breakpointId = entry.getKey();
+        Map<String, Object> breakpoint = (Map<String, Object>) entry.getValue();
+
+        infofmt("FirebaseClient: Serializing breakpoint %s for internal agent", breakpointId);
+
+        // This is simply a precaution, it's expected the 'id' would already be present within the
+        // brakpoint data.
+        breakpoint.putIfAbsent("id", breakpointId);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(outputStream, UTF_8));
-        GSON.toJson(GSON.toJsonTree(entry.getValue()), writer);
+        GSON.toJson(GSON.toJsonTree(breakpoint), writer);
         writer.flush();
         serializedBreakpoints[i] = outputStream.toByteArray();
         i++;

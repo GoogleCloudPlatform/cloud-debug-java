@@ -4,6 +4,10 @@
 *.o
 *.so
 
+# Ignore all bazel-* symlinks. There is no full list since this can change
+# based on the name of the directory bazel is cloned into.
+/bazel-*
+
 # These are required since running build.sh generates output in the source tree
 # itself. If this gets fixed at some point, these rules can be removed.
 src/agent/antlrgen

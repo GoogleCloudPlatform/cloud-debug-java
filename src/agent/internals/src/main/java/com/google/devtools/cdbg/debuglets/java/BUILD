@@ -25,8 +25,6 @@ java_library(
     deps = [
         ":logger",
         "@maven//:org_yaml_snakeyaml"
-        #"@org_snakeyaml//:snakeyaml",
-        #"//third_party/java/snakeyaml",
     ],
 )
 

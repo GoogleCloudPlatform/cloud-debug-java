@@ -16,6 +16,7 @@ java_test(
 
 java_test(
     name = "YamlConfigParserTest",
+    size = "small",
     srcs = ["YamlConfigParserTest.java"],
     deps = [
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:yaml_config_parser",

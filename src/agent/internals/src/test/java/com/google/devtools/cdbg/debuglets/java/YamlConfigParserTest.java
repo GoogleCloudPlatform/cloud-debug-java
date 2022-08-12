@@ -47,9 +47,6 @@ public class YamlConfigParserTest {
     assertThat(parser.getBlocklistExceptionPatterns()).isEmpty();
   }
 
-  /**
-   * TODO(b/185048957): Finalize the conversion to blocklist by removing this test.
-   */
   @Test
   public void oneBlacklist() {
     String[] config = {
@@ -70,9 +67,6 @@ public class YamlConfigParserTest {
     assertThat(Arrays.asList(parser.getBlocklistPatterns())).containsExactly("com.java.*");
   }
 
-  /**
-   * TODO(b/185048957): Finalize the conversion to blocklist by removing this test.
-   */
   @Test
   public void oneWhitelist() {
     String[] config = {
@@ -93,9 +87,6 @@ public class YamlConfigParserTest {
     assertThat(Arrays.asList(parser.getBlocklistExceptionPatterns())).containsExactly("com.java.*");
   }
 
-  /**
-   * TODO(b/185048957): Finalize the conversion to blocklist by removing this test.
-   */
   @Test
   public void duplicateBlacklist() {
     String[] config = {
@@ -116,9 +107,6 @@ public class YamlConfigParserTest {
     assertThat(Arrays.asList(parser.getBlocklistPatterns())).containsExactly("com.java.*");
   }
 
-  /**
-   * TODO(b/185048957): Finalize the conversion to blocklist by removing this test.
-   */
   @Test
   public void duplicateWhitelist() {
     String[] config = {
@@ -163,9 +151,7 @@ public class YamlConfigParserTest {
             "com.java.blocklist_exception.util.*",
             "foo.bar.blocklist_exception.Baz");
   }
-  /**
-   * TODO(b/185048957): Finalize the conversion to blocklist by removing this test.
-   */
+
   @Test
   public void multipleEntriesBothListKeyNamesUsed() {
     String[] config = {

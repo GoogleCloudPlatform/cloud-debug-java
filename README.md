@@ -300,3 +300,30 @@ used in an expression as `MainKt.getGreeting()`
 Companion object methods can be accessed by qualifying them with the `Companion`
 keyword. For instance, the `welcome` function above can be used in an expression
 as `Main.Companion.welcome()`
+
+## Running the tests
+
+### Install Bazel
+
+Running the tests requires [Bazel](https://bazel.build/), see
+[here](https://docs.bazel.build/versions/main/install.html) for installation
+instructions.
+
+### Sample Commands
+
+**From the root of the repository, run all tests found in the workspace:**
+```
+bazel test //src/...
+```
+
+**Run all tests in current directory**
+```
+# E.g. in directory `...test/java/com/google/devtools/cdbg/debuglets/java`
+bazel test :all
+```
+
+**Run individual test in current directory**:
+```
+# E.g. in directory `...test/java/com/google/devtools/cdbg/debuglets/java`
+bazel test :YamlConfigParserTest
+```

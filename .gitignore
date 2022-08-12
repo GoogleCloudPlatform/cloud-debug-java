@@ -3,6 +3,9 @@
 *.jar
 *.o
 *.so
+
+# These are required since running build.sh generates output in the source tree
+# itself. If this gets fixed at some point, these rules can be removed.
 src/agent/antlrgen
 src/agent/internals/target
 src/agent/internals-class-loader/target/

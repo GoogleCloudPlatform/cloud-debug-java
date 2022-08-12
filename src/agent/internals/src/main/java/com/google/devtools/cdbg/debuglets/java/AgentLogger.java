@@ -13,6 +13,10 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
+// Needed to wrap the calls to the native logging methods which may fail for unit tests of classes
+// that use the AgentLogger, since there won't be a .so loaded that provides the native methods.
+import java.lang.UnsatisfiedLinkError;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -34,27 +38,51 @@ public final class AgentLogger {
   public static native void severe(String message);
 
   public static void infofmt(Throwable thrown, String message, Object... args) {
-    info(formatSafely(thrown, message, args));
+    try {
+      info(formatSafely(thrown, message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   public static void warnfmt(Throwable thrown, String message, Object... args) {
-    warn(formatSafely(thrown, message, args));
+    try {
+      warn(formatSafely(thrown, message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   public static void severefmt(Throwable thrown, String message, Object... args) {
-    severe(formatSafely(thrown, message, args));
+    try {
+      severe(formatSafely(thrown, message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   public static void infofmt(String message, Object... args) {
-    info(formatSafely(message, args));
+    try {
+      info(formatSafely(message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   public static void warnfmt(String message, Object... args) {
-    warn(formatSafely(message, args));
+    try {
+      warn(formatSafely(message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   public static void severefmt(String message, Object... args) {
-    severe(formatSafely(message, args));
+    try {
+      severe(formatSafely(message, args));
+    }
+    catch (UnsatisfiedLinkError e) {
+    }
   }
 
   /**

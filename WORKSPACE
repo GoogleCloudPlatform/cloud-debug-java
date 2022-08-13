@@ -24,6 +24,7 @@ maven_install(
     artifacts = [
         "com.google.auth:google-auth-library-oauth2-http:0.26.0",
         "com.google.code.gson:gson:2.9.1",
+        "com.google.firebase:firebase-admin:9.0.0",
         "com.google.truth:truth:1.1.3",
         "junit:junit:4.13.2",
         "org.mockito:mockito-core:4.6.1",

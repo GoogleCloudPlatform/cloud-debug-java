@@ -21,7 +21,6 @@ java_test(
         "GcpHubClientTest.java",
     ],
     deps = [
-        #"//java/com/google/common/collect",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_environment",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_hub_client",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_metadata",

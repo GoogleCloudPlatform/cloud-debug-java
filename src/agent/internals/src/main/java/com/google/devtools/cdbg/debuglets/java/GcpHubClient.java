@@ -13,7 +13,6 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
-import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -368,7 +367,7 @@ class GcpHubClient implements HubClient {
     }
 
     if (response.getIsDisabled()) {
-      info("Debuggee is marked as disabled");
+      infofmt("Debuggee is marked as disabled");
       return false;
     }
 

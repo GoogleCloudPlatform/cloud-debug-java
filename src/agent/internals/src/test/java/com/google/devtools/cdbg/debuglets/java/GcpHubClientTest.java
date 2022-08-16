@@ -25,8 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-//import com.google.testing.testsize.MediumTest;
-//import com.google.testing.testsize.MediumTestAttribute;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -57,7 +55,6 @@ import org.mockito.junit.MockitoRule;
 
 /** Unit test for {@link GcpHubClient}. */
 @RunWith(JUnit4.class)
-//@MediumTest({MediumTestAttribute.FILE, MediumTestAttribute.THREADS})
 public class GcpHubClientTest {
   static interface MockServer {
     HttpURLConnection openConnection(String path);

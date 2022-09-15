@@ -80,7 +80,6 @@ java_library(
     deps = [
         ":logger",
         ":yaml_config_parser",
-        "@maven//:javax_xml_bind_jaxb_api",
         "@maven//:org_ow2_asm_asm",
     ],
 )

@@ -29,7 +29,6 @@ import java.util.SortedSet;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * Iterates over all the application .jar and .class files and computes their SHA1 hash. This hash
@@ -58,9 +57,18 @@ final class UniquifierComputer {
     }
   }
 
+  private static final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
+
   /** Computes the SHA1 hash value and encodes it in a string. */
   public String getUniquifier() {
-    return DatatypeConverter.printHexBinary(hash.digest());
+    byte[] digest = hash.digest();
+    char[] hex = new char[digest.length * 2];
+    for (int i = 0, j = 0; i < digest.length; i++) {
+      byte b = digest[i];
+      hex[j++] = HEX_DIGITS[(b >> 4) & 0xf];
+      hex[j++] = HEX_DIGITS[b & 0xf];
+    }
+    return new String(hex);
   }
 
   /** Hashes a single application file. */

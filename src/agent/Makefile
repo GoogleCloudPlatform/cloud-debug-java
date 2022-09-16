@@ -241,7 +241,7 @@ internals_class_loader_static_defs: internals_class_loader
 
 internals_jar:
 ifeq ($(JAVA_BUILD),maven)
-	cd internals ; mvn clean install
+	cd internals ; mvn -Dmaven.test.skip=true clean install
 	cp internals/target/cdbg_java_agent_internals-SNAPSHOT-jar-with-dependencies.jar $(INTERNALS_JAR)
 else
 	mkdir -p internals/target

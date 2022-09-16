@@ -29,7 +29,7 @@ maven_install(
         "junit:junit:4.13.2",
         "org.ow2.asm:asm:9.1",
         "org.mockito:mockito-core:4.6.1",
-        "org.yaml:snakeyaml:1.29",
+        "org.yaml:snakeyaml:1.32",
     ],
     repositories = [
         "https://maven.google.com",

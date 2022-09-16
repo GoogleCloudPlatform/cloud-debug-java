@@ -26,6 +26,7 @@ java_test(
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_metadata",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:hub_client",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
+        "@maven//:com_google_auth_google_auth_library_oauth2_http",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",

@@ -289,8 +289,8 @@ class FirebaseClient implements HubClient {
     isRegistered = true;
 
     infofmt(
-        "Successfully registered debuggee %s, agent version: %s",
-        getDebuggeeId(), GcpDebugletVersion.VERSION);
+        "Debuggee %s, registered %s, agent version: %s",
+        getDebuggeeId(), GSON.toJsonTree(debuggee), GcpDebugletVersion.VERSION);
 
     return true;
   }

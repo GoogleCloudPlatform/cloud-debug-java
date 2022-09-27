@@ -14,7 +14,7 @@
 package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
-import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severe;
+import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severefmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -256,9 +256,6 @@ class FirebaseClient implements HubClient {
   DatabaseReference activeBreakpointsRef = null;
   ValueEventListener activeBreakpointsListener = null;
 
-  /** The URL of the FirebaseDatabase. Use getter/setter to access. */
-  private String firebaseDatabaseUrl = "not-set-yet";
-
   /**
    * Holds the most recent pending active breakpoint snapshot. This is the snapshot that
    * listActiveBreakpoints() needs to retrieve and return to the native agent code.
@@ -272,11 +269,11 @@ class FirebaseClient implements HubClient {
    * add in the latest snapshot. The reader the native agent code which calls
    * listActiveBreakpoints() to stay up to date on the current snapshot it should have installed.
    *
-   * <p>The key is the breakpoint ID, and the value is a POJO that can be naturally serialized as a
-   * JSON document. In practice since it represents a Breakpoint, the Object itself will be a
-   * Map<String, Object> instance.
+   * <p>Entry is a Map<BreakpointId, BreakpointData>, where BreakpointId is a String, and
+   * BreakpointData is a Map<String, Object>, where each key is a breakpoint field name that maps to
+   * its value. Everything is a POJO that can be naturally serialized as a JSON document.
    */
-  private ArrayBlockingQueue<Map<String, Object>> pendingActiveBreakpoints =
+  private ArrayBlockingQueue<Map<String, Map<String, Object>>> pendingActiveBreakpoints =
       new ArrayBlockingQueue<>(1);
 
   /**
@@ -299,8 +296,14 @@ class FirebaseClient implements HubClient {
    * update), then it updates the particular breakpoint entry. It also acts as a reader when it
    * needs to combine the breakpoint fields provided from the native agent code with the complete
    * breakpoint to be written to the Firebase RTDB.
+   *
+   * <p>The map here is the current set of active breakpoints, it is a Map<BreakpointId,
+   * BreakpointData>, where BreakpointId is a String, and BreakpointData is a Map<String, Object>,
+   * where each key is a breakpoint field name that maps to its value. Everything is a POJO that can
+   * be naturally serialized as a JSON document.
    */
-  private ConcurrentHashMap<String, Object> currentBreakpoints = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, Map<String, Object>> currentBreakpoints =
+      new ConcurrentHashMap<>();
 
   private static final Gson GSON =
       new GsonBuilder()
@@ -343,10 +346,8 @@ class FirebaseClient implements HubClient {
   @Override
   public boolean registerDebuggee(Map<String, String> extraDebuggeeLabels) throws Exception {
     // No point going on if we don't have environment information.
-    if (metadata.getProjectId().isEmpty()
-        || metadata.getProjectNumber().isEmpty()
-        || metadata.getGoogleCredential() == null) {
-      severe("Environment not available");
+    if (metadata.getProjectId().isEmpty() || metadata.getGoogleCredential() == null) {
+      severefmt("Environment not available");
       throw new Exception("Environment not available");
     }
 
@@ -382,7 +383,10 @@ class FirebaseClient implements HubClient {
       throw new Exception("The Firebase Client needs to re-initialize.");
     }
 
-    Map<String, Object> snapshot = null;
+    // Map<BreakpointId, BreakpointData> where BreakpointId is a string and BreakpointData is a
+    // Map<String, Object>, which is a mapping of the field names to their values. Each value is
+    // represented as POJO object that represents a JSON value.
+    Map<String, Map<String, Object>> snapshot = null;
     try {
       snapshot =
           pendingActiveBreakpoints.poll(
@@ -405,7 +409,7 @@ class FirebaseClient implements HubClient {
 
     try {
       int i = 0;
-      for (Map.Entry<String, Object> entry : snapshot.entrySet()) {
+      for (Map.Entry<String, Map<String, Object>> entry : snapshot.entrySet()) {
         String breakpointId = entry.getKey();
         Map<String, Object> breakpoint = (Map<String, Object>) entry.getValue();
 
@@ -457,8 +461,7 @@ class FirebaseClient implements HubClient {
       throw new UnsupportedOperationException("FirebaseClient only supports json format");
     }
 
-    Map<String, Object> breakpointObject =
-        (Map<String, Object>) currentBreakpoints.get(breakpointId);
+    Map<String, Object> breakpointObject = currentBreakpoints.get(breakpointId);
     if (breakpointObject == null) {
       // If we don't find it, that means there was a race and another agent already completed the
       // breakpoint, so we can simply return here without further processing.
@@ -725,57 +728,75 @@ class FirebaseClient implements HubClient {
     }
 
     for (String databaseUrl : urls) {
-      FirebaseApp app = null;
-
-      try {
-        // Based on the documentation, setting the read and connect timeouts does not affect the
-        // FirebaseDatabase APIs, but it still seems reasonable to set the values to a know value,
-        // just as a precaution.
-        // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setconnecttimeout-int-connecttimeout
-        // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setreadtimeout-int-readtimeout
-        FirebaseOptions options =
-            FirebaseOptions.builder()
-                .setCredentials(this.metadata.getGoogleCredential())
-                .setDatabaseUrl(databaseUrl)
-                .setConnectTimeout(30 * 1000)
-                .setReadTimeout(30 * 1000)
-                .build();
-
-        app = this.firebaseStaticWrappers.initializeApp(options, "SnapshotDebugger");
-
-        infofmt(
-            "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
-            databaseUrl);
-
-        Object value =
-            getDbValue(
-                app, this.firebaseStaticWrappers, "cdbg/schema_version", timeouts.getSchemaVersion);
-        if (value != null) {
-          // For our purposes, we don't care what the data is, as long long as it's not null it
-          // indicates the DB exists and has been initialized for Snapshot Debugger use.
-          infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
-          this.firebaseApp = app;
-          app = null; // Otherwise the finally check will call delete!
-          return;
-        }
-      } catch (Exception e) {
-        infofmt(
-            "Failed to find a Snapshot Debugger configured db at '%s', error: %s", databaseUrl, e);
-      } finally {
-        if (app != null) {
-          // The delete is important, otherwise subsequant calls to FirebaseApp.initializeApp()
-          // using the same app instance name will throw an IllegalStateException.
-          app.delete();
-        }
+      this.firebaseApp = initializeFirebaseAppForUrl(databaseUrl);
+      if (this.firebaseApp != null) {
+        break;
       }
     }
 
-    String errorMessage = "Failed to initialize FirebaseApp, attempted URls: " + urls;
-    warnfmt(errorMessage);
-    throw new Exception(errorMessage);
+    if (this.firebaseApp == null) {
+      String errorMessage = "Failed to initialize FirebaseApp, attempted URls: " + urls;
+      warnfmt(errorMessage);
+      throw new Exception(errorMessage);
+    }
   }
 
-  synchronized FirebaseApp getFirebaseApp() throws RuntimeException {
+  /**
+   * Initializes and tests a FirebaseApp with the given database url. If the DB is configured for
+   * Debugger use, then the FirebaseApp is returned, otherwise null is returned.
+   *
+   * @param databaseUrl the URL of the Firebase RTDB to use.
+   * @return The FirebaseApp instance on success, null on failure.
+   */
+  private FirebaseApp initializeFirebaseAppForUrl(String databaseUrl) {
+    // Based on the documentation, setting the read and connect timeouts does not affect the
+    // FirebaseDatabase APIs, but it still seems reasonable to set the values to a know value,
+    // just as a precaution.
+    // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setconnecttimeout-int-connecttimeout
+    // https://firebase.google.com/docs/reference/admin/java/reference/com/google/firebase/FirebaseOptions.Builder#public-firebaseoptions.builder-setreadtimeout-int-readtimeout
+    FirebaseOptions options =
+        FirebaseOptions.builder()
+            .setCredentials(this.metadata.getGoogleCredential())
+            .setDatabaseUrl(databaseUrl)
+            .setConnectTimeout(30 * 1000)
+            .setReadTimeout(30 * 1000)
+            .build();
+
+    FirebaseApp app = null;
+    boolean isAppGoodToUse = false;
+
+    try {
+      app = this.firebaseStaticWrappers.initializeApp(options, "SnapshotDebugger");
+
+      infofmt(
+          "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
+          databaseUrl);
+
+      Object value =
+          getDbValue(
+              app, this.firebaseStaticWrappers, "cdbg/schema_version", timeouts.getSchemaVersion);
+
+      if (value != null) {
+        // For our purposes, we don't care what the data is, as long long as it's not null it
+        // indicates the DB exists and has been initialized for Snapshot Debugger use.
+        infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
+        isAppGoodToUse = true;
+      }
+    } catch (Exception e) {
+      infofmt(
+          "Failed to find a Snapshot Debugger configured db at '%s', error: %s", databaseUrl, e);
+    } finally {
+      if (!isAppGoodToUse && app != null) {
+        // The delete is important, otherwise subsequant calls to FirebaseApp.initializeApp()
+        // using the same app instance name will throw an IllegalStateException.
+        app.delete();
+      }
+    }
+
+    return isAppGoodToUse ? app : null;
+  }
+
+  private synchronized FirebaseApp getFirebaseApp() throws RuntimeException {
     // If we've been shutdown, don't create any new resources, the shutdown() will be calling
     // unregisterActiveBreakpointListener(), we don't want to inadvertently create a new listener
     // after this.
@@ -810,28 +831,44 @@ class FirebaseClient implements HubClient {
     String path = "cdbg/breakpoints/" + getDebuggeeId() + "/active";
     activeBreakpointsRef =
         this.firebaseStaticWrappers.getDbInstance(getFirebaseApp()).getReference(path);
+
+    // Install a listener at the top of the active breakpoints tree for the debuggee. Whenever any
+    // active breakpoint changes occur (breakpoint is modified/added/deleted), for full snapshot of
+    // the new state of the active breakpoint tree will be passed into the onDataChange().
     activeBreakpointsListener =
         activeBreakpointsRef.addValueEventListener(
             new ValueEventListener() {
               @Override
               public void onDataChange(DataSnapshot dataSnapshot) {
+                // The data snapshot contains the current state of the active breakpoint tree, and
+                // this method is called any time a breakpoint is updated/added/deleted.
+                // dataSnapshot.getValue() returns a POJO that represents a JSON object. In the case
+                // here, based on how the RTDB is setup/used, it will be a map<String, Map<String,
+                // Object>>, which maps a breakpoint ID to a breakpoint, where each breakpoint in
+                // turn is a map of field names to their corresponding values.
                 Object document = dataSnapshot.getValue();
                 infofmt("Active breakpoint snapshot from the Firebase RTDB: %s", document);
 
                 // If the value is null, that means the path is now empty, ie all breakpoints have
                 // been removed.
-                Map<String, Object> snapshotMap = (Map<String, Object>) document;
+                Map<String, Map<String, Object>> snapshotMap =
+                    (Map<String, Map<String, Object>>) document;
                 if (document == null) {
                   snapshotMap = new HashMap<>();
                 }
 
-                for (Map.Entry<String, Object> entry : snapshotMap.entrySet()) {
+                for (Map.Entry<String, Map<String, Object>> entry : snapshotMap.entrySet()) {
                   currentBreakpoints.putIfAbsent(entry.getKey(), entry.getValue());
                 }
                 currentBreakpoints.keySet().retainAll(snapshotMap.keySet());
 
                 pendingActiveBreakpoints.clear();
-                pendingActiveBreakpoints.offer(new HashMap(currentBreakpoints));
+
+                // The offer is expected to always succeed as we've just done a clear and this is
+                // the only code path that adds to the queue.
+                if (!pendingActiveBreakpoints.offer(new HashMap(currentBreakpoints))) {
+                  severefmt("Unexpected failure adding to pendingActiveBreakpoints");
+                }
               }
 
               @Override

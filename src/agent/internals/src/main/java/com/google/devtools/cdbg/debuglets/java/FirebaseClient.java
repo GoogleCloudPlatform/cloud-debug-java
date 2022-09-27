@@ -15,7 +15,6 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.infofmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severe;
-import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warn;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -32,6 +31,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.ToNumberPolicy;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.ByteArrayInputStream;
@@ -62,21 +62,14 @@ class FirebaseClient implements HubClient {
   //   2. The use of a List for sourceContexts instead of an array.
   static class Debuggee {
     public String id;
-    public String project;
     public String uniquifier;
     public String description;
     public Map<String, String> labels;
     public String agentVersion;
-
     public List<Map<String, Object>> sourceContexts;
-    public Boolean isDisabled;
 
     public void setDebuggeeId(String debuggeeId) {
       this.id = debuggeeId;
-    }
-
-    public void setProject(String project) {
-      this.project = project;
     }
 
     public void setUniquifier(String uniquifier) {
@@ -116,6 +109,70 @@ class FirebaseClient implements HubClient {
     }
   }
 
+  static class Timeout {
+    Timeout(long value, TimeUnit units) {
+      this.value = value;
+      this.units = units;
+    }
+
+    long value;
+    TimeUnit units;
+  }
+  ;
+
+  static class TimeoutConfig {
+    TimeoutConfig(long value, TimeUnit units) {
+      this.setDebuggee = new Timeout(value, units);
+      this.setBreakpoint = new Timeout(value, units);
+      this.getSchemaVersion = new Timeout(value, units);
+      this.listActiveBreakpoints = new Timeout(value, units);
+    }
+
+    Timeout setDebuggee;
+    Timeout setBreakpoint;
+    Timeout getSchemaVersion;
+    Timeout listActiveBreakpoints;
+  }
+  ;
+
+  /**
+   * Provide an interface for static methods of the Firebase admin sdk to allow mocking/injection
+   * for testing purposes.
+   */
+  public static interface FirebaseStaticWrappers {
+    /**
+     * Initializes a named FirebaseApp instance using the given options.
+     *
+     * @param options The FirebaseOptions to use for the DB.
+     * @param name Unique name for the app. It is an error to initialize an app with an already
+     *     existing name. Starting and ending whitespace characters in the name are ignored
+     *     (trimmed).
+     * @return an instance of FirebaseApp
+     * @throws IllegalStateException if an app with the same name has already been initialized.
+     */
+    public FirebaseApp initializeApp(FirebaseOptions options, String name);
+
+    /**
+     * Gets an instance of FirebaseDatabase for a specific FirebaseApp.
+     *
+     * @param app The FirebaseApp to get a FirebaseDatabase for.
+     * @return A FirebaseDatabase instance.
+     */
+    public FirebaseDatabase getDbInstance(FirebaseApp app);
+  }
+
+  private static class FirebaseStaticWrappersImpl implements FirebaseStaticWrappers {
+    @Override
+    public FirebaseApp initializeApp(FirebaseOptions options, String name) {
+      return FirebaseApp.initializeApp(options, name);
+    }
+
+    @Override
+    public FirebaseDatabase getDbInstance(FirebaseApp app) {
+      return FirebaseDatabase.getInstance(app);
+    }
+  }
+
   /** List of labels that (if defined) go into debuggee description. */
   private static final String[] DESCRIPTION_LABELS =
       new String[] {Labels.Debuggee.MODULE, Labels.Debuggee.VERSION, Labels.Debuggee.MINOR_VERSION};
@@ -150,6 +207,8 @@ class FirebaseClient implements HubClient {
         "./META-INF/classes",
         "./BOOT-INF/classes"
       };
+
+  private final TimeoutConfig timeouts;
 
   /** GCP project information and access token. */
   private final MetadataQuery metadata;
@@ -191,6 +250,8 @@ class FirebaseClient implements HubClient {
 
   /** Registered debuggee ID. Use getter/setter to access. */
   private String debuggeeId = "not-registered-yet";
+
+  FirebaseStaticWrappers firebaseStaticWrappers = null;
 
   DatabaseReference activeBreakpointsRef = null;
   ValueEventListener activeBreakpointsListener = null;
@@ -241,13 +302,22 @@ class FirebaseClient implements HubClient {
    */
   private ConcurrentHashMap<String, Object> currentBreakpoints = new ConcurrentHashMap<>();
 
-  private static final Gson GSON = new GsonBuilder().serializeNulls().create();
+  private static final Gson GSON =
+      new GsonBuilder()
+          .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+          .serializeNulls()
+          .create();
 
   /** Default constructor using environment provided by {@link GcpEnvironment}. */
   public FirebaseClient() {
     this.metadata = GcpEnvironment.getMetadataQuery();
     this.classPathLookup = ClassPathLookup.defaultInstance;
     this.labels = GcpEnvironment.getDebuggeeLabels();
+    this.firebaseStaticWrappers = new FirebaseStaticWrappersImpl();
+
+    // Initialize everything with the same timeout, then make specific overrides where desired.
+    this.timeouts = new TimeoutConfig(30, TimeUnit.SECONDS);
+    this.timeouts.getSchemaVersion.value = 10;
   }
 
   /**
@@ -258,10 +328,16 @@ class FirebaseClient implements HubClient {
    * @param labels debuggee labels (such as version and module)
    */
   public FirebaseClient(
-      MetadataQuery metadata, ClassPathLookup classPathLookup, Map<String, String> labels) {
+      MetadataQuery metadata,
+      ClassPathLookup classPathLookup,
+      Map<String, String> labels,
+      FirebaseStaticWrappers firebaseStaticWrappers,
+      TimeoutConfig timeouts) {
     this.metadata = metadata;
     this.classPathLookup = classPathLookup;
     this.labels = labels;
+    this.firebaseStaticWrappers = firebaseStaticWrappers;
+    this.timeouts = timeouts;
   }
 
   @Override
@@ -283,7 +359,7 @@ class FirebaseClient implements HubClient {
     Debuggee debuggee = getDebuggeeInfo(extraDebuggeeLabels);
     setDebuggeeId(debuggee.id);
     String debuggeePath = "cdbg/debuggees/" + getDebuggeeId();
-    setDbValue(debuggeePath, debuggee, 30, TimeUnit.SECONDS);
+    setDbValue(debuggeePath, debuggee, timeouts.setDebuggee);
 
     registerActiveBreakpointListener();
     isRegistered = true;
@@ -302,13 +378,15 @@ class FirebaseClient implements HubClient {
       // re-initialization. When this method throws an exception, the native agent run loop will go
       // back to calling registerDebuggee() until successful, at which point it will begin calling
       // listActiveBreakpoints() once again.
-      warn("The isRegistered flag is false, we need to re initialize.");
+      warnfmt("The isRegistered flag is false, we need to re initialize.");
       throw new Exception("The Firebase Client needs to re-initialize.");
     }
 
     Map<String, Object> snapshot = null;
     try {
-      snapshot = pendingActiveBreakpoints.poll(20, TimeUnit.SECONDS);
+      snapshot =
+          pendingActiveBreakpoints.poll(
+              timeouts.listActiveBreakpoints.value, timeouts.listActiveBreakpoints.units);
     } catch (InterruptedException e) {
       infofmt("Wait for active breakpoints update interrupted: %s", e);
     }
@@ -335,7 +413,10 @@ class FirebaseClient implements HubClient {
 
         // This is simply a precaution, it's expected the 'id' would already be present within the
         // brakpoint data.
-        breakpoint.putIfAbsent("id", breakpointId);
+        if (!breakpoint.containsKey("id")) {
+          breakpoint = new TreeMap<>(breakpoint);
+          breakpoint.put("id", breakpointId);
+        }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(outputStream, UTF_8));
@@ -419,7 +500,7 @@ class FirebaseClient implements HubClient {
     boolean isLogpoint = false;
     object = breakpointObject.get("action");
     if (object instanceof String) {
-      isLogpoint = (String) object == "LOG";
+      isLogpoint = ((String) object).equals("LOG");
     }
     boolean isSnapshot = !isLogpoint;
 
@@ -436,7 +517,7 @@ class FirebaseClient implements HubClient {
       // To note, setDbValue will throw on a failure. We allow this failure to propagate out, it
       // will indicate to the native agent code that it should retry sending the breakpoint update.
       currentBreakpoints.replace(breakpointId, breakpointObject);
-      setDbValue(activeBpPath, breakpointObject, 30, TimeUnit.SECONDS);
+      setDbValue(activeBpPath, breakpointObject, timeouts.setBreakpoint);
     } else {
       breakpointObject.put("finalTimeUnixMsec", ServerValue.TIMESTAMP);
 
@@ -445,9 +526,10 @@ class FirebaseClient implements HubClient {
         // to the 'snapshot' node regardless.
         String snapshotBpPath =
             String.format("cdbg/breakpoints/%s/snapshot/%s", getDebuggeeId(), breakpointId);
-        setDbValue(snapshotBpPath, breakpointObject, 30, TimeUnit.SECONDS);
+        setDbValue(snapshotBpPath, breakpointObject, timeouts.setBreakpoint);
 
         // Now strip potential snapshot data for the write to the 'final' node.
+        breakpointObject = new TreeMap<String, Object>(breakpointObject);
         breakpointObject.remove("evaluatedExpressions");
         breakpointObject.remove("stackFrames");
         breakpointObject.remove("variableTable");
@@ -455,11 +537,12 @@ class FirebaseClient implements HubClient {
 
       String finalBpPath =
           String.format("cdbg/breakpoints/%s/final/%s", getDebuggeeId(), breakpointId);
-      setDbValue(finalBpPath, breakpointObject, 30, TimeUnit.SECONDS);
+      setDbValue(finalBpPath, breakpointObject, timeouts.setBreakpoint);
 
       // We need to delete the breakpoint from the active breakpoints list, passing in null as the
-      // value will delete it.
-      setDbValue(activeBpPath, null, 30, TimeUnit.SECONDS);
+      // value will delete it. We also choose to do this one last, as we don't want to delete the
+      // active breakpoint until the finalized version is successfully written out.
+      setDbValue(activeBpPath, null, timeouts.setBreakpoint);
     }
   }
 
@@ -540,6 +623,7 @@ class FirebaseClient implements HubClient {
     Map<String, String> allLabels = new TreeMap<>();
     allLabels.putAll(extraDebuggeeLabels);
     allLabels.putAll(labels);
+    allLabels.put("projectid", metadata.getProjectId());
 
     if (uniquifier == null) {
       boolean hasSourceContext = ((sourceContextFiles != null) && (sourceContextFiles.length > 0));
@@ -548,7 +632,7 @@ class FirebaseClient implements HubClient {
       uniquifier = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
 
       if (!allLabels.containsKey(Labels.Debuggee.MINOR_VERSION) && !hasSourceContext) {
-        // There is no source context and minor version. It means that different versions of the
+        // There is no source context and no minor version. It means that different versions of the
         // application may be running with the same debuggee properties. Hash of application
         // binaries to generate different debuggees in this case.
         uniquifier = classPathLookup.computeDebuggeeUniquifier(uniquifier);
@@ -556,12 +640,13 @@ class FirebaseClient implements HubClient {
     }
 
     Debuggee debuggee = new Debuggee();
-    debuggee.setProject(metadata.getProjectNumber());
     debuggee.setUniquifier(uniquifier);
     debuggee.setDescription(getDebuggeeDescription());
     debuggee.setLabels(allLabels);
     debuggee.setAgentVersion(
-        String.format("google.com/java-gcp/@%d", GcpDebugletVersion.MAJOR_VERSION));
+        String.format(
+            "cloud-debug-java/v%d.%d",
+            GcpDebugletVersion.MAJOR_VERSION, GcpDebugletVersion.MINOR_VERSION));
     debuggee.setSourceContexts(sourceContextFiles);
 
     String debuggeeId = computeDebuggeeId(debuggee);
@@ -594,6 +679,7 @@ class FirebaseClient implements HubClient {
     return description.toString();
   }
 
+  /* Visible for testing. */
   public String computeDebuggeeId(Debuggee debuggee) throws NoSuchAlgorithmException {
     MessageDigest hash = MessageDigest.getInstance("SHA1");
 
@@ -603,7 +689,7 @@ class FirebaseClient implements HubClient {
     return "d-" + DatatypeConverter.printHexBinary(hash.digest()).substring(0, 8).toLowerCase();
   }
 
-  public static void updateHash(MessageDigest hash, JsonElement element) {
+  private static void updateHash(MessageDigest hash, JsonElement element) {
     if (element.isJsonArray()) {
       for (JsonElement e : element.getAsJsonArray()) {
         updateHash(hash, e);
@@ -621,6 +707,7 @@ class FirebaseClient implements HubClient {
     }
   }
 
+  /* Visible for testing */
   void initializeFirebaseApp() throws Exception {
     // Once we've successfully called FirebaseApp.initializeApp, there's no need to call it again.
     // Also unless we call delete on the FirebaseApp, it will throw an exception.
@@ -654,13 +741,15 @@ class FirebaseClient implements HubClient {
                 .setReadTimeout(30 * 1000)
                 .build();
 
-        app = FirebaseApp.initializeApp(options, "SnapshotDebugger");
+        app = this.firebaseStaticWrappers.initializeApp(options, "SnapshotDebugger");
 
         infofmt(
             "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
             databaseUrl);
 
-        Object value = getDbValue(app, "cdbg/schema_version", 10, TimeUnit.SECONDS);
+        Object value =
+            getDbValue(
+                app, this.firebaseStaticWrappers, "cdbg/schema_version", timeouts.getSchemaVersion);
         if (value != null) {
           // For our purposes, we don't care what the data is, as long long as it's not null it
           // indicates the DB exists and has been initialized for Snapshot Debugger use.
@@ -669,7 +758,6 @@ class FirebaseClient implements HubClient {
           app = null; // Otherwise the finally check will call delete!
           return;
         }
-
       } catch (Exception e) {
         infofmt(
             "Failed to find a Snapshot Debugger configured db at '%s', error: %s", databaseUrl, e);
@@ -720,15 +808,23 @@ class FirebaseClient implements HubClient {
     unregisterActiveBreakpointListener();
 
     String path = "cdbg/breakpoints/" + getDebuggeeId() + "/active";
-    activeBreakpointsRef = FirebaseDatabase.getInstance(getFirebaseApp()).getReference(path);
+    activeBreakpointsRef =
+        this.firebaseStaticWrappers.getDbInstance(getFirebaseApp()).getReference(path);
     activeBreakpointsListener =
         activeBreakpointsRef.addValueEventListener(
             new ValueEventListener() {
               @Override
               public void onDataChange(DataSnapshot dataSnapshot) {
                 Object document = dataSnapshot.getValue();
-                Map<String, Object> snapshotMap = (Map<String, Object>) dataSnapshot.getValue();
                 infofmt("Active breakpoint snapshot from the Firebase RTDB: %s", document);
+
+                // If the value is null, that means the path is now empty, ie all breakpoints have
+                // been removed.
+                Map<String, Object> snapshotMap = (Map<String, Object>) document;
+                if (document == null) {
+                  snapshotMap = new HashMap<>();
+                }
+
                 for (Map.Entry<String, Object> entry : snapshotMap.entrySet()) {
                   currentBreakpoints.putIfAbsent(entry.getKey(), entry.getValue());
                 }
@@ -757,8 +853,9 @@ class FirebaseClient implements HubClient {
     }
   }
 
-  void setDbValue(String path, Object value, long timeout, TimeUnit units) throws Exception {
-    DatabaseReference dbRef = FirebaseDatabase.getInstance(getFirebaseApp()).getReference(path);
+  void setDbValue(String path, Object value, Timeout timeout) throws Exception {
+    DatabaseReference dbRef =
+        this.firebaseStaticWrappers.getDbInstance(getFirebaseApp()).getReference(path);
 
     // A value of empty string indicates success, otherwise the string is an error message.
     final ArrayBlockingQueue<String> result = new ArrayBlockingQueue<>(1);
@@ -768,19 +865,20 @@ class FirebaseClient implements HubClient {
         new DatabaseReference.CompletionListener() {
           @Override
           public void onComplete(DatabaseError error, DatabaseReference ref) {
-            String errorString = (error == null) ? "" : error.toString();
+            String errorString = (error == null) ? "" : error.getMessage();
             result.offer(errorString);
           }
         });
 
     // Returns null on timeout.
-    String error = result.poll(timeout, units);
+    String error = result.poll(timeout.value, timeout.units);
     if (error == null) {
-      error = "Timed out after " + timeout + " " + units.toString();
+      error = "Timed out after " + timeout.value + " " + timeout.units.toString();
     }
 
     if (!error.isEmpty()) {
-      String msg = "Firebase Database write operation to '" + "' failed, error: '" + error + "'";
+      String msg =
+          "Firebase Database write operation to '" + path + "' failed, error: '" + error + "'";
       warnfmt(msg);
       throw new Exception(msg);
     }
@@ -788,12 +886,14 @@ class FirebaseClient implements HubClient {
     infofmt("Firebase Database write operation to '%s' was successful", path);
   }
 
-  /**
-   * TODO: Add comment.
-   */
-  static Object getDbValue(FirebaseApp app, final String path, long timeout, TimeUnit units)
+  /** TODO: Add comment. */
+  static Object getDbValue(
+      FirebaseApp app,
+      FirebaseStaticWrappers firebaseStaticWrappers,
+      final String path,
+      Timeout timeout)
       throws Exception {
-    DatabaseReference dbRef = FirebaseDatabase.getInstance(app).getReference(path);
+    DatabaseReference dbRef = firebaseStaticWrappers.getDbInstance(app).getReference(path);
 
     infofmt("Beginning Firebase Database read operation at '%s'", path);
 
@@ -823,11 +923,11 @@ class FirebaseClient implements HubClient {
           });
 
       // Returns null on timeout.
-      Boolean isSuccess = resultObtained.poll(timeout, units);
+      Boolean isSuccess = resultObtained.poll(timeout.value, timeout.units);
 
       // null will be returned on read timeout.
       if (isSuccess == null) {
-        infofmt("Read from %s timed out after %d %s", path, timeout, units);
+        infofmt("Read from %s timed out after %d %s", path, timeout.value, timeout.units);
         throw new Exception("Read timed out");
       } else if (!isSuccess) {
         throw new Exception("Error occured attempting to read from the DB");

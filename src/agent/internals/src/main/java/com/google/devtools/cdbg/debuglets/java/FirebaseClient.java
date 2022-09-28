@@ -752,7 +752,6 @@ class FirebaseClient implements HubClient {
     for (String databaseUrl : urls) {
       this.firebaseApp = initializeFirebaseAppForUrl(databaseUrl);
       if (this.firebaseApp != null) {
-        infofmt("Successfully initialized the FirebaseApp with url %s", databaseUrl);
         break;
       }
     }

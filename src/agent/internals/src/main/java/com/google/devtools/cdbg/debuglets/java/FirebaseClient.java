@@ -377,6 +377,10 @@ class FirebaseClient implements HubClient {
 
   @Override
   public ListActiveBreakpointsResult listActiveBreakpoints() throws Exception {
+    if (isShutdown) {
+      throw new RuntimeException("Shutdown in progress");
+    }
+
     if (!isRegistered) {
       // This occurs when the active breakpoints listener encounters an error and we need to force a
       // re-initialization. When this method throws an exception, the native agent run loop will go
@@ -577,6 +581,8 @@ class FirebaseClient implements HubClient {
     metadata.shutdown();
     unregisterActiveBreakpointListener();
     deleteFirebaseApp();
+    // This will wakeup the listActiveBreakpoints call so we exit sooner.
+    pendingActiveBreakpoints.offer(new HashMap());
     infofmt("FirebaseClient::shutdown() end");
   }
 

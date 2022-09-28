@@ -44,6 +44,13 @@ ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 # Parallelize the build over N threads where N is the number of cores * 1.5.
 PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
 
+if [[ -n "${INSTALL_DEPS}" ]]; then
+apt-get update
+apt-get -y -q --no-install-recommends install \
+    curl gcc build-essential libssl-dev unzip openjdk-8-jdk \
+    cmake python3 maven
+fi
+
 # Clean up any previous build files.
 rm -rf "${ROOT}"/third_party/gflags* \
        "${ROOT}"/third_party/glog* \

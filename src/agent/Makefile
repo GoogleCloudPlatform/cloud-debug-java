@@ -158,7 +158,7 @@ JNI_PROXIES_GENERATED_OBJECTS = \
 	jni_proxy_*.o \
 
 SOURCES := \
-	$(wildcard *.cc) \
+	$(filter-out %_test.cc, $(wildcard *.cc)) \
 	$(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) \
 	$(ANTLR_RUNTIME_SOURCES) \
 
@@ -198,7 +198,7 @@ all: \
 	target_version_txt \
 
 antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
-	mkdir -p antlrgen
+	mkdir antlrgen
 	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE)
 
 $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen

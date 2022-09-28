@@ -1078,8 +1078,6 @@ public final class FirebaseClientTest {
   }
 
   private DataSnapshot buildDataSnapshotFromJsonString(String jsonString) {
-    DataSnapshot dataSnapshot = mock(DataSnapshot.class);
-    doReturn(createObjectFromJsonString(jsonString)).when(dataSnapshot).getValue();
     return buildDataSnapshotFromJsonObject(createObjectFromJsonString(jsonString));
   }
 

@@ -120,6 +120,7 @@ class FirebaseClient implements HubClient {
   }
   ;
 
+  /** The timeouts are configurable to allows the unit test to set lower timeouts */
   static class TimeoutConfig {
     TimeoutConfig(long value, TimeUnit units) {
       this.setDebuggee = new Timeout(value, units);
@@ -329,6 +330,8 @@ class FirebaseClient implements HubClient {
    * @param metadata GCP project information and access token
    * @param classPathLookup read and explore application resources
    * @param labels debuggee labels (such as version and module)
+   * @param firebaseStaticWrappers implementation of Firebase static api calls
+   * @param the timeout values to use
    */
   public FirebaseClient(
       MetadataQuery metadata,
@@ -590,7 +593,7 @@ class FirebaseClient implements HubClient {
    *
    * @param extraDebuggeeLabels Extra labels to include in the Debuggee. These are to be in addition
    *     to the labels already collected locally that are to be included.
-   * @return debuggee registration request message
+   * @return debuggee instance to use
    */
   private Debuggee getDebuggeeInfo(Map<String, String> extraDebuggeeLabels)
       throws NoSuchAlgorithmException, IOException {
@@ -682,7 +685,12 @@ class FirebaseClient implements HubClient {
     return description.toString();
   }
 
-  /* Visible for testing. */
+  /**
+   * Computes the debuggee ID to use for the given debuggee. Visible for testing.
+   *
+   * @param debuggee the debuggee to compute the ID for.
+   * @return the debuggee ID, in string form.
+   */
   public String computeDebuggeeId(Debuggee debuggee) throws NoSuchAlgorithmException {
     MessageDigest hash = MessageDigest.getInstance("SHA1");
 
@@ -692,6 +700,14 @@ class FirebaseClient implements HubClient {
     return "d-" + DatatypeConverter.printHexBinary(hash.digest()).substring(0, 8).toLowerCase();
   }
 
+  /**
+   * Updates the current hash with the given JSON element. This is a recursive call, and for all map
+   * object will iterate over the keys/json fields in order to ensure the same hash will be computed
+   * for the same JSON content.
+   *
+   * @param hash the current hash to add to
+   * @param element the json element to add to the hash.
+   */
   private static void updateHash(MessageDigest hash, JsonElement element) {
     if (element.isJsonArray()) {
       for (JsonElement e : element.getAsJsonArray()) {
@@ -710,7 +726,13 @@ class FirebaseClient implements HubClient {
     }
   }
 
-  /* Visible for testing */
+  /**
+   * Configures a FirebaseApp instance and verifies the Firebase RTDB URL. On success, the value
+   * this.firebaseApp will be correctly set and the method returns normally, throws an Exception on
+   * error. Visible for testing
+   *
+   * @throws Exception when an error occurs or no valid database URL could be found.
+   */
   void initializeFirebaseApp() throws Exception {
     // Once we've successfully called FirebaseApp.initializeApp, there's no need to call it again.
     // Also unless we call delete on the FirebaseApp, it will throw an exception.
@@ -730,6 +752,7 @@ class FirebaseClient implements HubClient {
     for (String databaseUrl : urls) {
       this.firebaseApp = initializeFirebaseAppForUrl(databaseUrl);
       if (this.firebaseApp != null) {
+        infofmt("Successfully initialized the FirebaseApp with url %s", databaseUrl);
         break;
       }
     }
@@ -796,12 +819,17 @@ class FirebaseClient implements HubClient {
     return isAppGoodToUse ? app : null;
   }
 
+  /** Returns the FirebaseApp instance to use. */
   private synchronized FirebaseApp getFirebaseApp() throws RuntimeException {
     // If we've been shutdown, don't create any new resources, the shutdown() will be calling
     // unregisterActiveBreakpointListener(), we don't want to inadvertently create a new listener
     // after this.
     if (isShutdown) {
       throw new RuntimeException("Shutdown in progress");
+    }
+
+    if (firebaseApp == null) {
+      throw new RuntimeException("FirebaseApp is not initialized!!");
     }
 
     // Note, it may seem there is still a race here with shutdown() and deleteFirebaseApp(),
@@ -811,14 +839,19 @@ class FirebaseClient implements HubClient {
     return firebaseApp;
   }
 
-  synchronized void deleteFirebaseApp() {
+  private synchronized void deleteFirebaseApp() {
     if (firebaseApp != null) {
       firebaseApp.delete();
       firebaseApp = null;
     }
   }
 
-  synchronized void registerActiveBreakpointListener() throws RuntimeException {
+  /**
+   * Registers the active breakpoint listener. This is the mechanism the agent uses to find out
+   * about any changes to the active breakpoints in the Firebase RTDB. After first registration the
+   * callback will run to provide the current active breakpoints snapshots.
+   */
+  private synchronized void registerActiveBreakpointListener() throws RuntimeException {
     // If we've been shutdown, don't create any new resources, the shutdown() will be calling
     // unregisterActiveBreakpointListener(), we don't want to inadvertently create a new listener
     // after this.
@@ -834,7 +867,8 @@ class FirebaseClient implements HubClient {
 
     // Install a listener at the top of the active breakpoints tree for the debuggee. Whenever any
     // active breakpoint changes occur (breakpoint is modified/added/deleted), for full snapshot of
-    // the new state of the active breakpoint tree will be passed into the onDataChange().
+    // the new state of the active breakpoint tree will be passed into the onDataChange(). In
+    // addition, it will initially be called immediately to provide the current snapshot.
     activeBreakpointsListener =
         activeBreakpointsRef.addValueEventListener(
             new ValueEventListener() {
@@ -890,7 +924,16 @@ class FirebaseClient implements HubClient {
     }
   }
 
-  void setDbValue(String path, Object value, Timeout timeout) throws Exception {
+  /**
+   * Helper to set the data at a given path in the Firebase RTDB. Returns normally on success,
+   * throws an Exception on timeout or a write error.
+   *
+   * @param path The database path to write the value to.
+   * @param value The data to write. It should be a POJO that can be serialized to JSON.
+   * @param timeout How long to wait for confirmation the database was successfully written to.
+   * @throws Exception if the write timesout or if an outright error was reported.
+   */
+  private void setDbValue(String path, Object value, Timeout timeout) throws Exception {
     DatabaseReference dbRef =
         this.firebaseStaticWrappers.getDbInstance(getFirebaseApp()).getReference(path);
 
@@ -923,8 +966,18 @@ class FirebaseClient implements HubClient {
     infofmt("Firebase Database write operation to '%s' was successful", path);
   }
 
-  /** TODO: Add comment. */
-  static Object getDbValue(
+  /**
+   * Helper to read the data at a given path in the Firebase RTDB. Returns the data on success,
+   * throws an Exception on timeout or a read error.
+   *
+   * @param app The FirebaseApp instance to read from
+   * @param firebaseStaticWrappers The static wrappers to use, requires the getDbInstance method
+   * @param path The database path to read from
+   * @param timeout How long to wait for the read to complete
+   * @return Object The data read, it is a POJO that represents a JSON document
+   * @throws Exception if the write timesout or if an outright error was reported.
+   */
+  private static Object getDbValue(
       FirebaseApp app,
       FirebaseStaticWrappers firebaseStaticWrappers,
       final String path,
@@ -967,7 +1020,7 @@ class FirebaseClient implements HubClient {
         infofmt("Read from %s timed out after %d %s", path, timeout.value, timeout.units);
         throw new Exception("Read timed out");
       } else if (!isSuccess) {
-        throw new Exception("Error occured attempting to read from the DB");
+        throw new Exception("Error occurred attempting to read from the DB");
       }
     } finally {
       if (listener != null) {

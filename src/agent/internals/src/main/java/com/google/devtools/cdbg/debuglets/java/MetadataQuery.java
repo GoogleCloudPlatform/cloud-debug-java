@@ -13,6 +13,8 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
+import com.google.auth.oauth2.GoogleCredentials;
+
 /**
  * Obtains GCP project details and auth token for backend calls.
  *
@@ -27,7 +29,10 @@ interface MetadataQuery {
   /** Reads unique numeric project ID (e.g. 901565030211). */
   String getProjectNumber();
 
-  /** Reads unique numeric project ID (e.g. 901565030211). */
+  /** Retrieves the Google credentials. */
+  GoogleCredentials getGoogleCredential();
+
+  /** Retrieves OAuth access token for account authentication. */
   String getAccessToken();
 
   /** Closes HTTP connections and blocks any further calls. */

@@ -17,6 +17,7 @@ import static com.google.devtools.cdbg.debuglets.java.AgentLogger.severefmt;
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.warnfmt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
@@ -93,6 +94,9 @@ public final class GceMetadataQuery implements MetadataQuery {
   /** Cached value of GCP project number. */
   private String projectNumber = null;
 
+  /** Cached Google credentials for account authentication. */
+  private GoogleCredentials googleCredential;
+
   /** Cached OAuth access token for account authentication. */
   private String accessToken = null;
 
@@ -138,6 +142,20 @@ public final class GceMetadataQuery implements MetadataQuery {
     }
 
     return projectNumber;
+  }
+
+  @Override
+  public synchronized GoogleCredentials getGoogleCredential() {
+    if (googleCredential == null) {
+      try {
+        googleCredential = GoogleCredentials.getApplicationDefault();
+      } catch (IOException e) {
+        warnfmt(e, "Failed to query GCE metadata service");
+        return null;
+      }
+    }
+
+    return googleCredential;
   }
 
   @Override

@@ -19,5 +19,5 @@ src/agent/version.txt
 src/codegen/target
 src/codegen/*.cc
 src/codegen/*.h
+dist/
 third_party/
-version.txt

@@ -25,6 +25,7 @@ maven_install(
         "com.google.auth:google-auth-library-oauth2-http:0.26.0",
         "com.google.guava:guava:31.1-jre",
         "com.google.code.gson:gson:2.9.1",
+        "com.google.firebase:firebase-admin:9.0.0",
         "com.google.truth:truth:1.1.3",
         "javax.xml.bind:jaxb-api:2.3.1",
         "junit:junit:4.13.2",

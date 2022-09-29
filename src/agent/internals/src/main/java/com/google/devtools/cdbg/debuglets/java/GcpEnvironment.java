@@ -15,6 +15,10 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
 
+// Needed to wrap the calls to the native logging methods which may fail for unit tests of classes
+// that use the AgentLogger, since there won't be a .so loaded that provides the native methods.
+import java.lang.UnsatisfiedLinkError;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +78,11 @@ final class GcpEnvironment {
   static String getControllerBaseUrlString() {
     return System.getProperty(
         "com.google.cdbg.controller", "https://clouddebugger.googleapis.com/v2/controller/");
+  }
+
+  /** Gets the URL String of the Firebase RTDB instance. */
+  static String getFirebaseDatabaseUrlString() {
+    return getFlag("firebase_db_url", "firebase_db_url");
   }
 
   /** Lazily creates and returns the class to get access token and project information. */
@@ -202,9 +211,14 @@ final class GcpEnvironment {
       return value;
     }
 
-    value = getAgentFlag(agentFlagName);
-    if (value != null) {
-      return value;
+    try {
+      value = getAgentFlag(agentFlagName);
+
+      if (value != null) {
+        return value;
+      }
+    }
+    catch (UnsatisfiedLinkError e) {
     }
 
     return ""; // Return empty string so that we don't need to check for null references.

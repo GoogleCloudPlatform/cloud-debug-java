@@ -13,6 +13,23 @@ java_library(
 )
 
 java_library(
+    name = "firebase_client",
+    srcs = ["FirebaseClient.java"],
+    deps = [
+        ":gcp_debuglet_version",
+        ":gcp_environment",
+        ":gcp_metadata",
+        ":hub_client",
+        ":labels",
+        ":logger",
+        ":mapper",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_firebase_firebase_admin",
+        "@maven//:javax_xml_bind_jaxb_api",
+    ],
+)
+
+java_library(
     name = "gcp_hub_client",
     srcs = ["GcpHubClient.java"],
     deps = [

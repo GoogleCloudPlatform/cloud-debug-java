@@ -1,6 +1,19 @@
 load("@rules_java//java:defs.bzl", "java_test")
 
 java_test(
+    name = "DataTypeConverterTest",
+    size = "small",
+    srcs = [
+        "DataTypeConverterTest.java",
+    ],
+    deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:datatype_converter",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "FirebaseClientTest",
     size = "medium",
     srcs = [
@@ -21,6 +34,7 @@ java_test(
         "@maven//:org_mockito_mockito_core",
     ],
 )
+
 java_test(
     name = "GceMetadataQueryTest",
     size = "small",

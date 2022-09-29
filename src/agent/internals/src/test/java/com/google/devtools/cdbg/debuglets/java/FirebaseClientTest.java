@@ -223,7 +223,7 @@ public final class FirebaseClientTest {
         .thenReturn(mockSchemaVersionDbRef);
 
     // Don't set any responses for the schema_version gets, should cause an exception to be thrown
-    // since a good DB instanced couldn't be found.
+    // since a good DB instance couldn't be found.
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
@@ -232,7 +232,7 @@ public final class FirebaseClientTest {
     assertThat(ex)
         .hasMessageThat()
         .isEqualTo(
-            "Failed to initialize FirebaseApp, attempted URls:"
+            "Failed to initialize FirebaseApp, attempted URLs:"
                 + " [https://mock-project-id-cdbg.firebaseio.com,"
                 + " https://mock-project-id-default-rtdb.firebaseio.com]");
   }
@@ -254,7 +254,7 @@ public final class FirebaseClientTest {
   @Test
   public void registerDebuggeeSuccess() throws Exception {
     registerDebuggee();
-    assertThat(registeredDebuggee.id).matches("d-[0-9a-f]{8,8}");
+    assertThat(registeredDebuggee.id).matches("d-[0-9a-f]{8}");
     assertThat(registeredDebuggee.uniquifier).matches("[0-9A-F]+");
     assertThat(registeredDebuggee.description).isEqualTo("mock-project-id-default-v1-12345");
     assertThat(registeredDebuggee.labels).containsEntry("projectid", "mock-project-id");
@@ -394,7 +394,7 @@ public final class FirebaseClientTest {
     assertThat(ex)
         .hasMessageThat()
         .isEqualTo(
-            "Failed to initialize FirebaseApp, attempted URls:"
+            "Failed to initialize FirebaseApp, attempted URLs:"
                 + " [https://mock-project-id-cdbg.firebaseio.com,"
                 + " https://mock-project-id-default-rtdb.firebaseio.com]");
   }

@@ -120,7 +120,7 @@ class FirebaseClient implements HubClient {
   }
   ;
 
-  /** The timeouts are configurable to allows the unit test to set lower timeouts */
+  /** The timeouts are configurable to allow the unit test to set lower timeouts */
   static class TimeoutConfig {
     TimeoutConfig(long value, TimeUnit units) {
       this.setDebuggee = new Timeout(value, units);
@@ -763,7 +763,7 @@ class FirebaseClient implements HubClient {
     }
 
     if (this.firebaseApp == null) {
-      String errorMessage = "Failed to initialize FirebaseApp, attempted URls: " + urls;
+      String errorMessage = "Failed to initialize FirebaseApp, attempted URLs: " + urls;
       warnfmt(errorMessage);
       throw new Exception(errorMessage);
     }

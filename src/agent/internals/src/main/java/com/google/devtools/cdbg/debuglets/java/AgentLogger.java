@@ -13,8 +13,8 @@
  */
 package com.google.devtools.cdbg.debuglets.java;
 
-// Needed to wrap the calls to the native logging methods which may fail for unit tests of classes
-// that use the AgentLogger, since there won't be a .so loaded that provides the native methods.
+// Needed to wrap the calls to the native getAgentFlag method which may fail for unit tests of classes
+// that end up invoking it, since there won't be a .so loaded that provides the native methods.
 import java.lang.UnsatisfiedLinkError;
 
 import java.io.PrintWriter;

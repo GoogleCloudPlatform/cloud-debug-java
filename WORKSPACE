@@ -25,6 +25,7 @@ maven_install(
         "com.google.auth:google-auth-library-oauth2-http:0.26.0",
         "com.google.guava:guava:31.1-jre",
         "com.google.code.gson:gson:2.9.1",
+        "com.google.firebase:firebase-admin:9.0.0",
         "com.google.truth:truth:1.1.3",
         "junit:junit:4.13.2",
         "org.ow2.asm:asm:9.1",
@@ -37,3 +38,22 @@ maven_install(
     ],
 )
 
+http_archive(
+    name = "com_github_gflags_gflags",
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
+)
+
+http_archive(
+    name = "com_github_google_glog",
+    sha256 = "122fb6b712808ef43fbf80f75c52a21c9760683dae470154f02bddfc61135022",
+    strip_prefix = "glog-0.6.0",
+    urls = ["https://github.com/google/glog/archive/v0.6.0.zip"],
+)
+
+http_archive(
+  name = "com_google_googletest",
+  urls = ["https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip"],
+  strip_prefix = "googletest-609281088cfefc76f9d0ce82e1ff6c30cc3591e5",
+)

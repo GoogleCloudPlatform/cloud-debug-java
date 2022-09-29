@@ -33,8 +33,11 @@ final class ServiceAccountAuth implements MetadataQuery {
   /** Time to refresh the token before it expires. */
   private static final Duration TOKEN_EXPIRATION_BUFFER = Duration.ofSeconds(60);
 
+  /** The GoogleCredential obtained based on the service account json file. */
+  private final GoogleCredentials googleCredential;
+
   /** Runs OAuth flow to obtain the access token. */
-  private final ServiceAccountCredentials credential;
+  private final ServiceAccountCredentials serviceAccountCredential;
 
   /**
    * Class constructor
@@ -46,27 +49,39 @@ final class ServiceAccountAuth implements MetadataQuery {
     Objects.requireNonNull(serviceAccountJsonFile);
 
     InputStream serviceAccountJsonStream = new FileInputStream(serviceAccountJsonFile);
-    GoogleCredentials credentials =
-        GoogleCredentials.fromStream(serviceAccountJsonStream)
-            .createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
 
-    if (!(credentials instanceof ServiceAccountCredentials)) {
+    // Currently the class has two different credentials. The serviceAccountCredential
+    // is meant for use by the GcpHubClient which wants an AccessToken, and the
+    // googleCredential which is required by the FirebaseClient.
+
+    this.googleCredential =
+        GoogleCredentials.fromStream(serviceAccountJsonStream);
+
+    GoogleCredentials scopedCredential =
+        this.googleCredential.createScoped(Collections.singleton(CLOUD_PLATFORM_SCOPE));
+
+    if (!(scopedCredential instanceof ServiceAccountCredentials)) {
       throw new SecurityException("Cannot create service account credentials from file");
     }
-    this.credential = (ServiceAccountCredentials) credentials;
+    this.serviceAccountCredential = (ServiceAccountCredentials) scopedCredential;
 
     // A refresh is required to populate the access token and expiration fields.
-    credential.refreshIfExpired();
+    this.serviceAccountCredential.refreshIfExpired();
   }
 
   @Override
   public String getProjectId() {
-    return credential.getProjectId();
+    return serviceAccountCredential.getProjectId();
   }
 
   @Override
   public String getProjectNumber() {
-    return credential.getProjectId();
+    return serviceAccountCredential.getProjectId();
+  }
+
+  @Override
+  public synchronized GoogleCredentials getGoogleCredential() {
+    return googleCredential;
   }
 
   /**
@@ -77,17 +92,17 @@ final class ServiceAccountAuth implements MetadataQuery {
   @Override
   public synchronized String getAccessToken() {
     // Refresh the token before it expires.
-    Instant expirationTime = credential.getAccessToken().getExpirationTime().toInstant();
+    Instant expirationTime = serviceAccountCredential.getAccessToken().getExpirationTime().toInstant();
     if (Instant.now().plus(TOKEN_EXPIRATION_BUFFER).isAfter(expirationTime)) {
       try {
-        credential.refresh();
+        serviceAccountCredential.refresh();
       } catch (IOException e) {
         // Nothing we can do here.
         // Don't log since logger is not available in standalone service account auth utility.
       }
     }
 
-    String accessToken = credential.getAccessToken().getTokenValue();
+    String accessToken = serviceAccountCredential.getAccessToken().getTokenValue();
     return (accessToken == null) ? "" : accessToken;
   }
 

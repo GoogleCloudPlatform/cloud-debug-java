@@ -43,6 +43,7 @@
 
 #ifdef GCP_HUB_CLIENT
 #include "jni_proxy_api_client_datetime.h"
+#include "jni_proxy_firebaseclient.h"
 #include "jni_proxy_gcpbreakpointlabelsprovider.h"
 #include "jni_proxy_gcphubclient.h"
 #include "jni_proxy_yamlconfigparser.h"
@@ -76,6 +77,16 @@ ABSL_FLAG(string, service_account_email, "",
 
 ABSL_FLAG(string, service_account_json_file, "",
           "Path to JSON file containing private key of the service account");
+
+ABSL_FLAG(bool, use_firebase, false,
+          "Enables the use of a Firebase RTDB backend instead of the Google "
+          "Cloud Debugger backend.");
+
+
+ABSL_FLAG(string, firebase_db_url, "",
+          "When configured to use the Firebase RTDB backend, this value can be "
+          "set to specify the Firebase RTDB instance URL to use. If not "
+          "provided, will default to https://{project_id}-cdbg.firebaseio.com");
 #endif
 
 static devtools::cdbg::JvmtiAgent* g_instance = nullptr;
@@ -345,8 +356,11 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
   std::unique_ptr<devtools::cdbg::Bridge> bridge(
       new devtools::cdbg::JniBridge(
           [] () {
-              return jniproxy::GcpHubClient()->NewObject()
-                  .Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
+              return (
+                  absl::GetFlag(FLAGS_use_firebase) ?
+                    jniproxy::FirebaseClient()->NewObject() :
+                    jniproxy::GcpHubClient()->NewObject()
+                  ).Release(devtools::cdbg::ExceptionAction::LOG_AND_IGNORE);
           },
           devtools::cdbg::BreakpointToJson,
           devtools::cdbg::BreakpointFromJson));
@@ -372,6 +386,7 @@ Agent_OnLoad(JavaVM* vm, char* options, void* reserved) {
       {
         jniproxy::BindDateTimeWithClassLoader,
         jniproxy::BindGcpBreakpointLabelsProviderWithClassLoader,
+        jniproxy::BindFirebaseClientWithClassLoader,
         jniproxy::BindGcpHubClientWithClassLoader,
         jniproxy::BindYamlConfigParserWithClassLoader,
       },

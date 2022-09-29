@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -123,6 +124,11 @@ public class GcpHubClientTest {
           @Override
           public String getProjectNumber() {
             return "123456789";
+          }
+
+          @Override
+          public GoogleCredentials getGoogleCredential() {
+            return null; // Not needed for GcpHubClient
           }
 
           @Override

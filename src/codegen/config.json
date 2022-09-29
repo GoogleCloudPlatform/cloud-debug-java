@@ -276,6 +276,15 @@
       "nativeNamespace": "jniproxy"
     },
     {
+      "className": "com.google.devtools.cdbg.debuglets.java.FirebaseClient",
+      "methods": [
+        {
+          "methodName": "<init>"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
       "className": "com.google.devtools.cdbg.debuglets.java.GcpHubClient",
       "methods": [
         {

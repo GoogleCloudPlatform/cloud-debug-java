@@ -53,7 +53,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import javax.xml.bind.DatatypeConverter;
 
 class FirebaseClient implements HubClient {
   // Note, the Debuggee class is to be serialized automatically by the Firebase library. To support
@@ -703,7 +702,7 @@ class FirebaseClient implements HubClient {
     // Ideally we could just generate a Json string and then hash that, however with Gson it seems
     // there's no easy way to ensure the keys in the maps get output in a deterministic order.
     updateHash(hash, GSON.toJsonTree(debuggee));
-    return "d-" + DatatypeConverter.printHexBinary(hash.digest()).substring(0, 8).toLowerCase();
+    return "d-" + DataTypeConverter.printHexBinary(hash.digest()).substring(0, 8).toLowerCase();
   }
 
   /**

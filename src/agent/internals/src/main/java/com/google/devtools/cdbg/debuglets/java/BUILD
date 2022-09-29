@@ -3,6 +3,11 @@ load("@rules_java//java:defs.bzl", "java_library")
 package(default_visibility = ["//visibility:public"])
 
 java_library(
+    name = "datatype_converter",
+    srcs = ["DataTypeConverter.java"],
+)
+
+java_library(
     name = "gcp_debuglet_version",
     srcs = ["GcpDebugletVersion.java"],
 )
@@ -16,6 +21,7 @@ java_library(
     name = "firebase_client",
     srcs = ["FirebaseClient.java"],
     deps = [
+        ":datatype_converter",
         ":gcp_debuglet_version",
         ":gcp_environment",
         ":gcp_metadata",
@@ -25,7 +31,6 @@ java_library(
         ":mapper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_firebase_firebase_admin",
-        "@maven//:javax_xml_bind_jaxb_api",
     ],
 )
 
@@ -95,6 +100,7 @@ java_library(
         "UniquifierComputer.java",
     ],
     deps = [
+        ":datatype_converter",
         ":logger",
         ":yaml_config_parser",
         "@maven//:org_ow2_asm_asm",

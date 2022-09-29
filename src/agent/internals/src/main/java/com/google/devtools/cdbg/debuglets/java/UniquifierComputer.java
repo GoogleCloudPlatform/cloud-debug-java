@@ -57,18 +57,9 @@ final class UniquifierComputer {
     }
   }
 
-  private static final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
-
   /** Computes the SHA1 hash value and encodes it in a string. */
   public String getUniquifier() {
-    byte[] digest = hash.digest();
-    char[] hex = new char[digest.length * 2];
-    for (int i = 0, j = 0; i < digest.length; i++) {
-      byte b = digest[i];
-      hex[j++] = HEX_DIGITS[(b >> 4) & 0xf];
-      hex[j++] = HEX_DIGITS[b & 0xf];
-    }
-    return new String(hex);
+    return DataTypeConverter.printHexBinary(hash.digest());
   }
 
   /** Hashes a single application file. */

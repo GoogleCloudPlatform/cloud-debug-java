@@ -29,7 +29,6 @@ import java.util.SortedSet;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * Iterates over all the application .jar and .class files and computes their SHA1 hash. This hash
@@ -60,7 +59,7 @@ final class UniquifierComputer {
 
   /** Computes the SHA1 hash value and encodes it in a string. */
   public String getUniquifier() {
-    return DatatypeConverter.printHexBinary(hash.digest());
+    return DataTypeConverter.printHexBinary(hash.digest());
   }
 
   /** Hashes a single application file. */

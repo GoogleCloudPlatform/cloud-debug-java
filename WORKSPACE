@@ -27,7 +27,6 @@ maven_install(
         "com.google.code.gson:gson:2.9.1",
         "com.google.firebase:firebase-admin:9.0.0",
         "com.google.truth:truth:1.1.3",
-        "javax.xml.bind:jaxb-api:2.3.1",
         "junit:junit:4.13.2",
         "org.ow2.asm:asm:9.1",
         "org.mockito:mockito-core:4.6.1",

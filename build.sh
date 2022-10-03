@@ -22,8 +22,8 @@
 # The build script assumes some dependencies.
 # To install those on Debian, run this command:
 # sudo apt-get -y -q --no-install-recommends install \
-#     curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
-#     cmake python maven
+#     curl gcc build-essential libssl-dev unzip openjdk-8-jdk \
+#     cmake python3 maven
 #
 # The Java Cloud Debugger agent uses glog, gflags and jsoncpp libraries.
 # This script downloads and builds them first. Then it runs make to build
@@ -43,6 +43,22 @@ ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 
 # Parallelize the build over N threads where N is the number of cores * 1.5.
 PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
+
+# Clean up previously generated files
+pushd "${ROOT}"/third_party
+rm -rf gflags* glog* jsoncpp* instatall
+rm -f antlr/lib/cpp/src/*.o
+popd
+
+pushd "${ROOT}"/src/agent
+rm -f *.o
+rm -f *.jar
+rm -rf service-account-auth/target
+rm -rf internals/target
+rm -rf internals-class-loader/target
+rm -rf codegen/target
+popd
+
 
 if [[ -n "${INSTALL_DEPS}" ]]; then
 apt-get update

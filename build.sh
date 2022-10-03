@@ -46,18 +46,27 @@ PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
 
 # Clean up previously generated files
 pushd "${ROOT}"/third_party
-rm -rf gflags* glog* jsoncpp* instatall
+rm -rf gflags* glog* jsoncpp* install
 rm -f antlr/lib/cpp/src/*.o
 popd
 
-pushd "${ROOT}"/src/agent
-rm -f *.o
-rm -f *.jar
-rm -rf service-account-auth/target
-rm -rf internals/target
-rm -rf internals-class-loader/target
+pushd "${ROOT}"/src
+rm -f agent/*.class
+rm -f agent/*.jar
+rm -f agent/*.o
+rm -f agent/*.so
+rm -f agent/internals_class_loader_static_defs.inl
+rm -f agent/version.txt
+rm -rf agent/antlrgen
+rm -rf agent/service-account-auth/target
+rm -rf agent/internals/target
+rm -rf agent/internals-class-loader/target
+rm -f codegen/*.cc
+rm -f codegen/*.h
 rm -rf codegen/target
 popd
+
+rm -rf "${ROOT}"/dist
 
 
 if [[ -n "${INSTALL_DEPS}" ]]; then
@@ -120,7 +129,6 @@ popd
 # Build the debugger agent.
 pushd "${ROOT}"/src/agent
 mkdir -p ${ROOT}/dist
-rm -f ${ROOT}/dist/*
 make ${PARALLEL_BUILD_OPTION} \
      BUILD_TARGET_PATH="${ROOT}/dist" \
      THIRD_PARTY_LIB_PATH="${ROOT}"/third_party/install/lib \

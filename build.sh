@@ -22,8 +22,8 @@
 # The build script assumes some dependencies.
 # To install those on Debian, run this command:
 # sudo apt-get -y -q --no-install-recommends install \
-#     curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
-#     cmake python maven
+#     curl gcc build-essential libssl-dev unzip openjdk-8-jdk \
+#     cmake python3 maven
 #
 # The Java Cloud Debugger agent uses glog, gflags and jsoncpp libraries.
 # This script downloads and builds them first. Then it runs make to build
@@ -43,6 +43,31 @@ ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null; /bin/pwd -P)
 
 # Parallelize the build over N threads where N is the number of cores * 1.5.
 PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
+
+# Clean up previously generated files
+pushd "${ROOT}"/third_party
+rm -rf gflags* glog* jsoncpp* install
+rm -f antlr/lib/cpp/src/*.o
+popd
+
+pushd "${ROOT}"/src
+rm -f agent/*.class
+rm -f agent/*.jar
+rm -f agent/*.o
+rm -f agent/*.so
+rm -f agent/internals_class_loader_static_defs.inl
+rm -f agent/version.txt
+rm -rf agent/antlrgen
+rm -rf agent/service-account-auth/target
+rm -rf agent/internals/target
+rm -rf agent/internals-class-loader/target
+rm -f codegen/*.cc
+rm -f codegen/*.h
+rm -rf codegen/target
+popd
+
+rm -rf "${ROOT}"/dist
+
 
 if [[ -n "${INSTALL_DEPS}" ]]; then
 apt-get update
@@ -104,7 +129,6 @@ popd
 # Build the debugger agent.
 pushd "${ROOT}"/src/agent
 mkdir -p ${ROOT}/dist
-rm -f ${ROOT}/dist/*
 make ${PARALLEL_BUILD_OPTION} \
      BUILD_TARGET_PATH="${ROOT}/dist" \
      THIRD_PARTY_LIB_PATH="${ROOT}"/third_party/install/lib \

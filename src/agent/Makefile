@@ -5,7 +5,10 @@ OS = $(shell uname)
 
 ifneq ($(OS),Darwin)
 # Pass this flag only when building with gcc (does not exist on clang).
-ANTLR_DISABLED_WARNINGS = -Wno-unused-but-set-variable
+ANTLR_DISABLED_WARNINGS = \
+	-Wno-unused-but-set-variable \
+	-Wno-stringop-overflow \
+	-Wno-use-after-free
 endif
 
 # Ignore warning produced by glog

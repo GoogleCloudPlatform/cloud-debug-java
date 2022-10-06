@@ -69,14 +69,6 @@ Note that the build script assumes some dependencies. To install these
 dependencies, run this command:
 
 
-**On Debian 8:**
-
-```shell
-sudo apt-get -y -q --no-install-recommends install \
-    curl gcc build-essential libssl-dev unzip openjdk-7-jdk \
-    cmake python maven
-```
-
 **On Debian 9:**
 
 ```shell
@@ -227,9 +219,8 @@ supports it. Either download the pre-packaged agent from
 https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz
 or the locally built `cdbg_java_agent_service_account.tar.gz`
 
-To use the service account credentials add these system properties:
+To use the service account credentials add this system property:
 <pre>
--Dcom.google.cdbg.auth.serviceaccount.enable=<i>true</i>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/gcp-svc.json</i>
 </pre>
 
@@ -300,3 +291,27 @@ used in an expression as `MainKt.getGreeting()`
 Companion object methods can be accessed by qualifying them with the `Companion`
 keyword. For instance, the `welcome` function above can be used in an expression
 as `Main.Companion.welcome()`
+
+### Experimental Firebase Realtime Database Backend
+
+This functionality is available for release 3.0 onward of this agent.
+
+The agent can be configured to use Firebase Realtime Database as a backend
+instead of the deprecated Cloud Debugger service.  If the Firebase backend is
+used, breakpoints can be viewed and set using the Snapshot Debugger CLI instead
+of the Cloud Console.
+
+To use the Firebase backend, set the following system properties:
+
+```
+-Dcom.google.cdbg.agent.use_firebase=True
+```
+
+Additional configuration can be provided if necessary:
+
+```
+-Dcom.google.cdbg.agent.use_firebase=True
+-Dcom.google.cdbg.agent.firebase_db_url=https://my-database-url.firebaseio.com
+```
+
+See https://github.com/GoogleCloudPlatform/snapshot-debugger for more details.

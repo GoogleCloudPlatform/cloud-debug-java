@@ -68,7 +68,6 @@ popd
 
 rm -rf "${ROOT}"/dist
 
-
 if [[ -n "${INSTALL_DEPS}" ]]; then
 apt-get update
 apt-get -y -q --no-install-recommends install \

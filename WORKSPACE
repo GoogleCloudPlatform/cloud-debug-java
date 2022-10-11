@@ -28,8 +28,9 @@ maven_install(
         "com.google.firebase:firebase-admin:9.0.0",
         "com.google.truth:truth:1.1.3",
         "junit:junit:4.13.2",
-        "org.ow2.asm:asm:9.1",
+        "org.freemarker:freemarker:2.3.22",
         "org.mockito:mockito-core:4.6.1",
+        "org.ow2.asm:asm:9.1",
         "org.yaml:snakeyaml:1.32",
     ],
     repositories = [

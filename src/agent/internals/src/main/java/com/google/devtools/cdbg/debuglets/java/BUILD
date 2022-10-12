@@ -3,18 +3,23 @@ load("@rules_java//java:defs.bzl", "java_library")
 package(default_visibility = ["//visibility:public"])
 
 java_library(
+    name = "breakpoint_labels_provider",
+    srcs = ["BreakpointLabelsProvider.java"],
+)
+
+java_library(
     name = "datatype_converter",
     srcs = ["DataTypeConverter.java"],
 )
 
 java_library(
-    name = "gcp_debuglet_version",
-    srcs = ["GcpDebugletVersion.java"],
+    name = "dynamic_log_helper",
+    srcs = ["DynamicLogHelper.java"],
 )
 
 java_library(
-    name = "hub_client",
-    srcs = ["HubClient.java"],
+    name = "embed_class_loader",
+    srcs = ["EmbedClassLoader.java"],
 )
 
 java_library(
@@ -35,18 +40,17 @@ java_library(
 )
 
 java_library(
-    name = "gcp_hub_client",
-    srcs = ["GcpHubClient.java"],
+    name = "gcp_breakpoint_labels_provider",
+    srcs = ["GcpBreakpointLabelsProvider.java"],
     deps = [
+        ":breakpoint_labels_provider",
         ":gcp_debuglet_version",
-        ":gcp_environment",
-        ":gcp_metadata",
-        ":hub_client",
-        ":labels",
-        ":logger",
-        ":mapper",
-        "@maven//:com_google_code_gson_gson"
     ],
+)
+
+java_library(
+    name = "gcp_debuglet_version",
+    srcs = ["GcpDebugletVersion.java"],
 )
 
 java_library(
@@ -58,6 +62,21 @@ java_library(
         ":gcp_metadata",
         ":labels",
         ":logger",
+    ],
+)
+
+java_library(
+    name = "gcp_hub_client",
+    srcs = ["GcpHubClient.java"],
+    deps = [
+        ":gcp_debuglet_version",
+        ":gcp_environment",
+        ":gcp_metadata",
+        ":hub_client",
+        ":labels",
+        ":logger",
+        ":mapper",
+        "@maven//:com_google_code_gson_gson"
     ],
 )
 
@@ -75,6 +94,12 @@ java_library(
     ],
 )
 
+
+java_library(
+    name = "hub_client",
+    srcs = ["HubClient.java"],
+)
+
 java_library(
     name = "labels",
     srcs = ["Labels.java"],
@@ -84,6 +109,7 @@ java_library(
     name = "logger",
     srcs = ["AgentLogger.java"],
 )
+
 
 java_library(
     name = "mapper",
@@ -108,6 +134,16 @@ java_library(
 )
 
 java_library(
+    name = "statistician",
+    srcs = ["Statistician.java"],
+)
+
+java_library(
+    name = "user_id_provider",
+    srcs = ["UserIdProvider.java"],
+)
+
+java_library(
     name = "yaml_config_parser",
     srcs = [
         "YamlConfigParser.java",
@@ -119,3 +155,25 @@ java_library(
     ],
 )
 
+java_library(
+    name = "cdbg_java_agent_internals",
+    runtime_deps = [
+        ":breakpoint_labels_provider",
+        ":datatype_converter",
+        ":dynamic_log_helper",
+        ":embed_class_loader",
+        ":firebase_client",
+        ":gcp_breakpoint_labels_provider",
+        ":gcp_debuglet_version",
+        ":gcp_environment",
+        ":gcp_hub_client",
+        ":gcp_metadata",
+        ":hub_client",
+        ":labels",
+        ":logger",
+        ":mapper",
+        ":statistician",
+        ":user_id_provider",
+        "yaml_config_parser",
+    ],
+)

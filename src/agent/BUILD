@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "common",
     textual_hdrs = [
@@ -8,6 +10,45 @@ cc_library(
         "//:jdk_headers",
         "@com_github_google_glog//:glog",
     ],
+)
+
+cc_library(
+    name = "nullable",
+    hdrs = ["nullable.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "jvmti_buffer",
+    hdrs = ["jvmti_buffer.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "jni_utils_h",
+    hdrs = ["jni_utils.h"],
+    deps = [
+        ":common",
+        ":nullable",
+    ],
+)
+
+cc_library(
+    name = "jni_utils",
+    srcs = ["jni_utils.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":common",
+        ":jni_utils_h",
+        ":jvmti_buffer",
+        ":nullable",
+        "//src/codegen:jni_proxies",
+    ],
+    alwayslink = 1,
 )
 
 cc_library(
@@ -74,6 +115,46 @@ cc_library(
     hdrs = ["data_visibility_policy.h"],
     deps = [
         ":common",
+    ],
+)
+
+cc_library(
+    name = "mock_jni_env",
+    testonly = 1,
+    hdrs = ["mock_jni_env.h"],
+)
+
+cc_library(
+    name = "mock_jvmti_env",
+    testonly = 1,
+    srcs = ["mock_jvmti_env.cc"],
+    hdrs = ["mock_jvmti_env.h"],
+    deps = [
+        ":common",
+        "@com_google_googletest//:gtest_main",
+        "//:jdk_headers",
+    ],
+)
+
+cc_library(
+    name = "jvariant",
+    srcs = ["jvariant.cc"],
+    hdrs = ["jvariant.h"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+    ],
+)
+
+cc_test(
+    name = "jvariant_test",
+    srcs = ["jvariant_test.cc"],
+    deps = [
+        ":jvariant",
+        ":mock_jvmti_env",
+        ":mock_jni_env",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

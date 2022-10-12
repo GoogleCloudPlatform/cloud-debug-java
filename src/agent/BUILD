@@ -481,7 +481,7 @@ cc_library(
         ":model_util",
         ":mutex",
         ":stopwatch",
-        "@com_github_google_glog//:glog",
+        "@com_github_gflags_gflags//:gflags",
     ],
 )
 

@@ -58,3 +58,12 @@ http_archive(
   urls = ["https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip"],
   strip_prefix = "googletest-609281088cfefc76f9d0ce82e1ff6c30cc3591e5",
 )
+
+http_archive(
+    name = "jsoncpp",
+    sha256 = "f409856e5920c18d0c2fb85276e24ee607d2a09b5e7d5f0a371368903c275da2",
+    strip_prefix = "jsoncpp-1.9.5",
+    urls = [
+        "https://github.com/open-source-parsers/jsoncpp/archive/1.9.5.tar.gz",
+    ],
+)

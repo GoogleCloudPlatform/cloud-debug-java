@@ -59,6 +59,13 @@ using google::RemoveLogSink;  // NOLINT
 #define ABSL_DECLARE_FLAG(type, name) DECLARE_##type(name)
 
 namespace absl {
+#ifndef GFLAGS_NAMESPACE
+using FlagSaver = google::FlagSaver;
+#else
+using FlagSaver = GFLAGS_NAMESPACE::FlagSaver;
+#endif
+
+
 // Return the value of an old-style flag.  Not thread-safe.
 inline bool GetFlag(bool flag) { return flag; }
 inline int32 GetFlag(int32 flag) { return flag; }

@@ -24,6 +24,8 @@
 namespace devtools {
 namespace cdbg {
 
+using InputJvalueArray = const jvalue*;
+
 // JNIEnv interface is structure with pointers to functions, not a pure virtual
 // C++ class that can be mocked. To work around this problem, we create a
 // a pure virtual function for each JNIEnv function we care about and point
@@ -34,6 +36,36 @@ class MockableJNIEnv : public JNIEnv {
  public:
   MockableJNIEnv() {
     functions = &functions_;
+    functions_.CallBooleanMethodA = &CallCallBooleanMethodA;
+    functions_.CallByteMethodA = &CallCallByteMethodA;
+    functions_.CallCharMethodA = &CallCallCharMethodA;
+    functions_.CallDoubleMethodA = &CallCallDoubleMethodA;
+    functions_.CallFloatMethodA = &CallCallFloatMethodA;
+    functions_.CallIntMethodA = &CallCallIntMethodA;
+    functions_.CallLongMethodA = &CallCallLongMethodA;
+    functions_.CallNonvirtualBooleanMethodA = &CallCallNonvirtualBooleanMethodA;
+    functions_.CallNonvirtualByteMethodA = &CallCallNonvirtualByteMethodA;
+    functions_.CallNonvirtualCharMethodA = &CallCallNonvirtualCharMethodA;
+    functions_.CallNonvirtualDoubleMethodA = &CallCallNonvirtualDoubleMethodA;
+    functions_.CallNonvirtualFloatMethodA = &CallCallNonvirtualFloatMethodA;
+    functions_.CallNonvirtualIntMethodA = &CallCallNonvirtualIntMethodA;
+    functions_.CallNonvirtualLongMethodA = &CallCallNonvirtualLongMethodA;
+    functions_.CallNonvirtualObjectMethodA = &CallCallNonvirtualObjectMethodA;
+    functions_.CallNonvirtualShortMethodA = &CallCallNonvirtualShortMethodA;
+    functions_.CallNonvirtualVoidMethodA = &CallCallNonvirtualVoidMethodA;
+    functions_.CallObjectMethodA = &CallCallObjectMethodA;
+    functions_.CallShortMethodA = &CallCallShortMethodA;
+    functions_.CallStaticBooleanMethodA = &CallCallStaticBooleanMethodA;
+    functions_.CallStaticByteMethodA = &CallCallStaticByteMethodA;
+    functions_.CallStaticCharMethodA = &CallCallStaticCharMethodA;
+    functions_.CallStaticDoubleMethodA = &CallCallStaticDoubleMethodA;
+    functions_.CallStaticFloatMethodA = &CallCallStaticFloatMethodA;
+    functions_.CallStaticIntMethodA = &CallCallStaticIntMethodA;
+    functions_.CallStaticLongMethodA = &CallCallStaticLongMethodA;
+    functions_.CallStaticObjectMethodA = &CallCallStaticObjectMethodA;
+    functions_.CallStaticShortMethodA = &CallCallStaticShortMethodA;
+    functions_.CallStaticVoidMethodA = &CallCallStaticVoidMethodA;
+    functions_.CallVoidMethodA = &CallCallVoidMethodA;
     functions_.DeleteGlobalRef = &CallDeleteGlobalRef;
     functions_.DeleteLocalRef = &CallDeleteLocalRef;
     functions_.DeleteWeakGlobalRef = &CallDeleteWeakGlobalRef;
@@ -68,6 +100,76 @@ class MockableJNIEnv : public JNIEnv {
   }
   virtual ~MockableJNIEnv() {}
 
+  virtual jboolean CallBooleanMethodA(jobject obj, jmethodID methodID,
+                                      InputJvalueArray args) = 0;
+  virtual jbyte CallByteMethodA(jobject obj, jmethodID methodID,
+                                InputJvalueArray args) = 0;
+  virtual jchar CallCharMethodA(jobject obj, jmethodID methodID,
+                                InputJvalueArray args) = 0;
+  virtual jdouble CallDoubleMethodA(jobject obj, jmethodID methodID,
+                                    InputJvalueArray args) = 0;
+  virtual jfloat CallFloatMethodA(jobject obj, jmethodID methodID,
+                                  InputJvalueArray args) = 0;
+  virtual jint CallIntMethodA(jobject obj, jmethodID methodID,
+                              InputJvalueArray args) = 0;
+  virtual jlong CallLongMethodA(jobject obj, jmethodID methodID,
+                                InputJvalueArray args) = 0;
+  virtual jboolean CallNonvirtualBooleanMethodA(jobject obj, jclass clazz,
+                                                jmethodID methodID,
+                                                InputJvalueArray args) = 0;
+  virtual jbyte CallNonvirtualByteMethodA(jobject obj, jclass clazz,
+                                          jmethodID methodID,
+                                          InputJvalueArray args) = 0;
+  virtual jchar CallNonvirtualCharMethodA(jobject obj, jclass clazz,
+                                          jmethodID methodID,
+                                          InputJvalueArray args) = 0;
+  virtual jdouble CallNonvirtualDoubleMethodA(jobject obj, jclass clazz,
+                                              jmethodID methodID,
+                                              InputJvalueArray args) = 0;
+  virtual jfloat CallNonvirtualFloatMethodA(jobject obj, jclass clazz,
+                                            jmethodID methodID,
+                                            InputJvalueArray args) = 0;
+  virtual jint CallNonvirtualIntMethodA(jobject obj, jclass clazz,
+                                        jmethodID methodID,
+                                        InputJvalueArray args) = 0;
+  virtual jlong CallNonvirtualLongMethodA(jobject obj, jclass clazz,
+                                          jmethodID methodID,
+                                          InputJvalueArray args) = 0;
+  virtual jobject CallNonvirtualObjectMethodA(jobject obj, jclass clazz,
+                                              jmethodID methodID,
+                                              InputJvalueArray args) = 0;
+  virtual jshort CallNonvirtualShortMethodA(jobject obj, jclass clazz,
+                                            jmethodID methodID,
+                                            InputJvalueArray args) = 0;
+  virtual void CallNonvirtualVoidMethodA(jobject obj, jclass clazz,
+                                         jmethodID methodID,
+                                         InputJvalueArray args) = 0;
+  virtual jobject CallObjectMethodA(jobject obj, jmethodID methodID,
+                                    InputJvalueArray args) = 0;
+  virtual jshort CallShortMethodA(jobject obj, jmethodID methodID,
+                                  InputJvalueArray args) = 0;
+  virtual jboolean CallStaticBooleanMethodA(jclass clazz, jmethodID methodID,
+                                            InputJvalueArray args) = 0;
+  virtual jbyte CallStaticByteMethodA(jclass clazz, jmethodID methodID,
+                                      InputJvalueArray args) = 0;
+  virtual jchar CallStaticCharMethodA(jclass clazz, jmethodID methodID,
+                                      InputJvalueArray args) = 0;
+  virtual jdouble CallStaticDoubleMethodA(jclass clazz, jmethodID methodID,
+                                          InputJvalueArray args) = 0;
+  virtual jfloat CallStaticFloatMethodA(jclass clazz, jmethodID methodID,
+                                        InputJvalueArray args) = 0;
+  virtual jint CallStaticIntMethodA(jclass clazz, jmethodID methodID,
+                                    InputJvalueArray args) = 0;
+  virtual jlong CallStaticLongMethodA(jclass clazz, jmethodID methodID,
+                                      InputJvalueArray args) = 0;
+  virtual jobject CallStaticObjectMethodA(jclass clazz, jmethodID methodID,
+                                          InputJvalueArray args) = 0;
+  virtual jshort CallStaticShortMethodA(jclass clazz, jmethodID methodID,
+                                        InputJvalueArray args) = 0;
+  virtual void CallStaticVoidMethodA(jclass cls, jmethodID methodID,
+                                     InputJvalueArray args) = 0;
+  virtual void CallVoidMethodA(jobject obj, jmethodID methodID,
+                               InputJvalueArray args) = 0;
   virtual void DeleteGlobalRef(jobject gref) = 0;
   virtual void DeleteLocalRef(jobject obj) = 0;
   virtual void DeleteWeakGlobalRef(jweak ref) = 0;
@@ -104,6 +206,223 @@ class MockableJNIEnv : public JNIEnv {
   virtual jint Throw(jthrowable obj) = 0;
 
  private:
+  static jboolean JNICALL CallCallBooleanMethodA(JNIEnv* env, jobject obj,
+                                                 jmethodID methodID,
+                                                 InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallBooleanMethodA(
+        obj, methodID, args);
+  }
+
+  static jbyte JNICALL CallCallByteMethodA(JNIEnv* env, jobject obj,
+                                           jmethodID methodID,
+                                           InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallByteMethodA(
+        obj, methodID, args);
+  }
+
+  static jchar JNICALL CallCallCharMethodA(JNIEnv* env, jobject obj,
+                                           jmethodID methodID,
+                                           InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallCharMethodA(
+        obj, methodID, args);
+  }
+
+  static jdouble JNICALL CallCallDoubleMethodA(JNIEnv* env, jobject obj,
+                                               jmethodID methodID,
+                                               InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallDoubleMethodA(
+        obj, methodID, args);
+  }
+
+  static jfloat JNICALL CallCallFloatMethodA(JNIEnv* env, jobject obj,
+                                             jmethodID methodID,
+                                             InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallFloatMethodA(
+        obj, methodID, args);
+  }
+
+  static jint JNICALL CallCallIntMethodA(JNIEnv* env, jobject obj,
+                                         jmethodID methodID,
+                                         InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallIntMethodA(
+        obj, methodID, args);
+  }
+
+  static jlong JNICALL CallCallLongMethodA(JNIEnv* env, jobject obj,
+                                           jmethodID methodID,
+                                           InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallLongMethodA(
+        obj, methodID, args);
+  }
+
+  static jboolean JNICALL
+  CallCallNonvirtualBooleanMethodA(JNIEnv* env, jobject obj, jclass clazz,
+                                   jmethodID methodID, InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualBooleanMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jbyte JNICALL CallCallNonvirtualByteMethodA(JNIEnv* env, jobject obj,
+                                                     jclass clazz,
+                                                     jmethodID methodID,
+                                                     InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualByteMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jchar JNICALL CallCallNonvirtualCharMethodA(JNIEnv* env, jobject obj,
+                                                     jclass clazz,
+                                                     jmethodID methodID,
+                                                     InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualCharMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jdouble JNICALL
+  CallCallNonvirtualDoubleMethodA(JNIEnv* env, jobject obj, jclass clazz,
+                                  jmethodID methodID, InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualDoubleMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jfloat JNICALL CallCallNonvirtualFloatMethodA(JNIEnv* env, jobject obj,
+                                                       jclass clazz,
+                                                       jmethodID methodID,
+                                                       InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualFloatMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jint JNICALL CallCallNonvirtualIntMethodA(JNIEnv* env, jobject obj,
+                                                   jclass clazz,
+                                                   jmethodID methodID,
+                                                   InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualIntMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jlong JNICALL CallCallNonvirtualLongMethodA(JNIEnv* env, jobject obj,
+                                                     jclass clazz,
+                                                     jmethodID methodID,
+                                                     InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualLongMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jobject JNICALL
+  CallCallNonvirtualObjectMethodA(JNIEnv* env, jobject obj, jclass clazz,
+                                  jmethodID methodID, InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualObjectMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jshort JNICALL CallCallNonvirtualShortMethodA(JNIEnv* env, jobject obj,
+                                                       jclass clazz,
+                                                       jmethodID methodID,
+                                                       InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallNonvirtualShortMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static void JNICALL CallCallNonvirtualVoidMethodA(JNIEnv* env, jobject obj,
+                                                    jclass clazz,
+                                                    jmethodID methodID,
+                                                    InputJvalueArray args) {
+    static_cast<MockableJNIEnv*>(env)->CallNonvirtualVoidMethodA(
+        obj, clazz, methodID, args);
+  }
+
+  static jobject JNICALL CallCallObjectMethodA(JNIEnv* env, jobject obj,
+                                               jmethodID methodID,
+                                               InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallObjectMethodA(
+        obj, methodID, args);
+  }
+
+  static jshort JNICALL CallCallShortMethodA(JNIEnv* env, jobject obj,
+                                             jmethodID methodID,
+                                             InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallShortMethodA(
+        obj, methodID, args);
+  }
+
+  static jboolean JNICALL CallCallStaticBooleanMethodA(JNIEnv* env,
+                                                       jclass clazz,
+                                                       jmethodID methodID,
+                                                       InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticBooleanMethodA(
+        clazz, methodID, args);
+  }
+
+  static jbyte JNICALL CallCallStaticByteMethodA(JNIEnv* env, jclass clazz,
+                                                 jmethodID methodID,
+                                                 InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticByteMethodA(
+        clazz, methodID, args);
+  }
+
+  static jchar JNICALL CallCallStaticCharMethodA(JNIEnv* env, jclass clazz,
+                                                 jmethodID methodID,
+                                                 InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticCharMethodA(
+        clazz, methodID, args);
+  }
+
+  static jdouble JNICALL CallCallStaticDoubleMethodA(JNIEnv* env, jclass clazz,
+                                                     jmethodID methodID,
+                                                     InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticDoubleMethodA(
+        clazz, methodID, args);
+  }
+
+  static jfloat JNICALL CallCallStaticFloatMethodA(JNIEnv* env, jclass clazz,
+                                                   jmethodID methodID,
+                                                   InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticFloatMethodA(
+        clazz, methodID, args);
+  }
+
+  static jint JNICALL CallCallStaticIntMethodA(JNIEnv* env, jclass clazz,
+                                               jmethodID methodID,
+                                               InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticIntMethodA(
+        clazz, methodID, args);
+  }
+
+  static jlong JNICALL CallCallStaticLongMethodA(JNIEnv* env, jclass clazz,
+                                                 jmethodID methodID,
+                                                 InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticLongMethodA(
+        clazz, methodID, args);
+  }
+
+  static jobject JNICALL CallCallStaticObjectMethodA(JNIEnv* env, jclass clazz,
+                                                     jmethodID methodID,
+                                                     InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticObjectMethodA(
+        clazz, methodID, args);
+  }
+
+  static jshort JNICALL CallCallStaticShortMethodA(JNIEnv* env, jclass clazz,
+                                                   jmethodID methodID,
+                                                   InputJvalueArray args) {
+    return static_cast<MockableJNIEnv*>(env)->CallStaticShortMethodA(
+        clazz, methodID, args);
+  }
+
+  static void JNICALL CallCallStaticVoidMethodA(JNIEnv* env, jclass cls,
+                                                jmethodID methodID,
+                                                InputJvalueArray args) {
+    static_cast<MockableJNIEnv*>(env)->CallStaticVoidMethodA(
+        cls, methodID, args);
+  }
+
+  static void JNICALL CallCallVoidMethodA(JNIEnv* env, jobject obj,
+                                          jmethodID methodID,
+                                          InputJvalueArray args) {
+    static_cast<MockableJNIEnv*>(env)->CallVoidMethodA(obj, methodID, args);
+  }
+
   static void JNICALL CallDeleteGlobalRef(JNIEnv* env, jobject gref) {
     static_cast<MockableJNIEnv*>(env)->DeleteGlobalRef(gref);
   }
@@ -250,6 +569,106 @@ class MockableJNIEnv : public JNIEnv {
 
 class MockJNIEnv : public MockableJNIEnv {
  public:
+  MOCK_METHOD(jboolean, CallBooleanMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jbyte, CallByteMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jchar, CallCharMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jdouble, CallDoubleMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jfloat, CallFloatMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jint, CallIntMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jlong, CallLongMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jboolean, CallNonvirtualBooleanMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jbyte, CallNonvirtualByteMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jchar, CallNonvirtualCharMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jdouble, CallNonvirtualDoubleMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jfloat, CallNonvirtualFloatMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jint, CallNonvirtualIntMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jlong, CallNonvirtualLongMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jobject, CallNonvirtualObjectMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jshort, CallNonvirtualShortMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(void, CallNonvirtualVoidMethodA,
+              (jobject obj, jclass clazz, jmethodID methodID,
+               InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jobject, CallObjectMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jshort, CallShortMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jboolean, CallStaticBooleanMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jbyte, CallStaticByteMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jchar, CallStaticCharMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jdouble, CallStaticDoubleMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jfloat, CallStaticFloatMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jint, CallStaticIntMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jlong, CallStaticLongMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jobject, CallStaticObjectMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(jshort, CallStaticShortMethodA,
+              (jclass clazz, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(void, CallStaticVoidMethodA,
+              (jclass cls, jmethodID methodID, InputJvalueArray args),
+              (override));
+  MOCK_METHOD(void, CallVoidMethodA,
+              (jobject obj, jmethodID methodID, InputJvalueArray args),
+              (override));
   MOCK_METHOD(void, DeleteGlobalRef, (jobject gref), (override));
   MOCK_METHOD(void, DeleteLocalRef, (jobject obj), (override));
   MOCK_METHOD(void, DeleteWeakGlobalRef, (jweak ref), (override));

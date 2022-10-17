@@ -183,16 +183,6 @@ cc_library(
 )
 
 cc_library(
-    name = "method_caller",
-    hdrs = ["method_caller.h"],
-    deps = [
-        ":class_metadata_reader",
-        ":common",
-        ":model_util",
-    ],
-)
-
-cc_library(
     name = "json_eq_matcher",
     testonly = 1,
     hdrs = ["json_eq_matcher.h"],
@@ -721,6 +711,103 @@ cc_test(
 )
 
 cc_library(
+    name = "class_file",
+    srcs = ["class_file.cc"],
+    hdrs = ["class_file.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":byte_source",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":jvmti_buffer",
+        ":nullable",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "class_files_cache",
+    srcs = ["class_files_cache.cc"],
+    hdrs = ["class_files_cache.h"],
+    deps = [
+        ":class_file",
+        ":class_indexer",
+        ":common",
+        ":jobject_map",
+        ":mutex",
+        ":nullable",
+    ],
+)
+
+cc_library(
+    name = "method_caller",
+    hdrs = ["method_caller.h"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":model_util",
+    ],
+)
+
+cc_library(
+    name = "safe_method_caller",
+    srcs = ["safe_method_caller.cc"],
+    hdrs = ["safe_method_caller.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":class_file",
+        ":class_files_cache",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":config",
+        ":jni_method_caller",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jobject_map",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":method_caller",
+        ":model",
+        ":nanojava_interpreter",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "jni_method_caller",
+    srcs = ["jni_method_caller.cc"],
+    hdrs = ["jni_method_caller.h"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":method_call_result",
+    ],
+)
+
+cc_test(
+    name = "jni_method_caller_test",
+    srcs = ["jni_method_caller_test.cc"],
+    deps = [
+        ":class_metadata_reader",
+        ":fake_jni",
+        ":jni_method_caller",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "method_call_result",
     hdrs = ["method_call_result.h"],
     deps = [
@@ -733,6 +820,119 @@ cc_library(
 )
 
 cc_library(
+    name = "nanojava_internal_error_builder",
+    hdrs = ["nanojava_internal_error_builder.h"],
+    deps = [
+        ":common",
+        ":method_call_result",
+    ],
+)
+
+cc_library(
+    name = "mock_nanojava_internal_error_provider",
+    testonly = 1,
+    hdrs = ["mock_nanojava_internal_error_provider.h"],
+    deps = [
+        ":nanojava_internal_error_builder",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "nanojava_slot",
+    hdrs = ["nanojava_slot.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "nanojava_locals",
+    srcs = ["nanojava_locals.cc"],
+    hdrs = ["nanojava_locals.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":nanojava_internal_error_builder",
+        ":nanojava_slot",
+    ],
+)
+
+cc_test(
+    name = "nanojava_locals_test",
+    srcs = ["nanojava_locals_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":mock_nanojava_internal_error_provider",
+        ":nanojava_locals",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "nanojava_stack",
+    srcs = ["nanojava_stack.cc"],
+    hdrs = ["nanojava_stack.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":nanojava_internal_error_builder",
+        ":nanojava_slot",
+    ],
+)
+
+cc_test(
+    name = "nanojava_stack_test",
+    srcs = ["nanojava_stack_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":mock_nanojava_internal_error_provider",
+        ":nanojava_stack",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "nanojava_interpreter",
+    srcs = ["nanojava_interpreter.cc"],
+    hdrs = ["nanojava_interpreter.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":class_file",
+        ":common",
+        ":jni_utils",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":model",
+        ":nanojava_internal_error_builder",
+        ":nanojava_locals",
+        ":nanojava_slot",
+        ":nanojava_stack",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "safe_caller_proxies",
+    srcs = ["safe_caller_proxies.cc"],
+    hdrs = ["safe_caller_proxies.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":jvariant",
+        ":method_call_result",
+        ":method_caller",
+        ":safe_method_caller",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "config",
     srcs = ["config.cc"],
     hdrs = ["config.h"],
@@ -740,6 +940,41 @@ cc_library(
         ":common",
         ":jvariant",
         ":method_call_result",
+    ],
+)
+
+cc_test(
+    name = "config_test",
+    srcs = ["config_test.cc"],
+    deps = [
+        ":config",
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":type_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "config_builder",
+    srcs = ["config_builder.cc"],
+    hdrs = ["config_builder.h"],
+    deps = [
+        ":common",
+        ":config",
+        ":safe_caller_proxies",
+    ],
+)
+
+cc_test(
+    name = "config_builder_test",
+    srcs = ["config_builder_test.cc"],
+    deps = [
+        ":config_builder",
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":type_util",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

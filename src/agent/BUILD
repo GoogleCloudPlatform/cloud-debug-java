@@ -800,18 +800,6 @@ cc_library(
         ":model",
     ],
 )
-#
-#cc_library(
-#  name = "java_expression",
-#  srcs = ["java_expression.cc"],
-#  hdrs = ["java_expression.h"],
-#  deps = [
-#    ":common",
-#    ":expression_util",
-#    ":messages",
-#    ":model",
-#  ]
-#)
 
 genrule(
     name = "java_expression_grammar_gen",
@@ -831,18 +819,6 @@ genrule(
     cmd = "$(location //third_party/antlr:antlr_tool) -o $(@D)/antlrgen $(location java_expression.g)",
     tools = ["//third_party/antlr:antlr_tool"],
 )
-
-#cc_library(
-#  name = "java_expression_grammar",
-#  copts = ["-Ithird_party/antlr/lib/cpp", "-Isrc/agent"],
-#  srcs = [":java_expression_grammar_gen"],
-#  deps = [
-#      ":common",
-#      ":java_expression",
-#      "//third_party/antlr/lib/cpp/antlr:headers",
-#      "//third_party/antlr/lib/cpp/src:antlr",
-#  ]
-#)
 
 cc_library(
     name = "java_expression_evaluator",

@@ -889,7 +889,7 @@ TEST_F(CaptureDataCollectorTest, WatchedExpressions) {
 
   ExpectEvaluateLocalVariables(0, &locals);
 
-  // TODO(vlif): replace nullptr with "MockReadersFactory" instance.
+  // TODO: replace nullptr with "MockReadersFactory" instance.
   // For now all the expressions are static and don't require it, so don't
   // include it to speed up the build.
   watches_.push_back(CompileExpression("2 + 3", nullptr));

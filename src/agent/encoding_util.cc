@@ -15,8 +15,14 @@ std::string Base64Encode(const char* in, size_t in_size) {
   size_t out_size = ((in_size + 2) / 3) * 4;
   std::string out(out_size, 0);
 
+  auto in_value = [in](int idx) -> uint32_t {
+    return static_cast<uint32_t>(
+        reinterpret_cast<const unsigned char*>(in)[idx]);
+  };
+
   while (in_i + 2 < in_size) {
-    uint32_t in_bytes = in[in_i] << 16 | in[in_i + 1] << 8 | in[in_i + 2];
+    uint32_t in_bytes =
+        in_value(in_i) << 16 | in_value(in_i + 1) << 8 | in_value(in_i + 2);
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64Chars[(in_bytes >> 6) & 0x3F];
@@ -25,13 +31,13 @@ std::string Base64Encode(const char* in, size_t in_size) {
   }
 
   if (in_i + 1 == in_size) {
-    uint32_t in_bytes = in[in_i] << 16;
+    uint32_t in_bytes = in_value(in_i) << 16;
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64PadChar;
     out[out_i++] = kBase64PadChar;
   } else if (in_i + 2 == in_size) {
-    uint32_t in_bytes = in[in_i] << 16 | in[in_i + 1] << 8;
+    uint32_t in_bytes = in_value(in_i) << 16 | in_value(in_i + 1) << 8;
     out[out_i++] = kBase64Chars[in_bytes >> 18];
     out[out_i++] = kBase64Chars[(in_bytes >> 12) & 0x3F];
     out[out_i++] = kBase64Chars[(in_bytes >> 6) & 0x3F];

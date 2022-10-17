@@ -93,11 +93,92 @@ cc_library(
 )
 
 cc_library(
+    name = "value_formatter",
+    srcs = ["value_formatter.cc"],
+    hdrs = ["value_formatter.h"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":model_util",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "array_reader",
+    hdrs = ["array_reader.h"],
+    deps = [
+        ":common",
+        ":model_util",
+    ],
+)
+
+cc_library(
+    name = "mock_array_reader",
+    testonly = 1,
+    hdrs = ["mock_array_reader.h"],
+    deps = [
+        ":array_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "class_metadata_reader",
     hdrs = ["class_metadata_reader.h"],
     deps = [
         ":common",
         ":type_util",
+    ],
+)
+
+cc_library(
+    name = "local_variable_reader",
+    hdrs = ["local_variable_reader.h"],
+    deps = [
+        ":common",
+        ":model",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "fake_local_variable_reader",
+    testonly = 1,
+    hdrs = ["fake_local_variable_reader.h"],
+    deps = [
+        ":jvariant",
+        ":local_variable_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jvm_local_variable_reader",
+    srcs = ["jvm_local_variable_reader.cc"],
+    hdrs = ["jvm_local_variable_reader.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":local_variable_reader",
+        ":messages",
+        ":readers_factory",
+    ],
+)
+
+cc_library(
+    name = "method_locals",
+    srcs = ["method_locals.cc"],
+    hdrs = ["method_locals.h"],
+    deps = [
+        ":common",
+        ":data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_local_variable_reader",
+        ":jvmti_buffer",
+        ":mutex",
     ],
 )
 
@@ -108,6 +189,42 @@ cc_library(
         ":class_metadata_reader",
         ":common",
         ":model_util",
+    ],
+)
+
+cc_library(
+    name = "json_eq_matcher",
+    testonly = 1,
+    hdrs = ["json_eq_matcher.h"],
+    deps = [
+        ":model_json",
+        "@com_google_googletest//:gtest_main",
+        "@jsoncpp//:jsoncpp",
+    ],
+)
+
+cc_library(
+    name = "readers_factory",
+    hdrs = ["readers_factory.h"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":method_caller",
+    ],
+)
+
+cc_library(
+    name = "mock_readers_factory",
+    testonly = 1,
+    hdrs = ["mock_readers_factory.h"],
+    deps = [
+        ":common",
+        ":array_reader",
+        ":fake_instance_field_reader",
+        ":fake_local_variable_reader",
+        ":fake_static_field_reader",
+        ":readers_factory",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -241,6 +358,18 @@ cc_library(
 )
 
 cc_library(
+    name = "fake_static_field_reader",
+    testonly = 1,
+    hdrs = ["fake_static_field_reader.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":static_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "fake_instance_field_reader",
     testonly = 1,
     hdrs = ["fake_instance_field_reader.h"],
@@ -276,7 +405,24 @@ cc_test(
         ":model",
         ":model_util",
         ":static_field_reader",
-        #"//third_party/absl/strings:str_format",
+    ],
+)
+
+cc_library(
+    name = "object_evaluator",
+    hdrs = ["object_evaluator.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "mock_object_evaluator",
+    testonly = 1,
+    hdrs = ["mock_object_evaluator.h"],
+    deps = [
+        ":object_evaluator",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -373,6 +519,29 @@ cc_library(
 )
 
 cc_library(
+    name = "class_indexer",
+    hdrs = ["class_indexer.h"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":observable",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "mock_class_indexer",
+    testonly = 1,
+    hdrs = ["mock_class_indexer.h"],
+    deps = [
+        ":class_indexer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "debuggee_labels",
     srcs = ["debuggee_labels.cc"],
     hdrs = ["debuggee_labels.h"],
@@ -380,6 +549,57 @@ cc_library(
     deps = [
         ":common",
         "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "breakpoint_labels_provider",
+    hdrs = ["breakpoint_labels_provider.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "mock_breakpoint_labels_provider",
+    testonly = 1,
+    hdrs = ["mock_breakpoint_labels_provider.h"],
+    deps = [
+        ":breakpoint_labels_provider",
+        ":class_indexer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "user_id_provider",
+    hdrs = ["user_id_provider.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "jni_user_id_provider",
+    srcs = ["jni_user_id_provider.cc"],
+    hdrs = ["jni_user_id_provider.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":user_id_provider",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "mock_user_id_provider",
+    testonly = 1,
+    hdrs = ["mock_user_id_provider.h"],
+    deps = [
+        ":user_id_provider",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -501,6 +721,29 @@ cc_test(
 )
 
 cc_library(
+    name = "method_call_result",
+    hdrs = ["method_call_result.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":messages",
+        ":model",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "config",
+    srcs = ["config.cc"],
+    hdrs = ["config.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":method_call_result",
+    ],
+)
+
+cc_library(
     name = "mock_data_visibility_policy",
     testonly = 1,
     hdrs = ["mock_data_visibility_policy.h"],
@@ -525,6 +768,268 @@ cc_test(
     deps = [
         ":mock_data_visibility_policy",
         ":multi_data_visibility_policy",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "encoding_util",
+    srcs = ["encoding_util.cc"],
+    hdrs = ["encoding_util.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "expression_evaluator_h",
+    hdrs = ["expression_evaluator.h"],
+    deps = [
+        ":common",
+        ":model_util",
+        ":nullable",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "expression_util_h",
+    hdrs = ["expression_util.h"],
+    deps = [
+        ":common",
+        ":model",
+    ],
+)
+
+genrule(
+    name = "java_expression_grammar_gen",
+    srcs = ["java_expression.g"],
+    outs = [
+        "antlrgen/JavaExpressionCompiler.cc",
+        "antlrgen/JavaExpressionCompiler.hpp",
+        "antlrgen/JavaExpressionCompilerTokenTypes.hpp",
+        "antlrgen/JavaExpressionLexer.cc",
+        "antlrgen/JavaExpressionLexer.hpp",
+        "antlrgen/JavaExpressionLexerTokenTypes.hpp",
+        "antlrgen/JavaExpressionLexerTokenTypes.txt",
+        "antlrgen/JavaExpressionParser.cc",
+        "antlrgen/JavaExpressionParser.hpp",
+        "antlrgen/JavaExpressionParserTokenTypes.hpp",
+    ],
+    cmd = "$(location //third_party/antlr:antlr_tool) -o $(@D)/antlrgen $(location java_expression.g)",
+    tools = ["//third_party/antlr:antlr_tool"],
+)
+
+cc_library(
+    name = "java_expression_evaluator",
+    srcs = [
+        "array_expression_evaluator.cc",
+        "binary_expression_evaluator.cc",
+        "conditional_operator_evaluator.cc",
+        "expression_util.cc",
+        "field_evaluator.cc",
+        "identifier_evaluator.cc",
+        "instanceof_binary_expression_evaluator.cc",
+        "java_expression.cc",
+        "method_call_evaluator.cc",
+        "string_evaluator.cc",
+        "type_cast_operator_evaluator.cc",
+        "unary_expression_evaluator.cc",
+        ":java_expression_grammar_gen",
+    ],
+    hdrs = [
+        "antlrgen/JavaExpressionCompiler.hpp",
+        "antlrgen/JavaExpressionLexer.hpp",
+        "antlrgen/JavaExpressionParser.hpp",
+        "array_expression_evaluator.h",
+        "binary_expression_evaluator.h",
+        "conditional_operator_evaluator.h",
+        "expression_util.h",
+        "field_evaluator.h",
+        "identifier_evaluator.h",
+        "instanceof_binary_expression_evaluator.h",
+        "java_expression.h",
+        "literal_evaluator.h",
+        "method_call_evaluator.h",
+        "numeric_cast_evaluator.h",
+        "string_evaluator.h",
+        "type_cast_operator_evaluator.h",
+        "unary_expression_evaluator.h",
+    ],
+    copts = [
+        "-I$(BINDIR)/src/agent/antlrgen",
+        "-Isrc/agent",
+        "-Ithird_party/antlr/lib/cpp",
+    ],
+    deps = [
+        ":array_reader",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":instance_field_reader",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":jvmti_buffer",
+        ":local_variable_reader",
+        ":messages",
+        ":method_caller",
+        ":model",
+        ":model_util",
+        ":readers_factory",
+        ":static_field_reader",
+        ":type_util",
+        "//third_party/antlr/lib/cpp/antlr:headers",
+        "//third_party/antlr/lib/cpp/src:antlr",
+    ],
+)
+
+cc_library(
+    name = "eval_call_stack",
+    hdrs = ["eval_call_stack.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "mock_eval_call_stack",
+    testonly = 1,
+    hdrs = ["mock_eval_call_stack.h"],
+    deps = [
+        ":eval_call_stack",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jvm_eval_call_stack",
+    srcs = ["jvm_eval_call_stack.cc"],
+    hdrs = ["jvm_eval_call_stack.h"],
+    deps = [
+        ":common",
+        ":eval_call_stack",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvmti_buffer",
+        ":mutex",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "jvm_eval_call_stack_test",
+    srcs = ["jvm_eval_call_stack_test.cc"],
+    deps = [
+        ":common",
+        ":jvm_eval_call_stack",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jobject_map",
+    hdrs = ["jobject_map.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_test(
+    name = "jobject_map_test",
+    srcs = ["jobject_map_test.cc"],
+    deps = [
+        ":jobject_map",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jvm_evaluators",
+    hdrs = ["jvm_evaluators.h"],
+    deps = [
+        ":breakpoint_labels_provider",
+        ":config",
+        ":method_caller",
+        ":user_id_provider",
+    ],
+)
+
+cc_library(
+    name = "capture_data_collector",
+    srcs = ["capture_data_collector.cc"],
+    hdrs = ["capture_data_collector.h"],
+    deps = [
+        ":breakpoint_labels_provider",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":encoding_util",
+        ":eval_call_stack",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":jobject_map",
+        ":jvm_evaluators",
+        ":local_variable_reader",
+        ":messages",
+        ":method_locals",
+        ":model",
+        ":model_util",
+        ":object_evaluator",
+        ":readers_factory",
+        ":type_util",
+        ":user_id_provider",
+        ":value_formatter",
+    ],
+)
+
+cc_test(
+    name = "capture_data_collector_test",
+    srcs = ["capture_data_collector_test.cc"],
+    deps = [
+        ":common",
+        ":capture_data_collector",
+        ":expression_evaluator_h",
+        ":fake_instance_field_reader",
+        ":instance_field_reader",
+        ":java_expression_evaluator",
+        ":json_eq_matcher",
+        ":jvm_evaluators",
+        ":local_variable_reader",
+        ":messages",
+        ":mock_breakpoint_labels_provider",
+        ":mock_class_indexer",
+        ":mock_eval_call_stack",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        ":mock_object_evaluator",
+        ":mock_user_id_provider",
+        ":model_json",
+        ":model_util",
+        ":named_jvariant_test_util",
+        ":static_field_reader",
+        ":value_formatter",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "named_jvariant_test_util",
+    testonly = 1,
+    srcs = ["named_jvariant_test_util.cc"],
+    hdrs = ["named_jvariant_test_util.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":mock_jni_env",
+        ":model_json",
+        ":type_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -55,6 +55,25 @@ genrule(
     tools = ["//src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_proxy_code_gen_tool"],
 )
 
+genrule(
+    name = "mock_jni_proxy_code_gen_h",
+    srcs = [
+        "config.json",
+    ],
+    outs = ["generated/mock_%s.h" % c for c in ALL_GENERATED_CLASSES],
+    cmd = "$(location //src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_proxy_code_gen_tool) $(location config.json) $(@D)/generated",
+    tools = ["//src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_proxy_code_gen_tool"],
+)
+
+cc_library(
+    name = "mock_jni_proxies",
+    testonly = 1,
+    hdrs = [":mock_jni_proxy_code_gen_h"],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "jni_proxies",
     srcs = [":jni_proxy_code_gen_cc"],

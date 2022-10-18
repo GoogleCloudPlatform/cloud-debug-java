@@ -1,3 +1,5 @@
+load("//src/agent:build_defs.bzl", "jvm_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -10,6 +12,31 @@ cc_library(
         "//:jdk_headers",
         "@com_github_google_glog//:glog",
     ],
+)
+
+cc_library(
+    name = "jvm_env",
+    srcs = ["jvm_env.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        "//src/codegen:jni_proxies",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "jvm_test_base",
+    testonly = 1,
+    srcs = ["jvm_test_base.cc"],
+    deps = [
+        ":common",
+        ":jvm_env",
+        # Note, we don't use gtest_main target as it will invoke RUN_ALL_TESTS on its own
+        "@com_google_googletest//:gtest",
+    ],
+    alwayslink = 1,
 )
 
 cc_library(
@@ -89,6 +116,23 @@ cc_library(
         ":messages",
         ":model",
         ":type_util",
+    ],
+)
+
+jvm_test(
+    name = "model_util_test",
+    srcs = ["model_util_test.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    cc_deps = [
+        ":fake_jni",
+        ":json_eq_matcher",
+        ":mock_jvmti_env",
+        ":model_util",
+        "//src/codegen:jni_proxies",
+        "@com_google_googletest//:gtest",
+    ],
+    java_deps = [
+      "@maven//:com_google_api_client_google_api_client",
     ],
 )
 

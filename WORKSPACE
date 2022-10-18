@@ -22,6 +22,7 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
+        "com.google.api-client:google-api-client:1.35.2",
         "com.google.auth:google-auth-library-oauth2-http:0.26.0",
         "com.google.guava:guava:31.1-jre",
         "com.google.code.gson:gson:2.9.1",

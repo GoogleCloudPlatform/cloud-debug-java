@@ -501,6 +501,31 @@ cc_test(
 )
 
 cc_library(
+    name = "data_visibility_scrubbed_eval_call_stack",
+    srcs = ["data_visibility_scrubbed_eval_call_stack.cc"],
+    hdrs = ["data_visibility_scrubbed_eval_call_stack.h"],
+    deps = [
+        ":common",
+        ":data_visibility_policy",
+        ":eval_call_stack",
+        ":jvmti_buffer",
+    ],
+)
+
+cc_test(
+    name = "data_visibility_scrubbed_eval_call_stack_test",
+    srcs = ["data_visibility_scrubbed_eval_call_stack_test.cc"],
+    deps = [
+        ":data_visibility_scrubbed_eval_call_stack",
+        ":fake_jni",
+        ":mock_data_visibility_policy",
+        ":mock_eval_call_stack",
+        ":mock_jvmti_env",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "data_visibility_policy",
     hdrs = ["data_visibility_policy.h"],
     deps = [
@@ -539,6 +564,22 @@ cc_library(
     deps = [
         ":common",
         "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_test(
+    name = "debuggee_labels_test",
+    srcs = ["debuggee_labels_test.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":debuggee_labels",
+        ":fake_jni",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

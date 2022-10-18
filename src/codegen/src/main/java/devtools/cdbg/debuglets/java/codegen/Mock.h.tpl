@@ -19,7 +19,7 @@
 #define ${guard}
 
 #include "jni_proxy_${fileNameClass}.h"
-#include "testing/base/public/gmock.h"
+#include "gmock/gmock.h"
 
 //
 // Generated code. Don't edit.

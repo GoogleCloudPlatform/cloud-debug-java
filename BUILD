@@ -7,6 +7,7 @@ cc_library(
     "external/local_jdk/include",
     "external/local_jdk/include/linux",
   ],
+  linkstatic = 1,
   visibility = [
     "//visibility:public",
   ],

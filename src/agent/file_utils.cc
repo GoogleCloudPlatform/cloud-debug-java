@@ -31,6 +31,8 @@ namespace cdbg {
 
 namespace {
 
+// Done using the C library, as std::filesystem was introduced in C++17, and
+// we're still targetting building with C++11.
 void remove_all_files_and_dirs(const std::string& path) {
   DIR* dir;
   struct dirent* ent;
@@ -61,12 +63,14 @@ void remove_all_files_and_dirs(const std::string& path) {
 
 }  // namespace
 
-// Small utility to wrap a c string and manage its memory. Needed for the call
-// to mkdtemp, which requires a writeable c string.
-//
-// To note, the value returned from the c_str() method of std::string is not
-// useable, as it cannot be written to. And the value returned from data() is
-// not useable, as it is not guaranteed to be null terminated.
+/**
+ * Small utility to wrap a c string and manage its memory. Needed for the call
+ * to mkdtemp, which requires a writeable c string.
+ *
+ * To note, the value returned from the c_str() and data methods of std::string
+ * are not useable usabled as is, because in C++11 they both return const char*,
+ * so are not writable.
+ */
 class CString {
  public:
   CString(std::string str) {
@@ -107,7 +111,6 @@ bool SetFileContents(const std::string& filename, const std::string& data) {
   try {
     std::ofstream out(filename);
     out << data;
-    out.close();
   } catch (std::exception& e) {
     LOG(ERROR) << "Error opening/writting to " << filename << ", " << e.what();
     return false;
@@ -122,7 +125,6 @@ bool GetFileContents(const std::string& filename, std::string* data) {
     std::stringstream buffer;
     buffer << in.rdbuf();
     *data = buffer.str();
-    in.close();
   } catch (std::exception& e) {
     LOG(ERROR) << "Error opening/reading from " << filename << ", " << e.what();
     return false;

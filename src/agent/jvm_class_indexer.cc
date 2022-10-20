@@ -190,7 +190,6 @@ void JvmClassIndexer::Initialize() {
   // Keep track of already loaded classes.
   jint classes_count = 0;
   JvmtiBuffer<jclass> classes;
-  CHECK_NOTNULL(jvmti()); // JCB
   int err = jvmti()->GetLoadedClasses(&classes_count, classes.ref());
   if (err != JVMTI_ERROR_NONE) {
     LOG(ERROR) << "GetLoadedClasses failed, error: " << err;

@@ -35,6 +35,13 @@ ALL_GENERATED_CLASSES = [
     "yamlconfigparser",
 ]
 
+TEST_GENERATED_CLASSES = [
+    "classfiletextifier",
+    "jasmin_main",
+    "java_net_url",
+    "java_net_urlclassloader",
+]
+
 genrule(
     name = "jni_proxy_code_gen_cc",
     srcs = [
@@ -84,3 +91,39 @@ cc_library(
         "//src/agent:jni_utils_h",
     ],
 )
+
+genrule(
+    name = "jni_test_proxy_code_gen_cc",
+    testonly = 1,
+    srcs = [
+        "config-test.json",
+    ],
+    outs = ["generated/jni_proxy_%s.cc" % c for c in TEST_GENERATED_CLASSES],
+    cmd = "$(location //src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_test_proxy_code_gen_tool) $(location config-test.json) $(@D)/generated",
+    tools = ["//src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_test_proxy_code_gen_tool"],
+)
+
+genrule(
+    name = "jni_test_proxy_code_gen_h",
+    testonly = 1,
+    srcs = [
+        "config-test.json",
+    ],
+    outs = ["generated/jni_proxy_%s.h" % c for c in TEST_GENERATED_CLASSES],
+    cmd = "$(location //src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_test_proxy_code_gen_tool) $(location config-test.json) $(@D)/generated",
+    tools = ["//src/codegen/src/main/java/devtools/cdbg/debuglets/java/codegen:jni_test_proxy_code_gen_tool"],
+)
+
+cc_library(
+    name = "jni_test_proxies",
+    testonly = 1,
+    srcs = [":jni_test_proxy_code_gen_cc"],
+    hdrs = [":jni_test_proxy_code_gen_h"],
+    copts = ["-Isrc/agent"],
+    deps = [
+        "//src/agent:common",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+    ],
+)
+

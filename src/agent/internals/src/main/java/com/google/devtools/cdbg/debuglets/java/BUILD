@@ -128,8 +128,17 @@ java_library(
     deps = [
         ":datatype_converter",
         ":logger",
+        ":safe_caller",
         ":yaml_config_parser",
         "@maven//:org_ow2_asm_asm",
+    ],
+)
+
+java_library(
+    name = "safe_caller",
+    srcs = [
+        "ProxyObjectBase.java",
+        "SafeCallerException.java",
     ],
 )
 

@@ -18,6 +18,7 @@
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_BYTE_SOURCE_H_
 
 #include <cstdint>
+#include <cstring>
 #ifdef __APPLE__
 #include <libkern/OSByteOrder.h>
 #else
@@ -138,7 +139,15 @@ class ByteSource {
       return T();
     }
 
-    return *reinterpret_cast<const T*>(data_ + offset);
+    alignas(T) uint8_t tmpbuf[sizeof(T)];
+    const uint8_t *srcptr = data_ + offset;
+
+    if (reinterpret_cast<std::uintptr_t>(srcptr) % alignof(T) != 0) {
+      std::memcpy(tmpbuf, srcptr, sizeof(T));
+      srcptr = &tmpbuf[0];
+    }
+
+    return *reinterpret_cast<const T*>(srcptr);
   }
 
  private:

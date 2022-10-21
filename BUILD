@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
   name = "jdk_headers",
   srcs = [
@@ -11,4 +13,12 @@ cc_library(
   visibility = [
     "//visibility:public",
   ],
+)
+
+java_library(
+  name = "jasmin",
+  runtime_deps = [
+    "@jasmin//jar",
+    "@maven//:com_github_vbmacher_java_cup",
+  ]
 )

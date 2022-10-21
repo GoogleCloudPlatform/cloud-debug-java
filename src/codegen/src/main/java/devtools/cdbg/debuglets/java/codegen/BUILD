@@ -23,3 +23,14 @@ java_binary(
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals",
     ],
 )
+
+java_binary(
+    name = "jni_test_proxy_code_gen_tool",
+    testonly = 1,
+    main_class = "devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen",
+    runtime_deps = [
+        ":jni_proxy_code_gen_lib",
+        "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:class_file_textifier",
+        "@jasmin//jar",
+    ],
+)

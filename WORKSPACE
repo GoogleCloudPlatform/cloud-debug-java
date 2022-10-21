@@ -61,6 +61,13 @@ http_archive(
 )
 
 http_archive(
+    name = "com_googlesource_code_re2",
+    urls = ["https://github.com/google/re2/archive/2022-06-01.zip"],
+    strip_prefix = "re2-2022-06-01",
+    sha256 = "9f3b65f2e0c78253fcfdfce1754172b0f97ffdb643ee5fd67f0185acf91a3f28",
+)
+
+http_archive(
     name = "jsoncpp",
     sha256 = "f409856e5920c18d0c2fb85276e24ee607d2a09b5e7d5f0a371368903c275da2",
     strip_prefix = "jsoncpp-1.9.5",

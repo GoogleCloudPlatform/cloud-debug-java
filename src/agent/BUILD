@@ -1101,6 +1101,17 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "encoding_util_test",
+    srcs = ["encoding_util_test.cc"],
+    deps = [
+        ":encoding_util",
+        "@com_google_googletest//:gtest_main",
+        # Provides runetochar in util/utf.h, which the test uses.
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
 cc_library(
     name = "expression_evaluator_h",
     hdrs = ["expression_evaluator.h"],

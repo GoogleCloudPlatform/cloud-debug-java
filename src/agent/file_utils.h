@@ -34,16 +34,12 @@ class TempPath {
   ~TempPath();
 
   TempPath(const TempPath&) = delete;
-  void operator=(const TempPath&) = delete
-
-
+  void operator=(const TempPath&) = delete;
 
   std::string path() const;
 
  private:
   string temp_path_;
-
-  DISALLOW_COPY_AND_ASSIGN(TempPath);
 };
 
 /**

@@ -27,6 +27,8 @@
 namespace devtools {
 namespace cdbg {
 
+// Copied from:
+// https://github.com/abseil/abseil-cpp/blob/c2e754829628d1e9b7a16b3389cfdace76950fdf/absl/strings/escaping_test.cc#L281
 static struct {
   std::string plaintext;
   std::string cyphertext;
@@ -285,7 +287,12 @@ static struct {
     {"abcdefghijklmnopqrstuvwx", "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4"},
     {"abcdefghijklmnopqrstuvwxy", "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eQ=="},
     {"abcdefghijklmnopqrstuvwxyz", "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo="},
+};
 
+static struct {
+  std::string plaintext;
+  std::string cyphertext;
+} const base64_extra_tests[] = {
     // Tests added based on a failing capture_data_collector_test to test the
     // specific scenario with a '1' in the most significant bit position.
     {"\xC3\xBC", "w7w="},
@@ -301,11 +308,15 @@ TEST(EncodingUtil, Base64Encode) {
     EXPECT_EQ(tc.cyphertext, result);
   }
 
+  for (const auto& tc : base64_extra_tests) {
+    std::string result = Base64Encode(&tc.plaintext[0], tc.plaintext.size());
+    EXPECT_EQ(tc.cyphertext, result);
+  }
+
   // If length is zero, the plaintext pointer must be ignored.
   EXPECT_EQ(Base64Encode(nullptr, 0), "");
 }
 
-// Copied from google3/util/utf8/internal/unilib_unittest.cc.
 bool IsGood(int uv) {
   if (uv < 0) {
     return false;

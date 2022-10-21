@@ -468,8 +468,8 @@ TEST(EncodingUtil, ValidateUtf8) {
   EXPECT_TRUE(TestUTF8SpnStructurallyValid1(false));  // all valid
   EXPECT_TRUE(TestUTF8SpnStructurallyValid1(true));   // permuted valid
 
-  // More of a fuzz test, just running manning random values, most of them bad.
-  // Bassically if the test returns that's a success.
+  // More of a fuzz test, just running random values, most of them bad.
+  // Basically if the test returns that's a success.
   EXPECT_EQ(0, TestUTF8SpnStructurallyValid2(16));
   EXPECT_EQ(0, TestUTF8SpnStructurallyValid2(4));
 

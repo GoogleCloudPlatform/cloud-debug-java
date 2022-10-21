@@ -19,6 +19,26 @@
 
 using devtools::cdbg::set_thread_jni;
 
+/**
+ * Called when the Java code does the System.loadLibrary() call.
+ */
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+  // Get JVMTI interface.
+  jvmtiEnv* jvmti = nullptr;
+  int err = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION);
+  if (err != JNI_OK) {
+    return 1;
+  }
+
+  devtools::cdbg::set_jvmti(jvmti);
+
+  // Per the spec, the return value here indicates we aren't using any JVMTI
+  // methods specified in JVM versions later than the given version.  To note,
+  // we may in fact only be using methods from an even earlier version, but this
+  // is safe upperbound to report.
+  return JNI_VERSION_1_8;
+}
+
 /*
  * Class:     JvmTestMain
  * Method:    run

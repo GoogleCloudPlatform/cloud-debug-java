@@ -86,6 +86,30 @@ cc_library(
 )
 
 cc_library(
+    name = "file_utils",
+    testonly = 1,
+    srcs = ["file_utils.cc"],
+    hdrs = ["file_utils.h"],
+    deps = [
+        ":common",
+        "@com_google_googletest//:gtest",
+    ]
+)
+
+cc_library(
+    name = "jasmin_utils",
+    testonly = 1,
+    srcs = ["jasmin_utils.cc"],
+    hdrs = ["jasmin_utils.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":common",
+        ":file_utils",
+        "//src/codegen:jni_test_proxies",
+    ],
+)
+
+cc_library(
     name = "type_util",
     srcs = ["type_util.cc"],
     hdrs = ["type_util.h"],
@@ -601,6 +625,24 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_class_indexer",
+    srcs = ["jvm_class_indexer.cc"],
+    hdrs = ["jvm_class_indexer.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":class_indexer",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jobject_map",
+        ":jvmti_buffer",
+        ":mutex",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "debuggee_labels",
     srcs = ["debuggee_labels.cc"],
     hdrs = ["debuggee_labels.h"],
@@ -812,6 +854,29 @@ cc_library(
     ],
 )
 
+jvm_test(
+    name = "class_file_test",
+    srcs = ["class_file_test.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    cc_deps = [
+        ":class_file",
+        ":jasmin_utils",
+        ":jvariant",
+        ":jvm_class_indexer",
+        ":jvmti_buffer",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+        "//src/codegen:jni_test_proxies",
+        "@com_google_googletest//:gtest",
+        "@com_googlesource_code_re2//:re2",
+    ],
+    java_deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
+        "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:class_file_textifier",
+        "//:jasmin",
+    ],
+)
+
 cc_library(
     name = "class_files_cache",
     srcs = ["class_files_cache.cc"],
@@ -823,6 +888,28 @@ cc_library(
         ":jobject_map",
         ":mutex",
         ":nullable",
+    ],
+)
+
+jvm_test(
+    name = "class_files_cache_test",
+    srcs = ["class_files_cache_test.cc"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    cc_deps = [
+        ":class_files_cache",
+        ":file_utils",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_class_indexer",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+        "//src/codegen:jni_test_proxies",
+        "@com_google_googletest//:gtest",
+    ],
+    java_deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
+        "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:class_file_textifier",
+        "//:jasmin",
     ],
 )
 

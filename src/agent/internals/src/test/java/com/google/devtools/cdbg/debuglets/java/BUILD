@@ -1,5 +1,7 @@
 load("@rules_java//java:defs.bzl", "java_test")
 
+package(default_visibility = ["//visibility:public"])
+
 java_test(
     name = "DataTypeConverterTest",
     size = "small",
@@ -81,3 +83,14 @@ java_test(
     ],
 )
 
+java_library(
+    name = "class_file_textifier",
+    srcs = [
+        "ClassFileTextifier.java",
+    ],
+    deps = [
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_ow2_asm_asm",
+        "@maven//:org_ow2_asm_asm_util",
+    ],
+)

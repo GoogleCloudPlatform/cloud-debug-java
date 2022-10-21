@@ -1,0 +1,42 @@
+{
+  "classes": [
+    {
+      "className": "java.net.URL",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "(Ljava/lang/String;)V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "java.net.URLClassLoader",
+      "methods": [
+        {
+          "methodName": "<init>",
+          "methodSignature": "([Ljava/net/URL;)V"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "com.google.devtools.cdbg.debuglets.java.ClassFileTextifier",
+      "methods": [
+        {
+          "methodName": "textify"
+        }
+      ],
+      "nativeNamespace": "jniproxy"
+    },
+    {
+      "className": "jasmin.Main",
+      "methods": [
+        {
+          "methodName": "assemble"
+        }
+      ],
+      "nativeNamespace": "jniproxy::jasmin"
+    }
+  ]
+}

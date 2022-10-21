@@ -33,6 +33,11 @@ class TempPath {
   TempPath();
   ~TempPath();
 
+  TempPath(const TempPath&) = delete;
+  void operator=(const TempPath&) = delete
+
+
+
   std::string path() const;
 
  private:

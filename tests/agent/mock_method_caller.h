@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_METHOD_CALLER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_METHOD_CALLER_H_
 
-#include "method_caller.h"
 #include "gmock/gmock.h"
+#include "src/agent/method_caller.h"
 
 namespace devtools {
 namespace cdbg {

@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-
-#include "expression_evaluator.h"
-#include "expression_util.h"
-#include "fake_jni.h"
-#include "jni_utils.h"
-#include "local_variable_reader.h"
-#include "messages.h"
-#include "mock_array_reader.h"
-#include "mock_class_indexer.h"
-#include "mock_jni_env.h"
-#include "mock_jvmti_env.h"
-#include "mock_method_caller.h"
-#include "mock_readers_factory.h"
-#include "model.h"
-#include "model_util.h"
+#include "gtest/gtest.h"
+#include "src/agent/expression_evaluator.h"
+#include "src/agent/expression_util.h"
+#include "src/agent/jni_utils.h"
+#include "src/agent/messages.h"
+#include "src/agent/model.h"
+#include "src/agent/model_util.h"
+#include "src/agent/local_variable_reader.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_array_reader.h"
+#include "tests/agent/mock_class_indexer.h"
+#include "tests/agent/mock_jni_env.h"
+#include "tests/agent/mock_jvmti_env.h"
+#include "tests/agent/mock_method_caller.h"
+#include "tests/agent/mock_readers_factory.h"
 
 using testing::_;
 using testing::DoAll;

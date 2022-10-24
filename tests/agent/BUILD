@@ -213,6 +213,44 @@ cc_test(
 )
 
 cc_test(
+    name = "expressions_test",
+    srcs = ["expressions_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_array_reader",
+        ":mock_class_indexer",
+        ":mock_jvmti_env",
+        ":mock_method_caller",
+        ":mock_readers_factory",
+        "//src/agent:expression_evaluator_h",
+        "//src/agent:java_expression_evaluator",
+        "//src/agent:jni_utils_h",
+        "//src/agent:local_variable_reader",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "//src/agent:model_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "java_expression_parser_test",
+    srcs = ["java_expression_parser_test.cc"],
+    copts = [
+        "-I$(BINDIR)/src/agent/antlrgen",
+        "-Isrc/agent",
+        "-Ithird_party/antlr/lib/cpp",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:common",
+        "//src/agent:java_expression_evaluator",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "jni_method_caller_test",
     srcs = ["jni_method_caller_test.cc"],
     deps = [
@@ -440,6 +478,16 @@ cc_library(
     deps = [
         "//:jdk_headers",
         "//src/agent:common",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_method_caller",
+    testonly = 1,
+    hdrs = ["mock_method_caller.h"],
+    deps = [
+        "//src/agent:method_caller",
         "@com_google_googletest//:gtest",
     ],
 )

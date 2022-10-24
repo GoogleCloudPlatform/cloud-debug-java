@@ -21,9 +21,9 @@
 
 #include "src/agent/array_reader.h"
 #include "src/agent/readers_factory.h"
-#include "tests/agents/fake_instance_field_reader.h"
-#include "tests/agents/fake_local_variable_reader.h"
-#include "tests/agents/fake_static_field_reader.h"
+#include "tests/agent/fake_instance_field_reader.h"
+#include "tests/agent/fake_local_variable_reader.h"
+#include "tests/agent/fake_static_field_reader.h"
 
 
 namespace devtools {

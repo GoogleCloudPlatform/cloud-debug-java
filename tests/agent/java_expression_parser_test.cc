@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
 
 #include "JavaExpressionCompiler.hpp"
 #include "JavaExpressionLexer.hpp"
 #include "JavaExpressionParser.hpp"
-#include "common.h"
-#include "fake_jni.h"
-#include "java_expression.h"
-#include "mock_jvmti_env.h"
+#include "gtest/gtest.h"
+#include "src/agent/common.h"
+#include "src/agent/java_expression.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_jvmti_env.h"
 
 namespace devtools {
 namespace cdbg {

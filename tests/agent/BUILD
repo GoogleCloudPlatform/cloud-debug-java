@@ -201,6 +201,17 @@ cc_test(
 )
 
 cc_test(
+    name = "encoding_util_test",
+    srcs = ["encoding_util_test.cc"],
+    deps = [
+        "//src/agent:encoding_util",
+        "@com_google_googletest//:gtest_main",
+        # Provides runetochar in util/utf.h, which the test uses.
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+cc_test(
     name = "jni_method_caller_test",
     srcs = ["jni_method_caller_test.cc"],
     deps = [

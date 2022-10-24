@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-#include "encoding_util.h"
+#include "src/agent/encoding_util.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <random>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 // comes from @com_googlesource_code_re2//:re2, used for rune2char
 #include "util/utf.h"

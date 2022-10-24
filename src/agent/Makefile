@@ -161,7 +161,7 @@ JNI_PROXIES_GENERATED_OBJECTS = \
 	jni_proxy_*.o \
 
 SOURCES := \
-	$(filter-out %_test.cc %_test_util.cc mock_% fake_% jvm_test_base% file_utils% jasmin_utils%, $(wildcard *.cc)) \
+	$(wildcard *.cc) \
 	$(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) \
 	$(ANTLR_RUNTIME_SOURCES) \
 

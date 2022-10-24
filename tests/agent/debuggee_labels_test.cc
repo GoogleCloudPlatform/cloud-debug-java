@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "mock_ju_hashmap.h"
 #include "src/agent/jni_utils.h"

@@ -16,7 +16,7 @@
 
 #include "src/agent/jvariant.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "tests/agent/mock_jni_env.h"
 #include "tests/agent/mock_jvmti_env.h"
 

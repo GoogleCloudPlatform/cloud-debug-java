@@ -16,7 +16,7 @@
 
 #include "src/agent/model_util.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "jni_proxy_api_client_datetime.h"
 #include "tests/agent/json_eq_matcher.h"

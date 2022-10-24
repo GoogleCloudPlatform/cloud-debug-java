@@ -16,7 +16,7 @@
 
 #include "src/agent/auto_jvmti_breakpoint.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "tests/agent/fake_jni.h"
 #include "tests/agent/mock_breakpoint.h"

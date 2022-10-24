@@ -15,7 +15,7 @@
  */
 
 #include "src/agent/common.h"
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using devtools::cdbg::set_thread_jni;
 

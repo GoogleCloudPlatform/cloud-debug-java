@@ -19,7 +19,7 @@
 #include <functional>
 #include <sstream>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "jni_proxy_classfiletextifier.h"
 #include "jni_proxy_classpathlookup.h"

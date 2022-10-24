@@ -22,7 +22,7 @@
 #include "src/agent/model.h"
 #include "src/agent/model_util.h"
 #include "src/agent/static_field_reader.h"
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using testing::_;
 using testing::AtMost;

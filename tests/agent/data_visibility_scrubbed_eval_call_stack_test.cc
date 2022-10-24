@@ -16,7 +16,7 @@
 
 #include "src/agent/data_visibility_scrubbed_eval_call_stack.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "tests/agent/fake_jni.h"
 #include "tests/agent/mock_data_visibility_policy.h"

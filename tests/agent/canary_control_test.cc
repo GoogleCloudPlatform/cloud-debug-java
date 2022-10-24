@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "src/agent/callbacks_monitor.h"
 #include "tests/agent/fake_jni.h"

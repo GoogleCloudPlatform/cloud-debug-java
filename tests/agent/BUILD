@@ -11,6 +11,7 @@ cc_test(
         "//src/agent:model",
         "//src/agent:model_util",
         "//src/agent:static_field_reader",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -348,7 +349,7 @@ cc_library(
     hdrs = ["mock_array_reader.h"],
     deps = [
         "//src/agent:array_reader",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -359,7 +360,7 @@ cc_library(
     deps = [
         "//src/agent:breakpoint",
         "//src/agent:model_util",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -370,7 +371,7 @@ cc_library(
     deps = [
         "//src/agent:breakpoints_manager",
         "//src/agent:model_json",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -381,7 +382,7 @@ cc_library(
     deps = [
         "//src/agent:breakpoint_labels_provider",
         "//src/agent:class_indexer",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -391,7 +392,7 @@ cc_library(
     hdrs = ["mock_bridge.h"],
     deps = [
         "//src/agent:bridge",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -401,7 +402,7 @@ cc_library(
     hdrs = ["mock_class_indexer.h"],
     deps = [
         "//src/agent:class_indexer",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -411,7 +412,7 @@ cc_library(
     hdrs = ["mock_data_visibility_policy.h"],
     deps = [
         "//src/agent:data_visibility_policy",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -421,7 +422,7 @@ cc_library(
     hdrs = ["mock_eval_call_stack.h"],
     deps = [
         "//src/agent:eval_call_stack",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -439,7 +440,7 @@ cc_library(
     deps = [
         "//:jdk_headers",
         "//src/agent:common",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -449,7 +450,7 @@ cc_library(
     hdrs = ["mock_nanojava_internal_error_provider.h"],
     deps = [
         "//src/agent:nanojava_internal_error_builder",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -459,7 +460,7 @@ cc_library(
     hdrs = ["mock_object_evaluator.h"],
     deps = [
         "//src/agent:object_evaluator",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -474,7 +475,7 @@ cc_library(
         "//src/agent:array_reader",
         "//src/agent:common",
         "//src/agent:readers_factory",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -484,7 +485,7 @@ cc_library(
     hdrs = ["mock_user_id_provider.h"],
     deps = [
         "//src/agent:user_id_provider",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -495,7 +496,7 @@ cc_library(
     deps = [
         "//src/agent:jvariant",
         "//src/agent:local_variable_reader",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -521,7 +522,7 @@ cc_library(
         "//src/agent:common",
         "//src/agent:instance_field_reader",
         "//src/agent:jvariant",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -533,7 +534,7 @@ cc_library(
         "//src/agent:common",
         "//src/agent:jvariant",
         "//src/agent:static_field_reader",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -570,7 +571,7 @@ cc_library(
     hdrs = ["json_eq_matcher.h"],
     deps = [
         "//src/agent:model_json",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_googletest//:gtest",
         "@jsoncpp",
     ],
 )

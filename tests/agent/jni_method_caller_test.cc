@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "src/agent/class_metadata_reader.h"
 #include "tests/agent/fake_jni.h"

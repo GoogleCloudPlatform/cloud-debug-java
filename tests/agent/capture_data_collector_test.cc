@@ -30,7 +30,7 @@
 #include "src/agent/static_field_reader.h"
 #include "src/agent/value_formatter.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "tests/agent/json_eq_matcher.h"
 #include "tests/agent/fake_instance_field_reader.h"
 #include "tests/agent/mock_breakpoint_labels_provider.h"

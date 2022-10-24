@@ -30,7 +30,7 @@
 #include "src/agent/jvmti_buffer.h"
 #include "src/agent/type_util.h"
 #include "re2/re2.h"
-#include "src/agent/test_util/jasmin_utils.h"
+#include "tests/agent/jasmin_utils.h"
 
 using testing::Test;
 using testing::TestWithParam;

@@ -16,7 +16,7 @@
 
 #include "src/agent/multi_data_visibility_policy.h"
 
-#include "src/agent/test_util/mock_data_visibility_policy.h"
+#include "tests/agent/mock_data_visibility_policy.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

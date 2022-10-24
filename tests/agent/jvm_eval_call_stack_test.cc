@@ -20,8 +20,8 @@
 #include <cstdint>
 #include <iterator>
 
-#include "src/agent/test_util/mock_jni_env.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/mock_jni_env.h"
+#include "tests/agent/mock_jvmti_env.h"
 #include "gmock/gmock.h"
 
 ABSL_DECLARE_FLAG(int32, cdbg_max_stack_depth);

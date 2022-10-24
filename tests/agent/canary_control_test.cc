@@ -21,9 +21,9 @@
 #include "gmock/gmock.h"
 
 #include "src/agent/callbacks_monitor.h"
-#include "src/agent/test_util/fake_jni.h"
-#include "src/agent/test_util/mock_bridge.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_bridge.h"
+#include "tests/agent/mock_jvmti_env.h"
 #include "src/agent/model_util.h"
 
 using testing::_;

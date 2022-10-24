@@ -18,8 +18,8 @@
 
 #include "gmock/gmock.h"
 
-#include "src/agent/test_util/fake_jni.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_jvmti_env.h"
 #include "src/agent/type_util.h"
 
 ABSL_DECLARE_FLAG(bool, enable_safe_caller);

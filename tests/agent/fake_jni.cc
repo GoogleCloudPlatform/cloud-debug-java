@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "src/agent/test_util/fake_jni.h"
+#include "tests/agent/fake_jni.h"
 
-#include "src/agent/test_util/mock_jni_env.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/mock_jni_env.h"
+#include "tests/agent/mock_jvmti_env.h"
 
 using testing::_;
 using testing::DoAll;

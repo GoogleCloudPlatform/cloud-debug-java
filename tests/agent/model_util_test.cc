@@ -19,9 +19,9 @@
 #include "gmock/gmock.h"
 
 #include "jni_proxy_api_client_datetime.h"
-#include "src/agent/test_util/json_eq_matcher.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
-#include "src/agent/test_util/fake_jni.h"
+#include "tests/agent/json_eq_matcher.h"
+#include "tests/agent/mock_jvmti_env.h"
+#include "tests/agent/fake_jni.h"
 
 namespace devtools {
 namespace cdbg {

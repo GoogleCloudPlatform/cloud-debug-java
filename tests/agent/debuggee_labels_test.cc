@@ -22,9 +22,9 @@
 
 #include "mock_ju_hashmap.h"
 #include "src/agent/jni_utils.h"
-#include "src/agent/test_util/fake_jni.h"
-#include "src/agent/test_util/mock_jni_env.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_jni_env.h"
+#include "tests/agent/mock_jvmti_env.h"
 
 namespace devtools {
 namespace cdbg {

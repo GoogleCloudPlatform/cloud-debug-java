@@ -18,10 +18,10 @@
 
 #include "gmock/gmock.h"
 
-#include "src/agent/test_util/fake_jni.h"
-#include "src/agent/test_util/mock_data_visibility_policy.h"
-#include "src/agent/test_util/mock_eval_call_stack.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/fake_jni.h"
+#include "tests/agent/mock_data_visibility_policy.h"
+#include "tests/agent/mock_eval_call_stack.h"
+#include "tests/agent/mock_jvmti_env.h"
 
 namespace devtools {
 namespace cdbg {

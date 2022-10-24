@@ -31,16 +31,16 @@
 #include "src/agent/value_formatter.h"
 
 #include "gmock/gmock.h"
-#include "src/agent/test_util/json_eq_matcher.h"
-#include "src/agent/test_util/fake_instance_field_reader.h"
-#include "src/agent/test_util/mock_breakpoint_labels_provider.h"
-#include "src/agent/test_util/mock_class_indexer.h"
-#include "src/agent/test_util/mock_eval_call_stack.h"
-#include "src/agent/test_util/mock_jni_env.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
-#include "src/agent/test_util/mock_object_evaluator.h"
-#include "src/agent/test_util/mock_user_id_provider.h"
-#include "src/agent/test_util/named_jvariant_test_util.h"
+#include "tests/agent/json_eq_matcher.h"
+#include "tests/agent/fake_instance_field_reader.h"
+#include "tests/agent/mock_breakpoint_labels_provider.h"
+#include "tests/agent/mock_class_indexer.h"
+#include "tests/agent/mock_eval_call_stack.h"
+#include "tests/agent/mock_jni_env.h"
+#include "tests/agent/mock_jvmti_env.h"
+#include "tests/agent/mock_object_evaluator.h"
+#include "tests/agent/mock_user_id_provider.h"
+#include "tests/agent/named_jvariant_test_util.h"
 
 ABSL_DECLARE_FLAG(bool, cdbg_capture_user_id);
 

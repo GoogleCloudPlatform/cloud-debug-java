@@ -23,7 +23,7 @@
 
 #include "src/agent/model_json.h"
 #include "src/agent/type_util.h"
-#include "src/agent/test_util/mock_jni_env.h"
+#include "tests/agent/mock_jni_env.h"
 
 namespace devtools {
 namespace cdbg {

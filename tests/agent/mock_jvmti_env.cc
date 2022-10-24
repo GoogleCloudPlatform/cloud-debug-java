@@ -15,7 +15,7 @@
  */
 
 #include "src/agent/common.h"
-#include "src/agent/test_util/mock_jvmti_env.h"
+#include "tests/agent/mock_jvmti_env.h"
 
 namespace devtools {
 namespace cdbg {

@@ -30,7 +30,7 @@
 #include "src/agent/jni_utils.h"
 #include "src/agent/jvm_class_indexer.h"
 #include "src/agent/type_util.h"
-#include "src/agent/test_util/file_utils.h"
+#include "tests/agent/file_utils.h"
 
 namespace devtools {
 namespace cdbg {

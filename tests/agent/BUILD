@@ -426,6 +426,19 @@ cc_test(
 )
 
 cc_test(
+    name = "jvm_class_indexer_test",
+    srcs = ["jvm_class_indexer_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_class_indexer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "jvm_eval_call_stack_test",
     srcs = ["jvm_eval_call_stack_test.cc"],
     deps = [

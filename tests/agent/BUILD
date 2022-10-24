@@ -234,6 +234,50 @@ cc_test(
 )
 
 cc_test(
+    name = "format_queue_test",
+    srcs = ["format_queue_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:config_builder",
+        "//src/agent:format_queue",
+        "//src/agent:model_util",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "generic_type_evaluator_test",
+    srcs = ["generic_type_evaluator_test.cc"],
+    deps = [
+        ":fake_instance_field_reader",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:generic_type_evaluator",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "//src/agent:model_util",
+        "//src/agent:static_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "glob_data_visibility_policy_test",
+    srcs = ["glob_data_visibility_policy_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:glob_data_visibility_policy",
+        #"//util/glob",
+        #"//util/random:mt_random",
+        "@com_google_googletest//:gtest_main",
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+cc_test(
     name = "java_expression_parser_test",
     srcs = ["java_expression_parser_test.cc"],
     copts = [
@@ -261,6 +305,23 @@ cc_test(
         "//src/agent:jni_method_caller",
         "//src/agent:jni_utils",
         "//src/agent:jni_utils_h",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jni_utils_test",
+    srcs = ["jni_utils_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/codegen:mock_jni_proxies",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -296,6 +357,41 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+#cc_test(
+#    name = "jvm_breakpoint_test",
+#    srcs = ["jvm_breakpoint_test.cc"],
+#    deps = [
+#        ":fake_jni",
+#        ":json_eq_matcher",
+#        ":mock_breakpoint_labels_provider",
+#        ":mock_breakpoints_manager",
+#        ":mock_class_indexer",
+#        ":mock_class_metadata_reader",
+#        ":mock_class_path_lookup",
+#        ":mock_dynamic_logger",
+#        ":mock_eval_call_stack",
+#        ":mock_jvmti_env",
+#        ":mock_object_evaluator",
+#        ":mock_user_id_provider",
+#        "//src/agent:class_metadata_reader",
+#        "//src/agent:config_builder",
+#        "//src/agent:format_queue",
+#        "//src/agent:instance_field_reader",
+#        "//src/agent:jni_utils_h",
+#        "//src/agent:jvm_breakpoint",
+#        "//src/agent:jvm_evaluators",
+#        "//src/agent:messages",
+#        "//src/agent:method_locals",
+#        "//src/agent:model_json",
+#        "//src/agent:model_util",
+#        "//src/agent:object_evaluator",
+#        "//src/agent:resolved_source_location",
+#        "//src/agent:static_field_reader",
+#        "//src/agent:statistician",
+#        "@com_google_googletest//:gtest_main",
+#    ],
+#)
 
 cc_test(
     name = "jvm_eval_call_stack_test",

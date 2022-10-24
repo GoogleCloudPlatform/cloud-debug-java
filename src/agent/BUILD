@@ -194,12 +194,54 @@ cc_library(
 )
 
 cc_library(
+    name = "generic_type_evaluator",
+    srcs = ["generic_type_evaluator.cc"],
+    hdrs = ["generic_type_evaluator.h"],
+    deps = [
+        ":common",
+        ":instance_field_reader",
+        ":jvariant",
+        ":messages",
+        ":model",
+        ":type_evaluator",
+    ],
+)
+
+cc_library(
     name = "callbacks_monitor",
     srcs = ["callbacks_monitor.cc"],
     hdrs = ["callbacks_monitor.h"],
     deps = [
         ":common",
     ],
+)
+
+cc_library(
+    name = "format_queue",
+    srcs = ["format_queue.cc"],
+    hdrs = ["format_queue.h"],
+    deps = [
+        ":capture_data_collector",
+        ":common",
+        ":model",
+        ":mutex",
+        ":observable",
+        ":statistician",
+    ],
+)
+
+cc_library(
+    name = "statistician",
+    srcs = ["statistician.cc"],
+    hdrs = ["statistician.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":common",
+        ":mutex",
+        ":stopwatch",
+        "//src/codegen:jni_proxies",
+    ],
+    alwayslink = 1,
 )
 
 cc_library(
@@ -349,6 +391,25 @@ cc_library(
 )
 
 cc_library(
+    name = "glob_data_visibility_policy",
+    srcs = ["glob_data_visibility_policy.cc"],
+    hdrs = ["glob_data_visibility_policy.h"],
+    deps = [
+        ":data_visibility_policy",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "multi_data_visibility_policy",
+    srcs = ["multi_data_visibility_policy.cc"],
+    hdrs = ["multi_data_visibility_policy.h"],
+    deps = [
+        ":data_visibility_policy",
+    ],
+)
+
+cc_library(
     name = "class_indexer",
     hdrs = ["class_indexer.h"],
     deps = [
@@ -436,6 +497,43 @@ cc_library(
     deps = [
         ":common",
         ":model",
+    ],
+)
+
+cc_library(
+    name = "jvm_breakpoint",
+    srcs = ["jvm_breakpoint.cc"],
+    hdrs = ["jvm_breakpoint.h"],
+    deps = [
+        ":auto_jvmti_breakpoint",
+        ":breakpoint",
+        ":breakpoints_manager",
+        ":capture_data_collector",
+        ":class_indexer",
+        ":class_path_lookup",
+        ":common",
+        ":dynamic_logger",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":format_queue",
+        ":java_expression_evaluator",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_evaluators",
+        ":jvm_readers_factory",
+        ":jvmti_buffer",
+        ":leaky_bucket",
+        ":log_data_collector",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":mutex",
+        ":rate_limit",
+        ":resolved_source_location",
+        ":scheduler",
+        ":statistician",
+        ":stopwatch",
+        ":type_util",
     ],
 )
 
@@ -669,15 +767,6 @@ cc_library(
         ":common",
         ":config",
         ":safe_caller_proxies",
-    ],
-)
-
-cc_library(
-    name = "multi_data_visibility_policy",
-    srcs = ["multi_data_visibility_policy.cc"],
-    hdrs = ["multi_data_visibility_policy.h"],
-    deps = [
-        ":data_visibility_policy",
     ],
 )
 

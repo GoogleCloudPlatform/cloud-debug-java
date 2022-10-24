@@ -251,6 +251,54 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_class_metadata_reader",
+    srcs = ["jvm_class_metadata_reader.cc"],
+    hdrs = ["jvm_class_metadata_reader.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jobject_map",
+        ":jvariant",
+        ":jvm_instance_field_reader",
+        ":jvm_static_field_reader",
+        ":jvmti_buffer",
+        ":mutex",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "jvm_instance_field_reader",
+    srcs = ["jvm_instance_field_reader.cc"],
+    hdrs = ["jvm_instance_field_reader.h"],
+    deps = [
+        ":common",
+        ":instance_field_reader",
+        ":jvariant",
+        ":messages",
+    ],
+)
+
+cc_library(
+    name = "jvm_static_field_reader",
+    srcs = ["jvm_static_field_reader.cc"],
+    hdrs = ["jvm_static_field_reader.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":messages",
+        ":static_field_reader",
+    ],
+)
+
+cc_library(
     name = "type_evaluator",
     hdrs = ["type_evaluator.h"],
     deps = [
@@ -508,6 +556,18 @@ cc_library(
         ":jvariant",
         ":observable",
         ":type_util",
+    ],
+)
+
+cc_library(
+    name = "structured_data_visibility_policy",
+    srcs = ["structured_data_visibility_policy.cc"],
+    hdrs = ["structured_data_visibility_policy.h"],
+    deps = [
+        ":common",
+        ":data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
     ],
 )
 

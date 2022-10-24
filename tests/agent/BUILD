@@ -439,6 +439,26 @@ cc_test(
 )
 
 cc_test(
+    name = "jvm_class_metadata_reader_test",
+    srcs = ["jvm_class_metadata_reader_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:glob_data_visibility_policy",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jvm_class_metadata_reader",
+        "//src/agent:static_field_reader",
+        "//src/agent:structured_data_visibility_policy",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "jvm_eval_call_stack_test",
     srcs = ["jvm_eval_call_stack_test.cc"],
     deps = [

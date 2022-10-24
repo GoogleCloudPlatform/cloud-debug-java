@@ -19,8 +19,8 @@
 
 #include "gmock/gmock.h"
 
-#include "jvariant.h"
-#include "local_variable_reader.h"
+#include "src/agent/jvariant.h"
+#include "src/agent/local_variable_reader.h"
 
 namespace devtools {
 namespace cdbg {

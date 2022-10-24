@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_EVAL_CALL_STACK_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_EVAL_CALL_STACK_H_
 
-#include "eval_call_stack.h"
 #include "gmock/gmock.h"
+#include "src/agent/eval_call_stack.h"
 
 namespace devtools {
 namespace cdbg {

@@ -19,8 +19,8 @@
 
 #include <cstdint>
 
-#include "data_visibility_policy.h"
 #include "gmock/gmock.h"
+#include "src/agent/data_visibility_policy.h"
 
 namespace devtools {
 namespace cdbg {

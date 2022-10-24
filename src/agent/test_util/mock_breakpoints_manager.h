@@ -19,8 +19,8 @@
 
 #include "gmock/gmock.h"
 
-#include "breakpoints_manager.h"
-#include "model_json.h"
+#include "src/agent/breakpoints_manager.h"
+#include "src/agent/model_json.h"
 
 namespace devtools {
 namespace cdbg {

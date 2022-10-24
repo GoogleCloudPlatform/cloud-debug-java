@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_
 
 #include "gmock/gmock.h"
-
-#include "breakpoint_labels_provider.h"
-#include "class_indexer.h"
+#include "src/agent/nanojava_internal_error_builder.h"
 
 namespace devtools {
 namespace cdbg {
+namespace nanojava {
 
-class MockBreakpointLabelsProvider : public BreakpointLabelsProvider {
+class MockNanoJavaInternalErrorProvider
+    : public NanoJavaInternalErrorProvider {
  public:
-  MOCK_METHOD(void, Collect, (), (override));
+  MOCK_METHOD(std::string, method_name, (), (const, override));
 
-  MOCK_METHOD((std::map<std::string, std::string>), Format, (), (override));
+  MOCK_METHOD(std::string, FormatCallStack, (), (const, override));
+
+  MOCK_METHOD(void, SetResult, (MethodCallResult), (override));
 };
 
+}  // namespace nanojava
 }  // namespace cdbg
 }  // namespace devtools
 
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_

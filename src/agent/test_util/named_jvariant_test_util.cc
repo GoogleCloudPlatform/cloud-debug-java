@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "named_jvariant_test_util.h"
+#include "src/agent/test_util/named_jvariant_test_util.h"
 
 using testing::NotNull;
 using testing::Return;

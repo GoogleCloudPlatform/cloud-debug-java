@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_USER_ID_PROVIDER_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_USER_ID_PROVIDER_H_
 
-#include "array_reader.h"
 #include "gmock/gmock.h"
+#include "src/agent/user_id_provider.h"
 
 namespace devtools {
 namespace cdbg {
 
-class MockArrayReader : public ArrayReader {
+class MockUserIdProvider : public UserIdProvider {
  public:
-  MOCK_METHOD(ErrorOr<JVariant>, ReadValue, (const JVariant&, const JVariant&),
-              (const, override));
+  MOCK_METHOD(void, Collect, (), (override));
+
+  MOCK_METHOD(bool, Format, (std::string * kind, std::string* id), (override));
 };
 
 }  // namespace cdbg
 }  // namespace devtools
 
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_USER_ID_PROVIDER_H_

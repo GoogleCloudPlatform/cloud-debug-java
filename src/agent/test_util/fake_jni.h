@@ -22,9 +22,9 @@
 #include <set>
 #include <vector>
 
-#include "class_metadata_reader.h"
-#include "common.h"
-#include "jvariant.h"
+#include "src/agent/class_metadata_reader.h"
+#include "src/agent/common.h"
+#include "src/agent/jvariant.h"
 
 
 namespace devtools {

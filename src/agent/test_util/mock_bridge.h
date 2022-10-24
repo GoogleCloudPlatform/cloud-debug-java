@@ -19,7 +19,7 @@
 
 #include "gmock/gmock.h"
 
-#include "bridge.h"
+#include "src/agent/bridge.h"
 
 namespace devtools {
 namespace cdbg {

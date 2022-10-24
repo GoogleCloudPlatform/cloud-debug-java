@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_FAKE_STATIC_FIELD_READER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_FAKE_STATIC_FIELD_READER_H_
 
-#include "static_field_reader.h"
 #include "gmock/gmock.h"
+#include "src/agent/static_field_reader.h"
 
 namespace devtools {
 namespace cdbg {

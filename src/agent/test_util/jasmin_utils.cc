@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "jasmin_utils.h"
+#include "src/agent/test_util/jasmin_utils.h"
 
-#include "file_utils.h"
 #include "jni_proxy_classfiletextifier.h"
 #include "jni_proxy_jasmin_main.h"
+
+#include "src/agent/test_util/file_utils.h"
 
 namespace devtools {
 namespace cdbg {

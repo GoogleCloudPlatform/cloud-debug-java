@@ -18,8 +18,8 @@
 
 #include "gmock/gmock.h"
 
-#include "fake_jni.h"
-#include "mock_jvmti_env.h"
+#include "src/agent/test_util/fake_jni.h"
+#include "src/agent/test_util/mock_jvmti_env.h"
 #include "type_util.h"
 
 namespace devtools {

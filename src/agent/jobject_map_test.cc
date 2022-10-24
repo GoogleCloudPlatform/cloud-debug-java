@@ -20,8 +20,8 @@
 
 #include "gmock/gmock.h"
 
-#include "mock_jni_env.h"
-#include "mock_jvmti_env.h"
+#include "src/agent/test_util/mock_jni_env.h"
+#include "src/agent/test_util/mock_jvmti_env.h"
 
 using testing::_;
 using testing::Eq;

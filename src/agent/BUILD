@@ -27,19 +27,6 @@ cc_library(
 )
 
 cc_library(
-    name = "jvm_test_base",
-    testonly = 1,
-    srcs = ["jvm_test_base.cc"],
-    deps = [
-        ":common",
-        ":jvm_env",
-        # Note, we don't use gtest_main target as it will invoke RUN_ALL_TESTS on its own
-        "@com_google_googletest//:gtest",
-    ],
-    alwayslink = 1,
-)
-
-cc_library(
     name = "nullable",
     hdrs = ["nullable.h"],
     deps = [
@@ -86,30 +73,6 @@ cc_library(
 )
 
 cc_library(
-    name = "file_utils",
-    testonly = 1,
-    srcs = ["file_utils.cc"],
-    hdrs = ["file_utils.h"],
-    deps = [
-        ":common",
-        "@com_google_googletest//:gtest",
-    ]
-)
-
-cc_library(
-    name = "jasmin_utils",
-    testonly = 1,
-    srcs = ["jasmin_utils.cc"],
-    hdrs = ["jasmin_utils.h"],
-    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
-    deps = [
-        ":common",
-        ":file_utils",
-        "//src/codegen:jni_test_proxies",
-    ],
-)
-
-cc_library(
     name = "type_util",
     srcs = ["type_util.cc"],
     hdrs = ["type_util.h"],
@@ -148,10 +111,10 @@ jvm_test(
     srcs = ["model_util_test.cc"],
     copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
     cc_deps = [
-        ":fake_jni",
-        ":json_eq_matcher",
-        ":mock_jvmti_env",
         ":model_util",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:json_eq_matcher",
+        "//src/agent/test_util:mock_jvmti_env",
         "//src/codegen:jni_proxies",
         "@com_google_googletest//:gtest",
     ],
@@ -183,16 +146,6 @@ cc_library(
 )
 
 cc_library(
-    name = "mock_array_reader",
-    testonly = 1,
-    hdrs = ["mock_array_reader.h"],
-    deps = [
-        ":array_reader",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "class_metadata_reader",
     hdrs = ["class_metadata_reader.h"],
     deps = [
@@ -208,17 +161,6 @@ cc_library(
         ":common",
         ":model",
         ":type_util",
-    ],
-)
-
-cc_library(
-    name = "fake_local_variable_reader",
-    testonly = 1,
-    hdrs = ["fake_local_variable_reader.h"],
-    deps = [
-        ":jvariant",
-        ":local_variable_reader",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -251,38 +193,12 @@ cc_library(
 )
 
 cc_library(
-    name = "json_eq_matcher",
-    testonly = 1,
-    hdrs = ["json_eq_matcher.h"],
-    deps = [
-        ":model_json",
-        "@com_google_googletest//:gtest_main",
-        "@jsoncpp//:jsoncpp",
-    ],
-)
-
-cc_library(
     name = "readers_factory",
     hdrs = ["readers_factory.h"],
     deps = [
         ":class_metadata_reader",
         ":common",
         ":method_caller",
-    ],
-)
-
-cc_library(
-    name = "mock_readers_factory",
-    testonly = 1,
-    hdrs = ["mock_readers_factory.h"],
-    deps = [
-        ":common",
-        ":array_reader",
-        ":fake_instance_field_reader",
-        ":fake_local_variable_reader",
-        ":fake_static_field_reader",
-        ":readers_factory",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -326,38 +242,6 @@ cc_library(
 cc_library(
     name = "mutex",
     hdrs = ["mutex.h"],
-)
-
-cc_library(
-    name = "mock_jni_env",
-    testonly = 1,
-    hdrs = ["mock_jni_env.h"],
-)
-
-cc_library(
-    name = "mock_jvmti_env",
-    testonly = 1,
-    srcs = ["mock_jvmti_env.cc"],
-    hdrs = ["mock_jvmti_env.h"],
-    deps = [
-        ":common",
-        "@com_google_googletest//:gtest_main",
-        "//:jdk_headers",
-    ],
-)
-
-cc_library(
-    name = "fake_jni",
-    testonly = 1,
-    srcs = ["fake_jni.cc"],
-    hdrs = ["fake_jni.h"],
-    deps = [
-        ":class_metadata_reader",
-        ":common",
-        ":jvariant",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
-    ],
 )
 
 cc_library(
@@ -416,30 +300,6 @@ cc_library(
 )
 
 cc_library(
-    name = "fake_static_field_reader",
-    testonly = 1,
-    hdrs = ["fake_static_field_reader.h"],
-    deps = [
-        ":common",
-        ":jvariant",
-        ":static_field_reader",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "fake_instance_field_reader",
-    testonly = 1,
-    hdrs = ["fake_instance_field_reader.h"],
-    deps = [
-        ":common",
-        ":instance_field_reader",
-        ":jvariant",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "array_type_evaluator",
     hdrs = ["array_type_evaluator.h"],
     deps = [
@@ -457,9 +317,9 @@ cc_test(
     srcs = ["array_type_evaluator_test.cc"],
     deps = [
         ":array_type_evaluator",
-        ":fake_instance_field_reader",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_instance_field_reader",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
         ":model",
         ":model_util",
         ":static_field_reader",
@@ -471,16 +331,6 @@ cc_library(
     hdrs = ["object_evaluator.h"],
     deps = [
         ":common",
-    ],
-)
-
-cc_library(
-    name = "mock_object_evaluator",
-    testonly = 1,
-    hdrs = ["mock_object_evaluator.h"],
-    deps = [
-        ":object_evaluator",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -562,8 +412,8 @@ cc_test(
     srcs = ["jvariant_test.cc"],
     deps = [
         ":jvariant",
-        ":mock_jvmti_env",
-        ":mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
+        "//src/agent/test_util:mock_jni_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -585,10 +435,10 @@ cc_test(
     srcs = ["data_visibility_scrubbed_eval_call_stack_test.cc"],
     deps = [
         ":data_visibility_scrubbed_eval_call_stack",
-        ":fake_jni",
-        ":mock_data_visibility_policy",
-        ":mock_eval_call_stack",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_data_visibility_policy",
+        "//src/agent/test_util:mock_eval_call_stack",
+        "//src/agent/test_util:mock_jvmti_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -611,16 +461,6 @@ cc_library(
         ":jvariant",
         ":observable",
         ":type_util",
-    ],
-)
-
-cc_library(
-    name = "mock_class_indexer",
-    testonly = 1,
-    hdrs = ["mock_class_indexer.h"],
-    deps = [
-        ":class_indexer",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -659,11 +499,11 @@ cc_test(
     copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
     deps = [
         ":debuggee_labels",
-        ":fake_jni",
+        "//src/agent/test_util:fake_jni",
         ":jni_utils",
         ":jni_utils_h",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
         "//src/codegen:mock_jni_proxies",
         "@com_google_googletest//:gtest_main",
     ],
@@ -674,17 +514,6 @@ cc_library(
     hdrs = ["breakpoint_labels_provider.h"],
     deps = [
         ":common",
-    ],
-)
-
-cc_library(
-    name = "mock_breakpoint_labels_provider",
-    testonly = 1,
-    hdrs = ["mock_breakpoint_labels_provider.h"],
-    deps = [
-        ":breakpoint_labels_provider",
-        ":class_indexer",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -711,32 +540,12 @@ cc_library(
 )
 
 cc_library(
-    name = "mock_user_id_provider",
-    testonly = 1,
-    hdrs = ["mock_user_id_provider.h"],
-    deps = [
-        ":user_id_provider",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "bridge",
     hdrs = ["bridge.h"],
     deps = [
         ":common",
         ":debuggee_labels",
         ":model",
-    ],
-)
-
-cc_library(
-    name = "mock_bridge",
-    testonly = 1,
-    hdrs = ["mock_bridge.h"],
-    deps = [
-        ":bridge",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -750,33 +559,11 @@ cc_library(
 )
 
 cc_library(
-    name = "mock_breakpoint",
-    testonly = 1,
-    hdrs = ["mock_breakpoint.h"],
-    deps = [
-        ":breakpoint",
-        ":model_util",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "breakpoints_manager",
     hdrs = ["breakpoints_manager.h"],
     deps = [
         ":common",
         ":leaky_bucket",
-    ],
-)
-
-cc_library(
-    name = "mock_breakpoints_manager",
-    testonly = 1,
-    hdrs = ["mock_breakpoints_manager.h"],
-    deps = [
-        ":breakpoints_manager",
-        ":model_json",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -796,10 +583,10 @@ cc_test(
     srcs = ["auto_jvmti_breakpoint_test.cc"],
     deps = [
         ":auto_jvmti_breakpoint",
-        ":fake_jni",
-        ":mock_breakpoint",
-        ":mock_breakpoints_manager",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_breakpoint",
+        "//src/agent/test_util:mock_breakpoints_manager",
+        "//src/agent/test_util:mock_jvmti_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -829,9 +616,9 @@ cc_test(
     deps = [
         ":callbacks_monitor",
         ":canary_control",
-        ":fake_jni",
-        ":mock_bridge",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_bridge",
+        "//src/agent/test_util:mock_jvmti_env",
         ":model_util",
         "@com_google_googletest//:gtest_main",
     ],
@@ -860,11 +647,11 @@ jvm_test(
     copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
     cc_deps = [
         ":class_file",
-        ":jasmin_utils",
         ":jvariant",
         ":jvm_class_indexer",
         ":jvmti_buffer",
         ":type_util",
+        "//src/agent/test_util:jasmin_utils",
         "//src/codegen:jni_proxies",
         "//src/codegen:jni_test_proxies",
         "@com_google_googletest//:gtest",
@@ -897,11 +684,11 @@ jvm_test(
     copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
     cc_deps = [
         ":class_files_cache",
-        ":file_utils",
         ":jni_utils",
         ":jni_utils_h",
         ":jvm_class_indexer",
         ":type_util",
+        "//src/agent/test_util:file_utils",
         "//src/codegen:jni_proxies",
         "//src/codegen:jni_test_proxies",
         "@com_google_googletest//:gtest",
@@ -969,12 +756,12 @@ cc_test(
     srcs = ["jni_method_caller_test.cc"],
     deps = [
         ":class_metadata_reader",
-        ":fake_jni",
+        "//src/agent/test_util:fake_jni",
         ":jni_method_caller",
         ":jni_utils",
         ":jni_utils_h",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -997,16 +784,6 @@ cc_library(
     deps = [
         ":common",
         ":method_call_result",
-    ],
-)
-
-cc_library(
-    name = "mock_nanojava_internal_error_provider",
-    testonly = 1,
-    hdrs = ["mock_nanojava_internal_error_provider.h"],
-    deps = [
-        ":nanojava_internal_error_builder",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -1034,9 +811,9 @@ cc_test(
     name = "nanojava_locals_test",
     srcs = ["nanojava_locals_test.cc"],
     deps = [
-        ":fake_jni",
-        ":mock_jvmti_env",
-        ":mock_nanojava_internal_error_provider",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_jvmti_env",
+        "//src/agent/test_util:mock_nanojava_internal_error_provider",
         ":nanojava_locals",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1058,9 +835,9 @@ cc_test(
     name = "nanojava_stack_test",
     srcs = ["nanojava_stack_test.cc"],
     deps = [
-        ":fake_jni",
-        ":mock_jvmti_env",
-        ":mock_nanojava_internal_error_provider",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_jvmti_env",
+        "//src/agent/test_util:mock_nanojava_internal_error_provider",
         ":nanojava_stack",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1120,8 +897,8 @@ cc_test(
     srcs = ["config_test.cc"],
     deps = [
         ":config",
-        ":fake_jni",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_jvmti_env",
         ":type_util",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1143,19 +920,9 @@ cc_test(
     srcs = ["config_builder_test.cc"],
     deps = [
         ":config_builder",
-        ":fake_jni",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:fake_jni",
+        "//src/agent/test_util:mock_jvmti_env",
         ":type_util",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "mock_data_visibility_policy",
-    testonly = 1,
-    hdrs = ["mock_data_visibility_policy.h"],
-    deps = [
-        ":data_visibility_policy",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1173,7 +940,7 @@ cc_test(
     name = "multi_data_visibility_policy_test",
     srcs = ["multi_data_visibility_policy_test.cc"],
     deps = [
-        ":mock_data_visibility_policy",
+        "//src/agent/test_util:mock_data_visibility_policy",
         ":multi_data_visibility_policy",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1302,16 +1069,6 @@ cc_library(
 )
 
 cc_library(
-    name = "mock_eval_call_stack",
-    testonly = 1,
-    hdrs = ["mock_eval_call_stack.h"],
-    deps = [
-        ":eval_call_stack",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "jvm_eval_call_stack",
     srcs = ["jvm_eval_call_stack.cc"],
     hdrs = ["jvm_eval_call_stack.h"],
@@ -1332,8 +1089,8 @@ cc_test(
     deps = [
         ":common",
         ":jvm_eval_call_stack",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1351,8 +1108,8 @@ cc_test(
     srcs = ["jobject_map_test.cc"],
     deps = [
         ":jobject_map",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1403,40 +1160,26 @@ cc_test(
         ":common",
         ":capture_data_collector",
         ":expression_evaluator_h",
-        ":fake_instance_field_reader",
+        "//src/agent/test_util:fake_instance_field_reader",
         ":instance_field_reader",
         ":java_expression_evaluator",
-        ":json_eq_matcher",
         ":jvm_evaluators",
         ":local_variable_reader",
         ":messages",
-        ":mock_breakpoint_labels_provider",
-        ":mock_class_indexer",
-        ":mock_eval_call_stack",
-        ":mock_jni_env",
-        ":mock_jvmti_env",
-        ":mock_object_evaluator",
-        ":mock_user_id_provider",
         ":model_json",
         ":model_util",
-        ":named_jvariant_test_util",
         ":static_field_reader",
         ":value_formatter",
+        "//src/agent/test_util:json_eq_matcher",
+        "//src/agent/test_util:mock_breakpoint_labels_provider",
+        "//src/agent/test_util:mock_class_indexer",
+        "//src/agent/test_util:mock_eval_call_stack",
+        "//src/agent/test_util:mock_jni_env",
+        "//src/agent/test_util:mock_jvmti_env",
+        "//src/agent/test_util:mock_object_evaluator",
+        "//src/agent/test_util:mock_user_id_provider",
+        "//src/agent/test_util:named_jvariant_test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
 
-cc_library(
-    name = "named_jvariant_test_util",
-    testonly = 1,
-    srcs = ["named_jvariant_test_util.cc"],
-    hdrs = ["named_jvariant_test_util.h"],
-    deps = [
-        ":common",
-        ":jvariant",
-        ":mock_jni_env",
-        ":model_json",
-        ":type_util",
-        "@com_google_googletest//:gtest_main",
-    ],
-)

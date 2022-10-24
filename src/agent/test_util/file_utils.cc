@@ -23,7 +23,7 @@
 
 #include <fstream>
 
-#include "common.h"
+#include "src/agent/common.h"
 #include "gmock/gmock.h"
 
 namespace devtools {

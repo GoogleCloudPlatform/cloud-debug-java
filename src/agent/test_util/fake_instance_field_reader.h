@@ -19,7 +19,7 @@
 
 #include "gmock/gmock.h"
 
-#include "instance_field_reader.h"
+#include "src/agent/instance_field_reader.h"
 
 namespace devtools {
 namespace cdbg {

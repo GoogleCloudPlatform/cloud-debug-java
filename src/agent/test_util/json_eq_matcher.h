@@ -17,9 +17,9 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JSON_EQ_MATCHER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JSON_EQ_MATCHER_H_
 
-#include "model_json.h"
 #include "gmock/gmock.h"
 #include "json/json.h"
+#include "src/agent/model_json.h"
 
 namespace devtools {
 namespace cdbg {

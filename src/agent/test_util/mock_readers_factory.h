@@ -19,11 +19,11 @@
 
 #include "gmock/gmock.h"
 
-#include "array_reader.h"
-#include "fake_instance_field_reader.h"
-#include "fake_local_variable_reader.h"
-#include "fake_static_field_reader.h"
-#include "readers_factory.h"
+#include "src/agent/array_reader.h"
+#include "src/agent/readers_factory.h"
+#include "src/agent/test_utils/fake_instance_field_reader.h"
+#include "src/agent/test_utils/fake_local_variable_reader.h"
+#include "src/agent/test_utils/fake_static_field_reader.h"
 
 
 namespace devtools {

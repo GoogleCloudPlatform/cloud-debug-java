@@ -18,10 +18,10 @@
 
 #include "gmock/gmock.h"
 
-#include "fake_jni.h"
-#include "mock_breakpoint.h"
-#include "mock_breakpoints_manager.h"
-#include "mock_jvmti_env.h"
+#include "src/agent/test_util/fake_jni.h"
+#include "src/agent/test_util/mock_breakpoint.h"
+#include "src/agent/test_util/mock_breakpoints_manager.h"
+#include "src/agent/test_util/mock_jvmti_env.h"
 
 using testing::_;
 using testing::Return;

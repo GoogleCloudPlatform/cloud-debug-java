@@ -19,8 +19,8 @@
 
 #include "gmock/gmock.h"
 
-#include "breakpoint.h"
-#include "model_util.h"
+#include "src/agent/breakpoint.h"
+#include "src/agent/model_util.h"
 
 namespace devtools {
 namespace cdbg {

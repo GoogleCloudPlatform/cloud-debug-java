@@ -20,9 +20,9 @@
 
 #include "gmock/gmock.h"
 
-#include "fake_jni.h"
-#include "mock_jvmti_env.h"
-#include "mock_nanojava_internal_error_provider.h"
+#include "src/agent/test_util/fake_jni.h"
+#include "src/agent/test_util/mock_jvmti_env.h"
+#include "src/agent/test_util/mock_nanojava_internal_error_provider.h"
 
 using testing::_;
 using testing::Exactly;

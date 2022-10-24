@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "common.h"
+#include "src/agent/common.h"
 #include "gmock/gmock.h"
 
 using devtools::cdbg::set_thread_jni;

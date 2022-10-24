@@ -17,8 +17,8 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_CLASS_INDEXER_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_CLASS_INDEXER_H_
 
-#include "class_indexer.h"
 #include "gmock/gmock.h"
+#include "src/agent/class_indexer.h"
 
 namespace devtools {
 namespace cdbg {

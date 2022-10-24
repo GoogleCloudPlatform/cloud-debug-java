@@ -21,7 +21,6 @@
 
 #include "gmock/gmock.h"
 
-#include "file_utils.h"
 #include "jni_proxy_classfiletextifier.h"
 #include "jni_proxy_classloader.h"
 #include "jni_proxy_classpathlookup.h"
@@ -31,6 +30,7 @@
 #include "jni_utils.h"
 #include "jvm_class_indexer.h"
 #include "type_util.h"
+#include "src/agent/test_util/file_utils.h"
 
 namespace devtools {
 namespace cdbg {

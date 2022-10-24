@@ -17,7 +17,7 @@
 #ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_FILE_UTILS_H_
 #define DEVTOOLS_CDBG_DEBUGLETS_JAVA_FILE_UTILS_H_
 
-#include "common.h"
+#include "src/agent/common.h"
 
 namespace devtools {
 namespace cdbg {

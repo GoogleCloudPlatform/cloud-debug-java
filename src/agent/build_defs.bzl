@@ -7,7 +7,7 @@ def jvm_test(name, srcs, copts, cc_deps, java_deps):
         linkshared = 1,
         linkstatic = 1,
         deps = [
-            ":jvm_test_base",
+            "//src/agent/test_util:jvm_test_base",
         ] + cc_deps,
     )
 

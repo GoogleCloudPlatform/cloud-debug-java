@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "mock_jni_env.h"
-#include "model_json.h"
-#include "type_util.h"
+#include "src/agent/model_json.h"
+#include "src/agent/type_util.h"
+#include "src/agent/test_util/mock_jni_env.h"
 
 namespace devtools {
 namespace cdbg {

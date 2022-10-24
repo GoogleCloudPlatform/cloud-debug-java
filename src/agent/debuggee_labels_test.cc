@@ -21,10 +21,10 @@
 #include "gmock/gmock.h"
 
 #include "mock_ju_hashmap.h"
-#include "fake_jni.h"
 #include "jni_utils.h"
-#include "mock_jni_env.h"
-#include "mock_jvmti_env.h"
+#include "src/agent/test_util/fake_jni.h"
+#include "src/agent/test_util/mock_jni_env.h"
+#include "src/agent/test_util/mock_jvmti_env.h"
 
 namespace devtools {
 namespace cdbg {

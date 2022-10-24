@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_JASMIN_UTILS_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_JASMIN_UTILS_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_
 
-#include "common.h"
+#include "gmock/gmock.h"
+#include "src/agent/object_evaluator.h"
 
 namespace devtools {
 namespace cdbg {
 
-//
-// C++ wrapper for Jasmin assembler. Jasmin is an assembly for JVM.
-// For more details see: http://jasmin.sourceforge.net/
-//
-
-// Builds Java class from assembly using Jasmin.
-std::string Assemble(const std::string& asm_code);
-
-// Assembles test Java class that only has a single method using Jasmin. We
-// never set method arguments, since NanoJava interpreter ignores it anyway.
-std::string AssembleMethod(const std::string& return_type,
-                           const std::string& method_asm_code);
+class MockObjectEvaluator : public ObjectEvaluator {
+ public:
+  MOCK_METHOD(void, Evaluate,
+              (MethodCaller*, jobject, bool, std::vector<NamedJVariant>*),
+              (override));
+};
 
 }  // namespace cdbg
 }  // namespace devtools
 
-
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_JASMIN_UTILS_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_

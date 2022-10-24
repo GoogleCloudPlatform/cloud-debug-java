@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_
 
-#include "nanojava_internal_error_builder.h"
 #include "gmock/gmock.h"
+#include "src/agent/array_reader.h"
 
 namespace devtools {
 namespace cdbg {
-namespace nanojava {
 
-class MockNanoJavaInternalErrorProvider
-    : public NanoJavaInternalErrorProvider {
+class MockArrayReader : public ArrayReader {
  public:
-  MOCK_METHOD(std::string, method_name, (), (const, override));
-
-  MOCK_METHOD(std::string, FormatCallStack, (), (const, override));
-
-  MOCK_METHOD(void, SetResult, (MethodCallResult), (override));
+  MOCK_METHOD(ErrorOr<JVariant>, ReadValue, (const JVariant&, const JVariant&),
+              (const, override));
 };
 
-}  // namespace nanojava
 }  // namespace cdbg
 }  // namespace devtools
 
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_NANOJAVA_INTERNAL_ERROR_PROVIDER_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_ARRAY_READER_H_

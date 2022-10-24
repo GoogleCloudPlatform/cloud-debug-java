@@ -25,12 +25,12 @@
 #include "jni_proxy_classpathlookup.h"
 #include "jni_proxy_jasmin_main.h"
 #include "jni_proxy_string.h"
-#include "jasmin_utils.h"
 #include "jvariant.h"
 #include "jvm_class_indexer.h"
 #include "jvmti_buffer.h"
 #include "type_util.h"
 #include "re2/re2.h"
+#include "src/agent/test_util/jasmin_utils.h"
 
 using testing::Test;
 using testing::TestWithParam;

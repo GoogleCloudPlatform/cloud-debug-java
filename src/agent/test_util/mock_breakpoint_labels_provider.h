@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_
-#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_
+#ifndef DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_
+#define DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_
 
-#include "object_evaluator.h"
 #include "gmock/gmock.h"
+
+#include "src/agent/breakpoint_labels_provider.h"
+#include "src/agent/class_indexer.h"
 
 namespace devtools {
 namespace cdbg {
 
-class MockObjectEvaluator : public ObjectEvaluator {
+class MockBreakpointLabelsProvider : public BreakpointLabelsProvider {
  public:
-  MOCK_METHOD(void, Evaluate,
-              (MethodCaller*, jobject, bool, std::vector<NamedJVariant>*),
-              (override));
+  MOCK_METHOD(void, Collect, (), (override));
+
+  MOCK_METHOD((std::map<std::string, std::string>), Format, (), (override));
 };
 
 }  // namespace cdbg
 }  // namespace devtools
 
-#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_OBJECT_EVALUATOR_H_
+#endif  // DEVTOOLS_CDBG_DEBUGLETS_JAVA_MOCK_BREAKPOINT_LABELS_PROVIDER_H_

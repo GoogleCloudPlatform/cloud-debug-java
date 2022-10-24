@@ -358,40 +358,72 @@ cc_test(
     ],
 )
 
-#cc_test(
-#    name = "jvm_breakpoint_test",
-#    srcs = ["jvm_breakpoint_test.cc"],
-#    deps = [
-#        ":fake_jni",
-#        ":json_eq_matcher",
-#        ":mock_breakpoint_labels_provider",
-#        ":mock_breakpoints_manager",
-#        ":mock_class_indexer",
-#        ":mock_class_metadata_reader",
-#        ":mock_class_path_lookup",
-#        ":mock_dynamic_logger",
-#        ":mock_eval_call_stack",
-#        ":mock_jvmti_env",
-#        ":mock_object_evaluator",
-#        ":mock_user_id_provider",
-#        "//src/agent:class_metadata_reader",
-#        "//src/agent:config_builder",
-#        "//src/agent:format_queue",
-#        "//src/agent:instance_field_reader",
-#        "//src/agent:jni_utils_h",
-#        "//src/agent:jvm_breakpoint",
-#        "//src/agent:jvm_evaluators",
-#        "//src/agent:messages",
-#        "//src/agent:method_locals",
-#        "//src/agent:model_json",
-#        "//src/agent:model_util",
-#        "//src/agent:object_evaluator",
-#        "//src/agent:resolved_source_location",
-#        "//src/agent:static_field_reader",
-#        "//src/agent:statistician",
-#        "@com_google_googletest//:gtest_main",
-#    ],
-#)
+cc_test(
+    name = "jvm_breakpoint_test",
+    srcs = ["jvm_breakpoint_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":json_eq_matcher",
+        ":mock_breakpoint_labels_provider",
+        ":mock_breakpoints_manager",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_class_path_lookup",
+        ":mock_dynamic_logger",
+        ":mock_eval_call_stack",
+        ":mock_jvmti_env",
+        ":mock_object_evaluator",
+        ":mock_user_id_provider",
+        "//src/agent:class_metadata_reader",
+        "//src/agent:config_builder",
+        "//src/agent:format_queue",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_breakpoint",
+        "//src/agent:jvm_evaluators",
+        "//src/agent:messages",
+        "//src/agent:method_locals",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/agent:object_evaluator",
+        "//src/agent:resolved_source_location",
+        "//src/agent:static_field_reader",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_breakpoints_manager_test",
+    srcs = ["jvm_breakpoints_manager_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_breakpoint",
+        ":mock_bridge",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_class_path_lookup",
+        ":mock_dynamic_logger",
+        ":mock_eval_call_stack",
+        ":mock_jvmti_env",
+        ":mock_object_evaluator",
+        "//src/agent:callbacks_monitor",
+        "//src/agent:format_queue",
+        "//src/agent:jvm_breakpoints_manager",
+        "//src/agent:jvm_evaluators",
+        "//src/agent:messages",
+        "//src/agent:method_locals",
+        "//src/agent:model_util",
+        "//src/agent:object_evaluator",
+        "//src/agent:resolved_source_location",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "jvm_eval_call_stack_test",
@@ -541,11 +573,42 @@ cc_library(
 )
 
 cc_library(
+    name = "mock_class_metadata_reader",
+    testonly = 1,
+    hdrs = ["mock_class_metadata_reader.h"],
+    deps = [
+        "//src/agent:class_metadata_reader",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_class_path_lookup",
+    testonly = 1,
+    hdrs = ["mock_class_path_lookup.h"],
+    deps = [
+        "//src/agent:class_path_lookup",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
     name = "mock_data_visibility_policy",
     testonly = 1,
     hdrs = ["mock_data_visibility_policy.h"],
     deps = [
         "//src/agent:data_visibility_policy",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_dynamic_logger",
+    testonly = 1,
+    hdrs = ["mock_dynamic_logger.h"],
+    deps = [
+        "//src/agent:dynamic_logger",
+        "//src/agent:resolved_source_location",
         "@com_google_googletest//:gtest",
     ],
 )

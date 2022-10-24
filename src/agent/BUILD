@@ -105,6 +105,14 @@ cc_library(
 )
 
 cc_library(
+    name = "resolved_source_location",
+    hdrs = ["resolved_source_location.h"],
+    deps = [
+        ":model",
+    ],
+)
+
+cc_library(
     name = "value_formatter",
     srcs = ["value_formatter.cc"],
     hdrs = ["value_formatter.h"],
@@ -159,6 +167,38 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_object_array_reader",
+    hdrs = ["jvm_object_array_reader.h"],
+    deps = [
+        ":array_reader",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":model",
+        ":model_util",
+    ],
+)
+
+cc_library(
+    name = "jvm_primitive_array_reader",
+    hdrs = ["jvm_primitive_array_reader.h"],
+    deps = [
+        ":array_reader",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":model",
+        ":model_util",
+    ],
+)
+
+cc_library(
     name = "method_locals",
     srcs = ["method_locals.cc"],
     hdrs = ["method_locals.h"],
@@ -180,6 +220,33 @@ cc_library(
         ":class_metadata_reader",
         ":common",
         ":method_caller",
+    ],
+)
+
+cc_library(
+    name = "jvm_readers_factory",
+    srcs = ["jvm_readers_factory.cc"],
+    hdrs = ["jvm_readers_factory.h"],
+    deps = [
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":class_path_lookup",
+        ":common",
+        ":instance_field_reader",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_evaluators",
+        ":jvm_object_array_reader",
+        ":jvm_primitive_array_reader",
+        ":jvmti_buffer",
+        ":local_variable_reader",
+        ":messages",
+        ":method_locals",
+        ":model",
+        ":readers_factory",
+        ":safe_method_caller",
+        ":static_field_reader",
+        ":type_util",
     ],
 )
 
@@ -227,6 +294,17 @@ cc_library(
         ":mutex",
         ":observable",
         ":statistician",
+    ],
+)
+
+cc_library(
+    name = "class_path_lookup",
+    hdrs = ["class_path_lookup.h"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
     ],
 )
 
@@ -347,6 +425,17 @@ cc_library(
     hdrs = ["scheduler.h"],
     deps = [
         ":common",
+        ":mutex",
+    ],
+)
+
+cc_library(
+    name = "rate_limit",
+    srcs = ["rate_limit.cc"],
+    hdrs = ["rate_limit.h"],
+    deps = [
+        ":common",
+        ":leaky_bucket",
         ":mutex",
     ],
 )
@@ -543,6 +632,30 @@ cc_library(
     deps = [
         ":common",
         ":leaky_bucket",
+    ],
+)
+
+cc_library(
+    name = "jvm_breakpoints_manager",
+    srcs = ["jvm_breakpoints_manager.cc"],
+    hdrs = ["jvm_breakpoints_manager.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":breakpoint",
+        ":breakpoints_manager",
+        ":callbacks_monitor",
+        ":canary_control",
+        ":class_indexer",
+        ":common",
+        ":format_queue",
+        ":jvm_evaluators",
+        ":leaky_bucket",
+        ":mutex",
+        ":rate_limit",
+        ":statistician",
     ],
 )
 
@@ -954,3 +1067,35 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "dynamic_logger",
+    hdrs = ["dynamic_logger.h"],
+    deps = [
+        ":common",
+        ":model",
+    ],
+)
+
+cc_library(
+    name = "log_data_collector",
+    srcs = ["log_data_collector.cc"],
+    hdrs = ["log_data_collector.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":class_indexer",
+        ":common",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":messages",
+        ":method_caller",
+        ":model",
+        ":object_evaluator",
+        ":readers_factory",
+        ":type_util",
+        ":value_formatter",
+        "//src/codegen:jni_proxies",
+    ],
+)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "class_files_cache.h"
+#include "src/agent/class_files_cache.h"
 
 #include <functional>
 #include <memory>
@@ -27,9 +27,9 @@
 #include "jni_proxy_jasmin_main.h"
 #include "jni_proxy_java_net_url.h"
 #include "jni_proxy_java_net_urlclassloader.h"
-#include "jni_utils.h"
-#include "jvm_class_indexer.h"
-#include "type_util.h"
+#include "src/agent/jni_utils.h"
+#include "src/agent/jvm_class_indexer.h"
+#include "src/agent/type_util.h"
 #include "src/agent/test_util/file_utils.h"
 
 namespace devtools {

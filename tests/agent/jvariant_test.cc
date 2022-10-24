@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "jvariant.h"
+#include "src/agent/jvariant.h"
 
 #include "gmock/gmock.h"
 #include "src/agent/test_util/mock_jni_env.h"

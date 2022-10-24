@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "nanojava_locals.h"
+#include "src/agent/nanojava_locals.h"
 
 #include <cstdint>
 

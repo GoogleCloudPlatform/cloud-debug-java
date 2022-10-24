@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "byte_source.h"
+#include "src/agent/byte_source.h"
 
 #include <cstdint>
 

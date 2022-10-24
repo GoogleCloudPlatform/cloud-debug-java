@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include "canary_control.h"
+#include "src/agent/canary_control.h"
 
 #include <cstdint>
 
 #include "gmock/gmock.h"
 
-#include "callbacks_monitor.h"
+#include "src/agent/callbacks_monitor.h"
 #include "src/agent/test_util/fake_jni.h"
 #include "src/agent/test_util/mock_bridge.h"
 #include "src/agent/test_util/mock_jvmti_env.h"
-#include "model_util.h"
+#include "src/agent/model_util.h"
 
 using testing::_;
 using testing::Return;

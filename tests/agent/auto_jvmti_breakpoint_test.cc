@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "auto_jvmti_breakpoint.h"
+#include "src/agent/auto_jvmti_breakpoint.h"
 
 #include "gmock/gmock.h"
 

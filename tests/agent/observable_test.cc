@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "observable.h"
+#include "src/agent/observable.h"
 
 #include "gtest/gtest.h"
 

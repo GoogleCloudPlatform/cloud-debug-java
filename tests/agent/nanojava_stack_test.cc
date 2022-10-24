@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "nanojava_stack.h"
+#include "src/agent/nanojava_stack.h"
 
 #include <cstdint>
 

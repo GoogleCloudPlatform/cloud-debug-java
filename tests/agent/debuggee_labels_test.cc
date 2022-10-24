@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "debuggee_labels.h"
+#include "src/agent/debuggee_labels.h"
 
 #include <iostream>
 
 #include "gmock/gmock.h"
 
 #include "mock_ju_hashmap.h"
-#include "jni_utils.h"
+#include "src/agent/jni_utils.h"
 #include "src/agent/test_util/fake_jni.h"
 #include "src/agent/test_util/mock_jni_env.h"
 #include "src/agent/test_util/mock_jvmti_env.h"

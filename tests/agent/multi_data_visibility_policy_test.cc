@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "multi_data_visibility_policy.h"
+#include "src/agent/multi_data_visibility_policy.h"
 
 #include "src/agent/test_util/mock_data_visibility_policy.h"
 #include "gmock/gmock.h"

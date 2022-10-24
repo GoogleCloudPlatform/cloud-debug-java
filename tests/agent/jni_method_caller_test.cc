@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "jni_method_caller.h"
+#include "src/agent/jni_method_caller.h"
 
 #include <cstdint>
 
 #include "gmock/gmock.h"
 
-#include "class_metadata_reader.h"
+#include "src/agent/class_metadata_reader.h"
 #include "src/agent/test_util/fake_jni.h"
-#include "jni_utils.h"
+#include "src/agent/jni_utils.h"
 #include "src/agent/test_util/mock_jni_env.h"
 #include "src/agent/test_util/mock_jvmti_env.h"
 

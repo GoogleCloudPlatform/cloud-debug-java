@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "config_builder.h"
+#include "src/agent/config_builder.h"
 
 #include "gmock/gmock.h"
 
 #include "src/agent/test_util/fake_jni.h"
 #include "src/agent/test_util/mock_jvmti_env.h"
-#include "type_util.h"
+#include "src/agent/type_util.h"
 
 ABSL_DECLARE_FLAG(bool, enable_safe_caller);
 

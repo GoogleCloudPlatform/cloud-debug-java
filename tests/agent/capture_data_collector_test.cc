@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include "capture_data_collector.h"
+#include "src/agent/capture_data_collector.h"
 
 #include <cstdint>
 
-#include "common.h"
-#include "expression_evaluator.h"
-#include "expression_util.h"
-#include "instance_field_reader.h"
-#include "jvm_evaluators.h"
-#include "local_variable_reader.h"
-#include "messages.h"
-#include "model_json.h"
-#include "model_util.h"
-#include "static_field_reader.h"
-#include "value_formatter.h"
+#include "src/agent/common.h"
+#include "src/agent/expression_evaluator.h"
+#include "src/agent/expression_util.h"
+#include "src/agent/instance_field_reader.h"
+#include "src/agent/jvm_evaluators.h"
+#include "src/agent/local_variable_reader.h"
+#include "src/agent/messages.h"
+#include "src/agent/model_json.h"
+#include "src/agent/model_util.h"
+#include "src/agent/static_field_reader.h"
+#include "src/agent/value_formatter.h"
 
 #include "gmock/gmock.h"
 #include "src/agent/test_util/json_eq_matcher.h"

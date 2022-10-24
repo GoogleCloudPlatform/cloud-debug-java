@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "jvm_eval_call_stack.h"
+#include "src/agent/jvm_eval_call_stack.h"
 
 #include <algorithm>
 #include <cstdint>

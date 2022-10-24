@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "array_type_evaluator.h"
+#include "src/agent/array_type_evaluator.h"
 
 #include "src/agent/test_util/fake_instance_field_reader.h"
 #include "src/agent/test_util/mock_jni_env.h"
 #include "src/agent/test_util/mock_jvmti_env.h"
-#include "model.h"
-#include "model_util.h"
-#include "static_field_reader.h"
+#include "src/agent/model.h"
+#include "src/agent/model_util.h"
+#include "src/agent/static_field_reader.h"
 #include "gmock/gmock.h"
 
 using testing::_;

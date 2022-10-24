@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "jsoncpp_util.h"
+#include "src/agent/jsoncpp_util.h"
 
 #include "gmock/gmock.h"
 

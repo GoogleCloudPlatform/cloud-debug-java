@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "scheduler.h"
+#include "src/agent/scheduler.h"
 
 #include "gtest/gtest.h"
 

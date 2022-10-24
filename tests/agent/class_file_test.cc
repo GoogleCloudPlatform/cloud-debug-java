@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "class_file.h"
+#include "src/agent/class_file.h"
 
 #include <functional>
 #include <sstream>
@@ -25,10 +25,10 @@
 #include "jni_proxy_classpathlookup.h"
 #include "jni_proxy_jasmin_main.h"
 #include "jni_proxy_string.h"
-#include "jvariant.h"
-#include "jvm_class_indexer.h"
-#include "jvmti_buffer.h"
-#include "type_util.h"
+#include "src/agent/jvariant.h"
+#include "src/agent/jvm_class_indexer.h"
+#include "src/agent/jvmti_buffer.h"
+#include "src/agent/type_util.h"
 #include "re2/re2.h"
 #include "src/agent/test_util/jasmin_utils.h"
 

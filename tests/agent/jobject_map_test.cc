@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "jobject_map.h"
+#include "src/agent/jobject_map.h"
 
 #include <cstdint>
 

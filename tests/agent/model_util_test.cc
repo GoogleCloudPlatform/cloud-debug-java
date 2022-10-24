@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "model_util.h"
+#include "src/agent/model_util.h"
 
 #include "gmock/gmock.h"
 

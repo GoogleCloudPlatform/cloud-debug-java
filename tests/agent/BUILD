@@ -481,6 +481,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "jvm_local_variable_reader_test",
+    srcs = ["jvm_local_variable_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_local_variable_reader",
+        "//src/agent:readers_factory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

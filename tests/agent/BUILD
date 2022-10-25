@@ -565,6 +565,30 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "log_data_collector_test",
+    srcs = ["log_data_collector_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":mock_method_caller",
+        ":mock_object_evaluator",
+        ":mock_readers_factory",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/agent:config_builder",
+        "//src/agent:expression_evaluator_h",
+        "//src/agent:java_expression_evaluator",
+        "//src/agent:log_data_collector",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

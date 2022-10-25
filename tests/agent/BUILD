@@ -509,6 +509,34 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "jvm_object_evaluator_test",
+    srcs = ["jvm_object_evaluator_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_instance_field_reader",
+        ":fake_jni",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_jvmti_env",
+        ":mock_method_caller",
+        "//src/agent:config_builder",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_object_evaluator",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "//src/agent:static_field_reader",
+        "//src/agent:type_evaluator",
+        "//src/codegen:jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

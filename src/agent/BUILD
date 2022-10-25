@@ -299,30 +299,6 @@ cc_library(
 )
 
 cc_library(
-    name = "type_evaluator",
-    hdrs = ["type_evaluator.h"],
-    deps = [
-        ":class_metadata_reader",
-        ":common",
-        ":method_caller",
-    ],
-)
-
-cc_library(
-    name = "generic_type_evaluator",
-    srcs = ["generic_type_evaluator.cc"],
-    hdrs = ["generic_type_evaluator.h"],
-    deps = [
-        ":common",
-        ":instance_field_reader",
-        ":jvariant",
-        ":messages",
-        ":model",
-        ":type_evaluator",
-    ],
-)
-
-cc_library(
     name = "callbacks_monitor",
     srcs = ["callbacks_monitor.cc"],
     hdrs = ["callbacks_monitor.h"],
@@ -360,7 +336,10 @@ cc_library(
     name = "statistician",
     srcs = ["statistician.cc"],
     hdrs = ["statistician.h"],
-    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
     deps = [
         ":common",
         ":mutex",
@@ -430,6 +409,30 @@ cc_library(
 )
 
 cc_library(
+    name = "type_evaluator",
+    hdrs = ["type_evaluator.h"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":method_caller",
+    ],
+)
+
+cc_library(
+    name = "generic_type_evaluator",
+    srcs = ["generic_type_evaluator.cc"],
+    hdrs = ["generic_type_evaluator.h"],
+    deps = [
+        ":common",
+        ":instance_field_reader",
+        ":jvariant",
+        ":messages",
+        ":model",
+        ":type_evaluator",
+    ],
+)
+
+cc_library(
     name = "array_type_evaluator",
     hdrs = ["array_type_evaluator.h"],
     deps = [
@@ -447,6 +450,106 @@ cc_library(
     hdrs = ["object_evaluator.h"],
     deps = [
         ":common",
+    ],
+)
+
+cc_library(
+    name = "jvm_object_evaluator",
+    srcs = ["jvm_object_evaluator.cc"],
+    hdrs = ["jvm_object_evaluator.h"],
+    deps = [
+        ":array_type_evaluator",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":config",
+        ":generic_type_evaluator",
+        ":iterable_type_evaluator",
+        ":jvariant",
+        ":map_entry_type_evaluator",
+        ":map_type_evaluator",
+        ":messages",
+        ":model",
+        ":object_evaluator",
+        ":safe_method_caller",
+        ":stringable_type_evaluator",
+        ":type_evaluator",
+        ":value_formatter",
+    ],
+)
+
+cc_library(
+    name = "iterable_type_evaluator",
+    srcs = ["iterable_type_evaluator.cc"],
+    hdrs = ["iterable_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "map_entry_type_evaluator",
+    srcs = ["map_entry_type_evaluator.cc"],
+    hdrs = ["map_entry_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jvmti_buffer",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "map_type_evaluator",
+    srcs = ["map_type_evaluator.cc"],
+    hdrs = ["map_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":iterable_type_evaluator",
+        ":jni_utils",
+        ":map_entry_type_evaluator",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        ":value_formatter",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "stringable_type_evaluator",
+    srcs = ["stringable_type_evaluator.cc"],
+    hdrs = ["stringable_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
     ],
 )
 

@@ -589,6 +589,21 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "method_locals_test",
+    srcs = ["method_locals_test.cc"],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:common",
+        "//src/agent:local_variable_reader",
+        "//src/agent:method_locals",
+        "//src/agent:structured_data_visibility_policy",
+        "//src/agent:readers_factory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

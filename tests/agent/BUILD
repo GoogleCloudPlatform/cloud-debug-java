@@ -470,6 +470,17 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "jvm_instance_field_reader_test",
+    srcs = ["jvm_instance_field_reader_test.cc"],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_instance_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

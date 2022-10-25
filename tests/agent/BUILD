@@ -605,6 +605,26 @@ cc_test(
 )
 
 jvm_test(
+    name = "model_json_test",
+    srcs = ["model_json_test.cc"],
+    cc_deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/codegen:jni_proxies",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    java_deps = [
+        "@maven//:com_google_api_client_google_api_client",
+    ],
+)
+
+jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],
     cc_deps = [

@@ -537,6 +537,22 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "jvm_primitive_array_reader_test",
+    srcs = ["jvm_primitive_array_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_primitive_array_reader",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 jvm_test(
     name = "model_util_test",
     srcs = ["model_util_test.cc"],

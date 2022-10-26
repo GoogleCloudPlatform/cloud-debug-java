@@ -71,6 +71,31 @@ cc_library(
 )
 
 cc_library(
+    name = "agent_thread",
+    hdrs = ["agent_thread.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "semaphore",
+    hdrs = ["semaphore.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "auto_reset_event",
+    hdrs = ["auto_reset_event.h"],
+    deps = [
+        ":common",
+        ":semaphore",
+    ],
+)
+
+cc_library(
     name = "type_util",
     srcs = ["type_util.cc"],
     hdrs = ["type_util.h"],
@@ -830,6 +855,28 @@ cc_library(
         ":breakpoints_manager",
         ":common",
         ":mutex",
+    ],
+)
+
+cc_library(
+    name = "worker",
+    srcs = ["worker.cc"],
+    hdrs = ["worker.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":agent_thread",
+        ":auto_reset_event",
+        ":bridge",
+        ":callbacks_monitor",
+        ":canary_control",
+        ":common",
+        ":debuggee_labels",
+        ":format_queue",
+        ":model",
+        ":stopwatch",
     ],
 )
 

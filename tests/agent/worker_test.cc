@@ -35,9 +35,6 @@
 #include "tests/agent/mock_worker_provider.h"
 
 
-//#include "thread/thread.h"
-//#include "util/functional/to_callback.h"
-
 using testing::_;
 using testing::AtLeast;
 using testing::DoAll;

@@ -35,14 +35,8 @@ class MockWorkerProvider : public Worker::Provider {
 
   MOCK_METHOD(void, OnIdle, (), (override));
 
-  // See b/10817494 for more details on this workaround.
-  void OnBreakpointsUpdated(
-        std::vector<std::unique_ptr<BreakpointModel>> breakpoints) override {
-    OnBreakpointsUpdatedProxy(&breakpoints);
-  }
-
-  MOCK_METHOD(void, OnBreakpointsUpdatedProxy,
-              (std::vector<std::unique_ptr<BreakpointModel>>*));
+  MOCK_METHOD(void, OnBreakpointsUpdated,
+              (std::vector<std::unique_ptr<BreakpointModel>>), (override));
 
   MOCK_METHOD(void, EnableDebugger, (bool), (override));
 };

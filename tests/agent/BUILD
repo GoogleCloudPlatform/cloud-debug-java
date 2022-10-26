@@ -721,6 +721,95 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "statistician_test",
+    srcs = ["statistician_test.cc"],
+    deps = [
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "structured_data_visibility_policy_test",
+    srcs = ["structured_data_visibility_policy_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:structured_data_visibility_policy",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "type_util_test",
+    srcs = ["type_util_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:type_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "value_formatter_test",
+    srcs = ["value_formatter_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:model_util",
+        "//src/agent:value_formatter",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "worker_test",
+    srcs = ["worker_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_bridge",
+        ":mock_class_path_lookup",
+        ":mock_jvmti_env",
+        ":mock_worker_provider",
+        "//src/agent:agent_thread",
+        "//src/agent:callbacks_monitor",
+        "//src/agent:common",
+        "//src/agent:format_queue",
+        "//src/agent:mutex",
+        "//src/agent:semaphore",
+        "//src/agent:statistician",
+        "//src/agent:worker",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "yaml_data_visibility_config_reader_test",
+    srcs = ["yaml_data_visibility_config_reader_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_class_path_lookup",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:debuggee_labels",
+        "//src/agent:yaml_data_visibility_config_reader",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "mock_array_reader",
     testonly = 1,
@@ -904,6 +993,17 @@ cc_library(
     hdrs = ["mock_user_id_provider.h"],
     deps = [
         "//src/agent:user_id_provider",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_worker_provider",
+    testonly = 1,
+    hdrs = ["mock_worker_provider.h"],
+    deps = [
+        "//src/agent:model_json",
+        "//src/agent:worker",
         "@com_google_googletest//:gtest",
     ],
 )

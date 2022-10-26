@@ -71,6 +71,31 @@ cc_library(
 )
 
 cc_library(
+    name = "agent_thread",
+    hdrs = ["agent_thread.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "semaphore",
+    hdrs = ["semaphore.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+cc_library(
+    name = "auto_reset_event",
+    hdrs = ["auto_reset_event.h"],
+    deps = [
+        ":common",
+        ":semaphore",
+    ],
+)
+
+cc_library(
     name = "type_util",
     srcs = ["type_util.cc"],
     hdrs = ["type_util.h"],
@@ -650,6 +675,25 @@ cc_library(
 )
 
 cc_library(
+    name = "yaml_data_visibility_config_reader",
+    srcs = ["yaml_data_visibility_config_reader.cc"],
+    hdrs = ["yaml_data_visibility_config_reader.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":class_path_lookup",
+        ":common",
+        ":debuggee_labels",
+        ":glob_data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "class_indexer",
     hdrs = ["class_indexer.h"],
     deps = [
@@ -830,6 +874,28 @@ cc_library(
         ":breakpoints_manager",
         ":common",
         ":mutex",
+    ],
+)
+
+cc_library(
+    name = "worker",
+    srcs = ["worker.cc"],
+    hdrs = ["worker.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":agent_thread",
+        ":auto_reset_event",
+        ":bridge",
+        ":callbacks_monitor",
+        ":canary_control",
+        ":common",
+        ":debuggee_labels",
+        ":format_queue",
+        ":model",
+        ":stopwatch",
     ],
 )
 

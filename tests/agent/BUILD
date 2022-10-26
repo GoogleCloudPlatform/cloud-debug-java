@@ -1,5 +1,7 @@
 load("//tests/agent:build_defs.bzl", "jvm_test")
 
+package(default_visibility = ["//visibility:public"])
+
 cc_test(
     name = "array_type_evaluator_test",
     srcs = ["array_type_evaluator_test.cc"],
@@ -1020,5 +1022,22 @@ cc_library(
         "//src/agent:model_json",
         "//src/agent:type_util",
         "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_binary(
+    name = "libtest_logger.so",
+    testonly = 1,
+    srcs = [
+        "test_logger.cc",
+    ],
+    linkshared = 1,
+    linkstatic = 1,
+    deps = [
+        "//src/agent:common",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_env",
+        "//src/agent:mutex",
     ],
 )

@@ -105,6 +105,14 @@ cc_library(
 )
 
 cc_library(
+    name = "resolved_source_location",
+    hdrs = ["resolved_source_location.h"],
+    deps = [
+        ":model",
+    ],
+)
+
+cc_library(
     name = "value_formatter",
     srcs = ["value_formatter.cc"],
     hdrs = ["value_formatter.h"],
@@ -159,6 +167,38 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_object_array_reader",
+    hdrs = ["jvm_object_array_reader.h"],
+    deps = [
+        ":array_reader",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":model",
+        ":model_util",
+    ],
+)
+
+cc_library(
+    name = "jvm_primitive_array_reader",
+    hdrs = ["jvm_primitive_array_reader.h"],
+    deps = [
+        ":array_reader",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":messages",
+        ":method_call_result",
+        ":model",
+        ":model_util",
+    ],
+)
+
+cc_library(
     name = "method_locals",
     srcs = ["method_locals.cc"],
     hdrs = ["method_locals.h"],
@@ -184,12 +224,77 @@ cc_library(
 )
 
 cc_library(
-    name = "type_evaluator",
-    hdrs = ["type_evaluator.h"],
+    name = "jvm_readers_factory",
+    srcs = ["jvm_readers_factory.cc"],
+    hdrs = ["jvm_readers_factory.h"],
+    deps = [
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":class_path_lookup",
+        ":common",
+        ":instance_field_reader",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_evaluators",
+        ":jvm_object_array_reader",
+        ":jvm_primitive_array_reader",
+        ":jvmti_buffer",
+        ":local_variable_reader",
+        ":messages",
+        ":method_locals",
+        ":model",
+        ":readers_factory",
+        ":safe_method_caller",
+        ":static_field_reader",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "jvm_class_metadata_reader",
+    srcs = ["jvm_class_metadata_reader.cc"],
+    hdrs = ["jvm_class_metadata_reader.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
     deps = [
         ":class_metadata_reader",
         ":common",
-        ":method_caller",
+        ":data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jobject_map",
+        ":jvariant",
+        ":jvm_instance_field_reader",
+        ":jvm_static_field_reader",
+        ":jvmti_buffer",
+        ":mutex",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "jvm_instance_field_reader",
+    srcs = ["jvm_instance_field_reader.cc"],
+    hdrs = ["jvm_instance_field_reader.h"],
+    deps = [
+        ":common",
+        ":instance_field_reader",
+        ":jvariant",
+        ":messages",
+    ],
+)
+
+cc_library(
+    name = "jvm_static_field_reader",
+    srcs = ["jvm_static_field_reader.cc"],
+    hdrs = ["jvm_static_field_reader.h"],
+    deps = [
+        ":common",
+        ":jvariant",
+        ":messages",
+        ":static_field_reader",
     ],
 )
 
@@ -200,6 +305,48 @@ cc_library(
     deps = [
         ":common",
     ],
+)
+
+cc_library(
+    name = "format_queue",
+    srcs = ["format_queue.cc"],
+    hdrs = ["format_queue.h"],
+    deps = [
+        ":capture_data_collector",
+        ":common",
+        ":model",
+        ":mutex",
+        ":observable",
+        ":statistician",
+    ],
+)
+
+cc_library(
+    name = "class_path_lookup",
+    hdrs = ["class_path_lookup.h"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+    ],
+)
+
+cc_library(
+    name = "statistician",
+    srcs = ["statistician.cc"],
+    hdrs = ["statistician.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":mutex",
+        ":stopwatch",
+        "//src/codegen:jni_proxies",
+    ],
+    alwayslink = 1,
 )
 
 cc_library(
@@ -262,6 +409,30 @@ cc_library(
 )
 
 cc_library(
+    name = "type_evaluator",
+    hdrs = ["type_evaluator.h"],
+    deps = [
+        ":class_metadata_reader",
+        ":common",
+        ":method_caller",
+    ],
+)
+
+cc_library(
+    name = "generic_type_evaluator",
+    srcs = ["generic_type_evaluator.cc"],
+    hdrs = ["generic_type_evaluator.h"],
+    deps = [
+        ":common",
+        ":instance_field_reader",
+        ":jvariant",
+        ":messages",
+        ":model",
+        ":type_evaluator",
+    ],
+)
+
+cc_library(
     name = "array_type_evaluator",
     hdrs = ["array_type_evaluator.h"],
     deps = [
@@ -279,6 +450,106 @@ cc_library(
     hdrs = ["object_evaluator.h"],
     deps = [
         ":common",
+    ],
+)
+
+cc_library(
+    name = "jvm_object_evaluator",
+    srcs = ["jvm_object_evaluator.cc"],
+    hdrs = ["jvm_object_evaluator.h"],
+    deps = [
+        ":array_type_evaluator",
+        ":class_indexer",
+        ":class_metadata_reader",
+        ":common",
+        ":config",
+        ":generic_type_evaluator",
+        ":iterable_type_evaluator",
+        ":jvariant",
+        ":map_entry_type_evaluator",
+        ":map_type_evaluator",
+        ":messages",
+        ":model",
+        ":object_evaluator",
+        ":safe_method_caller",
+        ":stringable_type_evaluator",
+        ":type_evaluator",
+        ":value_formatter",
+    ],
+)
+
+cc_library(
+    name = "iterable_type_evaluator",
+    srcs = ["iterable_type_evaluator.cc"],
+    hdrs = ["iterable_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "map_entry_type_evaluator",
+    srcs = ["map_entry_type_evaluator.cc"],
+    hdrs = ["map_entry_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jvmti_buffer",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "map_type_evaluator",
+    srcs = ["map_type_evaluator.cc"],
+    hdrs = ["map_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":iterable_type_evaluator",
+        ":jni_utils",
+        ":map_entry_type_evaluator",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":type_evaluator",
+        ":value_formatter",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "stringable_type_evaluator",
+    srcs = ["stringable_type_evaluator.cc"],
+    hdrs = ["stringable_type_evaluator.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":type_evaluator",
+        "//src/codegen:jni_proxies",
     ],
 )
 
@@ -305,6 +576,17 @@ cc_library(
     hdrs = ["scheduler.h"],
     deps = [
         ":common",
+        ":mutex",
+    ],
+)
+
+cc_library(
+    name = "rate_limit",
+    srcs = ["rate_limit.cc"],
+    hdrs = ["rate_limit.h"],
+    deps = [
+        ":common",
+        ":leaky_bucket",
         ":mutex",
     ],
 )
@@ -349,6 +631,25 @@ cc_library(
 )
 
 cc_library(
+    name = "glob_data_visibility_policy",
+    srcs = ["glob_data_visibility_policy.cc"],
+    hdrs = ["glob_data_visibility_policy.h"],
+    deps = [
+        ":data_visibility_policy",
+        ":type_util",
+    ],
+)
+
+cc_library(
+    name = "multi_data_visibility_policy",
+    srcs = ["multi_data_visibility_policy.cc"],
+    hdrs = ["multi_data_visibility_policy.h"],
+    deps = [
+        ":data_visibility_policy",
+    ],
+)
+
+cc_library(
     name = "class_indexer",
     hdrs = ["class_indexer.h"],
     deps = [
@@ -358,6 +659,18 @@ cc_library(
         ":jvariant",
         ":observable",
         ":type_util",
+    ],
+)
+
+cc_library(
+    name = "structured_data_visibility_policy",
+    srcs = ["structured_data_visibility_policy.cc"],
+    hdrs = ["structured_data_visibility_policy.h"],
+    deps = [
+        ":common",
+        ":data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
     ],
 )
 
@@ -440,11 +753,72 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_breakpoint",
+    srcs = ["jvm_breakpoint.cc"],
+    hdrs = ["jvm_breakpoint.h"],
+    deps = [
+        ":auto_jvmti_breakpoint",
+        ":breakpoint",
+        ":breakpoints_manager",
+        ":capture_data_collector",
+        ":class_indexer",
+        ":class_path_lookup",
+        ":common",
+        ":dynamic_logger",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":format_queue",
+        ":java_expression_evaluator",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvm_evaluators",
+        ":jvm_readers_factory",
+        ":jvmti_buffer",
+        ":leaky_bucket",
+        ":log_data_collector",
+        ":messages",
+        ":model",
+        ":model_util",
+        ":mutex",
+        ":rate_limit",
+        ":resolved_source_location",
+        ":scheduler",
+        ":statistician",
+        ":stopwatch",
+        ":type_util",
+    ],
+)
+
+cc_library(
     name = "breakpoints_manager",
     hdrs = ["breakpoints_manager.h"],
     deps = [
         ":common",
         ":leaky_bucket",
+    ],
+)
+
+cc_library(
+    name = "jvm_breakpoints_manager",
+    srcs = ["jvm_breakpoints_manager.cc"],
+    hdrs = ["jvm_breakpoints_manager.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":breakpoint",
+        ":breakpoints_manager",
+        ":callbacks_monitor",
+        ":canary_control",
+        ":class_indexer",
+        ":common",
+        ":format_queue",
+        ":jvm_evaluators",
+        ":leaky_bucket",
+        ":mutex",
+        ":rate_limit",
+        ":statistician",
     ],
 )
 
@@ -673,15 +1047,6 @@ cc_library(
 )
 
 cc_library(
-    name = "multi_data_visibility_policy",
-    srcs = ["multi_data_visibility_policy.cc"],
-    hdrs = ["multi_data_visibility_policy.h"],
-    deps = [
-        ":data_visibility_policy",
-    ],
-)
-
-cc_library(
     name = "encoding_util",
     srcs = ["encoding_util.cc"],
     hdrs = ["encoding_util.h"],
@@ -865,3 +1230,35 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "dynamic_logger",
+    hdrs = ["dynamic_logger.h"],
+    deps = [
+        ":common",
+        ":model",
+    ],
+)
+
+cc_library(
+    name = "log_data_collector",
+    srcs = ["log_data_collector.cc"],
+    hdrs = ["log_data_collector.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":class_indexer",
+        ":common",
+        ":expression_evaluator_h",
+        ":expression_util_h",
+        ":messages",
+        ":method_caller",
+        ":model",
+        ":object_evaluator",
+        ":readers_factory",
+        ":type_util",
+        ":value_formatter",
+        "//src/codegen:jni_proxies",
+    ],
+)

@@ -199,7 +199,7 @@ static std::string PrintString(jstring str) {
         break;
 
       default:
-        // TODO(vlif): encode non-ASCII characters like ASM does.
+        // TODO: encode non-ASCII characters like ASM does.
         ss << static_cast<char>(ch);
         break;
     }

@@ -234,6 +234,50 @@ cc_test(
 )
 
 cc_test(
+    name = "format_queue_test",
+    srcs = ["format_queue_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:config_builder",
+        "//src/agent:format_queue",
+        "//src/agent:model_util",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "generic_type_evaluator_test",
+    srcs = ["generic_type_evaluator_test.cc"],
+    deps = [
+        ":fake_instance_field_reader",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:generic_type_evaluator",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "//src/agent:model_util",
+        "//src/agent:static_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "glob_data_visibility_policy_test",
+    srcs = ["glob_data_visibility_policy_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:glob_data_visibility_policy",
+        #"//util/glob",
+        #"//util/random:mt_random",
+        "@com_google_googletest//:gtest_main",
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+cc_test(
     name = "java_expression_parser_test",
     srcs = ["java_expression_parser_test.cc"],
     copts = [
@@ -261,6 +305,23 @@ cc_test(
         "//src/agent:jni_method_caller",
         "//src/agent:jni_utils",
         "//src/agent:jni_utils_h",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jni_utils_test",
+    srcs = ["jni_utils_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/codegen:mock_jni_proxies",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -298,6 +359,106 @@ cc_test(
 )
 
 cc_test(
+    name = "jvm_breakpoint_test",
+    srcs = ["jvm_breakpoint_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":json_eq_matcher",
+        ":mock_breakpoint_labels_provider",
+        ":mock_breakpoints_manager",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_class_path_lookup",
+        ":mock_dynamic_logger",
+        ":mock_eval_call_stack",
+        ":mock_jvmti_env",
+        ":mock_object_evaluator",
+        ":mock_user_id_provider",
+        "//src/agent:class_metadata_reader",
+        "//src/agent:config_builder",
+        "//src/agent:format_queue",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_breakpoint",
+        "//src/agent:jvm_evaluators",
+        "//src/agent:messages",
+        "//src/agent:method_locals",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/agent:object_evaluator",
+        "//src/agent:resolved_source_location",
+        "//src/agent:static_field_reader",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_breakpoints_manager_test",
+    srcs = ["jvm_breakpoints_manager_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_breakpoint",
+        ":mock_bridge",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_class_path_lookup",
+        ":mock_dynamic_logger",
+        ":mock_eval_call_stack",
+        ":mock_jvmti_env",
+        ":mock_object_evaluator",
+        "//src/agent:callbacks_monitor",
+        "//src/agent:format_queue",
+        "//src/agent:jvm_breakpoints_manager",
+        "//src/agent:jvm_evaluators",
+        "//src/agent:messages",
+        "//src/agent:method_locals",
+        "//src/agent:model_util",
+        "//src/agent:object_evaluator",
+        "//src/agent:resolved_source_location",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_class_indexer_test",
+    srcs = ["jvm_class_indexer_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_class_indexer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_class_metadata_reader_test",
+    srcs = ["jvm_class_metadata_reader_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:glob_data_visibility_policy",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jvm_class_metadata_reader",
+        "//src/agent:static_field_reader",
+        "//src/agent:structured_data_visibility_policy",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "jvm_eval_call_stack_test",
     srcs = ["jvm_eval_call_stack_test.cc"],
     deps = [
@@ -306,6 +467,160 @@ cc_test(
         "//src/agent:common",
         "//src/agent:jvm_eval_call_stack",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_instance_field_reader_test",
+    srcs = ["jvm_instance_field_reader_test.cc"],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_instance_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_local_variable_reader_test",
+    srcs = ["jvm_local_variable_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_local_variable_reader",
+        "//src/agent:readers_factory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_object_array_reader_test",
+    srcs = ["jvm_object_array_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_object_array_reader",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_object_evaluator_test",
+    srcs = ["jvm_object_evaluator_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_instance_field_reader",
+        ":fake_jni",
+        ":mock_class_indexer",
+        ":mock_class_metadata_reader",
+        ":mock_jvmti_env",
+        ":mock_method_caller",
+        "//src/agent:config_builder",
+        "//src/agent:instance_field_reader",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_object_evaluator",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "//src/agent:static_field_reader",
+        "//src/agent:type_evaluator",
+        "//src/codegen:jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_primitive_array_reader_test",
+    srcs = ["jvm_primitive_array_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:jni_utils_h",
+        "//src/agent:jvm_primitive_array_reader",
+        "//src/agent:messages",
+        "//src/agent:model",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jvm_static_field_reader_test",
+    srcs = ["jvm_static_field_reader_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_static_field_reader",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "log_data_collector_test",
+    srcs = ["log_data_collector_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        ":mock_method_caller",
+        ":mock_object_evaluator",
+        ":mock_readers_factory",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/agent:config_builder",
+        "//src/agent:expression_evaluator_h",
+        "//src/agent:java_expression_evaluator",
+        "//src/agent:log_data_collector",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "method_locals_test",
+    srcs = ["method_locals_test.cc"],
+    deps = [
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:common",
+        "//src/agent:local_variable_reader",
+        "//src/agent:method_locals",
+        "//src/agent:structured_data_visibility_policy",
+        "//src/agent:readers_factory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+jvm_test(
+    name = "model_json_test",
+    srcs = ["model_json_test.cc"],
+    cc_deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:model_json",
+        "//src/agent:model_util",
+        "//src/codegen:jni_proxies",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    java_deps = [
+        "@maven//:com_google_api_client_google_api_client",
     ],
 )
 
@@ -445,11 +760,42 @@ cc_library(
 )
 
 cc_library(
+    name = "mock_class_metadata_reader",
+    testonly = 1,
+    hdrs = ["mock_class_metadata_reader.h"],
+    deps = [
+        "//src/agent:class_metadata_reader",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_class_path_lookup",
+    testonly = 1,
+    hdrs = ["mock_class_path_lookup.h"],
+    deps = [
+        "//src/agent:class_path_lookup",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
     name = "mock_data_visibility_policy",
     testonly = 1,
     hdrs = ["mock_data_visibility_policy.h"],
     deps = [
         "//src/agent:data_visibility_policy",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "mock_dynamic_logger",
+    testonly = 1,
+    hdrs = ["mock_dynamic_logger.h"],
+    deps = [
+        "//src/agent:dynamic_logger",
+        "//src/agent:resolved_source_location",
         "@com_google_googletest//:gtest",
     ],
 )

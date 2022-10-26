@@ -75,15 +75,42 @@ class MockableJNIEnv : public JNIEnv {
     functions_.FindClass = &CallFindClass;
     functions_.GetArrayLength = &CallGetArrayLength;
     functions_.GetMethodID = &CallGetMethodID;
+    functions_.GetBooleanArrayRegion = &CallGetBooleanArrayRegion;
+    functions_.GetBooleanField = &CallGetBooleanField;
+    functions_.GetByteArrayRegion = &CallGetByteArrayRegion;
+    functions_.GetByteField = &CallGetByteField;
+    functions_.GetCharArrayRegion = &CallGetCharArrayRegion;
+    functions_.GetCharField = &CallGetCharField;
+    functions_.GetDoubleArrayRegion = &CallGetDoubleArrayRegion;
+    functions_.GetDoubleField = &CallGetDoubleField;
+    functions_.GetFloatArrayRegion = &CallGetFloatArrayRegion;
+    functions_.GetFloatField = &CallGetFloatField;
+    functions_.GetIntArrayRegion = &CallGetIntArrayRegion;
+    functions_.GetIntField = &CallGetIntField;
+    functions_.GetLongArrayRegion = &CallGetLongArrayRegion;
+    functions_.GetLongField = &CallGetLongField;
     functions_.GetObjectArrayElement = &CallGetObjectArrayElement;
     functions_.GetObjectClass = &CallGetObjectClass;
+    functions_.GetObjectField = &CallGetObjectField;
     functions_.GetObjectRefType = &CallGetObjectRefType;
     functions_.GetPrimitiveArrayCritical = &CallGetPrimitiveArrayCritical;
+    functions_.GetShortArrayRegion = &CallGetShortArrayRegion;
+    functions_.GetShortField = &CallGetShortField;
+    functions_.GetStaticBooleanField = &CallGetStaticBooleanField;
+    functions_.GetStaticByteField = &CallGetStaticByteField;
+    functions_.GetStaticCharField = &CallGetStaticCharField;
+    functions_.GetStaticDoubleField = &CallGetStaticDoubleField;
+    functions_.GetStaticFloatField = &CallGetStaticFloatField;
+    functions_.GetStaticIntField = &CallGetStaticIntField;
+    functions_.GetStaticLongField = &CallGetStaticLongField;
     functions_.GetStaticMethodID = &CallGetStaticMethodID;
+    functions_.GetStaticObjectField = &CallGetStaticObjectField;
+    functions_.GetStaticShortField = &CallGetStaticShortField;
     functions_.GetStringCritical = &CallGetStringCritical;
     functions_.GetStringLength = &CallGetStringLength;
     functions_.GetStringUTFChars = &CallGetStringUTFChars;
     functions_.GetStringUTFRegion = &CallGetStringUTFRegion;
+    functions_.GetSuperclass = &CallGetSuperclass;
     functions_.IsAssignableFrom = &CallIsAssignableFrom;
     functions_.IsInstanceOf = &CallIsInstanceOf;
     functions_.IsSameObject = &CallIsSameObject;
@@ -178,12 +205,47 @@ class MockableJNIEnv : public JNIEnv {
   virtual jthrowable ExceptionOccurred() = 0;
   virtual jclass FindClass(const char* name) = 0;
   virtual jsize GetArrayLength(jarray array) = 0;
+  virtual void GetBooleanArrayRegion(
+      jbooleanArray array, jsize start, jsize len, jboolean* buf) = 0;
+  virtual jboolean GetBooleanField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetByteArrayRegion(
+      jbyteArray array, jsize start, jsize len, jbyte* buf) = 0;
+  virtual jbyte GetByteField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetCharArrayRegion(
+      jcharArray array, jsize start, jsize len, jchar* buf) = 0;
+  virtual jchar GetCharField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetDoubleArrayRegion(
+      jdoubleArray array, jsize start, jsize len, jdouble* buf) = 0;
+  virtual jdouble GetDoubleField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetFloatArrayRegion(
+      jfloatArray array, jsize start, jsize len, jfloat* buf) = 0;
+  virtual jfloat GetFloatField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetIntArrayRegion(
+      jintArray array, jsize start, jsize len, jint* buf) = 0;
+  virtual jint GetIntField(jobject obj, jfieldID fieldID) = 0;
+  virtual void GetLongArrayRegion(
+      jlongArray array, jsize start, jsize len, jlong* buf) = 0;
+  virtual jlong GetLongField(jobject obj, jfieldID fieldID) = 0;
   virtual jmethodID GetMethodID(
       jclass clazz, const char* name, const char* sig) = 0;
   virtual jobject GetObjectArrayElement(jobjectArray array, jsize index) = 0;
   virtual jclass GetObjectClass(jobject obj) = 0;
+  virtual jobject GetObjectField(jobject obj, jfieldID fieldID) = 0;
   virtual jobjectRefType GetObjectRefType(jobject obj) = 0;
+  virtual void GetShortArrayRegion(
+      jshortArray array, jsize start, jsize len, jshort* buf) = 0;
+  virtual jshort GetShortField(jobject obj, jfieldID fieldID) = 0;
+  virtual jclass GetSuperclass(jclass sub) = 0;
   virtual void* GetPrimitiveArrayCritical(jarray array, jboolean* isCopy) = 0;
+  virtual jboolean GetStaticBooleanField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jbyte GetStaticByteField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jchar GetStaticCharField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jdouble GetStaticDoubleField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jfloat GetStaticFloatField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jint GetStaticIntField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jlong GetStaticLongField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jobject GetStaticObjectField(jclass clazz, jfieldID fieldID) = 0;
+  virtual jshort GetStaticShortField(jclass clazz, jfieldID fieldID) = 0;
   virtual jmethodID GetStaticMethodID(
       jclass clazz, const char* name, const char* sig) = 0;
   virtual const jchar* GetStringCritical(jstring str, jboolean* isCopy) = 0;
@@ -455,10 +517,81 @@ class MockableJNIEnv : public JNIEnv {
     return static_cast<MockableJNIEnv*>(env)->GetArrayLength(array);
   }
 
-  static jobject JNICALL CallGetObjectArrayElement(
-      JNIEnv* env, jobjectArray array, jsize index) {
-    return static_cast<MockableJNIEnv*>(env)->GetObjectArrayElement(
-        array, index);
+  static void JNICALL CallGetBooleanArrayRegion(
+      JNIEnv* env, jbooleanArray array, jsize start, jsize len, jboolean* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetBooleanArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jboolean JNICALL CallGetBooleanField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetBooleanField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetByteArrayRegion(
+      JNIEnv* env, jbyteArray array, jsize start, jsize len, jbyte* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetByteArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jbyte JNICALL CallGetByteField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetByteField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetCharArrayRegion(
+      JNIEnv* env, jcharArray array, jsize start, jsize len, jchar* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetCharArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jchar JNICALL CallGetCharField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetCharField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetDoubleArrayRegion(
+      JNIEnv* env, jdoubleArray array, jsize start, jsize len, jdouble* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetDoubleArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jdouble JNICALL CallGetDoubleField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetDoubleField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetFloatArrayRegion(
+      JNIEnv* env, jfloatArray array, jsize start, jsize len, jfloat* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetFloatArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jfloat JNICALL CallGetFloatField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetFloatField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetIntArrayRegion(
+      JNIEnv* env, jintArray array, jsize start, jsize len, jint* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jint JNICALL CallGetIntField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetIntField(obj, fieldID);
+  }
+
+  static void JNICALL CallGetLongArrayRegion(
+      JNIEnv* env, jlongArray array, jsize start, jsize len, jlong* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetLongArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jlong JNICALL CallGetLongField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetLongField(obj, fieldID);
   }
 
   static jmethodID JNICALL CallGetMethodID(
@@ -466,8 +599,19 @@ class MockableJNIEnv : public JNIEnv {
     return static_cast<MockableJNIEnv*>(env)->GetMethodID(clazz, name, sig);
   }
 
+  static jobject JNICALL CallGetObjectArrayElement(
+      JNIEnv* env, jobjectArray array, jsize index) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectArrayElement(
+        array, index);
+  }
+
   static jclass JNICALL CallGetObjectClass(JNIEnv* env, jobject obj) {
     return static_cast<MockableJNIEnv*>(env)->GetObjectClass(obj);
+  }
+
+  static jobject JNICALL CallGetObjectField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectField(obj, fieldID);
   }
 
   static jobjectRefType JNICALL CallGetObjectRefType(JNIEnv* env, jobject obj) {
@@ -478,6 +622,71 @@ class MockableJNIEnv : public JNIEnv {
       JNIEnv* env, jarray array, jboolean* isCopy) {
     return static_cast<MockableJNIEnv*>(env)->GetPrimitiveArrayCritical(
         array, isCopy);
+  }
+
+  static void JNICALL CallGetShortArrayRegion(
+      JNIEnv* env, jshortArray array, jsize start, jsize len, jshort* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetShortArrayRegion(
+        array, start, len, buf);
+  }
+
+  static jshort JNICALL CallGetShortField(
+      JNIEnv* env, jobject obj, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetShortField(obj, fieldID);
+  }
+
+  static jboolean JNICALL CallGetStaticBooleanField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticBooleanField(
+        clazz, fieldID);
+  }
+
+  static jbyte JNICALL CallGetStaticByteField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticByteField(
+        clazz, fieldID);
+  }
+
+  static jchar JNICALL CallGetStaticCharField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticCharField(
+        clazz, fieldID);
+  }
+
+  static jdouble JNICALL CallGetStaticDoubleField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticDoubleField(
+        clazz, fieldID);
+  }
+
+  static jfloat JNICALL CallGetStaticFloatField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticFloatField(
+        clazz, fieldID);
+  }
+
+  static jint JNICALL CallGetStaticIntField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticIntField(
+        clazz, fieldID);
+  }
+
+  static jlong JNICALL CallGetStaticLongField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticLongField(
+        clazz, fieldID);
+  }
+
+  static jobject JNICALL CallGetStaticObjectField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticObjectField(
+        clazz, fieldID);
+  }
+
+  static jshort JNICALL CallGetStaticShortField(
+      JNIEnv* env, jclass clazz, jfieldID fieldID) {
+    return static_cast<MockableJNIEnv*>(env)->GetStaticShortField(
+        clazz, fieldID);
   }
 
   static jmethodID JNICALL CallGetStaticMethodID(
@@ -506,6 +715,10 @@ class MockableJNIEnv : public JNIEnv {
       JNIEnv* env, jstring str, jsize start, jsize len, char* buf) {
     static_cast<MockableJNIEnv*>(env)->GetStringUTFRegion(
         str, start, len, buf);
+  }
+
+  static jclass JNICALL CallGetSuperclass(JNIEnv* env, jclass sub) {
+    return static_cast<MockableJNIEnv*>(env)->GetSuperclass(sub);
   }
 
   static jboolean JNICALL CallIsAssignableFrom(
@@ -677,14 +890,69 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(jthrowable, ExceptionOccurred, (), (override));
   MOCK_METHOD(jclass, FindClass, (const char* name), (override));
   MOCK_METHOD(jsize, GetArrayLength, (jarray array), (override));
+  MOCK_METHOD(void, GetBooleanArrayRegion,
+              (jbooleanArray array, jsize start, jsize len, jboolean* buf),
+              (override));
+  MOCK_METHOD(jboolean, GetBooleanField, (jobject obj, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(void, GetByteArrayRegion,
+              (jbyteArray array, jsize start, jsize len, jbyte* buf),
+              (override));
+  MOCK_METHOD(jbyte, GetByteField, (jobject obj, jfieldID fieldID), (override));
+  MOCK_METHOD(void, GetCharArrayRegion,
+              (jcharArray array, jsize start, jsize len, jchar* buf),
+              (override));
+  MOCK_METHOD(jchar, GetCharField, (jobject obj, jfieldID fieldID), (override));
+  MOCK_METHOD(void, GetDoubleArrayRegion,
+              (jdoubleArray array, jsize start, jsize len, jdouble* buf),
+              (override));
+  MOCK_METHOD(jdouble, GetDoubleField, (jobject obj, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(void, GetFloatArrayRegion,
+              (jfloatArray array, jsize start, jsize len, jfloat* buf),
+              (override));
+  MOCK_METHOD(jfloat, GetFloatField, (jobject obj, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(void, GetIntArrayRegion,
+              (jintArray array, jsize start, jsize len, jint* buf), (override));
+  MOCK_METHOD(jint, GetIntField, (jobject obj, jfieldID fieldID), (override));
+  MOCK_METHOD(void, GetLongArrayRegion,
+              (jlongArray array, jsize start, jsize len, jlong* buf),
+              (override));
+  MOCK_METHOD(jlong, GetLongField, (jobject obj, jfieldID fieldID), (override));
   MOCK_METHOD(jmethodID, GetMethodID,
               (jclass clazz, const char* name, const char* sig), (override));
   MOCK_METHOD(jobject, GetObjectArrayElement, (jobjectArray array, jsize index),
               (override));
   MOCK_METHOD(jclass, GetObjectClass, (jobject obj), (override));
+  MOCK_METHOD(jobject, GetObjectField, (jobject obj, jfieldID fieldID),
+              (override));
   MOCK_METHOD(jobjectRefType, GetObjectRefType, (jobject obj), (override));
   MOCK_METHOD(void*, GetPrimitiveArrayCritical,
               (jarray array, jboolean* isCopy), (override));
+  MOCK_METHOD(void, GetShortArrayRegion,
+              (jshortArray array, jsize start, jsize len, jshort* buf),
+              (override));
+  MOCK_METHOD(jshort, GetShortField, (jobject obj, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jboolean, GetStaticBooleanField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jbyte, GetStaticByteField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jchar, GetStaticCharField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jdouble, GetStaticDoubleField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jfloat, GetStaticFloatField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jint, GetStaticIntField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jlong, GetStaticLongField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jobject, GetStaticObjectField, (jclass clazz, jfieldID fieldID),
+              (override));
+  MOCK_METHOD(jshort, GetStaticShortField, (jclass clazz, jfieldID fieldID),
+              (override));
   MOCK_METHOD(jmethodID, GetStaticMethodID,
               (jclass clazz, const char* name, const char* sig), (override));
   MOCK_METHOD(const jchar*, GetStringCritical, (jstring str, jboolean* isCopy),
@@ -694,6 +962,7 @@ class MockJNIEnv : public MockableJNIEnv {
               (override));
   MOCK_METHOD(void, GetStringUTFRegion,
               (jstring str, jsize start, jsize len, char* buf), (override));
+  MOCK_METHOD(jclass, GetSuperclass, (jclass sub), (override));
   MOCK_METHOD(jboolean, IsAssignableFrom, (jclass sub, jclass sup), (override));
   MOCK_METHOD(jboolean, IsInstanceOf, (jobject obj, jclass clazz), (override));
   MOCK_METHOD(jboolean, IsSameObject, (jobject obj1, jobject obj2), (override));

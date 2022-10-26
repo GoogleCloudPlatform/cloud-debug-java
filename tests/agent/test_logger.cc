@@ -17,9 +17,9 @@
 #include <memory>
 #include <vector>
 
-#include "src/agent//common.h"
-#include "src/agent//jni_utils.h"
-#include "src/agent//mutex.h"
+#include "src/agent/common.h"
+#include "src/agent/jni_utils.h"
+#include "src/agent/mutex.h"
 
 using devtools::cdbg::JniToNativeString;
 using devtools::cdbg::JniToJavaString;

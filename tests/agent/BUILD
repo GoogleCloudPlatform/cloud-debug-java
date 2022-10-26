@@ -754,6 +754,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "value_formatter_test",
+    srcs = ["value_formatter_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:model_util",
+        "//src/agent:value_formatter",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "mock_array_reader",
     testonly = 1,

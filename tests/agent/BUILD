@@ -721,6 +721,17 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "statistician_test",
+    srcs = ["statistician_test.cc"],
+    deps = [
+        ":mock_jvmti_env",
+        "//src/agent:jni_utils",
+        "//src/agent:statistician",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "mock_array_reader",
     testonly = 1,

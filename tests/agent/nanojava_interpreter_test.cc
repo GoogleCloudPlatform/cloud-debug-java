@@ -36,7 +36,7 @@ using testing::MatchesRegex;
 
 namespace {
 
-// Provides absl::Substitue type functionality, but only accepts strings as
+// Provides absl::Substitute type functionality, but only accepts strings as
 // arguments. Serves the needs of this test file without needing to depend on
 // abseil, which we don't want to depend on at this time given we currently
 // depend on glog and gflags and want to avoid any issues.
@@ -106,7 +106,7 @@ std::string Substitute(const std::string& fmt, const std::string& arg1,
   return Substitute(fmt, args);
 }
 
-}
+} // namespace
 
 namespace devtools {
 namespace cdbg {

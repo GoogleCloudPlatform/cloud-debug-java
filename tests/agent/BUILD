@@ -678,8 +678,6 @@ jvm_test(
         "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:class_file_textifier",
     ],
 )
-        #"//strings",
-        #"//third_party/absl/strings",
 
 cc_test(
     name = "nanojava_locals_test",

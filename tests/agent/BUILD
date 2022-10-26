@@ -790,10 +790,25 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-        #"//third_party/absl/flags:flag",
-        #"//third_party/absl/synchronization",
-        #"//thread",
-        #"//util/functional:to_callback",
+
+cc_test(
+    name = "yaml_data_visibility_config_reader_test",
+    srcs = ["yaml_data_visibility_config_reader_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    deps = [
+        ":fake_jni",
+        ":mock_class_path_lookup",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:debuggee_labels",
+        "//src/agent:yaml_data_visibility_config_reader",
+        "//src/codegen:mock_jni_proxies",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_library(
     name = "mock_array_reader",

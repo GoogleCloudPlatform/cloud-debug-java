@@ -675,6 +675,25 @@ cc_library(
 )
 
 cc_library(
+    name = "yaml_data_visibility_config_reader",
+    srcs = ["yaml_data_visibility_config_reader.cc"],
+    hdrs = ["yaml_data_visibility_config_reader.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":class_path_lookup",
+        ":common",
+        ":debuggee_labels",
+        ":glob_data_visibility_policy",
+        ":jni_utils",
+        ":jni_utils_h",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "class_indexer",
     hdrs = ["class_indexer.h"],
     deps = [

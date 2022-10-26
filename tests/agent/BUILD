@@ -654,6 +654,31 @@ cc_test(
     ],
 )
 
+jvm_test(
+    name = "nanojava_interpreter_test",
+    srcs = ["nanojava_interpreter_test.cc"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated",
+    ],
+    cc_deps = [
+        ":jasmin_utils",
+        "//src/agent:jni_method_caller",
+        "//src/agent:jvm_class_indexer",
+        "//src/agent:model_util",
+        "//src/agent:nanojava_interpreter",
+        "//src/agent:type_util",
+        "//src/codegen:jni_proxies",
+        "//src/codegen:jni_test_proxies",
+        "@com_google_googletest//:gtest",
+    ],
+    java_deps = [
+        "//:jasmin",
+        "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:nano_java_interpreter_test_lib",
+        "//src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java:class_file_textifier",
+    ],
+)
+
 cc_test(
     name = "nanojava_locals_test",
     srcs = ["nanojava_locals_test.cc"],

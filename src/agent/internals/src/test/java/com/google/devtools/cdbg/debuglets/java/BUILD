@@ -94,3 +94,11 @@ java_library(
         "@maven//:org_ow2_asm_asm_util",
     ],
 )
+
+java_library(
+    name = "nano_java_interpreter_test_lib",
+    srcs = [
+        "NanoJavaInterpreterTestLib.java",
+    ],
+)
+

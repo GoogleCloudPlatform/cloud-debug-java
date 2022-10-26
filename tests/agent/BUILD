@@ -732,6 +732,17 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "structured_data_visibility_policy_test",
+    srcs = ["structured_data_visibility_policy_test.cc"],
+    deps = [
+        ":fake_jni",
+        ":mock_jvmti_env",
+        "//src/agent:structured_data_visibility_policy",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "mock_array_reader",
     testonly = 1,

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * This test logger is used by some of the Java agent unit tests under
+ * src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java
+ */
+
 #include <memory>
 #include <vector>
 

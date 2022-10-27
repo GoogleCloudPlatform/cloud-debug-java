@@ -29,6 +29,7 @@ public class AgentLoggerTest {
   private static native String pull();
 
   static {
+    // See tests/agent/test_logger.cc
     System.loadLibrary("test_logger");
   }
 

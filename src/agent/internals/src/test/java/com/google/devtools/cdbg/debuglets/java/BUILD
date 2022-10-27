@@ -3,6 +3,23 @@ load("@rules_java//java:defs.bzl", "java_test")
 package(default_visibility = ["//visibility:public"])
 
 java_test(
+    name = "AgentLoggerTest",
+    size = "small",
+    srcs = [
+        "AgentLoggerTest.java",
+    ],
+    resources = [
+        "//tests/agent:libtest_logger.so",
+    ],
+    deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:logger",
+        "//tests/agent:libtest_logger.so",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "DataTypeConverterTest",
     size = "small",
     srcs = [

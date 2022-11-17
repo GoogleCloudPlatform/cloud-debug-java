@@ -305,12 +305,12 @@ static struct {
 
 TEST(EncodingUtil, Base64Encode) {
   for (const auto& tc : base64_tests) {
-    std::string result = Base64Encode(&tc.plaintext[0], tc.plaintext.size());
+    std::string result = Base64Encode(tc.plaintext.data(), tc.plaintext.size());
     EXPECT_EQ(tc.cyphertext, result);
   }
 
   for (const auto& tc : base64_extra_tests) {
-    std::string result = Base64Encode(&tc.plaintext[0], tc.plaintext.size());
+    std::string result = Base64Encode(tc.plaintext.data(), tc.plaintext.size());
     EXPECT_EQ(tc.cyphertext, result);
   }
 

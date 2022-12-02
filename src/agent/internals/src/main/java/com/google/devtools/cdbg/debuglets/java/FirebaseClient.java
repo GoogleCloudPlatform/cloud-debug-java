@@ -131,15 +131,15 @@ class FirebaseClient implements HubClient {
     TimeoutConfig(long value, TimeUnit units) {
       this.setDebuggee = new Timeout(value, units);
       this.setBreakpoint = new Timeout(value, units);
-      this.getSchemaVersion = new Timeout(value, units);
-      this.getDebuggee = new Timeout(value, units);
+      this.dbConfiguredTest = new Timeout(value, units);
+      this.debuggeePresentTest = new Timeout(value, units);
       this.listActiveBreakpoints = new Timeout(value, units);
     }
 
     Timeout setDebuggee;
     Timeout setBreakpoint;
-    Timeout getSchemaVersion;
-    Timeout getDebuggee;
+    Timeout dbConfiguredTest;
+    Timeout debuggeePresentTest;
     Timeout listActiveBreakpoints;
   }
   ;
@@ -334,8 +334,9 @@ class FirebaseClient implements HubClient {
     this.timeouts = new TimeoutConfig(30, TimeUnit.SECONDS);
 
     // We lower this timeout, as it's only used when probing a potential DB address to see if it
-    // exists and is configured for Snapshot Debugger use.
-    this.timeouts.getSchemaVersion.value = 10;
+    // exists and is configured for Snapshot Debugger use, so it's expected it may fail. It will
+    // also be retried if no configured DBs are found.
+    this.timeouts.dbConfiguredTest.value = 10;
 
     this.markDebuggeeActivePeriod = MARK_DEBUGGEE_ACTIVE_PERIOD;
   }
@@ -381,18 +382,9 @@ class FirebaseClient implements HubClient {
 
     Debuggee debuggee = getDebuggeeInfo(extraDebuggeeLabels);
     setDebuggeeId(debuggee.id);
-    String debuggeePath = getDebuggeeDbPath();
-    String registrationTimePath = debuggeePath + "/registrationTimeMsec";
 
-    boolean isDebuggeeAlreadyRegistered =
-        getDbValue(
-                this.firebaseApp,
-                this.firebaseStaticWrappers,
-                registrationTimePath,
-                timeouts.getDebuggee)
-            != null;
-
-    if (isDebuggeeAlreadyRegistered) {
+    if (isDebuggeePresentInDb(
+        this.firebaseApp, this.firebaseStaticWrappers, debuggee.id, timeouts.debuggeePresentTest)) {
       infofmt("Debuggee %s is already present in the RTDB, marking it active", getDebuggeeId());
       markDebuggeeActive();
     } else {
@@ -400,14 +392,12 @@ class FirebaseClient implements HubClient {
       // start the markDebuggeeActiveTimer, it will schecule the first update right away with no
       // delay.
       infofmt("Debuggee %s is not yet present in the RTDB, sending it.", getDebuggeeId());
-      setDbValue(debuggeePath, debuggee, timeouts.setDebuggee);
+      setDbValue(getDebuggeeDbPath(debuggee.id), debuggee, timeouts.setDebuggee);
     }
 
     registerActiveBreakpointListener();
-    isRegistered = true;
-
-    // Start the timer after setting isRegistered to true.
     startMarkDebuggeeActiveTimer();
+    isRegistered = true;
 
     infofmt(
         "Debuggee %s, registered %s, agent version: %s",
@@ -637,7 +627,11 @@ class FirebaseClient implements HubClient {
   }
 
   public String getDebuggeeDbPath() {
-    return "cdbg/debuggees/" + getDebuggeeId();
+    return getDebuggeeDbPath(getDebuggeeId());
+  }
+
+  public static String getDebuggeeDbPath(String debuggeeId) {
+    return "cdbg/debuggees/" + debuggeeId;
   }
 
   /**
@@ -846,13 +840,7 @@ class FirebaseClient implements HubClient {
           "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
           databaseUrl);
 
-      Object value =
-          getDbValue(
-              app, this.firebaseStaticWrappers, "cdbg/schema_version", timeouts.getSchemaVersion);
-
-      if (value != null) {
-        // For our purposes, we don't care what the data is, as long long as it's not null it
-        // indicates the DB exists and has been initialized for Snapshot Debugger use.
+      if (isDbConfigured(app, this.firebaseStaticWrappers, timeouts.dbConfiguredTest)) {
         infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
         isAppGoodToUse = true;
       }
@@ -1060,6 +1048,29 @@ class FirebaseClient implements HubClient {
     }
 
     infofmt("Firebase Database write operation to '%s' was successful", path);
+  }
+
+  private static boolean isDbConfigured(
+      FirebaseApp firebaseApp, FirebaseStaticWrappers firebaseStaticWrappers, Timeout timeout)
+      throws Exception {
+
+    // For our purposes, we don't care what the data is, as long long as it's not null it
+    // indicates the DB exists and has been initialized for Snapshot Debugger use.
+    return getDbValue(firebaseApp, firebaseStaticWrappers, "cdbg/schema_version", timeout) != null;
+  }
+
+  private static boolean isDebuggeePresentInDb(
+      FirebaseApp firebaseApp,
+      FirebaseStaticWrappers firebaseStaticWrappers,
+      String debuggeeId,
+      Timeout timeout)
+      throws Exception {
+
+    String registrationTimePath = getDebuggeeDbPath(debuggeeId) + "/registrationTimeMsec";
+
+    // For our purposes, we don't care what the data is, as long as it's not null it
+    // indicates the debuggee exists in the DB.
+    return getDbValue(firebaseApp, firebaseStaticWrappers, registrationTimePath, timeout) != null;
   }
 
   /**

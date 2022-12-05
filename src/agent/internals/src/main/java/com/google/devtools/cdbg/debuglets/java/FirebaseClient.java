@@ -56,6 +56,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class FirebaseClient implements HubClient {
   static final Duration MARK_DEBUGGEE_ACTIVE_PERIOD = Duration.ofHours(1);
@@ -119,6 +120,10 @@ class FirebaseClient implements HubClient {
     Timeout(long value, TimeUnit units) {
       this.value = value;
       this.units = units;
+    }
+
+    public String toString() {
+      return value + " " + units;
     }
 
     long value;
@@ -1037,7 +1042,7 @@ class FirebaseClient implements HubClient {
     // Returns null on timeout.
     String error = result.poll(timeout.value, timeout.units);
     if (error == null) {
-      error = "Timed out after " + timeout.value + " " + timeout.units.toString();
+      error = "Timed out after " + timeout;
     }
 
     if (!error.isEmpty()) {
@@ -1089,7 +1094,7 @@ class FirebaseClient implements HubClient {
       FirebaseStaticWrappers firebaseStaticWrappers,
       final String path,
       Timeout timeout)
-      throws Exception {
+      throws IOException, InterruptedException, TimeoutException {
     DatabaseReference dbRef = firebaseStaticWrappers.getDbInstance(app).getReference(path);
 
     infofmt("Beginning Firebase Database read operation at '%s'", path);
@@ -1120,16 +1125,11 @@ class FirebaseClient implements HubClient {
 
     // null will be returned on read timeout.
     if (isSuccess == null) {
-      infofmt("Read from %s timed out after %d %s", path, timeout.value, timeout.units);
-      throw new Exception(
-          "Firebase Database read operation from '"
-              + path
-              + "' timed out after "
-              + timeout.value
-              + " "
-              + timeout.units.toString());
+      infofmt("Read from %s timed out after %s", path, timeout);
+      throw new TimeoutException(
+          "Firebase Database read operation from '" + path + "' timed out after " + timeout);
     } else if (!isSuccess) {
-      throw new Exception("Error occurred attempting to read from the DB");
+      throw new IOException("Error occurred attempting to read from the DB");
     }
 
     return obtainedValue.get(0);

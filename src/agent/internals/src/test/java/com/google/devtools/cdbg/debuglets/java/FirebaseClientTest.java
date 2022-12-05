@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
@@ -53,6 +54,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -104,8 +106,11 @@ public final class FirebaseClientTest {
 
   private FirebaseClient.TimeoutConfig timeouts =
       new FirebaseClient.TimeoutConfig(100, TimeUnit.MILLISECONDS);
-  private MetadataQuery metadata;
 
+  // Set the default high, we don't want it interfering with most tests. Tests that care about the
+  // functionality will use their own value.
+  private Duration markDebuggeeActivePeriod = Duration.ofHours(1);
+  private MetadataQuery metadata;
   private ClassPathLookup classPathLookup = new ClassPathLookup(false, null);
 
   /**
@@ -194,7 +199,12 @@ public final class FirebaseClientTest {
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     firebaseClient.initializeFirebaseApp();
 
     ArgumentCaptor<FirebaseOptions> capturedFirebaseOptions =
@@ -243,7 +253,12 @@ public final class FirebaseClientTest {
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     Exception ex = assertThrows(Exception.class, () -> firebaseClient.initializeFirebaseApp());
     assertThat(ex)
         .hasMessageThat()
@@ -277,6 +292,8 @@ public final class FirebaseClientTest {
     assertThat(registeredDebuggee.labels).containsEntry("module", "default");
     assertThat(registeredDebuggee.labels).containsEntry("version", "v1");
     assertThat(registeredDebuggee.labels).containsEntry("minorversion", "12345");
+    assertThat(registeredDebuggee.registrationTimeMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.lastUpdateTimeMsec).containsEntry(".sv", "timestamp");
     assertThat(registeredDebuggee.agentVersion).matches("cloud-debug-java/v[0-9]+.[0-9]+");
     assertThat(registeredDebuggee.sourceContexts).isEmpty();
   }
@@ -288,7 +305,7 @@ public final class FirebaseClientTest {
     ImmutableMap<String, String> extraLabels =
         ImmutableMap.<String, String>of("afoo", "abar", "mkfoo", "mkbar", "sfoo", "sbar");
 
-    registerDebuggee(DEFAULT_LABELS, extraLabels);
+    registerDebuggee(DEFAULT_LABELS, extraLabels, markDebuggeeActivePeriod);
     assertThat(registeredDebuggee.id).matches("d-[0-9a-f]{8,8}");
     assertThat(registeredDebuggee.uniquifier).matches("[0-9A-F]+");
     assertThat(registeredDebuggee.description).isEqualTo("mock-project-id-default-v1-12345");
@@ -299,6 +316,8 @@ public final class FirebaseClientTest {
     assertThat(registeredDebuggee.labels).containsEntry("afoo", "abar");
     assertThat(registeredDebuggee.labels).containsEntry("mkfoo", "mkbar");
     assertThat(registeredDebuggee.labels).containsEntry("sfoo", "sbar");
+    assertThat(registeredDebuggee.registrationTimeMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.lastUpdateTimeMsec).containsEntry(".sv", "timestamp");
     assertThat(registeredDebuggee.agentVersion).matches("cloud-debug-java/v[0-9]+.[0-9]+");
     assertThat(registeredDebuggee.sourceContexts).isEmpty();
   }
@@ -331,7 +350,7 @@ public final class FirebaseClientTest {
             .buildOrThrow();
 
     for (Entry<Map<String, String>, String> testCase : testCases.entrySet()) {
-      registerDebuggee(testCase.getKey(), EMPTY_EXTRA_DEBUGGEE_LABELS);
+      registerDebuggee(testCase.getKey(), EMPTY_EXTRA_DEBUGGEE_LABELS, markDebuggeeActivePeriod);
       assertThat(registeredDebuggee.description).isEqualTo(testCase.getValue());
     }
   }
@@ -403,7 +422,12 @@ public final class FirebaseClientTest {
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     Exception ex =
         assertThrows(
             Exception.class, () -> firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS));
@@ -413,6 +437,141 @@ public final class FirebaseClientTest {
             "Failed to initialize FirebaseApp, attempted URLs:"
                 + " [https://mock-project-id-cdbg.firebaseio.com,"
                 + " https://mock-project-id-default-rtdb.firebaseio.com]");
+  }
+
+  @Test
+  public void registerDebuggeeWorksAsExpectedWhenAlreadyInRtdb() throws Exception {
+    DatabaseReference mockSchemaVersionDbRef = mock(DatabaseReference.class);
+    DatabaseReference mockDebuggeesDbRef = mock(DatabaseReference.class);
+    DatabaseReference mockBreakpointsDbRef = mock(DatabaseReference.class);
+
+    when(mockFirebaseStaticWrappers.getDbInstance(mockFirebaseApp))
+        .thenReturn(mockFirebaseDatabase);
+    when(mockFirebaseDatabase.getReference(eq("cdbg/schema_version")))
+        .thenReturn(mockSchemaVersionDbRef);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees")))
+        .thenReturn(mockDebuggeesDbRef);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/breakpoints/")))
+        .thenReturn(mockBreakpointsDbRef);
+
+    ArgumentCaptor<Object> capturedDebuggee = ArgumentCaptor.forClass(Object.class);
+    ArgumentCaptor<String> capturedDbPaths = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<ValueEventListener> capturedBpUpdateListener =
+        ArgumentCaptor.forClass(ValueEventListener.class);
+
+    setResponseDbGet(mockSchemaVersionDbRef, "2");
+
+    // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
+    // indicates it does exist, and the registration code won't write out the full Debuggee, but
+    // rather simply update the lastUpdateTimeMsec field.
+    setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
+
+    // This will be for the udpate to lastActiveTimeMsec
+    setCompletionSuccessDbSet(mockDebuggeesDbRef);
+
+    FirebaseClient firebaseClient =
+        new FirebaseClient(
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
+    assertThat(firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS)).isTrue();
+    verify(mockDebuggeesDbRef).setValue(capturedDebuggee.capture(), any());
+
+    verify(mockFirebaseDatabase, times(4)).getReference(capturedDbPaths.capture());
+    List<String> dbPaths = capturedDbPaths.getAllValues();
+    assertThat(dbPaths)
+        .isEqualTo(
+            Arrays.asList(
+                "cdbg/schema_version",
+                String.format(
+                    "cdbg/debuggees/%s/registrationTimeMsec", firebaseClient.getDebuggeeId()),
+                String.format(
+                    "cdbg/debuggees/%s/lastUpdateTimeMsec", firebaseClient.getDebuggeeId()),
+                String.format("cdbg/breakpoints/%s/active", firebaseClient.getDebuggeeId())));
+
+    verify(mockBreakpointsDbRef).addValueEventListener(capturedBpUpdateListener.capture());
+    this.breakpointUpdateListener = capturedBpUpdateListener.getValue();
+    assertThat(this.breakpointUpdateListener).isNotNull();
+
+    reset(mockFirebaseDatabase);
+  }
+
+  @Test
+  public void registerDebuggeeThrowsOnGetDebuggeeRegistrationTimeTimeout() throws Exception {
+    DatabaseReference mockSchemaVersionDbRef = mock(DatabaseReference.class);
+    DatabaseReference mockDebuggeesDbRef = mock(DatabaseReference.class);
+
+    when(mockFirebaseStaticWrappers.getDbInstance(mockFirebaseApp))
+        .thenReturn(mockFirebaseDatabase);
+    when(mockFirebaseDatabase.getReference(eq("cdbg/schema_version")))
+        .thenReturn(mockSchemaVersionDbRef);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees/")))
+        .thenReturn(mockDebuggeesDbRef);
+
+    setResponseDbGet(mockSchemaVersionDbRef, "2");
+
+    // NOTE, we don't set a response for the debuggee registration time get call, so it will
+    // timeout.
+
+    FirebaseClient firebaseClient =
+        new FirebaseClient(
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
+    Exception ex =
+        assertThrows(
+            Exception.class, () -> firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS));
+    assertThat(ex)
+        .hasMessageThat()
+        .matches(
+            "Firebase Database read operation from 'cdbg/debuggees/.*/registrationTimeMsec' timed"
+                + " out after.*");
+  }
+
+  @Test
+  public void registerDebuggeeThrowsOnSetDebuggeeLastUpdateTimeTimeout() throws Exception {
+    DatabaseReference mockSchemaVersionDbRef = mock(DatabaseReference.class);
+    DatabaseReference mockDebuggeesDbRef = mock(DatabaseReference.class);
+
+    when(mockFirebaseStaticWrappers.getDbInstance(mockFirebaseApp))
+        .thenReturn(mockFirebaseDatabase);
+    when(mockFirebaseDatabase.getReference(eq("cdbg/schema_version")))
+        .thenReturn(mockSchemaVersionDbRef);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees/")))
+        .thenReturn(mockDebuggeesDbRef);
+
+    setResponseDbGet(mockSchemaVersionDbRef, "2");
+
+    // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
+    // indicates it does exist, and the registration code won't write out the full Debuggee, but
+    // rather simply update the lastUpdateTimeMsec field.
+    setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
+
+    // NOTE, don't set a set completion response for the last update write, this will cause the set
+    // to timeout as desired by the test.
+
+    FirebaseClient firebaseClient =
+        new FirebaseClient(
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
+    Exception ex =
+        assertThrows(
+            Exception.class, () -> firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS));
+    assertThat(ex)
+        .hasMessageThat()
+        .matches(
+            "Firebase Database write operation to 'cdbg/debuggees.*/lastUpdateTimeMsec' failed,"
+                + " error: 'Timed out after.*'");
   }
 
   @Test
@@ -428,19 +587,29 @@ public final class FirebaseClientTest {
         .thenReturn(mockDebuggeesDbRef);
 
     setResponseDbGet(mockSchemaVersionDbRef, "2");
-    // NOTE, don't set a response for the debuggees reference, this will cause the set to timeout as
-    // desired by the test.
+
+    // For the registrationTimeMsec check, returning null here indicates it does not yet exist
+    setResponseDbGet(mockDebuggeesDbRef, null);
+
+    // NOTE, don't set a set completion response for the debuggees reference, this will cause the
+    // set to timeout as desired by the test.
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     Exception ex =
         assertThrows(
             Exception.class, () -> firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS));
     assertThat(ex)
         .hasMessageThat()
         .matches(
-            "Firebase Database write operation to 'cdbg/debuggees.* error: 'Timed out after.*'");
+            "Firebase Database write operation to 'cdbg/debuggees.*' failed, error: 'Timed out"
+                + " after.*'");
   }
 
   @Test
@@ -456,11 +625,20 @@ public final class FirebaseClientTest {
         .thenReturn(mockDebuggeesDbRef);
 
     setResponseDbGet(mockSchemaVersionDbRef, "2");
+
+    // For the registrationTimeMsec check, returning null here indicates it does not yet exist
+    setResponseDbGet(mockDebuggeesDbRef, null);
+
     setCompletionFailedDbSet(mockDebuggeesDbRef, "FAKE DB ERROR");
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     Exception ex =
         assertThrows(
             Exception.class, () -> firebaseClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS));
@@ -894,6 +1072,82 @@ public final class FirebaseClientTest {
   }
 
   @Test
+  public void markDebuggeeActiveWorksAsExpected() throws Exception {
+    Duration updatePeriod = Duration.ofMillis(100);
+    FirebaseClient client = registerDebuggee(updatePeriod);
+
+    String lastUpdateTimeDbPath =
+        String.format("cdbg/debuggees/%s/lastUpdateTimeMsec", client.getDebuggeeId());
+    DatabaseReference mockDebuggeeLastUpdateTimeDbRef = mock(DatabaseReference.class);
+    when(mockFirebaseDatabase.getReference(eq(lastUpdateTimeDbPath)))
+        .thenReturn(mockDebuggeeLastUpdateTimeDbRef);
+
+    setCompletionSuccessDbSet(mockDebuggeeLastUpdateTimeDbRef);
+
+    TimeUnit.SECONDS.sleep(1);
+    verify(mockDebuggeeLastUpdateTimeDbRef, atLeast(3))
+        .setValue(eq(ImmutableMap.<String, String>of(".sv", "timestamp")), any());
+  }
+
+  @Test
+  public void periodicMarkDebuggeeActiveFailureWorksAsExpected() throws Exception {
+    // If a failure occurs on a periodic mark debuggee active attempt, the agent will re-register.
+    // This means the next call to listActiveBreakpoints should fail to force a reregister of the
+    // debuggee. During this time there should be no attempts to periodically mark the debuggee
+    // active.
+    Duration updatePeriod = Duration.ofMillis(100);
+    FirebaseClient client = registerDebuggee(updatePeriod);
+
+    String lastUpdateTimeDbPath =
+        String.format("cdbg/debuggees/%s/lastUpdateTimeMsec", client.getDebuggeeId());
+    DatabaseReference mockDebuggeeLastUpdateTimeDbRef = mock(DatabaseReference.class);
+    when(mockFirebaseDatabase.getReference(eq(lastUpdateTimeDbPath)))
+        .thenReturn(mockDebuggeeLastUpdateTimeDbRef);
+
+    setCompletionFailedDbSet(mockDebuggeeLastUpdateTimeDbRef, "FAKE DB ERROR");
+    TimeUnit.SECONDS.sleep(1);
+
+    assertThrows(Exception.class, () -> client.listActiveBreakpoints());
+
+    // There should be only 1 attempt, the one that failed. Unitl the re-register, no further
+    // attempts should be made.
+    verify(mockDebuggeeLastUpdateTimeDbRef, times(1))
+        .setValue(eq(ImmutableMap.<String, String>of(".sv", "timestamp")), any());
+
+    // As a final step, we'll re-regster and ensure the periodic mark debuggee active continues.
+    reset(mockFirebaseDatabase);
+    DatabaseReference mockDebuggeesDbRef = mock(DatabaseReference.class);
+    DatabaseReference mockBreakpointsDbRef = mock(DatabaseReference.class);
+    when(mockFirebaseStaticWrappers.getDbInstance(mockFirebaseApp))
+        .thenReturn(mockFirebaseDatabase);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees/")))
+        .thenReturn(mockDebuggeesDbRef);
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/breakpoints/")))
+        .thenReturn(mockBreakpointsDbRef);
+
+    // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
+    // indicates it does exist, and the registration code won't write out the full Debuggee, but
+    // rather simply update the lastUpdateTimeMsec field.
+    setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
+
+    // For the setting of the debuggee in the RTDB
+    setCompletionSuccessDbSet(mockDebuggeesDbRef);
+
+    assertThat(client.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS)).isTrue();
+
+    // Now verify that periodic updates have restarted.
+    reset(mockFirebaseDatabase);
+    reset(mockDebuggeeLastUpdateTimeDbRef);
+    setCompletionSuccessDbSet(mockDebuggeeLastUpdateTimeDbRef);
+    when(mockFirebaseDatabase.getReference(eq(lastUpdateTimeDbPath)))
+        .thenReturn(mockDebuggeeLastUpdateTimeDbRef);
+
+    TimeUnit.SECONDS.sleep(1);
+    verify(mockDebuggeeLastUpdateTimeDbRef, atLeast(3))
+        .setValue(eq(ImmutableMap.<String, String>of(".sv", "timestamp")), any());
+  }
+
+  @Test
   public void computeDebuggeeIdWorksAsExpected() throws NoSuchAlgorithmException {
     FirebaseClient.Debuggee debuggee = new FirebaseClient.Debuggee();
     HashSet<String> ids = new HashSet<String>();
@@ -902,7 +1156,12 @@ public final class FirebaseClientTest {
     // get an instance of the client.
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, DEFAULT_LABELS, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            DEFAULT_LABELS,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
 
     ImmutableMap<String, String> labels1 =
         ImmutableMap.<String, String>builder()
@@ -990,7 +1249,13 @@ public final class FirebaseClientTest {
         .thenReturn(mockDebuggeesDbRef);
     when(mockFirebaseDatabase.getReference(startsWith("cdbg/breakpoints/")))
         .thenReturn(mockBreakpointsDbRef);
+
+    // This is the test to the debuggee registrationTimeMsec, indicates Debuggee not yet in RTDB
+    setResponseDbGet(mockDebuggeesDbRef, null);
+
+    // For the setting of the debuggee in the RTDB
     setCompletionSuccessDbSet(mockDebuggeesDbRef);
+
     assertThat(hubClient.registerDebuggee(EMPTY_EXTRA_DEBUGGEE_LABELS)).isTrue();
 
     // Now listActiveBreakpoints() should succeed again.
@@ -999,15 +1264,26 @@ public final class FirebaseClientTest {
 
   /** Common code to get the debuggee registered for all test cases requiring that. */
   private FirebaseClient registerDebuggee() throws Exception {
-    return registerDebuggee(DEFAULT_LABELS, EMPTY_EXTRA_DEBUGGEE_LABELS);
+    return registerDebuggee(DEFAULT_LABELS, EMPTY_EXTRA_DEBUGGEE_LABELS, markDebuggeeActivePeriod);
+  }
+
+  /** Common code to get the debuggee registered with custom markDebuggeeActive period. */
+  private FirebaseClient registerDebuggee(Duration markDebuggeeActivePeriod) throws Exception {
+    return registerDebuggee(DEFAULT_LABELS, EMPTY_EXTRA_DEBUGGEE_LABELS, markDebuggeeActivePeriod);
   }
 
   /**
    * Common code to get the debuggee registered with extra labels provided in the registerDebuggee
    * call.
+   *
+   * <p>To note, this goes through what it considers the 'common' path of the Debuggee not being
+   * present in the RTDB yet and the debuggee having to be written to it.
    */
   private FirebaseClient registerDebuggee(
-      Map<String, String> gcpEnvironmentLabels, Map<String, String> extraLabels) throws Exception {
+      Map<String, String> gcpEnvironmentLabels,
+      Map<String, String> extraLabels,
+      Duration markDebuggeeActivePeriod)
+      throws Exception {
 
     DatabaseReference mockSchemaVersionDbRef = mock(DatabaseReference.class);
     DatabaseReference mockDebuggeesDbRef = mock(DatabaseReference.class);
@@ -1017,7 +1293,7 @@ public final class FirebaseClientTest {
         .thenReturn(mockFirebaseDatabase);
     when(mockFirebaseDatabase.getReference(eq("cdbg/schema_version")))
         .thenReturn(mockSchemaVersionDbRef);
-    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees/")))
+    when(mockFirebaseDatabase.getReference(startsWith("cdbg/debuggees")))
         .thenReturn(mockDebuggeesDbRef);
     when(mockFirebaseDatabase.getReference(startsWith("cdbg/breakpoints/")))
         .thenReturn(mockBreakpointsDbRef);
@@ -1028,21 +1304,34 @@ public final class FirebaseClientTest {
         ArgumentCaptor.forClass(ValueEventListener.class);
 
     setResponseDbGet(mockSchemaVersionDbRef, "2");
+
+    // registerDebuggee will test if the Debuggee exists yet in the DB, returning null here
+    // indicates it does not yet exist.
+    setResponseDbGet(mockDebuggeesDbRef, null);
+
+    // This will be registerDebuggee setting the Debuggee in the RTDB since we returned null
+    // when it tested if the debuggee existed.
     setCompletionSuccessDbSet(mockDebuggeesDbRef);
 
     FirebaseClient firebaseClient =
         new FirebaseClient(
-            metadata, classPathLookup, gcpEnvironmentLabels, mockFirebaseStaticWrappers, timeouts);
+            metadata,
+            classPathLookup,
+            gcpEnvironmentLabels,
+            mockFirebaseStaticWrappers,
+            timeouts,
+            markDebuggeeActivePeriod);
     assertThat(firebaseClient.registerDebuggee(extraLabels)).isTrue();
     verify(mockDebuggeesDbRef).setValue(capturedDebuggee.capture(), any());
     this.registeredDebuggee = (FirebaseClient.Debuggee) capturedDebuggee.getValue();
 
-    verify(mockFirebaseDatabase, times(3)).getReference(capturedDbPaths.capture());
+    verify(mockFirebaseDatabase, times(4)).getReference(capturedDbPaths.capture());
     List<String> dbPaths = capturedDbPaths.getAllValues();
     assertThat(dbPaths)
         .isEqualTo(
             Arrays.asList(
                 "cdbg/schema_version",
+                String.format("cdbg/debuggees/%s/registrationTimeMsec", registeredDebuggee.id),
                 String.format("cdbg/debuggees/%s", registeredDebuggee.id),
                 String.format("cdbg/breakpoints/%s/active", registeredDebuggee.id)));
 
@@ -1136,7 +1425,7 @@ public final class FirebaseClientTest {
               }
             })
         .when(mockDbRef)
-        .addValueEventListener((ValueEventListener) notNull());
+        .addListenerForSingleValueEvent((ValueEventListener) notNull());
   }
 
   private void setOnCancelledDbGet(DatabaseReference mockDbRef, String errorMessage) {

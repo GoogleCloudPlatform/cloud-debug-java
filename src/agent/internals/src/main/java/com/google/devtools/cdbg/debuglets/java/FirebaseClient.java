@@ -42,19 +42,25 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class FirebaseClient implements HubClient {
+  static final Duration MARK_DEBUGGEE_ACTIVE_PERIOD = Duration.ofHours(1);
+
   // Note, the Debuggee class is to be serialized automatically by the Firebase library. To support
   // this the following is purposely done here:
   //   1. All data members are public.
@@ -66,6 +72,8 @@ class FirebaseClient implements HubClient {
     public Map<String, String> labels;
     public String agentVersion;
     public List<Map<String, Object>> sourceContexts;
+    public final Map<String, String> registrationTimeMsec = ServerValue.TIMESTAMP;
+    public final Map<String, String> lastUpdateTimeMsec = ServerValue.TIMESTAMP;
 
     public void setDebuggeeId(String debuggeeId) {
       this.id = debuggeeId;
@@ -114,23 +122,29 @@ class FirebaseClient implements HubClient {
       this.units = units;
     }
 
+    public String toString() {
+      return value + " " + units;
+    }
+
     long value;
     TimeUnit units;
   }
   ;
 
-  /** The timeouts are configurable to allow the unit test to set lower timeouts */
+  /** The timeouts are configurable to allow the unit test to set lower values */
   static class TimeoutConfig {
     TimeoutConfig(long value, TimeUnit units) {
       this.setDebuggee = new Timeout(value, units);
       this.setBreakpoint = new Timeout(value, units);
-      this.getSchemaVersion = new Timeout(value, units);
+      this.dbConfiguredTest = new Timeout(value, units);
+      this.debuggeePresentTest = new Timeout(value, units);
       this.listActiveBreakpoints = new Timeout(value, units);
     }
 
     Timeout setDebuggee;
     Timeout setBreakpoint;
-    Timeout getSchemaVersion;
+    Timeout dbConfiguredTest;
+    Timeout debuggeePresentTest;
     Timeout listActiveBreakpoints;
   }
   ;
@@ -311,6 +325,9 @@ class FirebaseClient implements HubClient {
           .serializeNulls()
           .create();
 
+  private Timer markDebuggeeActiveTimer;
+  private final Duration markDebuggeeActivePeriod;
+
   /** Default constructor using environment provided by {@link GcpEnvironment}. */
   public FirebaseClient() {
     this.metadata = GcpEnvironment.getMetadataQuery();
@@ -320,7 +337,13 @@ class FirebaseClient implements HubClient {
 
     // Initialize everything with the same timeout, then make specific overrides where desired.
     this.timeouts = new TimeoutConfig(30, TimeUnit.SECONDS);
-    this.timeouts.getSchemaVersion.value = 10;
+
+    // We lower this timeout, as it's only used when probing a potential DB address to see if it
+    // exists and is configured for Snapshot Debugger use, so it's expected it may fail. It will
+    // also be retried if no configured DBs are found.
+    this.timeouts.dbConfiguredTest.value = 10;
+
+    this.markDebuggeeActivePeriod = MARK_DEBUGGEE_ACTIVE_PERIOD;
   }
 
   /**
@@ -330,19 +353,22 @@ class FirebaseClient implements HubClient {
    * @param classPathLookup read and explore application resources
    * @param labels debuggee labels (such as version and module)
    * @param firebaseStaticWrappers implementation of Firebase static api calls
-   * @param the timeout values to use
+   * @param timeouts the timeout values to use
+   * @param markDebuggeeActivePeriod the period to use for marking the debuggee active
    */
   public FirebaseClient(
       MetadataQuery metadata,
       ClassPathLookup classPathLookup,
       Map<String, String> labels,
       FirebaseStaticWrappers firebaseStaticWrappers,
-      TimeoutConfig timeouts) {
+      TimeoutConfig timeouts,
+      Duration markDebuggeeActivePeriod) {
     this.metadata = metadata;
     this.classPathLookup = classPathLookup;
     this.labels = labels;
     this.firebaseStaticWrappers = firebaseStaticWrappers;
     this.timeouts = timeouts;
+    this.markDebuggeeActivePeriod = markDebuggeeActivePeriod;
   }
 
   @Override
@@ -361,10 +387,21 @@ class FirebaseClient implements HubClient {
 
     Debuggee debuggee = getDebuggeeInfo(extraDebuggeeLabels);
     setDebuggeeId(debuggee.id);
-    String debuggeePath = "cdbg/debuggees/" + getDebuggeeId();
-    setDbValue(debuggeePath, debuggee, timeouts.setDebuggee);
+
+    if (isDebuggeePresentInDb(
+        this.firebaseApp, this.firebaseStaticWrappers, debuggee.id, timeouts.debuggeePresentTest)) {
+      infofmt("Debuggee %s is already present in the RTDB, marking it active", getDebuggeeId());
+      markDebuggeeActive();
+    } else {
+      // Note, no need to update the lastUpdateTimeMsec field of the Debuggee in the RTDB, below we
+      // start the markDebuggeeActiveTimer, it will schecule the first update right away with no
+      // delay.
+      infofmt("Debuggee %s is not yet present in the RTDB, sending it.", getDebuggeeId());
+      setDbValue(getDebuggeeDbPath(debuggee.id), debuggee, timeouts.setDebuggee);
+    }
 
     registerActiveBreakpointListener();
+    startMarkDebuggeeActiveTimer();
     isRegistered = true;
 
     infofmt(
@@ -577,6 +614,7 @@ class FirebaseClient implements HubClient {
   public void shutdown() {
     infofmt("FirebaseClient::shutdown() begin");
     isShutdown = true;
+    stopMarkDebuggeeActiveTimer();
     metadata.shutdown();
     unregisterActiveBreakpointListener();
     deleteFirebaseApp();
@@ -591,6 +629,14 @@ class FirebaseClient implements HubClient {
 
   private void setDebuggeeId(String id) {
     debuggeeId = id;
+  }
+
+  public String getDebuggeeDbPath() {
+    return getDebuggeeDbPath(getDebuggeeId());
+  }
+
+  public static String getDebuggeeDbPath(String debuggeeId) {
+    return "cdbg/debuggees/" + debuggeeId;
   }
 
   /**
@@ -799,13 +845,7 @@ class FirebaseClient implements HubClient {
           "Attempting to verify if db %s exists and is configured for the Snapshot Debugger",
           databaseUrl);
 
-      Object value =
-          getDbValue(
-              app, this.firebaseStaticWrappers, "cdbg/schema_version", timeouts.getSchemaVersion);
-
-      if (value != null) {
-        // For our purposes, we don't care what the data is, as long long as it's not null it
-        // indicates the DB exists and has been initialized for Snapshot Debugger use.
+      if (isDbConfigured(app, this.firebaseStaticWrappers, timeouts.dbConfiguredTest)) {
         infofmt("Successfully initialized FirebaseApp with db '%s'", databaseUrl);
         isAppGoodToUse = true;
       }
@@ -912,11 +952,7 @@ class FirebaseClient implements HubClient {
               @Override
               public void onCancelled(DatabaseError error) {
                 warnfmt("Database subscription error: %s", error.getMessage());
-
-                // This will force listActiveBreakpoints() to throw an exception and get the native
-                // agent code to begin calling registerDebuggee() again so the agent code can get
-                // back to a working registered state.
-                isRegistered = false;
+                forceReregistration();
               }
             });
   }
@@ -925,6 +961,55 @@ class FirebaseClient implements HubClient {
     if (activeBreakpointsListener != null) {
       activeBreakpointsRef.removeEventListener(activeBreakpointsListener);
       activeBreakpointsListener = null;
+    }
+  }
+
+  private void markDebuggeeActive() throws Exception {
+    String lastUpdateTimeMsecPath = getDebuggeeDbPath() + "/lastUpdateTimeMsec";
+    setDbValue(lastUpdateTimeMsecPath, ServerValue.TIMESTAMP, timeouts.setDebuggee);
+  }
+
+  private void forceReregistration() {
+    // This will force listActiveBreakpoints() to throw an exception and get the native agent code
+    // to begin calling registerDebuggee() again so the agent code can get back to a working
+    // registered state.
+    isRegistered = false;
+  }
+
+  private void startMarkDebuggeeActiveTimer() {
+    if (markDebuggeeActiveTimer != null) {
+      return;
+    }
+
+    markDebuggeeActiveTimer = new Timer();
+
+    markDebuggeeActiveTimer.scheduleAtFixedRate(
+        new TimerTask() {
+          @Override
+          public void run() {
+            if (!isRegistered) {
+              return;
+            }
+
+            try {
+              markDebuggeeActive();
+            } catch (Exception e) {
+              warnfmt("An unexpected error occurred trying to mark the debuggee active: ", e);
+              forceReregistration();
+            }
+          }
+        },
+        // We wait for the first update as the registerDebuggee() handles marking the debuggee
+        // active
+        // initially.
+        /* delay= */ markDebuggeeActivePeriod.toMillis(),
+        /* period= */ markDebuggeeActivePeriod.toMillis());
+  }
+
+  private void stopMarkDebuggeeActiveTimer() {
+    if (markDebuggeeActiveTimer != null) {
+      markDebuggeeActiveTimer.cancel();
+      markDebuggeeActiveTimer = null;
     }
   }
 
@@ -957,7 +1042,7 @@ class FirebaseClient implements HubClient {
     // Returns null on timeout.
     String error = result.poll(timeout.value, timeout.units);
     if (error == null) {
-      error = "Timed out after " + timeout.value + " " + timeout.units.toString();
+      error = "Timed out after " + timeout;
     }
 
     if (!error.isEmpty()) {
@@ -968,6 +1053,29 @@ class FirebaseClient implements HubClient {
     }
 
     infofmt("Firebase Database write operation to '%s' was successful", path);
+  }
+
+  private static boolean isDbConfigured(
+      FirebaseApp firebaseApp, FirebaseStaticWrappers firebaseStaticWrappers, Timeout timeout)
+      throws Exception {
+
+    // For our purposes, we don't care what the data is, as long long as it's not null it
+    // indicates the DB exists and has been initialized for Snapshot Debugger use.
+    return getDbValue(firebaseApp, firebaseStaticWrappers, "cdbg/schema_version", timeout) != null;
+  }
+
+  private static boolean isDebuggeePresentInDb(
+      FirebaseApp firebaseApp,
+      FirebaseStaticWrappers firebaseStaticWrappers,
+      String debuggeeId,
+      Timeout timeout)
+      throws Exception {
+
+    String registrationTimePath = getDebuggeeDbPath(debuggeeId) + "/registrationTimeMsec";
+
+    // For our purposes, we don't care what the data is, as long as it's not null it
+    // indicates the debuggee exists in the DB.
+    return getDbValue(firebaseApp, firebaseStaticWrappers, registrationTimePath, timeout) != null;
   }
 
   /**
@@ -986,50 +1094,42 @@ class FirebaseClient implements HubClient {
       FirebaseStaticWrappers firebaseStaticWrappers,
       final String path,
       Timeout timeout)
-      throws Exception {
+      throws IOException, InterruptedException, TimeoutException {
     DatabaseReference dbRef = firebaseStaticWrappers.getDbInstance(app).getReference(path);
 
     infofmt("Beginning Firebase Database read operation at '%s'", path);
 
-    ValueEventListener listener = null;
-
     final ArrayBlockingQueue<Boolean> resultObtained = new ArrayBlockingQueue<>(1);
     final ArrayList<Object> obtainedValue = new ArrayList<>();
 
-    try {
-      dbRef.addValueEventListener(
-          new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-              Object value = dataSnapshot.getValue();
-              infofmt(
-                  "Response obtained, data was %s found at %s", value == null ? "not" : "", path);
+    dbRef.addListenerForSingleValueEvent(
+        new ValueEventListener() {
+          @Override
+          public void onDataChange(DataSnapshot dataSnapshot) {
+            Object value = dataSnapshot.getValue();
+            infofmt("Response obtained, data was %s found at %s", value == null ? "not" : "", path);
 
-              obtainedValue.add(value);
-              resultObtained.offer(Boolean.TRUE);
-            }
+            obtainedValue.add(value);
+            resultObtained.offer(Boolean.TRUE);
+          }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-              warnfmt("Database subscription error: %s", error.getMessage());
-              resultObtained.offer(Boolean.FALSE);
-            }
-          });
+          @Override
+          public void onCancelled(DatabaseError error) {
+            warnfmt("Database subscription error: %s", error.getMessage());
+            resultObtained.offer(Boolean.FALSE);
+          }
+        });
 
-      // Returns null on timeout.
-      Boolean isSuccess = resultObtained.poll(timeout.value, timeout.units);
+    // Returns null on timeout.
+    Boolean isSuccess = resultObtained.poll(timeout.value, timeout.units);
 
-      // null will be returned on read timeout.
-      if (isSuccess == null) {
-        infofmt("Read from %s timed out after %d %s", path, timeout.value, timeout.units);
-        throw new Exception("Read timed out");
-      } else if (!isSuccess) {
-        throw new Exception("Error occurred attempting to read from the DB");
-      }
-    } finally {
-      if (listener != null) {
-        dbRef.removeEventListener(listener);
-      }
+    // null will be returned on read timeout.
+    if (isSuccess == null) {
+      infofmt("Read from %s timed out after %s", path, timeout);
+      throw new TimeoutException(
+          "Firebase Database read operation from '" + path + "' timed out after " + timeout);
+    } else if (!isSuccess) {
+      throw new IOException("Error occurred attempting to read from the DB");
     }
 
     return obtainedValue.get(0);

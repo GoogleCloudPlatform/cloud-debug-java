@@ -72,8 +72,8 @@ class FirebaseClient implements HubClient {
     public Map<String, String> labels;
     public String agentVersion;
     public List<Map<String, Object>> sourceContexts;
-    public final Map<String, String> registrationTimeMsec = ServerValue.TIMESTAMP;
-    public final Map<String, String> lastUpdateTimeMsec = ServerValue.TIMESTAMP;
+    public final Map<String, String> registrationTimeUnixMsec = ServerValue.TIMESTAMP;
+    public final Map<String, String> lastUpdateTimeUnixMsec = ServerValue.TIMESTAMP;
 
     public void setDebuggeeId(String debuggeeId) {
       this.id = debuggeeId;
@@ -393,8 +393,8 @@ class FirebaseClient implements HubClient {
       infofmt("Debuggee %s is already present in the RTDB, marking it active", getDebuggeeId());
       markDebuggeeActive();
     } else {
-      // Note, no need to update the lastUpdateTimeMsec field of the Debuggee in the RTDB, below we
-      // start the markDebuggeeActiveTimer, it will schecule the first update right away with no
+      // Note, no need to update the lastUpdateTimeUnixMsec field of the Debuggee in the RTDB, below
+      // we start the markDebuggeeActiveTimer, it will schecule the first update right away with no
       // delay.
       infofmt("Debuggee %s is not yet present in the RTDB, sending it.", getDebuggeeId());
       setDbValue(getDebuggeeDbPath(debuggee.id), debuggee, timeouts.setDebuggee);
@@ -965,8 +965,8 @@ class FirebaseClient implements HubClient {
   }
 
   private void markDebuggeeActive() throws Exception {
-    String lastUpdateTimeMsecPath = getDebuggeeDbPath() + "/lastUpdateTimeMsec";
-    setDbValue(lastUpdateTimeMsecPath, ServerValue.TIMESTAMP, timeouts.setDebuggee);
+    String lastUpdateTimeUnixMsecPath = getDebuggeeDbPath() + "/lastUpdateTimeUnixMsec";
+    setDbValue(lastUpdateTimeUnixMsecPath, ServerValue.TIMESTAMP, timeouts.setDebuggee);
   }
 
   private void forceReregistration() {
@@ -1071,7 +1071,7 @@ class FirebaseClient implements HubClient {
       Timeout timeout)
       throws Exception {
 
-    String registrationTimePath = getDebuggeeDbPath(debuggeeId) + "/registrationTimeMsec";
+    String registrationTimePath = getDebuggeeDbPath(debuggeeId) + "/registrationTimeUnixMsec";
 
     // For our purposes, we don't care what the data is, as long as it's not null it
     // indicates the debuggee exists in the DB.

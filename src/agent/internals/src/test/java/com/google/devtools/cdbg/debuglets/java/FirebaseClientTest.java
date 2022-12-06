@@ -292,8 +292,8 @@ public final class FirebaseClientTest {
     assertThat(registeredDebuggee.labels).containsEntry("module", "default");
     assertThat(registeredDebuggee.labels).containsEntry("version", "v1");
     assertThat(registeredDebuggee.labels).containsEntry("minorversion", "12345");
-    assertThat(registeredDebuggee.registrationTimeMsec).containsEntry(".sv", "timestamp");
-    assertThat(registeredDebuggee.lastUpdateTimeMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.registrationTimeUnixMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.lastUpdateTimeUnixMsec).containsEntry(".sv", "timestamp");
     assertThat(registeredDebuggee.agentVersion).matches("cloud-debug-java/v[0-9]+.[0-9]+");
     assertThat(registeredDebuggee.sourceContexts).isEmpty();
   }
@@ -316,8 +316,8 @@ public final class FirebaseClientTest {
     assertThat(registeredDebuggee.labels).containsEntry("afoo", "abar");
     assertThat(registeredDebuggee.labels).containsEntry("mkfoo", "mkbar");
     assertThat(registeredDebuggee.labels).containsEntry("sfoo", "sbar");
-    assertThat(registeredDebuggee.registrationTimeMsec).containsEntry(".sv", "timestamp");
-    assertThat(registeredDebuggee.lastUpdateTimeMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.registrationTimeUnixMsec).containsEntry(".sv", "timestamp");
+    assertThat(registeredDebuggee.lastUpdateTimeUnixMsec).containsEntry(".sv", "timestamp");
     assertThat(registeredDebuggee.agentVersion).matches("cloud-debug-java/v[0-9]+.[0-9]+");
     assertThat(registeredDebuggee.sourceContexts).isEmpty();
   }
@@ -463,10 +463,10 @@ public final class FirebaseClientTest {
 
     // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
     // indicates it does exist, and the registration code won't write out the full Debuggee, but
-    // rather simply update the lastUpdateTimeMsec field.
+    // rather simply update the lastUpdateTimeUnixMsec field.
     setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
 
-    // This will be for the udpate to lastActiveTimeMsec
+    // This will be for the udpate to lastActiveTimeUnixMsec
     setCompletionSuccessDbSet(mockDebuggeesDbRef);
 
     FirebaseClient firebaseClient =
@@ -487,9 +487,9 @@ public final class FirebaseClientTest {
             Arrays.asList(
                 "cdbg/schema_version",
                 String.format(
-                    "cdbg/debuggees/%s/registrationTimeMsec", firebaseClient.getDebuggeeId()),
+                    "cdbg/debuggees/%s/registrationTimeUnixMsec", firebaseClient.getDebuggeeId()),
                 String.format(
-                    "cdbg/debuggees/%s/lastUpdateTimeMsec", firebaseClient.getDebuggeeId()),
+                    "cdbg/debuggees/%s/lastUpdateTimeUnixMsec", firebaseClient.getDebuggeeId()),
                 String.format("cdbg/breakpoints/%s/active", firebaseClient.getDebuggeeId())));
 
     verify(mockBreakpointsDbRef).addValueEventListener(capturedBpUpdateListener.capture());
@@ -530,8 +530,8 @@ public final class FirebaseClientTest {
     assertThat(ex)
         .hasMessageThat()
         .matches(
-            "Firebase Database read operation from 'cdbg/debuggees/.*/registrationTimeMsec' timed"
-                + " out after.*");
+            "Firebase Database read operation from 'cdbg/debuggees/.*/registrationTimeUnixMsec'"
+                + " timed out after.*");
   }
 
   @Test
@@ -550,7 +550,7 @@ public final class FirebaseClientTest {
 
     // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
     // indicates it does exist, and the registration code won't write out the full Debuggee, but
-    // rather simply update the lastUpdateTimeMsec field.
+    // rather simply update the lastUpdateTimeUnixMsec field.
     setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
 
     // NOTE, don't set a set completion response for the last update write, this will cause the set
@@ -570,7 +570,7 @@ public final class FirebaseClientTest {
     assertThat(ex)
         .hasMessageThat()
         .matches(
-            "Firebase Database write operation to 'cdbg/debuggees.*/lastUpdateTimeMsec' failed,"
+            "Firebase Database write operation to 'cdbg/debuggees.*/lastUpdateTimeUnixMsec' failed,"
                 + " error: 'Timed out after.*'");
   }
 
@@ -588,7 +588,7 @@ public final class FirebaseClientTest {
 
     setResponseDbGet(mockSchemaVersionDbRef, "2");
 
-    // For the registrationTimeMsec check, returning null here indicates it does not yet exist
+    // For the registrationTimeUnixMsec check, returning null here indicates it does not yet exist
     setResponseDbGet(mockDebuggeesDbRef, null);
 
     // NOTE, don't set a set completion response for the debuggees reference, this will cause the
@@ -626,7 +626,7 @@ public final class FirebaseClientTest {
 
     setResponseDbGet(mockSchemaVersionDbRef, "2");
 
-    // For the registrationTimeMsec check, returning null here indicates it does not yet exist
+    // For the registrationTimeUnixMsec check, returning null here indicates it does not yet exist
     setResponseDbGet(mockDebuggeesDbRef, null);
 
     setCompletionFailedDbSet(mockDebuggeesDbRef, "FAKE DB ERROR");
@@ -1077,7 +1077,7 @@ public final class FirebaseClientTest {
     FirebaseClient client = registerDebuggee(updatePeriod);
 
     String lastUpdateTimeDbPath =
-        String.format("cdbg/debuggees/%s/lastUpdateTimeMsec", client.getDebuggeeId());
+        String.format("cdbg/debuggees/%s/lastUpdateTimeUnixMsec", client.getDebuggeeId());
     DatabaseReference mockDebuggeeLastUpdateTimeDbRef = mock(DatabaseReference.class);
     when(mockFirebaseDatabase.getReference(eq(lastUpdateTimeDbPath)))
         .thenReturn(mockDebuggeeLastUpdateTimeDbRef);
@@ -1099,7 +1099,7 @@ public final class FirebaseClientTest {
     FirebaseClient client = registerDebuggee(updatePeriod);
 
     String lastUpdateTimeDbPath =
-        String.format("cdbg/debuggees/%s/lastUpdateTimeMsec", client.getDebuggeeId());
+        String.format("cdbg/debuggees/%s/lastUpdateTimeUnixMsec", client.getDebuggeeId());
     DatabaseReference mockDebuggeeLastUpdateTimeDbRef = mock(DatabaseReference.class);
     when(mockFirebaseDatabase.getReference(eq(lastUpdateTimeDbPath)))
         .thenReturn(mockDebuggeeLastUpdateTimeDbRef);
@@ -1127,7 +1127,7 @@ public final class FirebaseClientTest {
 
     // registerDebuggee will test if the Debuggee exists yet in the DB, returning a value here
     // indicates it does exist, and the registration code won't write out the full Debuggee, but
-    // rather simply update the lastUpdateTimeMsec field.
+    // rather simply update the lastUpdateTimeUnixMsec field.
     setResponseDbGet(mockDebuggeesDbRef, "1669841300081");
 
     // For the setting of the debuggee in the RTDB
@@ -1250,7 +1250,7 @@ public final class FirebaseClientTest {
     when(mockFirebaseDatabase.getReference(startsWith("cdbg/breakpoints/")))
         .thenReturn(mockBreakpointsDbRef);
 
-    // This is the test to the debuggee registrationTimeMsec, indicates Debuggee not yet in RTDB
+    // This is the test to the debuggee registrationTimeUnixMsec, indicates Debuggee not yet in RTDB
     setResponseDbGet(mockDebuggeesDbRef, null);
 
     // For the setting of the debuggee in the RTDB
@@ -1331,7 +1331,7 @@ public final class FirebaseClientTest {
         .isEqualTo(
             Arrays.asList(
                 "cdbg/schema_version",
-                String.format("cdbg/debuggees/%s/registrationTimeMsec", registeredDebuggee.id),
+                String.format("cdbg/debuggees/%s/registrationTimeUnixMsec", registeredDebuggee.id),
                 String.format("cdbg/debuggees/%s", registeredDebuggee.id),
                 String.format("cdbg/breakpoints/%s/active", registeredDebuggee.id)));
 

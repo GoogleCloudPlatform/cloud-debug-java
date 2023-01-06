@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/CommonToken.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/CommonToken.cpp#2 $
  */
 
 #include "antlr/CommonToken.hpp"
@@ -15,17 +15,23 @@ namespace antlr {
 CommonToken::CommonToken() : Token(), line(1), col(1), text("")
 {}
 
-CommonToken::CommonToken(int t, const string& txt)
-	: Token(t), line(1), col(1), text(txt)
+CommonToken::CommonToken(int t, const ANTLR_USE_NAMESPACE(std)string& txt)
+: Token(t)
+, line(1)
+, col(1)
+, text(txt)
 {}
 
-CommonToken::CommonToken(const string& s)
-	: Token(), line(1), col(1), text(s)
+CommonToken::CommonToken(const ANTLR_USE_NAMESPACE(std)string& s)
+: Token()
+, line(1)
+, col(1)
+, text(s)
 {}
 
-string CommonToken::toString() const
+ANTLR_USE_NAMESPACE(std)string CommonToken::toString() const
 {
-	return "[\""+getText()+"\",<"+type+">,line="+line+",column="+col+"]";
+	return "[\""+getText()+"\",<"+getType()+">,line="+getLine()+",column="+getColumn()+"]";
 }
 
 RefToken CommonToken::factory()
@@ -36,3 +42,4 @@ RefToken CommonToken::factory()
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
+

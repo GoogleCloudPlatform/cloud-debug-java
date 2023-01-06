@@ -1,25 +1,19 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/Parser.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/Parser.cpp#2 $
  */
 
 #include "antlr/Parser.hpp"
 
-#include "antlr/BitSet.hpp"
-#include "antlr/TokenBuffer.hpp"
-#include "antlr/MismatchedTokenException.hpp"
-//#include "antlr/ASTFactory.hpp"
-#include <stdlib.h>
 #include <iostream>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
-ANTLR_C_USING(exit)
 
-/**A generic ANTLR parser (LL(k) for k>=1) containing a bunch of
+/** A generic ANTLR parser (LL(k) for k>=1) containing a bunch of
  * utility routines useful at any lookahead depth.  We distinguish between
  * the LL(1) and LL(k) parsers because of efficiency.  This may not be
  * necessary in the near future.
@@ -53,129 +47,7 @@ ANTLR_C_USING(exit)
  * @see antlr.LLkParser
  */
 
-bool DEBUG_PARSER=false;
-
-Parser::Parser(TokenBuffer& input)
-: inputState(new ParserInputState(input)), astFactory(0), traceDepth(0)
-{
-  pExSlot_ = 0;
-  SetExceptionSlot( &pExSlot_ );
-}
-
-Parser::Parser(TokenBuffer* input)
-: inputState(new ParserInputState(input)), astFactory(0), traceDepth(0)
-{
-  pExSlot_ = 0;
-  SetExceptionSlot( &pExSlot_ );
-}
-
-Parser::Parser(const ParserSharedInputState& state)
-: inputState(state), astFactory(0), traceDepth(0)
-{
-  pExSlot_ = 0;
-  SetExceptionSlot( &pExSlot_ );
-}
-
-Parser::~Parser()
-{
-  SetExceptionSlot( 0 );
-}
-
-/** Consume tokens until one matches the given token */
-void Parser::consumeUntil(int tokenType)
-{
-	while (LA(1) != Token::EOF_TYPE && LA(1) != tokenType)
-		consume();
-}
-
-/** Consume tokens until one matches the given token set */
-void Parser::consumeUntil(const BitSet& set)
-{
-	while (LA(1) != Token::EOF_TYPE && !set.member(LA(1)))
-		consume();
-}
-
-/**Make sure current lookahead symbol matches token type <tt>t</tt>.
- * Throw an exception upon mismatch, which is catch by either the
- * error handler or by the syntactic predicate.
- */
-void Parser::match(int t)
-{
-	if ( DEBUG_PARSER )
-	{
-		traceIndent();
-		ANTLR_USE_NAMESPACE(std)cout << "enter match(" << t << ") with LA(1)=" << LA(1) << ANTLR_USE_NAMESPACE(std)endl;
-	}
-	if ( LA(1)!=t ) {
-		if ( DEBUG_PARSER )
-		{
-			traceIndent();
-			ANTLR_USE_NAMESPACE(std)cout << "token mismatch: " << LA(1) << "!=" << t << ANTLR_USE_NAMESPACE(std)endl;
-		}
-#ifdef ANTLR_EXCEPTIONS
-		throw MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), t, false, getFilename());
-#else
-    SetException( new MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), t, false, getFilename()) );
-    return;
-#endif
-	} else {
-		// mark token as consumed -- fetch next token deferred until LA/LT
-		consume();
-	}
-}
-
-/**Make sure current lookahead symbol matches the given set
- * Throw an exception upon mismatch, which is catch by either the
- * error handler or by the syntactic predicate.
- */
-void Parser::match(const BitSet& b)
-{
-	if ( DEBUG_PARSER )
-	{
-		traceIndent();
-		ANTLR_USE_NAMESPACE(std)cout << "enter match(" << "bitset" /*b.toString()*/
-			  << ") with LA(1)=" << LA(1) << ANTLR_USE_NAMESPACE(std)endl;
-	}
-	if ( !b.member(LA(1)) ) {
-		if ( DEBUG_PARSER )
-		{
-			traceIndent();
-			ANTLR_USE_NAMESPACE(std)cout << "token mismatch: " << LA(1) << " not member of "
-				  << "bitset" /*b.toString()*/ << ANTLR_USE_NAMESPACE(std)endl;
-		}
-#ifdef ANTLR_EXCEPTIONS
-		throw MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), b, false, getFilename());
-#else
-    SetException( new MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), b, false, getFilename()) );
-    return;
-#endif
-	} else {
-		// mark token as consumed -- fetch next token deferred until LA/LT
-		consume();
-	}
-}
-
-void Parser::matchNot(int t)
-{
-	if ( LA(1)==t ) {
-		// Throws inverted-sense exception
-#ifdef ANTLR_EXCEPTIONS
-		throw MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), t, true, getFilename());
-#else
-    SetException( new MismatchedTokenException(getTokenNames(), getNumTokens(), LT(1), t, true, getFilename()) );
-    return;
-#endif
-	} else {
-		// mark token as consumed -- fetch next token deferred until LA/LT
-		consume();
-	}
-}
-
-void Parser::panic()
-{
-	ANTLR_USE_NAMESPACE(std)cerr << "Parser: panic" << ANTLR_USE_NAMESPACE(std)endl;
-	exit(1);
-}
+bool DEBUG_PARSER = false;
 
 /** Parser error-reporting function can be overridden in subclass */
 void Parser::reportError(const RecognitionException& ex)
@@ -184,7 +56,7 @@ void Parser::reportError(const RecognitionException& ex)
 }
 
 /** Parser error-reporting function can be overridden in subclass */
-void Parser::reportError(const string& s)
+void Parser::reportError(const ANTLR_USE_NAMESPACE(std)string& s)
 {
 	if ( getFilename()=="" )
 		ANTLR_USE_NAMESPACE(std)cerr << "error: " << s.c_str() << ANTLR_USE_NAMESPACE(std)endl;
@@ -193,7 +65,7 @@ void Parser::reportError(const string& s)
 }
 
 /** Parser warning-reporting function can be overridden in subclass */
-void Parser::reportWarning(const string& s)
+void Parser::reportWarning(const ANTLR_USE_NAMESPACE(std)string& s)
 {
 	if ( getFilename()=="" )
 		ANTLR_USE_NAMESPACE(std)cerr << "warning: " << s.c_str() << ANTLR_USE_NAMESPACE(std)endl;

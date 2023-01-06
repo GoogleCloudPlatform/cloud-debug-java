@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/NoViableAltException.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/NoViableAltException.cpp#2 $
  */
 
 #include "antlr/NoViableAltException.hpp"
@@ -11,8 +11,6 @@
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
-
-ANTLR_IMPLEMENT_DYNAMIC( NoViableAltException, RecognitionException, ANTLRException );
 
 ANTLR_USING_NAMESPACE(std)
 
@@ -24,13 +22,13 @@ NoViableAltException::NoViableAltException(RefAST t)
 
 NoViableAltException::NoViableAltException(
 	RefToken t,
-	const string& fileName_
+	const ANTLR_USE_NAMESPACE(std)string& fileName_
 ) : RecognitionException("NoViableAlt",fileName_,t->getLine(),t->getColumn()),
     token(t), node(nullASTptr)
 {
 }
 
-string NoViableAltException::getMessage() const
+ANTLR_USE_NAMESPACE(std)string NoViableAltException::getMessage() const
 {
 	if (token)
 	{

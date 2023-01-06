@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/main/main/lib/cpp/antlr/ASTFactory.hpp#9 $
+ * $Id:$
  */
 
 #include <antlr/config.hpp>
@@ -43,7 +43,7 @@ ANTLR_USE_NAMESPACE(std)istream& eatwhite( ANTLR_USE_NAMESPACE(std)istream& is )
  * @returns the string read from file exclusive the '"'
  * @throws IOException if string is badly formatted
  */
-ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in, ANTLRException** pExSlot )
+ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in )
 {
 	char ch;
 	ANTLR_USE_NAMESPACE(std)string ret("");
@@ -60,14 +60,7 @@ ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in,
 		case START:
 			// start state: check wether starting with " then switch to READING
 			if( ch != '"' )
-      {
-#ifdef ANTLR_EXCEPTIONS
 				throw IOException("string must start with '\"'");
-#else
-        *pExSlot = new IOException("string must start with '\"'");
-        return ret;
-#endif
-      }
 			state = READING;
 			continue;
 		case READING:
@@ -108,14 +101,7 @@ ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in,
 		}
 	}
 	if( state != FINISHED )
-  {
-#ifdef ANTLR_EXCEPTIONS
 		throw IOException("badly formatted string: "+ret);
-#else
-    *pExSlot = new IOException("badly formatted string: "+ret);
-    return ret;
-#endif
-  }
 
 	return ret;
 }
@@ -161,23 +147,15 @@ ANTLR_USE_NAMESPACE(std)string read_identifier( ANTLR_USE_NAMESPACE(std)istream&
  */
 void read_AttributeNValue( ANTLR_USE_NAMESPACE(std)istream& in,
 									ANTLR_USE_NAMESPACE(std)string& attribute,
-									ANTLR_USE_NAMESPACE(std)string& value,
-                  ANTLRException** pExSlot )
+									ANTLR_USE_NAMESPACE(std)string& value )
 {
 	attribute = read_identifier(in);
 
 	char ch;
 	if( in.get(ch) && ch == '=' )
-		value = read_string(in, pExSlot);
+		value = read_string(in);
 	else
-  {
-#ifdef ANTLR_EXCEPTIONS
 		throw IOException("invalid attribute=value thing "+attribute);
-#else
-    *pExSlot = new IOException("invalid attribute=value thing "+attribute);
-    return;
-#endif
-  }
 }
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/TokenBuffer.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/TokenBuffer.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -33,19 +33,11 @@ namespace antlr {
  * @see antlr.TokenStream
  * @see antlr.TokenQueue
  */
-class ANTLR_API TokenBuffer : public ExceptionSlot {
+class ANTLR_API TokenBuffer {
 public:
 	/** Create a token buffer */
-	explicit TokenBuffer(TokenStream& input_);
-
-  // Override of ExceptionSlot function
-  virtual void SetExceptionSlot(ANTLRException **ppEx)
-  {
-    ExceptionSlot::SetExceptionSlot(ppEx);
-    input.SetExceptionSlot(ppEx);
-  }
-
-
+	TokenBuffer(TokenStream& input_);
+	virtual ~TokenBuffer();
 
 	/// Reset the input buffer to empty state
 	inline void reset( void )
@@ -57,47 +49,50 @@ public:
 	}
 
 	/** Get a lookahead token value */
-	int LA(int i);
+	int LA( unsigned int i );
 
 	/** Get a lookahead token */
-	RefToken LT(int i);
+	RefToken LT( unsigned int i );
 
 	/** Return an integer marker that can be used to rewind the buffer to
 	 * its current state.
 	 */
-	int mark();
+	unsigned int mark();
 
 	/**Rewind the token buffer to a marker.
 	 * @param mark Marker returned previously from mark()
 	 */
-	void rewind(int mark);
+	void rewind(unsigned int mark);
 
 	/** Mark another token for deferred consumption */
 	inline void consume()
 	{
 		numToConsume++;
 	}
+
+	/// Return the number of entries in the TokenBuffer
+	virtual unsigned int entries() const;
+
 private:
 	/** Ensure that the token buffer is sufficiently full */
-	void fill(int amount);
+	void fill(unsigned int amount);
 	/** Sync up deferred consumption */
 	void syncConsume();
 
 protected:
-	// Token source
+	/// Token source
 	TokenStream& input;
 
-private:
-	// Number of active markers
-	int nMarkers;
+	/// Number of active markers
+	unsigned int nMarkers;
 
-	// Additional offset used when markers are active
-	int markerOffset;
+	/// Additional offset used when markers are active
+	unsigned int markerOffset;
 
-	// Number of calls to consume() since last LA() or LT() call
-	int numToConsume;
+	/// Number of calls to consume() since last LA() or LT() call
+	unsigned int numToConsume;
 
-	// Circular queue
+	/// Circular queue with Tokens
 	CircularQueue<RefToken> queue;
 
 private:

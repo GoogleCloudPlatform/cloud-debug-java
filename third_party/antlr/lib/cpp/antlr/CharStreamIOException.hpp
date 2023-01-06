@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/CharStreamIOException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/CharStreamIOException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -17,15 +17,10 @@ namespace antlr {
 
 class ANTLR_API CharStreamIOException : public CharStreamException {
 public:
-// JLW change
-//	ANTLR_USE_NAMESPACE(std)exception io;
+	ANTLR_USE_NAMESPACE(std)exception io;
 
-  ANTLR_DECLARE_DYNAMIC( CharStreamIOException, CharStreamException, ANTLRException );
-// JLW change
-//	CharStreamIOException(ANTLR_USE_NAMESPACE(std)exception& e)
-//		: CharStreamException(e.what()), io(e) {}
-	explicit CharStreamIOException(const ANTLR_USE_NAMESPACE(std)string& s)
-		: CharStreamException(s) {}
+	CharStreamIOException(ANTLR_USE_NAMESPACE(std)exception& e)
+		: CharStreamException(e.what()), io(e) {}
 	~CharStreamIOException() throw() {}
 };
 

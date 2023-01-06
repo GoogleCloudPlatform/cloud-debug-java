@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/String.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/String.cpp#2 $
  */
 
 #include "antlr/String.hpp"
@@ -18,25 +18,42 @@
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
+
+// wh: hack for Borland C++ 5.6
+#if __BORLANDC__
+  using std::sprintf;
+#endif
+
+
+// RK: should be using snprintf actually... (or stringstream)
 ANTLR_C_USING(sprintf)
 
-string operator+( const string& lhs, const int rhs )
+ANTLR_USE_NAMESPACE(std)string operator+( const ANTLR_USE_NAMESPACE(std)string& lhs, const int rhs )
 {
 	char tmp[100];
 	sprintf(tmp,"%d",rhs);
 	return lhs+tmp;
 }
 
+ANTLR_USE_NAMESPACE(std)string operator+( const ANTLR_USE_NAMESPACE(std)string& lhs, size_t rhs )
+{
+	char tmp[100];
+	sprintf(tmp,"%u",rhs);
+	return lhs+tmp;
+}
+
 /** Convert character to readable string
  */
-string charName(int ch)
+ANTLR_USE_NAMESPACE(std)string charName(int ch)
 {
 	if (ch == EOF)
 		return "EOF";
 	else
 	{
-		string s;
+		ANTLR_USE_NAMESPACE(std)string s;
 
+		// when you think you've seen it all.. an isprint that crashes...
+		ch = ch & 0xFF;
 #ifdef ANTLR_CCTYPE_NEEDS_STD
 		if( ANTLR_USE_NAMESPACE(std)isprint( ch ) )
 #else
@@ -70,3 +87,4 @@ string charName(int ch)
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
+

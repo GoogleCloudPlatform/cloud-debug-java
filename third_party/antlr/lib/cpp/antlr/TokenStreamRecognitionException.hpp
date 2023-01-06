@@ -3,31 +3,33 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/TokenStreamRecognitionException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/TokenStreamRecognitionException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
-#include <antlr/RecognitionException.hpp>
 #include <antlr/TokenStreamException.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
+/** Exception thrown from generated lexers when there's no default error
+ * handler specified.
+ * @see TokenStream
+ */
 class TokenStreamRecognitionException : public TokenStreamException {
 public:
-
-	explicit TokenStreamRecognitionException(RecognitionException& re)
+	TokenStreamRecognitionException(RecognitionException& re)
 	: TokenStreamException(re.getMessage())
 	, recog(re)
 	{
 	}
-	~TokenStreamRecognitionException() throw()
+	virtual ~TokenStreamRecognitionException() throw()
 	{
 	}
-	string toString() const
+	virtual ANTLR_USE_NAMESPACE(std)string toString() const
 	{
 		return recog.getFileLineColumnString()+getMessage();
 	}
@@ -44,8 +46,6 @@ public:
 	{
 		return recog.getColumn();
 	}
-
-  ANTLR_DECLARE_DYNAMIC( TokenStreamRecognitionException, TokenStreamException, ANTLRException );
 private:
 	RecognitionException recog;
 };

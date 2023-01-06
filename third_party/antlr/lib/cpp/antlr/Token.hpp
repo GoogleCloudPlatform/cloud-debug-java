@@ -3,27 +3,26 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/Token.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/Token.hpp#2 $
  */
 
 #include <antlr/config.hpp>
-#include <antlr/RefCount.hpp>
+#include <antlr/TokenRefCount.hpp>
 #include <string>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
+struct TokenRef;
+
 /** A token is minimally a token type.  Subclasses can add the text matched
  *  for the token and line info.
  */
-
-class ANTLR_API Token;
-typedef RefCount<Token> RefToken;
-
-class ANTLR_API Token {
+class ANTLR_API Token
+{
 public:
 	// constants
 #ifndef NO_STATIC_CONSTS
@@ -42,42 +41,65 @@ public:
 	};
 #endif
 
-	// each Token has at least a token type
-	int type; //=INVALID_TYPE;
-
-public:
-	// the illegal token object
-	static RefToken badToken; // = new Token(INVALID_TYPE, "<no text>");
-	static RefToken eofToken; // = new Token(EOF_TYPE, "<no text>");
-
-	Token();
-	explicit Token(int t);
-	Token(int t, const string& txt);
+	Token()
+	: ref(0)
+	, type(INVALID_TYPE)
+	{
+	}
+	Token(int t)
+	: ref(0)
+	, type(t)
+	{
+	}
+	Token(int t, const ANTLR_USE_NAMESPACE(std)string& txt)
+	: ref(0)
+	, type(t)
+	{
+		setText(txt);
+	}
+	virtual ~Token()
+	{
+	}
 
 	virtual int getColumn() const;
 	virtual int getLine() const;
-	virtual string getText() const;
+	virtual ANTLR_USE_NAMESPACE(std)string getText() const;
+	virtual const ANTLR_USE_NAMESPACE(std)string& getFilename() const;
 	virtual int getType() const;
 
 	virtual void setColumn(int c);
 
 	virtual void setLine(int l);
-	virtual void setText(const string& t);
+	virtual void setText(const ANTLR_USE_NAMESPACE(std)string& t);
 	virtual void setType(int t);
 
-	virtual string toString() const;
+	virtual void setFilename( const std::string& file );
 
-	virtual ~Token();
+	virtual ANTLR_USE_NAMESPACE(std)string toString() const;
+
 private:
+	friend struct TokenRef;
+	TokenRef* ref;
+
+	int type; 							///< the type of the token
+
+	Token(RefToken other);
+	Token& operator=(const Token& other);
+	Token& operator=(RefToken other);
+
 	Token(const Token&);
-	const Token& operator=(const Token&);
 };
 
-#ifdef NEEDS_OPERATOR_LESS_THAN
-inline operator<(RefToken l,RefToken r); //{return true;}
-#endif
-
 extern ANTLR_API RefToken nullToken;
+
+#ifdef NEEDS_OPERATOR_LESS_THAN
+// RK: Added after 2.7.2 previously it was undefined.
+// AL: what to return if l and/or r point to nullToken???
+inline bool operator<( RefToken l, RefToken r )
+{
+	return nullToken == l ? ( nullToken == r ? false : true ) : l->getType() < r->getType();
+}
+#endif
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }

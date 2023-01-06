@@ -2,9 +2,9 @@
 #define INC_RefCount_hpp__
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/RefCount.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/RefCount.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -16,63 +16,61 @@ namespace antlr {
 template<class T>
 class ANTLR_API RefCount {
 private:
-        struct Ref {
-                T* const ptr;
-                int count;
+	struct Ref {
+		T* const ptr;
+		unsigned int count;
 
-                // static_ref == true will create a no-op reference counter for
-                // static objects that are never supposed to be deleted.
-                Ref(T* p, bool static_ref) : ptr(p), count(static_ref ? -1 : 1) {}
-                ~Ref() {delete ptr;}
-                Ref* increment() {if (count != -1) ++count;return this;}
-                bool decrement() {return (count != -1 && --count==0);}
-        private:
-                Ref(const Ref&);
-                Ref& operator=(const Ref&);
-        }* ref;
+		Ref(T* p) : ptr(p), count(1) {}
+		~Ref() {delete ptr;}
+		Ref* increment() {++count;return this;}
+		bool decrement() {return (--count==0);}
+	private:
+		Ref(const Ref&);
+		Ref& operator=(const Ref&);
+	}* ref;
 
 public:
-        explicit RefCount(T* p = 0, bool static_ref = false)
-        : ref(p ? new Ref(p, static_ref) : 0)
-        {
-        }
-        RefCount(const RefCount<T>& other)
-        : ref(other.ref ? other.ref->increment() : 0)
-        {
-        }
-        ~RefCount()
-        {
-                if (ref && ref->decrement())
-                        delete ref;
-        }
-        RefCount<T>& operator=(const RefCount<T>& other)
-        {
-                Ref* tmp = other.ref ? other.ref->increment() : 0;
-                if (ref && ref->decrement())
-                        delete ref;
-                ref = tmp;
-                return *this;
-        }
+	explicit RefCount(T* p = 0)
+	: ref(p ? new Ref(p) : 0)
+	{
+	}
+	RefCount(const RefCount<T>& other)
+	: ref(other.ref ? other.ref->increment() : 0)
+	{
+	}
+	~RefCount()
+	{
+		if (ref && ref->decrement())
+			delete ref;
+	}
+	RefCount<T>& operator=(const RefCount<T>& other)
+	{
+		Ref* tmp = other.ref ? other.ref->increment() : 0;
+		if (ref && ref->decrement())
+			delete ref;
+		ref = tmp;
+		return *this;
+	}
 
-        operator T* () const
-        {
-                return ref ? ref->ptr : 0;
-        }
+	operator T* () const
+	{
+		return ref ? ref->ptr : 0;
+	}
 
-        T* operator->() const
-        {
-                return ref ? ref->ptr : 0;
-        }
+	T* operator->() const
+	{
+		return ref ? ref->ptr : 0;
+	}
 
-        T* get() const
-        {
-                return ref ? ref->ptr : 0;
-        }
+	T* get() const
+	{
+		return ref ? ref->ptr : 0;
+	}
 
-        template<class newType> operator RefCount<newType>()
-        {
-                return RefCount<newType>(ref);
-        }
+	template<class newType> operator RefCount<newType>()
+	{
+		return RefCount<newType>(ref);
+	}
 };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

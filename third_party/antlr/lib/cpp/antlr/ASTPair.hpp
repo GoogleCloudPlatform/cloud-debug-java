@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/ASTPair.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/ASTPair.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -43,9 +43,9 @@ public:
 //		tmp.child = child;
 //		return tmp;
 //	}
-	string toString() const {
-		string r = !root ? string("null") : root->getText();
-		string c = !child ? string("null") : child->getText();
+	ANTLR_USE_NAMESPACE(std)string toString() const {
+		ANTLR_USE_NAMESPACE(std)string r = !root ? ANTLR_USE_NAMESPACE(std)string("null") : root->getText();
+		ANTLR_USE_NAMESPACE(std)string c = !child ? ANTLR_USE_NAMESPACE(std)string("null") : child->getText();
 		return "["+r+","+c+"]";
 	}
 };

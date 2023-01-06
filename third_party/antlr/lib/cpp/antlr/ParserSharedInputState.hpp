@@ -3,15 +3,14 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/ParserSharedInputState.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/ParserSharedInputState.hpp#2 $
  */
 
 #include <antlr/config.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include <antlr/RefCount.hpp>
-#include <antlr/ExceptionSlot.hpp>
 #include <string>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
@@ -23,13 +22,13 @@ namespace antlr {
  * share a single ParserSharedInputState to parse
  * the same stream of tokens.
  */
-class ANTLR_API ParserInputState : public ExceptionSlot {
+class ANTLR_API ParserInputState {
 public:
 	/** Construct a new ParserInputState
-	 * @param input_ the TokenBuffer to read from. The object is deleted together
+	 * @param in the TokenBuffer to read from. The object is deleted together
 	 * with the ParserInputState object.
 	 */
-	explicit ParserInputState( TokenBuffer* in )
+	ParserInputState( TokenBuffer* in )
 	: guessing(0)
 	, filename()
 	, input(in)
@@ -39,7 +38,7 @@ public:
 	/** Construct a new ParserInputState
 	 * @param in the TokenBuffer to read from.
 	 */
-	explicit ParserInputState(TokenBuffer& in )
+	ParserInputState( TokenBuffer& in )
 	: guessing(0)
 	, filename("")
 	, input(&in)
@@ -47,18 +46,11 @@ public:
 	{
 	}
 
-	~ParserInputState()
+	virtual ~ParserInputState()
 	{
 		if (inputResponsible)
 			delete input;
 	}
-
-  // Override of ExceptionSlot function
-  virtual void SetExceptionSlot(ANTLRException **ppEx)
-  {
-    ExceptionSlot::SetExceptionSlot(ppEx);
-    input->SetExceptionSlot(ppEx);
-  }
 
 	TokenBuffer& getInput( void )
 	{

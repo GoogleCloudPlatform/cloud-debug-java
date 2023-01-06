@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/MismatchedCharException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/MismatchedCharException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -20,8 +20,6 @@ class CharScanner;
 
 class ANTLR_API MismatchedCharException : public RecognitionException {
 public:
-  ANTLR_DECLARE_DYNAMIC( MismatchedCharException, RecognitionException, ANTLRException );
-
 	// Types of chars
 #ifndef NO_STATIC_CONSTS
 	static const int CHAR = 1;
@@ -94,7 +92,7 @@ public:
 	/**
 	 * Returns a clean error message (no line number/column information)
 	 */
-	string getMessage() const;
+	ANTLR_USE_NAMESPACE(std)string getMessage() const;
 };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

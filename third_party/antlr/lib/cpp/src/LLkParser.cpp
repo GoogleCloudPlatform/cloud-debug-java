@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/LLkParser.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/LLkParser.cpp#2 $
  */
 
 #include "antlr/LLkParser.hpp"
@@ -42,30 +42,30 @@ void LLkParser::trace(const char* ee, const char* rname)
 {
 	traceIndent();
 
-	std::cout << ee << rname << ((inputState->guessing>0)?"; [guessing]":"; ");
+	cout << ee << rname << ((inputState->guessing>0)?"; [guessing]":"; ");
 
 	for (int i = 1; i <= k; i++)
 	{
 		if (i != 1) {
-			std::cout << ", ";
+			cout << ", ";
 		}
-		std::cout << "LA(" << i << ")==";
+		cout << "LA(" << i << ")==";
 
 		string temp;
 
-//		try {
+		try {
 			temp = LT(i)->getText().c_str();
-//		}
-//		catch( ANTLRException& ae )
-//		{
-//			temp = "[error: ";
-//			temp += ae.toString();
-//			temp += ']';
-//		}
-		std::cout << temp;
+		}
+		catch( ANTLRException& ae )
+		{
+			temp = "[error: ";
+			temp += ae.toString();
+			temp += ']';
+		}
+		cout << temp;
 	}
 
-	std::cout << std::endl;
+	cout << endl;
 }
 
 void LLkParser::traceIn(const char* rname)

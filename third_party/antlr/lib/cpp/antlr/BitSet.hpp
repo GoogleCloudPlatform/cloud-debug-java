@@ -3,25 +3,20 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/BitSet.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/BitSet.hpp#2 $
  */
 
 #include <antlr/config.hpp>
 #include <vector>
-//#include <stdexcept>
+#include <stdexcept>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
 
-#if defined(_MSC_VER) && !defined(__ICL) // Microsoft Visual C++
-extern template class ANTLR_API ANTLR_USE_NAMESPACE(std)vector<unsigned int>;
-extern template class ANTLR_API ANTLR_USE_NAMESPACE(std)vector<bool>;
-#endif
-
-/**A BitSet to replace java.util.BitSet.
+/** A BitSet to replace java.util.BitSet.
  * Primary differences are that most set operators return new sets
  * as opposed to oring and anding "in place".  Further, a number of
  * operations were added.  I cannot contain a BitSet because there
@@ -47,7 +42,7 @@ private:
 	ANTLR_USE_NAMESPACE(std)vector<bool> storage;
 
 public:
-	explicit BitSet( unsigned int nbits=64 );
+	BitSet( unsigned int nbits=64 );
 	BitSet( const unsigned long* bits_, unsigned int nlongs);
 	~BitSet();
 

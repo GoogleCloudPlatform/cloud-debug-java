@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/LexerSharedInputState.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/LexerSharedInputState.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -29,7 +29,7 @@ public:
 	 * @param inbuf the InputBuffer to read from. The object is deleted together
 	 * with the LexerInputState object.
 	 */
-	explicit LexerInputState(InputBuffer* inbuf)
+	LexerInputState(InputBuffer* inbuf)
 	: column(1)
 	, line(1)
 	, tokenStartColumn(1)
@@ -44,7 +44,7 @@ public:
 	/** Construct a new LexerInputState
 	 * @param inbuf the InputBuffer to read from.
 	 */
-	explicit LexerInputState(InputBuffer& inbuf)
+	LexerInputState(InputBuffer& inbuf)
 	: column(1)
 	, line(1)
 	, tokenStartColumn(1)
@@ -60,7 +60,7 @@ public:
 	 * @param in an istream to read from.
 	 * @see antlr.CharBuffer
 	 */
-	explicit LexerInputState(ANTLR_USE_NAMESPACE(std)istream& in)
+	LexerInputState(ANTLR_USE_NAMESPACE(std)istream& in)
 	: column(1)
 	, line(1)
 	, tokenStartColumn(1)
@@ -141,13 +141,13 @@ private:
 	LexerInputState& operator=(const LexerInputState&);
 };
 
-/// A reference counted LexerInputState object
-typedef RefCount<LexerInputState> LexerSharedInputState;
-
 inline InputBuffer& LexerInputState::getInput()
 {
 	return *input;
 }
+
+/// A reference counted LexerInputState object
+typedef RefCount<LexerInputState> LexerSharedInputState;
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }

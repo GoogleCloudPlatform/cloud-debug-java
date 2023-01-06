@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/ASTArray.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/ASTArray.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -25,7 +25,7 @@ public:
 	int size; // = 0;
 	ANTLR_USE_NAMESPACE(std)vector<RefAST> array;
 
-	explicit ASTArray(int capacity)
+	ASTArray(int capacity)
 	: size(0)
 	, array(capacity)
 	{

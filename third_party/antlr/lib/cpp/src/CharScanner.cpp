@@ -1,20 +1,11 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/CharScanner.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/CharScanner.cpp#2 $
  */
 
-#include <stdlib.h>
-#include <map>
-
 #include <iostream>
-
-#ifdef HAS_NOT_CSTRING_H
-#include <string>
-#else
-#include <cstring>
-#endif
 
 #include "antlr/CharScanner.hpp"
 #include "antlr/CommonToken.hpp"
@@ -58,46 +49,6 @@ CharScanner::CharScanner( const LexerSharedInputState& state, bool case_sensitiv
 	, traceDepth(0)
 {
 	setTokenObjectFactory(&CommonToken::factory);
-}
-
-void CharScanner::consume()
-{
-	if (inputState->guessing == 0)
-	{
-		int c = LA(1);
-		if (caseSensitive)
-		{
-			append(c);
-		}
-		else
-		{
-			// use input.LA(), not LA(), to get original case
-			// CharScanner.LA() would toLower it.
-			append(inputState->getInput().LA(1));
-		}
-
-		// RK: in a sense I don't like this automatic handling.
-		if (c == '\t')
-			tab();
-		else
-			inputState->column++;
-	}
-	inputState->getInput().consume();
-}
-
-//bool CharScanner::getCaseSensitiveLiterals() const
-//{ return caseSensitiveLiterals; }
-
-void CharScanner::panic()
-{
-	ANTLR_USE_NAMESPACE(std)cerr << "CharScanner: panic" << ANTLR_USE_NAMESPACE(std)endl;
-	exit(1);
-}
-
-void CharScanner::panic(const ANTLR_USE_NAMESPACE(std)string& s)
-{
-	ANTLR_USE_NAMESPACE(std)cerr << "CharScanner: panic: " << s.c_str() << ANTLR_USE_NAMESPACE(std)endl;
-	exit(1);
 }
 
 /** Report exception errors caught in nextToken() */
@@ -154,3 +105,4 @@ const int CharScanner::EOF_CHAR;
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }
 #endif
+

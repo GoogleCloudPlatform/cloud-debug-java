@@ -457,7 +457,14 @@ options {
       return nullptr;
     }
 
-    std::unique_ptr<JavaExpression> expression(statement(ast));
+    std::unique_ptr<JavaExpression> expression;
+    try {
+      expression.reset(statement(ast));
+    }
+    catch (const antlr::ANTLRException& e) {
+      reportError(e.getMessage());
+    }
+
     if (expression == nullptr) {
       // Set generic error message if specific error wasn't set.
       SetErrorMessage({ ExpressionParserError });

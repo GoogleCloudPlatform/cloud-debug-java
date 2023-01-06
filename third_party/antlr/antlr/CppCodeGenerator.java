@@ -3154,7 +3154,7 @@ public class CppCodeGenerator extends CodeGenerator {
 	/// Generate (if not already done) a declaration for the AST for el.
 	protected void genASTDeclaration( AlternativeElement el, String var_name, String node_type ) {
 		// already declared?
-		if( declaredASTVariables.contains(el) )
+		if( declaredASTVariables.containsValue(el) )
 			return;
 
 		String init = labeledElementASTInit;

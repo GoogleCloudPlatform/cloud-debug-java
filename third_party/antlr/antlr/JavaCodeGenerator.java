@@ -2245,7 +2245,7 @@ public class JavaCodeGenerator extends CodeGenerator {
 
     protected void genASTDeclaration(AlternativeElement el, String var_name, String node_type) {
         // already declared?
-        if (declaredASTVariables.contains(el))
+        if (declaredASTVariables.containsValue(el))
             return;
 
         // emit code

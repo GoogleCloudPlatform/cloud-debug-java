@@ -47,6 +47,7 @@ PARALLEL_BUILD_OPTION="-j $(($(nproc 2> /dev/null || echo 4)*3/2))"
 # Clean up previously generated files
 pushd "${ROOT}"/third_party
 rm -rf gflags* glog* jsoncpp* install
+rm -rf antlr/build
 rm -f antlr/lib/cpp/src/*.o
 popd
 

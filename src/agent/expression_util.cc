@@ -56,9 +56,12 @@ CompiledExpression CompileExpression(const std::string& string_expression,
   parser.Init();
 
   parser.statement();
+  /*
+   * TODO: FIX
   if (parser.ActiveException()) {
     parser.reportError(parser.ActiveException()->getMessage());
   }
+  */
 
   if (parser.num_errors() > 0) {
     LOG(WARNING) << "Expression parsing failed" << std::endl

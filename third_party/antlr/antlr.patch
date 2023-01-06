@@ -1,0 +1,49 @@
+diff -ruN antlr-orig/antlr/CppCodeGenerator.java antlr/antlr/CppCodeGenerator.java
+--- antlr-orig/antlr/CppCodeGenerator.java	2023-01-06 15:17:56.621534438 +0000
++++ antlr/antlr/CppCodeGenerator.java	2023-01-06 15:18:28.325469738 +0000
+@@ -3154,7 +3154,7 @@
+ 	/// Generate (if not already done) a declaration for the AST for el.
+ 	protected void genASTDeclaration( AlternativeElement el, String var_name, String node_type ) {
+ 		// already declared?
+-		if( declaredASTVariables.contains(el) )
++		if( declaredASTVariables.containsValue(el) )
+ 			return;
+ 
+ 		String init = labeledElementASTInit;
+diff -ruN antlr-orig/antlr/JavaCodeGenerator.java antlr/antlr/JavaCodeGenerator.java
+--- antlr-orig/antlr/JavaCodeGenerator.java	2023-01-06 15:17:56.625534430 +0000
++++ antlr/antlr/JavaCodeGenerator.java	2023-01-06 15:18:28.325469738 +0000
+@@ -2245,7 +2245,7 @@
+ 
+     protected void genASTDeclaration(AlternativeElement el, String var_name, String node_type) {
+         // already declared?
+-        if (declaredASTVariables.contains(el))
++        if (declaredASTVariables.containsValue(el))
+             return;
+ 
+         // emit code
+diff -ruN antlr-orig/lib/cpp/antlr/CharScanner.hpp antlr/lib/cpp/antlr/CharScanner.hpp
+--- antlr-orig/lib/cpp/antlr/CharScanner.hpp	2023-01-06 15:17:56.685534307 +0000
++++ antlr/lib/cpp/antlr/CharScanner.hpp	2023-01-06 15:18:28.385469616 +0000
+@@ -10,6 +10,9 @@
+ 
+ #include <antlr/config.hpp>
+ 
++#include <stdio.h>
++#include <strings.h>
++
+ #include <map>
+ 
+ #ifdef HAS_NOT_CCTYPE_H
+diff -ruN antlr-orig/lib/cpp/src/String.cpp antlr/lib/cpp/src/String.cpp
+--- antlr-orig/lib/cpp/src/String.cpp	2023-01-06 15:17:56.689534298 +0000
++++ antlr/lib/cpp/src/String.cpp	2023-01-06 15:18:28.389469608 +0000
+@@ -38,7 +38,7 @@
+ ANTLR_USE_NAMESPACE(std)string operator+( const ANTLR_USE_NAMESPACE(std)string& lhs, size_t rhs )
+ {
+ 	char tmp[100];
+-	sprintf(tmp,"%u",rhs);
++	sprintf(tmp,"%zu",rhs);
+ 	return lhs+tmp;
+ }
+ 

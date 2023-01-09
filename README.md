@@ -292,12 +292,14 @@ Companion object methods can be accessed by qualifying them with the `Companion`
 keyword. For instance, the `welcome` function above can be used in an expression
 as `Main.Companion.welcome()`
 
-### Experimental Firebase Realtime Database Backend
+### Snapshot Debugger - Firebase Realtime Database Backend
 
-This functionality is available for release 3.0 onward of this agent.
+This functionality is available for release 3.0 onward of this agent and
+provides support for the Snapshot Debugger, which is being provided as a
+replacement for the deprecated Cloud Debugger service.
 
 The agent can be configured to use Firebase Realtime Database as a backend
-instead of the deprecated Cloud Debugger service.  If the Firebase backend is
+instead of the Cloud Debugger service.  If the Firebase backend is
 used, breakpoints can be viewed and set using the Snapshot Debugger CLI instead
 of the Cloud Console.
 
@@ -314,4 +316,5 @@ Additional configuration can be provided if necessary:
 -Dcom.google.cdbg.agent.firebase_db_url=https://my-database-url.firebaseio.com
 ```
 
-See https://github.com/GoogleCloudPlatform/snapshot-debugger for more details.
+See https://github.com/GoogleCloudPlatform/snapshot-debugger and
+https://cloud.google.com/debugger/docs/deprecations for more details.

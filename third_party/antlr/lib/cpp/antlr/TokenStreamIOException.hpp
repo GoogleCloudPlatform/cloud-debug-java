@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/TokenStreamIOException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/TokenStreamIOException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -17,25 +17,20 @@ namespace antlr {
 
 class TokenStreamIOException : public TokenStreamException {
 public:
-  ANTLR_DECLARE_DYNAMIC( TokenStreamIOException, TokenStreamException, ANTLRException );
-	
-  TokenStreamIOException()
+	TokenStreamIOException()
 	: TokenStreamException()	
 	{
 	}
-//	TokenStreamIOException(const ANTLR_USE_NAMESPACE(std)exception& e)
-//	: TokenStreamException(e.what())
-//	, io(e)
-//	{
-//	}
-	explicit TokenStreamIOException(const ANTLR_USE_NAMESPACE(std)string& s)
-		: TokenStreamException(s) {}
-
+	TokenStreamIOException(const ANTLR_USE_NAMESPACE(std)exception& e)
+	: TokenStreamException(e.what())
+	, io(e)
+	{
+	}
 	~TokenStreamIOException() throw()
 	{
 	}
 private:
-//	ANTLR_USE_NAMESPACE(std)exception io;
+	ANTLR_USE_NAMESPACE(std)exception io;
 };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

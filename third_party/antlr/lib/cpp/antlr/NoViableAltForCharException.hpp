@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/NoViableAltForCharException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/NoViableAltForCharException.hpp#2 $
  */
 
 # include <antlr/config.hpp>
@@ -20,10 +20,8 @@ namespace antlr
 class ANTLR_API NoViableAltForCharException : public RecognitionException
 {
 public:
-  ANTLR_DECLARE_DYNAMIC( NoViableAltForCharException, RecognitionException, ANTLRException );
-
 	NoViableAltForCharException(int c, CharScanner* scanner);
-	NoViableAltForCharException(int c, const string& fileName_,
+	NoViableAltForCharException(int c, const ANTLR_USE_NAMESPACE(std)string& fileName_,
 										 int line_, int column_);
 
 	virtual ~NoViableAltForCharException() throw()
@@ -31,7 +29,7 @@ public:
 	}
 
 	/// Returns a clean error message (no line number/column information)
-	string getMessage() const;
+	ANTLR_USE_NAMESPACE(std)string getMessage() const;
 protected:
 	int foundChar;
 };

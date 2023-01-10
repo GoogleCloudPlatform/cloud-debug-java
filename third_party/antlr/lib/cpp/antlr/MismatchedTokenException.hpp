@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/MismatchedTokenException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/MismatchedTokenException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -21,8 +21,6 @@ namespace antlr {
 
 class ANTLR_API MismatchedTokenException : public RecognitionException {
 public:
-  ANTLR_DECLARE_DYNAMIC( MismatchedTokenException, RecognitionException, ANTLRException );
-
 	MismatchedTokenException();
 
 	/// Expected range / not range
@@ -61,7 +59,7 @@ public:
 		int lower,
 		int upper_,
 		bool matchNot,
-		const string& fileName_
+		const ANTLR_USE_NAMESPACE(std)string& fileName_
 	);
 
 	// Expected token / not token
@@ -71,7 +69,7 @@ public:
 		RefToken token_,
 		int expecting_,
 		bool matchNot,
-		const string& fileName_
+		const ANTLR_USE_NAMESPACE(std)string& fileName_
 	);
 
 	// Expected BitSet / not BitSet
@@ -81,14 +79,14 @@ public:
 		RefToken token_,
 		BitSet set_,
 		bool matchNot,
-		const string& fileName_
+		const ANTLR_USE_NAMESPACE(std)string& fileName_
 	);
 	~MismatchedTokenException() throw() {}
 
 	/**
 	 * Returns a clean error message (no line number/column information)
 	 */
-	string getMessage() const;
+	ANTLR_USE_NAMESPACE(std)string getMessage() const;
 
 public:
 	/// The token that was encountered
@@ -96,11 +94,10 @@ public:
 	/// The offending AST node if tree walking
 	const RefAST node;
 	/// taken from node or token object
-	string tokenText;
+	ANTLR_USE_NAMESPACE(std)string tokenText;
 
 	/// Types of tokens
 #ifndef NO_STATIC_CONSTS
-	static const int UNSPECIFIED = 0;
 	static const int TOKEN = 1;
 	static const int NOT_TOKEN = 2;
 	static const int RANGE = 3;
@@ -109,7 +106,6 @@ public:
 	static const int NOT_SET = 6;
 #else
 	enum {
-    UNSPECIFIED = 0,
 		TOKEN = 1,
 		NOT_TOKEN = 2,
 		RANGE = 3,
@@ -138,7 +134,7 @@ private:
 	/// Max number of tokens in tokenNames
 	const int numTokens;
 	/// Return token name for tokenType
-	string tokenName(int tokenType) const;
+	ANTLR_USE_NAMESPACE(std)string tokenName(int tokenType) const;
 };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

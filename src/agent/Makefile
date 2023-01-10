@@ -8,7 +8,8 @@ ifneq ($(OS),Darwin)
 ANTLR_DISABLED_WARNINGS = \
 	-Wno-unused-but-set-variable \
 	-Wno-stringop-overflow \
-	-Wno-use-after-free
+	-Wno-use-after-free \
+	-Wno-misleading-indentation
 endif
 
 # Ignore warning produced by glog
@@ -97,7 +98,6 @@ TARGET_VERSION_TXT = $(BUILD_TARGET_PATH)/version.txt
 APPENGINE_FORMAT_SCRIPT = format-env-appengine-vm.sh
 
 ANTLR_RUNTIME_SOURCES = \
-	$(ANTLR_CPP_LIB_SRC)/ANTLRException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/ANTLRUtil.cpp \
 	$(ANTLR_CPP_LIB_SRC)/ASTFactory.cpp \
 	$(ANTLR_CPP_LIB_SRC)/ASTNULLType.cpp \
@@ -106,14 +106,10 @@ ANTLR_RUNTIME_SOURCES = \
 	$(ANTLR_CPP_LIB_SRC)/BitSet.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CharBuffer.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CharScanner.cpp \
-	$(ANTLR_CPP_LIB_SRC)/CharStreamException.cpp \
-	$(ANTLR_CPP_LIB_SRC)/CharStreamIOException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CommonAST.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CommonASTWithHiddenTokens.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CommonHiddenStreamToken.cpp \
 	$(ANTLR_CPP_LIB_SRC)/CommonToken.cpp \
-	$(ANTLR_CPP_LIB_SRC)/ExceptionSlot.cpp \
-	$(ANTLR_CPP_LIB_SRC)/IOException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/InputBuffer.cpp \
 	$(ANTLR_CPP_LIB_SRC)/LLkParser.cpp \
 	$(ANTLR_CPP_LIB_SRC)/MismatchedCharException.cpp \
@@ -122,16 +118,13 @@ ANTLR_RUNTIME_SOURCES = \
 	$(ANTLR_CPP_LIB_SRC)/NoViableAltForCharException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/Parser.cpp \
 	$(ANTLR_CPP_LIB_SRC)/RecognitionException.cpp \
-	$(ANTLR_CPP_LIB_SRC)/SemanticException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/String.cpp \
 	$(ANTLR_CPP_LIB_SRC)/Token.cpp \
 	$(ANTLR_CPP_LIB_SRC)/TokenBuffer.cpp \
+	$(ANTLR_CPP_LIB_SRC)/TokenRefCount.cpp \
 	$(ANTLR_CPP_LIB_SRC)/TokenStreamBasicFilter.cpp \
-	$(ANTLR_CPP_LIB_SRC)/TokenStreamException.cpp \
 	$(ANTLR_CPP_LIB_SRC)/TokenStreamHiddenTokenFilter.cpp \
-	$(ANTLR_CPP_LIB_SRC)/TokenStreamIOException.cpp \
-	$(ANTLR_CPP_LIB_SRC)/TokenStreamRecognitionException.cpp \
-	$(ANTLR_CPP_LIB_SRC)/TokenStreamRetryException.cpp \
+	$(ANTLR_CPP_LIB_SRC)/TokenStreamRewriteEngine.cpp \
 	$(ANTLR_CPP_LIB_SRC)/TokenStreamSelector.cpp \
 	$(ANTLR_CPP_LIB_SRC)/TreeParser.cpp \
 
@@ -139,9 +132,9 @@ JAVA_EXPRESSION_GRAMMAR_FILE = \
 	java_expression.g \
 
 ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES = \
-	antlrgen/JavaExpressionCompiler.cc \
-	antlrgen/JavaExpressionLexer.cc \
-	antlrgen/JavaExpressionParser.cc \
+	antlrgen/JavaExpressionCompiler.cpp \
+	antlrgen/JavaExpressionLexer.cpp \
+	antlrgen/JavaExpressionParser.cpp \
 
 ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS = \
 	antlrgen/JavaExpressionCompiler.hpp \
@@ -201,8 +194,9 @@ all: \
 	target_version_txt \
 
 antlrgen: $(JAVA_EXPRESSION_GRAMMAR_FILE)
+	make -C $(ANTLR_TOOL_PATH) libantlr.jar
 	mkdir antlrgen
-	java -classpath $(ANTLR_TOOL_PATH)/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE)
+	java -classpath $(ANTLR_TOOL_PATH)/build/libantlr.jar antlr.Tool -o antlrgen $(JAVA_EXPRESSION_GRAMMAR_FILE)
 
 $(ANTLR_JAVA_EXPRESSION_GENERATED_SOURCES) $(ANTLR_JAVA_EXPRESSION_GENERATED_HEADERS): antlrgen
 

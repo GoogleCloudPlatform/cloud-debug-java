@@ -1,12 +1,10 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/ASTFactory.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/ASTFactory.cpp#2 $
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "antlr/CommonAST.hpp"
 #include "antlr/ANTLRException.hpp"
 #include "antlr/IOException.hpp"
@@ -14,6 +12,7 @@
 #include "antlr/ANTLRUtil.hpp"
 
 #include <iostream>
+#include <istream>
 
 using namespace std;
 
@@ -38,7 +37,7 @@ namespace antlr {
 
 /// Initialize factory
 ASTFactory::ASTFactory()
-: default_factory_descriptor(ANTLR_USE_NAMESPACE(std)make_pair(static_cast<const char*>("CommonAST"),&CommonAST::factory))
+: default_factory_descriptor(ANTLR_USE_NAMESPACE(std)make_pair(CommonAST::TYPE_NAME,&CommonAST::factory))
 {
 	nodeFactories.resize( Token::MIN_USER_TYPE, &default_factory_descriptor );
 }
@@ -70,19 +69,11 @@ ASTFactory::~ASTFactory()
 void ASTFactory::registerFactory( int type, const char* ast_name, factory_type factory )
 {
 	// check validity of arguments...
-#ifdef ANTLR_EXCEPTIONS
 	if( type < Token::MIN_USER_TYPE )
-  {
 		throw ANTLRException("Internal parser error invalid type passed to RegisterFactory");
-  }
 	if( factory == 0 )
-  {
-  	throw ANTLRException("Internal parser error 0 factory passed to RegisterFactory");
-  }
-#else
-  ANTLR_CHECK ( type >= Token::MIN_USER_TYPE ) ;
-  ANTLR_CHECK ( factory != 0 );
-#endif
+		throw ANTLRException("Internal parser error 0 factory passed to RegisterFactory");
+
 	// resize up to and including 'type' and initalize any gaps to default
 	// factory.
 	if( nodeFactories.size() < (static_cast<unsigned int>(type)+1) )
@@ -139,11 +130,7 @@ RefAST ASTFactory::create(const ANTLR_USE_NAMESPACE(std)string& type_name, ANTLR
 	}
 
 	string error = "ASTFactory::create: Unknown AST type '" + type_name + "'";
-#if ANTLR_EXCEPTIONS
 	throw ANTLRException(error);
-#else
-  ANTLR_FATAL( error.c_str() );
-#endif
 }
 #endif
 
@@ -358,11 +345,7 @@ void ASTFactory::loadChildren( ANTLR_USE_NAMESPACE(std)istream& infile,
 		{
 			string error = "Invalid XML file... no '<' found (";
 			error += ch + ")";
-#if ANTLR_EXCEPTIONS
 			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
 		}
 
 		infile.get(ch);		// / or text....
@@ -379,11 +362,7 @@ void ASTFactory::loadChildren( ANTLR_USE_NAMESPACE(std)istream& infile,
 				string error = "Invalid XML file... close tag does not match start tag: ";
 				error += current->typeName();
 				error += " closed by " + temp;
-#if ANTLR_EXCEPTIONS
-			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
+				throw IOException(error);
 			}
 
 			infile.get(ch);	// must be a '>'
@@ -392,11 +371,7 @@ void ASTFactory::loadChildren( ANTLR_USE_NAMESPACE(std)istream& infile,
 			{
 				string error = "Invalid XML file... no '>' found (";
 				error += ch + ")";
-#if ANTLR_EXCEPTIONS
-			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
+				throw IOException(error);
 			}
 			// close tag => exit loop
 			break;
@@ -445,11 +420,7 @@ RefAST ASTFactory::LoadAST( ANTLR_USE_NAMESPACE(std)istream& infile )
 	{
 		string error = "Invalid XML file... no '<' found (";
 		error += ch + ")";
-#if ANTLR_EXCEPTIONS
-			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
+		throw IOException(error);
 	}
 
 	string ast_type = read_identifier(infile);
@@ -459,11 +430,7 @@ RefAST ASTFactory::LoadAST( ANTLR_USE_NAMESPACE(std)istream& infile )
 	if( current == nullAST )
 	{
 		string error = "Unsuported AST type: " + ast_type;
-#if ANTLR_EXCEPTIONS
-			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
+		throw IOException(error);
 	}
 
 	eatwhite(infile);
@@ -480,11 +447,7 @@ RefAST ASTFactory::LoadAST( ANTLR_USE_NAMESPACE(std)istream& infile )
 		{
 			string error = "Invalid XML file... no '>' found after '/' (";
 			error += ch + ")";
-#if ANTLR_EXCEPTIONS
 			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
 		}
 
 		// get the rest on this level
@@ -498,11 +461,7 @@ RefAST ASTFactory::LoadAST( ANTLR_USE_NAMESPACE(std)istream& infile )
 	{
 		string error = "Invalid XML file... no '>' found (";
 		error += ch + ")";
-#if ANTLR_EXCEPTIONS
-			throw IOException(error);
-#else
-      ANTLR_FATAL( error.c_str() );
-#endif
+		throw IOException(error);
 	}
 
 	// handle the ones below this level..

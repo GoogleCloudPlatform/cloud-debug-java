@@ -1,20 +1,17 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/MismatchedCharException.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/MismatchedCharException.cpp#2 $
  */
 
 #include "antlr/CharScanner.hpp"
 #include "antlr/MismatchedCharException.hpp"
 #include "antlr/String.hpp"
-#include "antlr/DynamicCast.hpp"
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
-
-ANTLR_IMPLEMENT_DYNAMIC( MismatchedCharException, RecognitionException, ANTLRException );
 
 MismatchedCharException::MismatchedCharException()
   : RecognitionException("Mismatched char")
@@ -70,9 +67,9 @@ MismatchedCharException::MismatchedCharException(
 {
 }
 
-string MismatchedCharException::getMessage() const
+ANTLR_USE_NAMESPACE(std)string MismatchedCharException::getMessage() const
 {
-	string s;
+	ANTLR_USE_NAMESPACE(std)string s;
 
 	switch (mismatchType) {
 	case CHAR :
@@ -90,7 +87,7 @@ string MismatchedCharException::getMessage() const
 	case SET :
 	case NOT_SET :
 		{
-			s += string("expecting ") + (mismatchType == NOT_SET ? "NOT " : "") + "one of (";
+			s += ANTLR_USE_NAMESPACE(std)string("expecting ") + (mismatchType == NOT_SET ? "NOT " : "") + "one of (";
 			ANTLR_USE_NAMESPACE(std)vector<unsigned int> elems = set.toArray();
 			for ( unsigned int i = 0; i < elems.size(); i++ )
 			{

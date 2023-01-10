@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/CommonASTWithHiddenTokens.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/CommonASTWithHiddenTokens.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -24,13 +24,13 @@ public:
 	virtual ~CommonASTWithHiddenTokens();
 	virtual const char* typeName( void ) const
 	{
-		return "CommonASTWithHiddenTokens";
+		return CommonASTWithHiddenTokens::TYPE_NAME;
 	}
 	/// Clone this AST node.
 	virtual RefAST clone( void ) const;
 
 	// Borland C++ builder seems to need the decl's of the first two...
-	virtual void initialize(int t,const string& txt);
+	virtual void initialize(int t,const ANTLR_USE_NAMESPACE(std)string& txt);
 	virtual void initialize(RefAST t);
 	virtual void initialize(RefToken t);
 
@@ -46,6 +46,7 @@ public:
 
 	static RefAST factory();
 
+	static const char* const TYPE_NAME;
 protected:
 	RefToken hiddenBefore,hiddenAfter; // references to hidden tokens
 };

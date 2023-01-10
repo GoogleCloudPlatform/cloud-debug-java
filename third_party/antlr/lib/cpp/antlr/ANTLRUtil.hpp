@@ -3,14 +3,13 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/main/main/lib/cpp/antlr/ASTFactory.hpp#9 $
+ * $Id:$
  */
 
 #include <antlr/config.hpp>
-
-class ANTLRException;
+#include <iostream>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
@@ -27,13 +26,11 @@ ANTLR_USE_NAMESPACE(std)istream& eatwhite( ANTLR_USE_NAMESPACE(std)istream& is )
  * @returns the string read from file exclusive the '"'
  * @throws ios_base::failure if string is badly formatted
  */
-ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in,
-                                            ANTLRException** pExSlot );
+ANTLR_USE_NAMESPACE(std)string read_string( ANTLR_USE_NAMESPACE(std)istream& in );
 
 /* Read a ([A-Z][0-9][a-z]_)* kindoff thing. Skips leading whitespace.
  * @param in the istream to read from.
  */
-
 ANTLR_USE_NAMESPACE(std)string read_identifier( ANTLR_USE_NAMESPACE(std)istream& in );
 
 /** Read a attribute="value" thing. Leading whitespace is skipped.
@@ -47,8 +44,7 @@ ANTLR_USE_NAMESPACE(std)string read_identifier( ANTLR_USE_NAMESPACE(std)istream&
  */
 void read_AttributeNValue( ANTLR_USE_NAMESPACE(std)istream& in,
 								   ANTLR_USE_NAMESPACE(std)string& attribute,
-								   ANTLR_USE_NAMESPACE(std)string& value,
-                   ANTLRException** pExSlot );
+								   ANTLR_USE_NAMESPACE(std)string& value );
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 }

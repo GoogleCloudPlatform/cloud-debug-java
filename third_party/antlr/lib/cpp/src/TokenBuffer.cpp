@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/TokenBuffer.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/TokenBuffer.cpp#2 $
  */
 
 #include "antlr/TokenBuffer.hpp"
@@ -27,58 +27,48 @@ namespace antlr {
  */
 
 /** Create a token buffer */
-TokenBuffer::TokenBuffer( TokenStream& input_ )
-: input(input_), nMarkers(0), markerOffset(0), numToConsume(0)
+TokenBuffer::TokenBuffer( TokenStream& inp )
+: input(inp)
+, nMarkers(0)
+, markerOffset(0)
+, numToConsume(0)
 {
 }
 
+TokenBuffer::~TokenBuffer( void )
+{
+}
 
 /** Ensure that the token buffer is sufficiently full */
-void TokenBuffer::fill(int amount)
+void TokenBuffer::fill(unsigned int amount)
 {
 	syncConsume();
 	// Fill the buffer sufficiently to hold needed tokens
-	while (queue.entries() < amount + markerOffset) {
+	while (queue.entries() < (amount + markerOffset))
+	{
 		// Append the next token
-    RefToken next = input.nextToken();
-    if (ActiveException())
-    {
-      return;
-    }
-    else
-    {
-      queue.append(next);
-    }
+		queue.append(input.nextToken());
 	}
 }
 
 /** Get a lookahead token value */
-int TokenBuffer::LA(int i)
+int TokenBuffer::LA(unsigned int i)
 {
 	fill(i);
-  if (ActiveException())
-    return Token::EOF_TYPE; //JLW return this or bad token??
-  else
-    return queue.elementAt(markerOffset+i-1)->type;
+	return queue.elementAt(markerOffset+i-1)->getType();
 }
 
 /** Get a lookahead token */
-RefToken TokenBuffer::LT(int i)
+RefToken TokenBuffer::LT(unsigned int i)
 {
 	fill(i);
-  if (ActiveException())
-    return Token::eofToken; // I don't have access to the token factory here
-                            // so I can't use makeToken(Token::EOF_TYPE);
-                            // we might be able to use new Token() ??? but then
-                            // its not as extensible. Could push up into token stream??
-  else
-    return queue.elementAt(markerOffset+i-1);
+	return queue.elementAt(markerOffset+i-1);
 }
 
 /** Return an integer marker that can be used to rewind the buffer to
  * its current state.
  */
-int TokenBuffer::mark()
+unsigned int TokenBuffer::mark()
 {
 	syncConsume();
 	nMarkers++;
@@ -88,14 +78,19 @@ int TokenBuffer::mark()
 /**Rewind the token buffer to a marker.
  * @param mark Marker returned previously from mark()
  */
-void TokenBuffer::rewind(int mark)
+void TokenBuffer::rewind(unsigned int mark)
 {
 	syncConsume();
 	markerOffset=mark;
 	nMarkers--;
 }
 
+/// Get number of non-consumed tokens
+unsigned int TokenBuffer::entries() const
+{
+	return queue.entries() - markerOffset;
+}
+
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 	}
 #endif
-

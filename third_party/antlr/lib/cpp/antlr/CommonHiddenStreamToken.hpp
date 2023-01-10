@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/CommonHiddenStreamToken.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/CommonHiddenStreamToken.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -23,7 +23,7 @@ protected:
 public:
 	CommonHiddenStreamToken();
 	CommonHiddenStreamToken(int t, const ANTLR_USE_NAMESPACE(std)string& txt);
-	explicit CommonHiddenStreamToken(const ANTLR_USE_NAMESPACE(std)string& s);
+	CommonHiddenStreamToken(const ANTLR_USE_NAMESPACE(std)string& s);
 
 	RefToken getHiddenAfter();
 	RefToken getHiddenBefore();

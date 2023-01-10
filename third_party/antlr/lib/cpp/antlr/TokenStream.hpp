@@ -3,14 +3,13 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/TokenStream.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/TokenStream.hpp#2 $
  */
 
 #include <antlr/config.hpp>
 #include <antlr/Token.hpp>
-#include <antlr/ExceptionSlot.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
@@ -20,7 +19,7 @@ namespace antlr {
  * of tokens.
  * @author Terence Parr, MageLang Institute
  */
-class ANTLR_API TokenStream : public ExceptionSlot {
+class ANTLR_API TokenStream {
 public:
 	virtual RefToken nextToken()=0;
 	virtual ~TokenStream()

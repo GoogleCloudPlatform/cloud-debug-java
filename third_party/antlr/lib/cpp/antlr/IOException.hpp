@@ -3,13 +3,14 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/main/main/lib/cpp/antlr/ASTFactory.hpp#9 $
+ * $Id:$
  */
 
 #include <antlr/config.hpp>
 #include <antlr/ANTLRException.hpp>
+#include <exception>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
@@ -22,14 +23,13 @@ namespace antlr {
 class ANTLR_API IOException : public ANTLRException
 {
 public:
-//	ANTLR_USE_NAMESPACE(std)exception io;
-  ANTLR_DECLARE_DYNAMIC( IOException, ANTLRException, ANTLRException );
+	ANTLR_USE_NAMESPACE(std)exception io;
 
-//	IOException( ANTLR_USE_NAMESPACE(std)exception& e )
-//		: ANTLRException(e.what())
-//	{
-//	}
-	explicit IOException( const ANTLR_USE_NAMESPACE(std)string& mesg )
+	IOException( ANTLR_USE_NAMESPACE(std)exception& e )
+		: ANTLRException(e.what())
+	{
+	}
+	IOException( const ANTLR_USE_NAMESPACE(std)string& mesg )
 		: ANTLRException(mesg)
 	{
 	}

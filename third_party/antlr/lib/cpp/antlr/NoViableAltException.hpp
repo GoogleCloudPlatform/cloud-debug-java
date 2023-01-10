@@ -3,9 +3,9 @@
 
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/antlr/NoViableAltException.hpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/antlr/NoViableAltException.hpp#2 $
  */
 
 #include <antlr/config.hpp>
@@ -22,16 +22,15 @@ public:
 	const RefToken token;
 	const RefAST node; // handles parsing and treeparsing
 
-  ANTLR_DECLARE_DYNAMIC( NoViableAltException, RecognitionException, ANTLRException );
-	explicit NoViableAltException(RefAST t);
-	NoViableAltException(RefToken t,const string& fileName_);
+	NoViableAltException(RefAST t);
+	NoViableAltException(RefToken t,const ANTLR_USE_NAMESPACE(std)string& fileName_);
 
 	~NoViableAltException() throw() {}
 
 	/**
 	 * Returns a clean error message (no line number/column information)
 	 */
-	string getMessage() const;
+	ANTLR_USE_NAMESPACE(std)string getMessage() const;
 };
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

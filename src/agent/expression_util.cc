@@ -55,9 +55,10 @@ CompiledExpression CompileExpression(const std::string& string_expression,
   JavaExpressionParser parser(lexer);
   parser.Init();
 
-  parser.statement();
-  if (parser.ActiveException()) {
-    parser.reportError(parser.ActiveException()->getMessage());
+  try {
+    parser.statement();
+  } catch (const antlr::ANTLRException& e) {
+    parser.reportError(e.getMessage());
   }
 
   if (parser.num_errors() > 0) {

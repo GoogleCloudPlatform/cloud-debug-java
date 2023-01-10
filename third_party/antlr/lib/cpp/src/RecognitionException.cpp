@@ -1,8 +1,8 @@
 /* ANTLR Translator Generator
  * Project led by Terence Parr at http://www.jGuru.com
- * Software rights: http://www.antlr.org/RIGHTS.html
+ * Software rights: http://www.antlr.org/license.html
  *
- * $Id: //depot/code/org.antlr/release/antlr-2.7.2/lib/cpp/src/RecognitionException.cpp#1 $
+ * $Id: //depot/code/org.antlr/release/antlr-2.7.7/lib/cpp/src/RecognitionException.cpp#2 $
  */
 
 #include "antlr/RecognitionException.hpp"
@@ -12,8 +12,6 @@
 namespace antlr {
 #endif
 
-ANTLR_IMPLEMENT_DYNAMIC( RecognitionException, ANTLRException, ANTLRException );
-
 RecognitionException::RecognitionException()
 : ANTLRException("parsing error")
 , line(-1)
@@ -21,15 +19,15 @@ RecognitionException::RecognitionException()
 {
 }
 
-RecognitionException::RecognitionException(const string& s)
+RecognitionException::RecognitionException(const ANTLR_USE_NAMESPACE(std)string& s)
 : ANTLRException(s)
 , line(-1)
 , column(-1)
 {
 }
 
-RecognitionException::RecognitionException(const string& s,
-                                           const string& fileName_,
+RecognitionException::RecognitionException(const ANTLR_USE_NAMESPACE(std)string& s,
+                                           const ANTLR_USE_NAMESPACE(std)string& fileName_,
                                            int line_,int column_)
 : ANTLRException(s)
 , fileName(fileName_)
@@ -38,9 +36,9 @@ RecognitionException::RecognitionException(const string& s,
 {
 }
 
-string RecognitionException::getFileLineColumnString() const
+ANTLR_USE_NAMESPACE(std)string RecognitionException::getFileLineColumnString() const
 {
-	string fileLineColumnString;
+	ANTLR_USE_NAMESPACE(std)string fileLineColumnString;
 
 	if ( fileName.length() > 0 )
 		fileLineColumnString = fileName + ":";
@@ -63,7 +61,7 @@ string RecognitionException::getFileLineColumnString() const
 	return fileLineColumnString;
 }
 
-string RecognitionException::toString() const
+ANTLR_USE_NAMESPACE(std)string RecognitionException::toString() const
 {
 	return getFileLineColumnString()+getMessage();
 }

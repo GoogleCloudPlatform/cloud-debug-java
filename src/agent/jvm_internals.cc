@@ -17,6 +17,7 @@
 #include "jvm_internals.h"
 
 #include <dlfcn.h>
+#include <unistd.h>
 
 #include <fstream>  // NOLINT
 
@@ -24,6 +25,70 @@
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "stopwatch.h"
+
+namespace {
+bool file_exists(const std::string& full_file_name) {
+  return (access(full_file_name.c_str(), F_OK) != -1);
+}
+
+/**
+ * Under AppEngine Java8, there is currently a maximum file size limit of 32MB.
+ * As a result jar splitting must be done to the cdbg_java_agent_internals.jar
+ * file so it can be deployed, and so in this case multiple jar files are
+ * expected instead of just one. This utility function will determine which
+ * scenario is present and will create the vector of jar files accordingly.
+ *
+ * E.g.
+ *  AppEngine Java8:
+ *   cdbg_java_agent_internals-0000.jar
+ *   cdbg_java_agent_internals-0001.jar
+ *   ....
+ *   cdbg_java_agent_internals-0004.jar
+ *
+ *  All Other environments
+ *   cdbg_java_agent_internals.jar
+ *
+ * Returns:
+ *   On success returns a vector of the full jar file names representing the agent internals classes
+ *   that must be loaded. On error an empty vector is returned.
+ */
+std::vector<std::string> get_internals_jar_paths(const std::string& agentdir) {
+  std::vector<std::string> paths;
+
+  // This number is overkill, as the jars are split into sizes of ~10MB each,
+  // and as of the time of this writing cdbg_java_agent_internals.jar is ~52MB.
+  // However the jar splitting allows for 4 digits.
+  const int kMaxJars = 10000;
+
+  if (file_exists(agentdir + "/cdbg_java_agent_internals.jar")) {
+    paths.emplace_back(agentdir + "/cdbg_java_agent_internals.jar");
+    LOG(INFO) << "Loading internals from " << paths.back();
+  } else {
+    const int kBufSize = 5;
+    char buf[kBufSize];
+    for (int i = 0; i < kMaxJars; ++i) {
+      snprintf(buf, sizeof(buf), "%04d", i);
+      std::string file_name =
+          agentdir + "/cdbg_java_agent_internals-" + buf + ".jar";
+
+      if (!file_exists(file_name)) {
+        break;
+      }
+      paths.push_back(file_name);
+      LOG(INFO) << "Loading internals from " << paths.back();
+    }
+  }
+
+  // If we actually hit the max something is wrong and we should not proceed.
+  if (paths.size() == kMaxJars) {
+    LOG(ERROR) << "Hit the maximum number of jars, cannot proceed";
+    paths.clear();
+  }
+
+  return paths;
+}
+
+} // namespace
 
 namespace devtools {
 namespace cdbg {
@@ -356,7 +421,7 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
   class_loader_cls.Assign(static_cast<jclass>(define_class_rc.get()));
 
   jmethodID constructor_method =
-      class_loader_cls.GetConstructor("(Ljava/lang/String;)V");
+      class_loader_cls.GetConstructor("([Ljava/lang/String;)V");
   if (constructor_method == nullptr) {
     LOG(ERROR) << "Couldn't find constructor of InternalsClassLoader class";
     class_loader_cls.ReleaseRef();
@@ -365,15 +430,17 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
 
   // Create class loader instance exposing classes from
   // "cdbg_java_agent_internals.jar".
-  const std::string internals_jar_path =
-      agentdir + "/cdbg_java_agent_internals.jar";
-  LOG(INFO) << "Loading internals from " << internals_jar_path;
-  JniLocalRef jstr_internals_path(JniToJavaString(internals_jar_path));
+  std::vector<std::string> jar_paths = get_internals_jar_paths(agentdir);
+  if (jar_paths.empty()) {
+    return false;
+  }
+
+  JniLocalRef jstr_internals_paths(JniToJavaStringArray(jar_paths));
 
   JniLocalRef class_loader_obj_local_ref(jni()->NewObject(
       class_loader_cls.get(),
       constructor_method,
-      jstr_internals_path.get()));
+      jstr_internals_paths.get()));
 
   class_loader_cls.ReleaseRef();
 

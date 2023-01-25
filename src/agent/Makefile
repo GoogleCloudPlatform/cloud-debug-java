@@ -48,7 +48,10 @@ JAVAC=javac -source 1.7 -target 1.7
 BUILD_TARGET_PATH ?= .
 
 OPT_FLAGS = -O3 -D NDEBUG
-LDFLAGS += -shared
+
+# Statically linking libstd++ helps ensure cdbg_java_agent.so will load in a
+# wider set of environments
+LDFLAGS += -shared -static-libstdc++
 
 ifneq ($(OS),Darwin)
 # Pass these linker flags only when building with gcc (i.e., not with clang).

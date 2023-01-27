@@ -78,17 +78,19 @@ final class ClassPathLookup {
    *     indexed
    * @param extraClassPath optional file system locations to search for .class and .jar files beyond
    *     what's normally specified in Java class path
+   * @param agentDir The directory the agent .so file is located.
    */
-  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath) {
+  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath, String agentDir) {
     infofmt(
-        "Initializing ClassPathLookup, default classpath: %b, extra classpath: %s",
-        useDefaultClassPath, (extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath));
+        "Initializing ClassPathLookup, default classpath: %b, extra classpath: %s, agent dir: %s",
+        useDefaultClassPath, (extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath),
+        agentDir);
 
     // Try to guess where application classes might be besides class path. We only do it if the
     // debugger uses default configuration. If the user sets additional directories, we use that and
     // not try to guess anything.
     if (useDefaultClassPath && ((extraClassPath == null) || (extraClassPath.length == 0))) {
-      extraClassPath = findExtraClassPath();
+      extraClassPath = findExtraClassPath(agentDir);
     }
 
     this.useDefaultClassPath = useDefaultClassPath;
@@ -382,9 +384,13 @@ final class ClassPathLookup {
    * in the default ROOT directory.
    *
    * <p>This function is marked as public for unit tests.
+   *
+   * @param agentDir The directory the agent .so file is located.
    */
-  public static String[] findExtraClassPath() {
+  public static String[] findExtraClassPath(String agentDir) {
     Set<String> paths = new HashSet<>();
+
+    addAppEngineJava8Paths(paths, agentDir);
 
     // Tomcat.
     addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/lib");
@@ -400,6 +406,81 @@ final class ClassPathLookup {
   }
 
   /**
+   * If the environment is Java8 App Engine Standard it will attempt to add the WEB-INF/lib and
+   * WEB-INF/classes directories to the paths for indexing.
+   *
+   * <p>No effect if the environment is not Java8 App Engine Standard or the directories don't
+   * exist.
+   */
+  public static void addAppEngineJava8Paths(Set<String> paths, String agentDir) {
+    String userDir = getAppEngineJava8UserDir(agentDir);
+    if (userDir == null) {
+      return;
+    }
+
+    addPathRelative(paths, userDir, "WEB-INF/lib");
+    addPathRelative(paths, userDir, "WEB-INF/classes");
+  }
+
+  /**
+   * Returns the user dir of a Java8 App Engine Standard instance. This is the base directory where the
+   * user's files are deployed.
+   *
+   * <p> While there is a system property defined, "user.dir", in Java8 App Engine environments, it
+   * is unfortunately not set at the point in time this agent code runs, so it cannot be relied
+   * upon. Here we use the GAE_AGENTPATH_OPTS environment variable which users much specify to load
+   * an agent. It has the relative path in the application deployment to the agent .so file. We also
+   * have access to the full path of the directory containing the .so file. Using these two values
+   * the user dir can be extracted.
+   *
+   * Example:
+   * agentDir: /base/data/home/apps/s~my-project/20230126t151823.449561295697253946/cdbg
+   * GAE_AGENTPATH_OPTS: cdbg/cdbg_java_agent.so=--use-firebase=true
+   * Extracted user dir: /base/data/home/apps/s~my-project/20230126t151823.449561295697253946
+   *
+   * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
+   * otherwise.
+   */
+  public static String getAppEngineJava8UserDir(String agentDir) {
+    // Note, we could also check that we are definitely in Java 8 App Engine by checking the
+    // GAE_SERVICE environment variable for the value "java8", however the presence of
+    // GAE_AGENTPATH_OPTS is sufficient.
+    String agentPathOpts = System.getenv("GAE_AGENTPATH_OPTS");
+
+    if (agentPathOpts == null) {
+      return null;
+    }
+
+    // In case there's a trailing / remove it.
+    if (agentDir.endsWith("/")) {
+      agentDir = agentDir.substring(0, agentDir.length() - 1);
+    }
+
+    // An example value for GAE_AGENTPATH_OPTS is: 'cdbg/cdbg_java_agent.so=--use-firebase=true'
+    // Anything after the '=' are parameters passed into the agent, however it is optional and may
+    // not be present.
+    int argStartIdx = agentPathOpts.indexOf("=");
+    String relativeFilePath = argStartIdx == -1 ? agentPathOpts : agentPathOpts.substring(0, argStartIdx);
+
+    int pathEndIdx = relativeFilePath.lastIndexOf("/");
+    String relativeAgentPath = pathEndIdx == -1 ? "" : relativeFilePath.substring(0, pathEndIdx);
+
+    // This means the agent is found at the root of the app engine deployment, so the user dir is
+    // the same as the agent dir.
+    if (relativeAgentPath.isEmpty()) {
+      return agentDir;
+    }
+
+    // In an actual App Engine Java8 environment this case would be unexpected, but if
+    // GAE_AGENTPATH_OPTS happened to be set in a different environment it could happen.
+    if (!agentDir.endsWith(relativeAgentPath)) {
+      return null;
+    }
+
+    return agentDir.substring(0, agentDir.length() - relativeAgentPath.length());
+  }
+
+  /**
    * Appends a path relative to the base path defined in a system property.
    *
    * <p>No effect if the system property is not defined or the combined path does not exist.
@@ -410,11 +491,21 @@ final class ClassPathLookup {
       return;
     }
 
-    File path = new File(value, suffix);
+    addPathRelative(paths, value, suffix);
+  }
+
+  /**
+   * Appends a path relative to a base path.
+   *
+   * <p>No effect if the combined path does not exist.
+   */
+  private static void addPathRelative(Set<String> paths, String basePath, String suffix) {
+    File path = new File(basePath, suffix);
     if (!path.exists()) {
       return;
     }
 
+    infofmt("Adding path %s for indexing", path.toString());
     paths.add(path.toString());
   }
 

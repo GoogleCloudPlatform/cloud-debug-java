@@ -183,7 +183,8 @@ bool JvmInternals::CreateClassPathLookupInstance(
           class_path_lookup_.cls.get(),
           class_path_lookup_.constructor,
           use_default_class_path,
-          extra_class_path)))
+          extra_class_path,
+          JniToJavaString(GetAgentDirectory()).get())))
       .Release(ExceptionAction::LOG_AND_IGNORE);
 
   if (instance_local_ref == nullptr) {
@@ -472,7 +473,7 @@ bool JvmInternals::LoadClasses() {
   class_path_lookup_.constructor =
       class_path_lookup_.cls.GetInstanceMethod(
           "<init>",
-          "(Z[Ljava/lang/String;)V");
+          "(Z[Ljava/lang/String;Ljava/lang/String;)V");
   if (class_path_lookup_.constructor == nullptr) {
     return false;
   }

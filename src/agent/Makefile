@@ -64,6 +64,7 @@ ANTLR_TOOL_PATH = $(THIRD_PARTY_PATH)/antlr
 ANTLR_CPP_LIB = $(THIRD_PARTY_PATH)/antlr/lib/cpp
 ANTLR_CPP_LIB_SRC = $(ANTLR_CPP_LIB)/src
 ANTLR_CPP_LIB_INCLUDE = $(ANTLR_CPP_LIB)
+JAR_SPLITTER_TOOL_PATH = $(THIRD_PARTY_PATH)/jar_splitter
 
 INCLUDES = \
 	-I$(ROOT) \
@@ -95,6 +96,7 @@ INTERNALS_CLASS_LOADER_STATIC_DEFS = internals_class_loader_static_defs.inl
 INTERNALS_JAR = internals.jar
 SERVICE_ACCOUNT_AUTH_TOOL = $(BUILD_TARGET_PATH)/cdbg_service_account_auth.jar
 TARGET_TAR_GZ_APPENGINE = $(BUILD_TARGET_PATH)/cdbg_java_agent.tar.gz
+TARGET_TAR_GZ_APPENGINE_JAVA8 = $(BUILD_TARGET_PATH)/cdbg_java_agent_gae_java8.tar.gz
 TARGET_TAR_GZ_GCE = $(BUILD_TARGET_PATH)/cdbg_java_agent_gce.tar.gz
 TARGET_TAR_GZ_SERVICE_ACCOUNT = $(BUILD_TARGET_PATH)/cdbg_java_agent_service_account.tar.gz
 TARGET_VERSION_TXT = $(BUILD_TARGET_PATH)/version.txt
@@ -193,6 +195,7 @@ GOOGLE_API_CLIENT_JARS_CLASS_PATH := $(subst $(SPACE),:,$(GOOGLE_API_CLIENT_JARS
 
 all: \
 	packages \
+	jar_splitter_tool \
 	service_account_auth_tool \
 	target_version_txt \
 
@@ -258,6 +261,10 @@ else
 	jar cvf $(INTERNALS_JAR) -C internals/target/ .
 endif
 
+jar_splitter_tool:
+	mkdir -p $(JAR_SPLITTER_TOOL_PATH)/build
+	$(JAVAC) $(JAR_SPLITTER_TOOL_PATH)/*.java -d $(JAR_SPLITTER_TOOL_PATH)/build
+
 # Separate tool to obtain OAuth access token given service account email
 # and p12 file. This tool is used by GCE bootstrap script when service account
 # authentication is enabled.
@@ -284,7 +291,9 @@ target_version_txt: internals_jar
 #    (Identical to #2, retained for legacy purposes).
 packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT) target_version_txt
 	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
+	java -cp $(JAR_SPLITTER_TOOL_PATH)/build JarSplitterMain `pwd`/cdbg_java_agent_internals.jar `pwd`
 	cp $(TARGET_VERSION_TXT) version.txt
 	tar cfz $(TARGET_TAR_GZ_APPENGINE) $(TARGET_AGENT) cdbg_java_agent_internals.jar $(APPENGINE_FORMAT_SCRIPT) version.txt
+	tar cfz $(TARGET_TAR_GZ_APPENGINE_JAVA8) $(TARGET_AGENT) cdbg_java_agent_internals-*.jar version.txt
 	tar cfz $(TARGET_TAR_GZ_GCE) $(TARGET_AGENT) cdbg_java_agent_internals.jar version.txt
 	tar cfz $(TARGET_TAR_GZ_SERVICE_ACCOUNT) $(TARGET_AGENT) cdbg_java_agent_internals.jar version.txt

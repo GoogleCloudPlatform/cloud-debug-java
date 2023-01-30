@@ -49,6 +49,7 @@ pushd "${ROOT}"/third_party
 rm -rf gflags* glog* jsoncpp* install
 rm -rf antlr/build
 rm -f antlr/lib/cpp/src/*.o
+rm -rf jar_splitter/build
 popd
 
 pushd "${ROOT}"/src

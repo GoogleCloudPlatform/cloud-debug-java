@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-import java.io.IOException;
+package com.google.devtools.cdbg.debuglets.java;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 
 public class JarSplitterMain {
-  public static void main(String[] args){
+  public static void main(String[] args) {
+    if (args.length < 2) {
+      System.err.println(
+          "JarSplitter requires 2 arguments, the jar file to split and the location to place the"
+              + " split files.");
+      System.exit(1);
+    }
+
     // Taking default values for JarSplitter constructor based on
     // https://github.com/GoogleCloudPlatform/appengine-java-standard/blob/6b724ba9e2a181ba55e07a9daf28105dc11be16d/lib/tools_api/src/main/java/com/google/appengine/tools/admin/Application.java#L1494
     try {
@@ -34,15 +43,15 @@ public class JarSplitterMain {
       }
 
       new com.google.appengine.tools.util.JarSplitter(
-          jarFile,
-          outputDirectory,
-          maxJarSize,
-          false, /* replicateManifests */
-          4, /* outputDigits */
-          Collections.<String>emptySet() /* excludes */
-      ).run();
+              jarFile,
+              outputDirectory,
+              maxJarSize,
+              false, /* replicateManifests */
+              4, /* outputDigits */
+              Collections.<String>emptySet() /* excludes */)
+          .run();
     } catch (IOException e) {
-      System.out.println("JarSplitter failed: " + e);
+      System.err.println("JarSplitter failed: " + e);
       System.exit(1);
     }
   }

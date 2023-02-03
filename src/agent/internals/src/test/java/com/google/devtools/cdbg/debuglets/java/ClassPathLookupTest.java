@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.devtools.cdbg.debuglets.java; /* BPTAG: PACKAGE */
 
 import static com.google.common.truth.Truth.assertThat;
@@ -121,9 +120,13 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     }
   }
 
+  // For most tests the agent path does not factor in, defaulting it to empty is fine.
+  private static final String DEFAULT_AGENT_DIR = "";
+
   // It takes a relatively long time to instantiate ClassPathLookup, so we only do it once.
   // Tests should not interfere with each other, since ClassPathLookup is stateless.
-  private static final ClassPathLookup DEFAULT_CLASS_PATH_LOOKUP = new ClassPathLookup(true, null);
+  private static final ClassPathLookup DEFAULT_CLASS_PATH_LOOKUP =
+      new ClassPathLookup(true, null, DEFAULT_AGENT_DIR);
 
   @Rule public TemporaryFolder temporaryFolder1 = new TemporaryFolder();
 
@@ -141,7 +144,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
   @Test
   public void resolveSourceLocationPositive() throws BreakpointTagException {
     String[] sourceFiles = // BPTAG: RESOLVE_POSITIVE
-        new String[] { 
+        new String[] {
           SIGNATURE_BASE + ".java",
           "/home/" + SIGNATURE_BASE + ".java",
           "/home/myproj/" + SIGNATURE_BASE + ".java",
@@ -228,7 +231,8 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     File jarFile = TestDataPath.get("DynamicJar.jar");
     String[] extraClassPath = new String[] {"badpath1", jarFile.getAbsolutePath(), "badpath2"};
 
-    ClassPathLookup classPathLookupExtra = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookupExtra =
+        new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
 
     String sourcePath = "org/myorg/myprod/test/DynamicJarClass.java";
     int line =
@@ -253,7 +257,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     File jarFile = TestDataPath.get("DynamicJar.jar");
     String[] extraClassPath = new String[] {jarFile.getAbsolutePath()};
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(false, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(false, extraClassPath, DEFAULT_AGENT_DIR);
 
     String sourcePath;
     int line;
@@ -488,7 +492,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
     String[] extraClassPath = new String[] {temporaryFolder1.getRoot().getAbsolutePath()};
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertThat(classPathLookup.readGitPropertiesResourceAsSourceContext("my.file")).hasLength(1);
     assertEquals(
         expectedResult, classPathLookup.readGitPropertiesResourceAsSourceContext("my.file")[0]);
@@ -506,7 +510,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
     String[] extraClassPath = new String[] {temporaryFolder1.getRoot().getAbsolutePath()};
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertThat(classPathLookup.readGitPropertiesResourceAsSourceContext("my.file")).isEmpty();
   }
 
@@ -522,7 +526,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
     String[] extraClassPath = new String[] {temporaryFolder1.getRoot().getAbsolutePath()};
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertThat(classPathLookup.readGitPropertiesResourceAsSourceContext("my.file")).isEmpty();
   }
 
@@ -540,7 +544,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
     String[] extraClassPath = new String[] {temporaryFolder1.getRoot().getAbsolutePath()};
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertEquals(1, classPathLookup.readApplicationResource("my.file").length);
     assertEquals(content, classPathLookup.readApplicationResource("my.file")[0]);
   }
@@ -561,7 +565,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     String[] extraClassPath = new String[] {temporaryFolder1.getRoot().getAbsolutePath()};
     String resourcePath = "META-INF/source-context.json";
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertEquals(1, classPathLookup.readApplicationResource(resourcePath).length);
     assertEquals(content, classPathLookup.readApplicationResource(resourcePath)[0]);
   }
@@ -589,7 +593,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
           temporaryFolder1.getRoot().getAbsolutePath(), temporaryFolder2.getRoot().getAbsolutePath()
         };
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertEquals(2, classPathLookup.readApplicationResource("my.file").length);
     assertEquals("abc", classPathLookup.readApplicationResource("my.file")[0]);
     assertEquals("def", classPathLookup.readApplicationResource("my.file")[1]);
@@ -607,13 +611,13 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
           temporaryFolder1.getRoot().getAbsolutePath(), temporaryFolder1.getRoot().getAbsolutePath()
         };
 
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, extraClassPath, DEFAULT_AGENT_DIR);
     assertEquals(1, classPathLookup.readApplicationResource("my.file").length);
   }
 
   @Test
   public void readApplicationResourceFailure() {
-    ClassPathLookup classPathLookup = new ClassPathLookup(true, null);
+    ClassPathLookup classPathLookup = new ClassPathLookup(true, null, DEFAULT_AGENT_DIR);
     assertEquals(0, classPathLookup.readApplicationResource("my.file").length);
   }
 
@@ -650,7 +654,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
   @Test
   public void emptyAutoClassPath() {
-    assertThat(ClassPathLookup.findExtraClassPath()).isEmpty();
+    assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR)).isEmpty();
   }
 
   @Test
@@ -659,7 +663,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
       System.setProperty("catalina.base", "/tomcat");
       System.setProperty("jetty.base", "/jetty");
 
-      assertThat(ClassPathLookup.findExtraClassPath()).isEmpty();
+      assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR)).isEmpty();
     } finally {
       System.clearProperty("catalina.base");
       System.clearProperty("jetty.base");
@@ -683,7 +687,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
       System.setProperty("catalina.base", tomcatRoot.toString());
       System.setProperty("jetty.base", jettyRoot.toString());
 
-      assertThat(ClassPathLookup.findExtraClassPath())
+      assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR))
           .asList()
           .containsExactly(
               tomcatRoot + "/webapps/ROOT/WEB-INF/lib",

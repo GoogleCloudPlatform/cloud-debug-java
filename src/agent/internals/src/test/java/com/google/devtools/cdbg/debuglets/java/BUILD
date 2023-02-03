@@ -20,6 +20,29 @@ java_test(
 )
 
 java_test(
+    name = "ClassPathLookupTest",
+    size = "medium",
+    srcs = [
+        "ClassPathLookupTest.java",
+    ],
+    data = [
+        ":DynamicJar.jar",
+    ],
+    resources = [
+        "//tests/agent:libtest_logger.so",
+    ],
+    deps = [
+        ":TestInfra",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
+        "//tests/agent:libtest_logger.so",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_ow2_asm_asm",
+    ],
+)
+
+java_test(
     name = "DataTypeConverterTest",
     size = "small",
     srcs = [
@@ -28,6 +51,22 @@ java_test(
     deps = [
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:datatype_converter",
         "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_binary(
+    name = "DynamicJar",
+    srcs = [
+        "DynamicJarClass.java",
+    ],
+    # Using Java Launcher adds an extra LoadSwigDeps.txt file and the (quite
+    # big) Java Launcher binary to the output jar. We enforce building this
+    # jar with the JDK Launcher to get consistent contents, and eliminate the
+    # inclusion of the redundant ELF Java Launcher in the jar. This jar is not
+    # supposed to be directly executed anyways.
+    #use_launcher = False,
+    deps = [
         "@maven//:junit_junit",
     ],
 )
@@ -119,3 +158,32 @@ java_library(
     ],
 )
 
+# Include source files to automatically find source location by special comment
+# tag in a source file.
+java_library(
+    name = "TestInfra",
+    testonly = 1,
+    srcs = [
+        "BreakpointDefinition.java",
+        "BreakpointTagException.java",
+        "TestDataPath.java",
+    ],
+    data = glob(["*.java"]),
+    deps = [
+        "//schema:data_java_proto",
+        "@bazel_tools//tools/java/runfiles:runfiles",
+        "@maven//:com_google_guava_guava",
+        "@maven//:junit_junit",
+    ]
+)
+
+java_test(
+    name = "BreakpointDefinitionTest",
+    size = "small",
+    srcs = ["BreakpointDefinitionTest.java"],
+    deps = [
+        ":TestInfra",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

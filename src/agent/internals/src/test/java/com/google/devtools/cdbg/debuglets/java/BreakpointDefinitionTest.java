@@ -31,7 +31,7 @@ public final class BreakpointDefinitionTest {
     // Note: This test will fail if lines are added/removed above it.
     // If that happens, update the line number in the assertion.
     assertThat(BreakpointDefinition.resolveLineNumber("BreakpointDefinitionTest.java", "MULTILINE"))
-        .isEqualTo(35); /* BPTAG: MULTILINE */
+        .isEqualTo(34); /* BPTAG: MULTILINE */
   }
 
   @Test
@@ -40,7 +40,7 @@ public final class BreakpointDefinitionTest {
     // If that happens, update the line number in the assertion.
     assertThat(
             BreakpointDefinition.resolveLineNumber("BreakpointDefinitionTest.java", "SINGLELINE"))
-        .isEqualTo(44); // BPTAG: SINGLELINE
+        .isEqualTo(43); // BPTAG: SINGLELINE
   }
 
   @Test

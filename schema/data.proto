@@ -253,7 +253,7 @@ message Variable {
   // Reference to a variable in the shared variable table. More than
   // one variable can reference the same variable in the table. The
   // `var_table_index` field is an index into `variable_table` in Breakpoint.
-  int32 var_table_index = 5;
+  optional int32 var_table_index = 5;
 
   // Status associated with the variable. This field will usually stay
   // unset. A status of a single variable only applies to that variable or
@@ -373,7 +373,7 @@ message Breakpoint {
 
   // Time this breakpoint was finalized as seen by the RTDB in milliseconds
   // resolution since unix epoch.
-  int64 final_time_unix_msec = 10;
+  optional int64 final_time_unix_msec = 10;
 
   // E-mail address of the user that created this breakpoint
   string user_email = 11;

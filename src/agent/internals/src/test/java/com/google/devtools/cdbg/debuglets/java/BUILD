@@ -1,3 +1,17 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -20,6 +34,29 @@ java_test(
 )
 
 java_test(
+    name = "ClassPathLookupTest",
+    size = "medium",
+    srcs = [
+        "ClassPathLookupTest.java",
+    ],
+    data = [
+        ":DynamicJar.jar",
+    ],
+    resources = [
+        "//tests/agent:libtest_logger.so",
+    ],
+    deps = [
+        ":BreakpointTag",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
+        "//tests/agent:libtest_logger.so",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:org_ow2_asm_asm",
+    ],
+)
+
+java_test(
     name = "DataTypeConverterTest",
     size = "small",
     srcs = [
@@ -28,6 +65,16 @@ java_test(
     deps = [
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:datatype_converter",
         "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_binary(
+    name = "DynamicJar",
+    srcs = [
+        "DynamicJarClass.java",
+    ],
+    deps = [
         "@maven//:junit_junit",
     ],
 )
@@ -119,3 +166,34 @@ java_library(
     ],
 )
 
+# Provides support for finding a line number in a source file for tests that need this.
+# Eg. add either '/* BPTAG: TAG_NAME */' or '// BPTAG: TAG_NAME'  to the end of
+# a line in the source file.
+# All the .java files are included automatically and available for tests to set TAGs in
+java_library(
+    name = "BreakpointTag",
+    testonly = 1,
+    srcs = [
+        "BreakpointDefinition.java",
+        "BreakpointTagException.java",
+        "TestDataPath.java",
+    ],
+    data = glob(["*.java"]),
+    deps = [
+        "//schema:data_java_proto",
+        "@bazel_tools//tools/java/runfiles:runfiles",
+        "@maven//:com_google_guava_guava",
+        "@maven//:junit_junit",
+    ]
+)
+
+java_test(
+    name = "BreakpointDefinitionTest",
+    size = "small",
+    srcs = ["BreakpointDefinitionTest.java"],
+    deps = [
+        ":BreakpointTag",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

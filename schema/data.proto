@@ -16,6 +16,7 @@
 
 // This file contains the definitions of the Debuggee and Breakpoint data
 // entities.
+//
 // The version here is google.devtools.clouddebugger.v3 and represents the
 // version of the entities for the Snapshot Debugger, as they can be found in
 // the Firebase RTDB backend.
@@ -23,9 +24,9 @@
 // To note, currently in practise this file is only compiled and used by the
 // java unit tests, as the FirebaseClient deals with a JSON representation of
 // this data. Similarly the native C++ agent code also deals with a JSON
-// representation which it translates to its own strct based definition. This is
-// a historic holdover of the agent minimizing for size by minimizing external
-// dependencies.
+// representation which it translates to its own struct based definition. This
+// is a historic holdover of the agent minimizing for size by minimizing
+// external dependencies.
 
 syntax = "proto3";
 

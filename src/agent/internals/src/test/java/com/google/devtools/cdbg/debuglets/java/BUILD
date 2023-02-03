@@ -60,12 +60,6 @@ java_binary(
     srcs = [
         "DynamicJarClass.java",
     ],
-    # Using Java Launcher adds an extra LoadSwigDeps.txt file and the (quite
-    # big) Java Launcher binary to the output jar. We enforce building this
-    # jar with the JDK Launcher to get consistent contents, and eliminate the
-    # inclusion of the redundant ELF Java Launcher in the jar. This jar is not
-    # supposed to be directly executed anyways.
-    #use_launcher = False,
     deps = [
         "@maven//:junit_junit",
     ],

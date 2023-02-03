@@ -97,7 +97,6 @@ public class BreakpointDefinition {
         reader.close();
       }
     } catch (IOException | IOError e) {
-      System.err.println("JCB ERROR: " + e);
       throw new BreakpointTagException(fileName);
     }
   }

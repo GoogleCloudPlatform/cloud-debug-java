@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.myorg.myprod.test;
 
 import static org.junit.Assert.fail;

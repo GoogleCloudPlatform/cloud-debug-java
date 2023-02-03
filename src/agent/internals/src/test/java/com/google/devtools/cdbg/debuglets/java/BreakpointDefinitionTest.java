@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.common.truth.Truth.assertThat;

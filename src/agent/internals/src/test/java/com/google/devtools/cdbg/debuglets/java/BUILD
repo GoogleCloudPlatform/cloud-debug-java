@@ -46,7 +46,7 @@ java_test(
         "//tests/agent:libtest_logger.so",
     ],
     deps = [
-        ":TestInfra",
+        ":BreakpointTag",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
         "//tests/agent:libtest_logger.so",
         "@maven//:com_google_guava_guava",
@@ -166,10 +166,12 @@ java_library(
     ],
 )
 
-# Include source files to automatically find source location by special comment
-# tag in a source file.
+# Provides support for finding a line number in a source file for tests that need this.
+# Eg. add either '/* BPTAG: TAG_NAME */' or '// BPTAG: TAG_NAME'  to the end of
+# a line in the source file.
+# All the .java files are included automatically and available for tests to set TAGs in
 java_library(
-    name = "TestInfra",
+    name = "BreakpointTag",
     testonly = 1,
     srcs = [
         "BreakpointDefinition.java",
@@ -190,7 +192,7 @@ java_test(
     size = "small",
     srcs = ["BreakpointDefinitionTest.java"],
     deps = [
-        ":TestInfra",
+        ":BreakpointTag",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

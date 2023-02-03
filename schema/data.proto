@@ -99,7 +99,7 @@ message StatusMessage {
   Reference refers_to = 2;
 
   // Status message text.
-  FormatMessage description = 3;
+  optional FormatMessage description = 3;
 }
 
 //------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ message SourceLocation {
   // Column within a line. The first column in a line as the value `1`.
   // Agents that do not support setting breakpoints on specific columns ignore
   // this field.
-  int32 column = 3;
+  optional int32 column = 3;
 }
 
 //------------------------------------------------------------------------------
@@ -239,13 +239,13 @@ message Variable {
   string name = 1;
 
   // Simple value of the variable.
-  string value = 2;
+  optional string value = 2;
 
   // Variable type (e.g. `MyClass`). If the variable is split with
   // `var_table_index`, `type` goes next to `value`. The interpretation of
   // a type is agent specific. It is recommended to include the dynamic type
   // rather than a static type of an object.
-  string type = 3;
+  optional string type = 3;
 
   // Members contained or pointed to by the variable.
   repeated Variable members = 4;
@@ -330,7 +330,7 @@ message Breakpoint {
   // Condition that triggers the breakpoint.
   // The condition is a compound boolean expression composed using expressions
   // in a programming language at the source location.
-  string condition = 4;
+  optional string condition = 4;
 
   // List of read-only expressions to evaluate at the breakpoint location.
   // The expressions are composed using expressions in the programming language
@@ -346,7 +346,7 @@ message Breakpoint {
   //
   // Example: `Message received, id = $0, count = $1` with
   // `expressions` = `[ message.id, message.count ]`.
-  string log_message_format = 6;
+  optional string log_message_format = 6;
 
   // Log severity levels.
   enum LogLevel {
@@ -361,7 +361,7 @@ message Breakpoint {
   }
 
   // Indicates the severity of the log. Only relevant when action is `LOG`.
-  LogLevel log_level = 7;
+  optional LogLevel log_level = 7;
 
   // When true, indicates that this is a final result and the
   // breakpoint state will not change from here on.
@@ -376,7 +376,7 @@ message Breakpoint {
   optional int64 final_time_unix_msec = 10;
 
   // E-mail address of the user that created this breakpoint
-  string user_email = 11;
+  optional string user_email = 11;
 
   // Breakpoint status.
   //
@@ -393,7 +393,7 @@ message Breakpoint {
   //
   // *   `Invalid line number` referring to location
   // *   `Field f not found in class C` referring to condition
-  StatusMessage status = 12;
+  optional StatusMessage status = 12;
 
   // The stack at breakpoint time, where stack_frames[0] represents the most
   // recently entered function.
@@ -441,7 +441,7 @@ message Debuggee {
   string id = 1;
 
   // Project the debuggee is associated with.
-  string project = 2;
+  optional string project = 2;
 
   // Uniquifier to further distinguish the application.  It is possible that
   // different applications might have identical values in the debuggee
@@ -449,7 +449,7 @@ message Debuggee {
   // adds salt to further distinguish the application. Agents should consider
   // seeding this field with value that identifies the code, binary,
   // configuration and environment.
-  string uniquifier = 3;
+  optional string uniquifier = 3;
 
   // Human readable description of the debuggee.
   // Including a human-readable project name, environment name and version
@@ -467,7 +467,7 @@ message Debuggee {
   // Human readable message to be displayed to the user about this debuggee.
   // Absence of this field indicates no status. The message can be either
   // informational or an error status.
-  StatusMessage status = 8;
+  optional StatusMessage status = 8;
 
   // References to the locations and revisions of the source code used in the
   // deployed application.

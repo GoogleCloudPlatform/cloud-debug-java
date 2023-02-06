@@ -16,6 +16,10 @@ load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
 
+CDBG_AGENT_PATH = \
+    "-agentpath:$${TEST_SRCDIR}/__main__/src/agent/cdbg_java_agent.so=" + \
+    "--log_dir=`if [[ -n \"$${TEST_TMPDIR}\" ]]; then echo \"$${TEST_TMPDIR}\"; else echo \"/tmp\"; fi`"
+
 java_test(
     name = "AgentLoggerTest",
     size = "small",
@@ -98,6 +102,27 @@ java_test(
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@maven//:org_mockito_mockito_core",
+    ],
+)
+
+java_test(
+    name = "GcpEnvironmentTest",
+    size = "small",
+    srcs = [
+        "GcpEnvironmentTest.java",
+    ],
+    jvm_flags = [
+        CDBG_AGENT_PATH,
+    ],
+    data = [
+        "//src/agent:cdbg_java_agent.so",
+    ],
+    deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_environment",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_metadata",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:labels",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
 

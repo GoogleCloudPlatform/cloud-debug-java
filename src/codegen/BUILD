@@ -1,4 +1,7 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
 package(default_visibility = ["//visibility:public"])
+
 
 ALL_GENERATED_CLASSES = [
     "api_client_datetime",
@@ -10,6 +13,7 @@ ALL_GENERATED_CLASSES = [
     "class",
     "classloader",
     "classpathlookup",
+    "dynamicloghelper",
     "exception",
     "firebaseclient",
     "gcpbreakpointlabelsprovider",
@@ -127,3 +131,22 @@ cc_library(
     ],
 )
 
+py_binary(
+  name = "static_def_gen",
+  srcs = ["static_def_gen.py"],
+)
+
+genrule(
+    name = "internals_class_loader_static_defs",
+    srcs = [
+        "//src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class",
+    ],
+    outs = [
+        "internals_class_loader_static_defs.inl",
+    ],
+    cmd = "$(location :static_def_gen) $@ " +
+          "$$(dirname $(location //src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class)):^cdbg_java_agent_internals_loader\\.class$$",
+    tools = [
+        ":static_def_gen",
+    ],
+)

@@ -12,8 +12,8 @@ genrule(
     name = "classloader_extract",
     srcs = [":classloader"],
     outs = ["cdbg_java_agent_internals_loader.class"],
-    cmd = "$(location @local_jdk//:jar) xf $(SRCS) com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class && " +
+    cmd = "$(JAVABASE)/bin/jar xf $(SRCS) com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class && " +
           "mv com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $@ &&" +
           "rm -r com",
-    tools = ["@local_jdk//:jar"],
+    toolchains = ["@bazel_tools//tools/jdk:current_java_runtime"],
 )

@@ -1562,10 +1562,10 @@ cc_library(
     alwayslink = 1,
 )
 
-# This rule is here to allow the dbg_java_agent_internals.jar to be located in
-# the same directory as cdbg_java_agent.so during the Java unit test runs that
-# load the agent. This is a requirement of the .so file, it only knows to look
-# for the internals jar file in the same directory as itself.
+# This rule is here so the cdbg_java_agent_internals.jar file will be located
+# in the same directory as cdbg_java_agent.so for Java unit tests that load the
+# agent. This is a requirement of the .so file, it requires that the
+# cdbg_java_agent_internals.jar file be in the same directory as itself.
 genrule(
     name = "cdbg_java_agent_internals_jar_rename",
     srcs = ["//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals_deploy.jar"],

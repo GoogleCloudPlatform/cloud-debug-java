@@ -16,15 +16,17 @@ load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
 
-# For tests that need to load the agent. These test will also need the following:
-#    data = [
-#        "//src/agent:cdbg_java_agent.so",
-#        "//src/agent:cdbg_java_agent_internals.jar",
-#    ],
 CDBG_AGENT_PATH = \
     "-agentpath:$${TEST_SRCDIR}/__main__/src/agent/cdbg_java_agent.so=" + \
     "--log_dir=`if [[ -n \"$${TEST_TMPDIR}\" ]]; then echo \"$${TEST_TMPDIR}\"; else echo \"/tmp\"; fi`"
 
+filegroup(
+    name = "agent_files",
+    data = [
+        "//src/agent:cdbg_java_agent.so",
+        "//src/agent:cdbg_java_agent_internals.jar",
+    ],
+)
 
 java_test(
     name = "AgentLoggerTest",
@@ -121,8 +123,7 @@ java_test(
         CDBG_AGENT_PATH,
     ],
     data = [
-        "//src/agent:cdbg_java_agent.so",
-        "//src/agent:cdbg_java_agent_internals.jar",
+        ":agent_files"
     ],
     deps = [
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_environment",

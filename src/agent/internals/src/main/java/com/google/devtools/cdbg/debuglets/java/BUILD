@@ -165,7 +165,7 @@ java_library(
 )
 
 java_library(
-    name = "cdbg_java_agent_internals",
+    name = "agent",
     runtime_deps = [
         ":breakpoint_labels_provider",
         ":datatype_converter",
@@ -183,6 +183,15 @@ java_library(
         ":mapper",
         ":statistician",
         ":user_id_provider",
-        "yaml_config_parser",
+        ":yaml_config_parser",
+    ],
+)
+
+java_binary(
+    name = "cdbg_java_agent_internals",
+    create_executable = 0,
+    use_launcher = False,
+    runtime_deps = [
+        ":agent"
     ],
 )

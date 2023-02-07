@@ -1557,11 +1557,20 @@ cc_library(
         ":model_json",
         ":statistician",
         ":yaml_data_visibility_config_reader",
-        #"//devtools/cdbg/debuglets/java/codegen:jni_proxy_api_client_datetime",
-        #"//devtools/cdbg/debuglets/java/codegen:jni_proxy_gcp_hub_client",
         "//src/codegen:jni_proxies",
     ],
     alwayslink = 1,
+)
+
+# This rule is here to allow the dbg_java_agent_internals.jar to be located in
+# the same directory as cdbg_java_agent.so during the Java unit test runs that
+# load the agent. This is a requirement of the .so file, it only knows to look
+# for the internals jar file in the same directory as itself.
+genrule(
+    name = "cdbg_java_agent_internals_jar_rename",
+    srcs = ["//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals_deploy.jar"],
+    outs = ["cdbg_java_agent_internals.jar"],
+    cmd = "cp $< $@",
 )
 
 cc_binary(

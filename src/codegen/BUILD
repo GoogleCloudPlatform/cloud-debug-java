@@ -1,4 +1,7 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
 package(default_visibility = ["//visibility:public"])
+
 
 ALL_GENERATED_CLASSES = [
     "api_client_datetime",
@@ -10,6 +13,7 @@ ALL_GENERATED_CLASSES = [
     "class",
     "classloader",
     "classpathlookup",
+    "dynamicloghelper",
     "exception",
     "firebaseclient",
     "gcpbreakpointlabelsprovider",
@@ -127,3 +131,37 @@ cc_library(
     ],
 )
 
+# This tool Generates C++ static definition with the content of binary files.
+#
+# This script is used to embed content of binary files (such as Java .class
+# files) inside the C++ binary. It generates C++ code that statically
+# initializes byte array with the content of the specified binary files.
+# This tool is used below for the cdbg_java_agent_internals_loader.class
+py_binary(
+  name = "static_def_gen",
+  srcs = ["static_def_gen.py"],
+)
+
+# Uses static_def_gen.py tool to convert the InternalsClassLoader.class file
+# into a C++ file that can be included by jvm_internals.cc. jvm_internals.cc loads this class file
+# directly into the JVM and then uses it to load the cdbg_java_agent_internals.jar file.
+#
+# It is done this way as the internal functionality has to be completely
+# segregated from the application: the application must not be able to
+# reference debuglet functionality by mistake and vice versa. Furthermore since
+# the debuglet internals uses some open source libraries, it is possible that
+# the application is using different versions of the same libraries.
+genrule(
+    name = "internals_class_loader_static_defs",
+    srcs = [
+        "//src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class",
+    ],
+    outs = [
+        "internals_class_loader_static_defs.inl",
+    ],
+    cmd = "$(location :static_def_gen) $@ " +
+          "$$(dirname $(location //src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class)):^cdbg_java_agent_internals_loader\\.class$$",
+    tools = [
+        ":static_def_gen",
+    ],
+)

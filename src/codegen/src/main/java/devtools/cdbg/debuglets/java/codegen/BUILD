@@ -20,7 +20,7 @@ java_binary(
     main_class = "devtools.cdbg.debuglets.java.codegen.JniProxyCodeGen",
     runtime_deps = [
         ":jni_proxy_code_gen_lib",
-        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:agent",
     ],
 )
 

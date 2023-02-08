@@ -44,6 +44,18 @@ maven_install(
     ],
 )
 
+# https://github.com/bazelbuild/rules_python/releases/tag/0.17.3
+http_archive(
+    name = "rules_python",
+    sha256 = "8c15896f6686beb5c631a4459a3aa8392daccaab805ea899c9d14215074b60ef",
+    strip_prefix = "rules_python-0.17.3",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.17.3.tar.gz",
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
 # https://github.com/bazelbuild/rules_java/releases/tag/5.4.0
 http_archive(
     name = "rules_java",

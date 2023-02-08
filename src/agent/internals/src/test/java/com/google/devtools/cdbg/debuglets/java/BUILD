@@ -62,6 +62,7 @@ java_test(
     ],
     deps = [
         ":BreakpointTag",
+        ":test_data_path",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
         "//tests/agent:libtest_logger.so",
         "@maven//:com_google_guava_guava",
@@ -202,6 +203,17 @@ java_library(
     ],
 )
 
+java_library(
+    name = "test_data_path",
+    srcs = [
+        "TestDataPath.java",
+    ],
+    deps = [
+        "@bazel_tools//tools/java/runfiles:runfiles",
+        "@maven//:junit_junit",
+    ]
+)
+
 # Provides support for finding a line number in a source file for tests that need this.
 # Eg. add either '/* BPTAG: TAG_NAME */' or '// BPTAG: TAG_NAME'  to the end of
 # a line in the source file.
@@ -212,12 +224,11 @@ java_library(
     srcs = [
         "BreakpointDefinition.java",
         "BreakpointTagException.java",
-        "TestDataPath.java",
     ],
     data = glob(["*.java"]),
     deps = [
+        ":test_data_path",
         "//schema:data_java_proto",
-        "@bazel_tools//tools/java/runfiles:runfiles",
         "@maven//:com_google_guava_guava",
         "@maven//:junit_junit",
     ]
@@ -229,6 +240,7 @@ java_test(
     srcs = ["BreakpointDefinitionTest.java"],
     deps = [
         ":BreakpointTag",
+        ":test_data_path",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

@@ -154,13 +154,13 @@ py_binary(
 genrule(
     name = "internals_class_loader_static_defs",
     srcs = [
-        "//src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class",
+        "//src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals_loader.class",
     ],
     outs = [
         "internals_class_loader_static_defs.inl",
     ],
     cmd = "$(location :static_def_gen) $@ " +
-          "$$(dirname $(location //src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg:cdbg_java_agent_internals_loader.class)):^cdbg_java_agent_internals_loader\\.class$$",
+          "$$(dirname $(location //src/agent/internals-class-loader/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals_loader.class)):^cdbg_java_agent_internals_loader\\.class$$",
     tools = [
         ":static_def_gen",
     ],

@@ -16,6 +16,9 @@ load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
 
+# Here we set the logging directory to the value of TEST_TMPDIR if it's set, otherwise it falls back to /tmp
+# Bazel sets TEST_TMPDIR to a "absolute path to a private writable directory".
+# See https://bazel.build/reference/test-encyclopedia#initial-conditions
 CDBG_AGENT_PATH = \
     "-agentpath:$${TEST_SRCDIR}/__main__/src/agent/cdbg_java_agent.so=" + \
     "--log_dir=`if [[ -n \"$${TEST_TMPDIR}\" ]]; then echo \"$${TEST_TMPDIR}\"; else echo \"/tmp\"; fi`"

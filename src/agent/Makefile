@@ -226,10 +226,10 @@ target_agent: $(OBJECTS) jni_proxies_obj
 
 internals_class_loader:
 ifeq ($(JAVA_BUILD),maven)
-	cd internals-class-loader ; mvn clean install
+	cd internals-class-loader ; mvn -Dmaven.test.skip=true clean install
 else
 	mkdir -p internals-class-loader/target
-	cd internals-class-loader ; $(JAVAC) -g:none -d target src/main/java/com/google/devtools/cdbg/*.java
+	cd internals-class-loader ; $(JAVAC) -g:none -d target src/main/java/com/google/devtools/cdbg/debuglets/java/*.java
 endif
 	cp internals-class-loader/target/com/google/devtools/cdbg/debuglets/java/InternalsClassLoader.class $(INTERNALS_CLASS_LOADER)
 

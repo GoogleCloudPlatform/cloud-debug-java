@@ -39,14 +39,18 @@ import java.io.IOException;
 public class TestDataPath {
   // To note, the '__main__' here is the workspace name. This is the default
   // when it's not explicitly set in the base WORKSPACE file.
-  public static final String BASE_PATH =
+  public static final String DEFAULT_BASE_PATH =
       "__main__/src/agent/internals/src/test/java/com/google/devtools/cdbg/debuglets/java";
 
   public static File get(String fileName) {
+    return get (DEFAULT_BASE_PATH, fileName);
+  }
+
+  public static File get(String basePath, String fileName) {
     File file = null;
 
     try {
-      file = new File(Runfiles.create().rlocation(BASE_PATH + "/" + fileName));
+      file = new File(Runfiles.create().rlocation(basePath + "/" + fileName));
     } catch (IOException e) {
       System.err.println("Runfiles rlocation failed: " + e);
     }

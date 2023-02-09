@@ -79,10 +79,35 @@ cc_library(
 )
 
 cc_library(
+    name = "jvmti_agent_thread",
+    srcs = ["jvmti_agent_thread.cc"],
+    hdrs = ["jvmti_agent_thread.h"],
+    copts = ["-Isrc/agent", "-I$(BINDIR)/src/codegen/generated"],
+    deps = [
+        ":agent_thread",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "semaphore",
     hdrs = ["semaphore.h"],
     deps = [
         ":common",
+    ],
+)
+
+cc_library(
+    name = "jni_semaphore",
+    srcs = ["jni_semaphore.cc"],
+    hdrs = ["jni_semaphore.h"],
+    deps = [
+        ":jni_utils",
+        ":jni_utils_h",
+        ":semaphore",
     ],
 )
 
@@ -347,6 +372,12 @@ cc_library(
 )
 
 cc_library(
+    name = "transmit_queue",
+    hdrs = ["transmit_queue.h"],
+    deps = [":common"],
+)
+
+cc_library(
     name = "class_path_lookup",
     hdrs = ["class_path_lookup.h"],
     deps = [
@@ -596,6 +627,27 @@ cc_library(
 )
 
 cc_library(
+    name = "jni_flags",
+    srcs = ["jni_flags.cc"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "jni_logger",
+    srcs = ["jni_logger.cc"],
+    deps = [
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+    ],
+    alwayslink = 1,
+)
+cc_library(
     name = "scheduler",
     srcs = ["scheduler.cc"],
     hdrs = ["scheduler.h"],
@@ -756,6 +808,23 @@ cc_library(
 )
 
 cc_library(
+    name = "jni_breakpoint_labels_provider",
+    srcs = ["jni_breakpoint_labels_provider.cc"],
+    hdrs = ["jni_breakpoint_labels_provider.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":breakpoint_labels_provider",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "user_id_provider",
     hdrs = ["user_id_provider.h"],
     deps = [
@@ -784,6 +853,28 @@ cc_library(
         ":common",
         ":debuggee_labels",
         ":model",
+    ],
+)
+
+cc_library(
+    name = "jni_bridge",
+    srcs = ["jni_bridge.cc"],
+    hdrs = ["jni_bridge.h"],
+    copts = [
+        "-DGCP_HUB_CLIENT",
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":bridge",
+        ":common",
+        ":debuggee_labels",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":mutex",
+        ":nullable",
+        ":transmit_queue",
+        "//src/codegen:jni_proxies",
     ],
 )
 
@@ -1306,6 +1397,25 @@ cc_library(
 )
 
 cc_library(
+    name = "jvm_dynamic_logger",
+    srcs = ["jvm_dynamic_logger.cc"],
+    hdrs = ["jvm_dynamic_logger.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":common",
+        ":dynamic_logger",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":resolved_source_location",
+        ":type_util",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
     name = "log_data_collector",
     srcs = ["log_data_collector.cc"],
     hdrs = ["log_data_collector.h"],
@@ -1326,5 +1436,158 @@ cc_library(
         ":type_util",
         ":value_formatter",
         "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "jvm_internals",
+    srcs = ["jvm_internals.cc"],
+    hdrs = [
+        "jvm_internals.h",
+    ],
+    textual_hdrs = [
+        "//src/codegen:internals_class_loader_static_defs.inl",
+    ],
+    copts = ["-I$(BINDIR)/src/codegen"],
+    deps = [
+        ":class_path_lookup",
+        ":common",
+        ":jni_utils",
+        ":jni_utils_h",
+        ":jvariant",
+        ":model",
+        ":model_util",
+        ":resolved_source_location",
+        ":stopwatch",
+    ],
+)
+
+cc_library(
+    name = "debugger",
+    srcs = ["debugger.cc"],
+    hdrs = ["debugger.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":breakpoint_labels_provider",
+        ":canary_control",
+        ":class_files_cache",
+        ":class_metadata_reader",
+        ":common",
+        ":dynamic_logger",
+        ":eval_call_stack",
+        ":jni_utils_h",
+        ":jvm_breakpoint",
+        ":jvm_breakpoints_manager",
+        ":jvm_class_indexer",
+        ":jvm_evaluators",
+        ":jvm_object_evaluator",
+        ":method_locals",
+        ":model",
+        ":safe_method_caller",
+        ":scheduler",
+        ":statistician",
+        ":stopwatch",
+        ":user_id_provider",
+    ],
+)
+
+cc_library(
+    name = "jvmti_agent",
+    srcs = ["jvmti_agent.cc"],
+    hdrs = ["jvmti_agent.h"],
+    copts = [
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":auto_reset_event",
+        ":bridge",
+        ":callbacks_monitor",
+        ":common",
+        ":config",
+        ":config_builder",
+        ":data_visibility_policy",
+        ":debuggee_labels",
+        ":debugger",
+        ":eval_call_stack",
+        ":jni_breakpoint_labels_provider",
+        ":jni_semaphore",
+        ":jni_user_id_provider",
+        ":jvm_class_metadata_reader",
+        ":jvm_dynamic_logger",
+        ":jvm_eval_call_stack",
+        ":jvm_internals",
+        ":jvmti_agent_thread",
+        ":jvmti_buffer",
+        ":method_locals",
+        ":scheduler",
+        ":stopwatch",
+        ":user_id_provider",
+        ":worker",
+        "//src/codegen:jni_proxies",
+    ],
+)
+
+cc_library(
+    name = "jvmti_globals",
+    srcs = ["jvmti_globals.cc"],
+    copts = [
+        "-DGCP_HUB_CLIENT",
+        "-DSTANDALONE_BUILD",
+        "-Isrc/agent",
+        "-I$(BINDIR)/src/codegen/generated"
+    ],
+    deps = [
+        ":callbacks_monitor",
+        ":common",
+        ":data_visibility_scrubbed_eval_call_stack",
+        ":debuggee_labels",
+        ":glob_data_visibility_policy",
+        ":jni_bridge",
+        ":jni_flags",
+        ":jni_logger",
+        ":jvm_env",
+        ":jvm_eval_call_stack",
+        ":jvm_internals",
+        ":jvmti_agent",
+        ":jvmti_buffer",
+        ":model_json",
+        ":statistician",
+        ":yaml_data_visibility_config_reader",
+        "//src/codegen:jni_proxies",
+    ],
+    alwayslink = 1,
+)
+
+# This rule is here so the cdbg_java_agent_internals.jar file will be located
+# in the same directory as cdbg_java_agent.so for Java unit tests that load the
+# agent. This is a requirement of the .so file, it requires that the
+# cdbg_java_agent_internals.jar file be in the same directory as itself.
+genrule(
+    name = "cdbg_java_agent_internals_jar_rename",
+    srcs = ["//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:cdbg_java_agent_internals_deploy.jar"],
+    outs = ["cdbg_java_agent_internals.jar"],
+    cmd = "cp $< $@",
+)
+
+cc_binary(
+    name = "cdbg_java_agent.so",
+    linkopts = [
+        "-Xlinker",
+        "--version-script",
+        "-Xlinker",
+        "$(location cdbg_java_agent.lds)",
+        "-Bsymbolic",
+    ],
+    linkshared = 1,
+    linkstatic = 1,
+    deps = [
+        "cdbg_java_agent.lds",
+        ":java_expression_evaluator",
+        ":jvmti_agent",
+        ":jvmti_globals",
     ],
 )

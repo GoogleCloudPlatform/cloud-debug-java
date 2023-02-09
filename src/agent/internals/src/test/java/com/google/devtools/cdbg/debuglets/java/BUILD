@@ -16,6 +16,21 @@ load("@rules_java//java:defs.bzl", "java_test")
 
 package(default_visibility = ["//visibility:public"])
 
+# Here we set the logging directory to the value of TEST_TMPDIR if it's set, otherwise it falls back to /tmp
+# Bazel sets TEST_TMPDIR to a "absolute path to a private writable directory".
+# See https://bazel.build/reference/test-encyclopedia#initial-conditions
+CDBG_AGENT_PATH = \
+    "-agentpath:$${TEST_SRCDIR}/__main__/src/agent/cdbg_java_agent.so=" + \
+    "--log_dir=`if [[ -n \"$${TEST_TMPDIR}\" ]]; then echo \"$${TEST_TMPDIR}\"; else echo \"/tmp\"; fi`"
+
+filegroup(
+    name = "agent_files",
+    data = [
+        "//src/agent:cdbg_java_agent.so",
+        "//src/agent:cdbg_java_agent_internals.jar",
+    ],
+)
+
 java_test(
     name = "AgentLoggerTest",
     size = "small",
@@ -47,6 +62,7 @@ java_test(
     ],
     deps = [
         ":BreakpointTag",
+        ":test_data_path",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
         "//tests/agent:libtest_logger.so",
         "@maven//:com_google_guava_guava",
@@ -98,6 +114,27 @@ java_test(
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@maven//:org_mockito_mockito_core",
+    ],
+)
+
+java_test(
+    name = "GcpEnvironmentTest",
+    size = "small",
+    srcs = [
+        "GcpEnvironmentTest.java",
+    ],
+    jvm_flags = [
+        CDBG_AGENT_PATH,
+    ],
+    data = [
+        ":agent_files"
+    ],
+    deps = [
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_environment",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_metadata",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:labels",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
 
@@ -166,6 +203,17 @@ java_library(
     ],
 )
 
+java_library(
+    name = "test_data_path",
+    srcs = [
+        "TestDataPath.java",
+    ],
+    deps = [
+        "@bazel_tools//tools/java/runfiles:runfiles",
+        "@maven//:junit_junit",
+    ]
+)
+
 # Provides support for finding a line number in a source file for tests that need this.
 # Eg. add either '/* BPTAG: TAG_NAME */' or '// BPTAG: TAG_NAME'  to the end of
 # a line in the source file.
@@ -176,12 +224,11 @@ java_library(
     srcs = [
         "BreakpointDefinition.java",
         "BreakpointTagException.java",
-        "TestDataPath.java",
     ],
     data = glob(["*.java"]),
     deps = [
+        ":test_data_path",
         "//schema:data_java_proto",
-        "@bazel_tools//tools/java/runfiles:runfiles",
         "@maven//:com_google_guava_guava",
         "@maven//:junit_junit",
     ]
@@ -193,6 +240,7 @@ java_test(
     srcs = ["BreakpointDefinitionTest.java"],
     deps = [
         ":BreakpointTag",
+        ":test_data_path",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

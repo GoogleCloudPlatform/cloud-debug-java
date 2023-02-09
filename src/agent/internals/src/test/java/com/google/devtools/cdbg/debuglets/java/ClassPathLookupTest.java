@@ -35,6 +35,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -50,6 +52,25 @@ import org.objectweb.asm.ClassWriter;
  */
 @RunWith(JUnit4.class)
 public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
+  private static class TestEnvironmentStore implements GcpEnvironment.EnvironmentStore {
+    Map<String, String> overrides = new HashMap<>();
+
+    @Override
+    public String get(String name) {
+      if (overrides.containsKey(name)) {
+        return overrides.get(name);
+      }
+      return System.getenv(name);
+    }
+
+    public void set(String name, String value) {
+      overrides.put(name, value);
+    }
+  }
+
+  private TestEnvironmentStore environmentStore;
+  private GcpEnvironment.EnvironmentStore oldEnvironmentStore;
+
   private static final String SIGNATURE_BASE =
       "com/google/devtools/cdbg/debuglets/java/ClassPathLookupTest";
 
@@ -139,6 +160,18 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
   public ClassPathLookupTest() {
     myInteger++;
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    environmentStore = new TestEnvironmentStore();
+    oldEnvironmentStore = GcpEnvironment.environmentStore;
+    GcpEnvironment.environmentStore = environmentStore;
+  }
+
+  @After
+  public void cleanup() throws Exception {
+    GcpEnvironment.environmentStore = oldEnvironmentStore;
   }
 
   @Test
@@ -662,8 +695,9 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", "/tomcat");
       System.setProperty("jetty.base", "/jetty");
+      environmentStore.set("GAE_AGENTPATH_OPTS", "cdbg_java_agent.so");
 
-      assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR)).isEmpty();
+      assertThat(ClassPathLookup.findExtraClassPath("/foo")).isEmpty();
     } finally {
       System.clearProperty("catalina.base");
       System.clearProperty("jetty.base");
@@ -675,10 +709,18 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     File root = temporaryFolder1.getRoot();
     File tomcatRoot = new File(root, "tomcat");
     File jettyRoot = new File(root, "jetty");
+    File java8Root = new File(root, "java8");
 
-    String[] suffixes = new String[] {"webapps/ROOT/WEB-INF/lib", "webapps/ROOT/WEB-INF/classes"};
-    for (File prefix : new File[] {tomcatRoot, jettyRoot}) {
-      for (String suffix : suffixes) {
+    String[] appServerSuffixes = new String[] {"webapps/ROOT/WEB-INF/lib", "webapps/ROOT/WEB-INF/classes"};
+    for (File prefix : new File[] {tomcatRoot, jettyRoot, java8Root}) {
+      for (String suffix : appServerSuffixes) {
+        new File(prefix, suffix).mkdirs();
+      }
+    }
+
+    String[] java8Suffixes = new String[] {"WEB-INF/lib", "WEB-INF/classes"};
+    for (File prefix : new File[] {java8Root}) {
+      for (String suffix : java8Suffixes) {
         new File(prefix, suffix).mkdirs();
       }
     }
@@ -686,14 +728,17 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", tomcatRoot.toString());
       System.setProperty("jetty.base", jettyRoot.toString());
+      environmentStore.set("GAE_AGENTPATH_OPTS", "cdbg_java_agent.so");
 
-      assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR))
+      assertThat(ClassPathLookup.findExtraClassPath(java8Root.getAbsolutePath()))
           .asList()
           .containsExactly(
               tomcatRoot + "/webapps/ROOT/WEB-INF/lib",
               tomcatRoot + "/webapps/ROOT/WEB-INF/classes",
               jettyRoot + "/webapps/ROOT/WEB-INF/lib",
-              jettyRoot + "/webapps/ROOT/WEB-INF/classes");
+              jettyRoot + "/webapps/ROOT/WEB-INF/classes",
+              java8Root + "/WEB-INF/lib",
+              java8Root + "/WEB-INF/classes");
     } finally {
       System.clearProperty("catalina.base");
       System.clearProperty("jetty.base");

@@ -22,6 +22,9 @@ import static org.junit.Assert.assertThrows;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.converters.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Unit test for {@link GcpEnvironment}. */
-@RunWith(JUnit4.class)
+@RunWith(JUnitParamsRunner.class)
 public class GcpEnvironmentTest {
   private static class TestEnvironmentStore implements GcpEnvironment.EnvironmentStore {
     Map<String, String> overrides = new HashMap<>();
@@ -155,6 +158,30 @@ public class GcpEnvironmentTest {
         .hasCauseThat()
         .hasMessageThat()
         .isEqualTo("/file_does_not_exist.txt (No such file or directory)");
+  }
+
+  @Test
+  @Parameters({
+    "null|/foo|null",
+    "cdbg_java_agent.so|/foo|/foo",
+    "cdbg_java_agent.so|/foo/|/foo",
+    "bar/cdbg_java_agent.so|/foo/bar|/foo",
+    "bar/cdbg_java_agent.so|/foo/bar/|/foo",
+    "cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|foo|foo",
+    "r1/r2/r3/cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|/w1/w2/w3/r1/r2/r3|/w1/w2/w3",
+    "f1/f2/f3/cdbg_java_agent.so|/f1/f2/f3/f1/f2/f3/f1/f2/f3|/f1/f2/f3/f1/f2/f3",
+    "r1/foo.so|/w1/r1|/w1",
+    "r1/foo.so|/w1/r2|null",
+    "r1/agent1.so r2/agent2.so|/w1/r2/|/w1",
+    "r2/agent1.so r1/agent2.so|/w1/r2/|/w1",
+    "r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
+    "r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
+    "  r1/agent1.so      r2/agent2.so     |/w1/r2/|/w1",
+  })
+  public void getAppEngineJava8UserDir(
+      @Nullable String agentPathOpts, String agentDir, @Nullable String expectedResult) throws Exception {
+    environmentStore.set("GAE_AGENTPATH_OPTS", agentPathOpts);
+    assertThat(GcpEnvironment.getAppEngineJava8UserDir(agentDir)).isEqualTo(expectedResult);
   }
 
   private static void setAndTestCanaryMode(

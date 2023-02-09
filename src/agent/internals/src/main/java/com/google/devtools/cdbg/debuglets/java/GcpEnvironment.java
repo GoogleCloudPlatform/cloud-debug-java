@@ -191,6 +191,8 @@ final class GcpEnvironment {
    * GAE_AGENTPATH_OPTS: cdbg/cdbg_java_agent.so=--use-firebase=true
    * Extracted user dir: /base/data/home/apps/s~my-project/20230126t151823.449561295697253946
    *
+   * To note, GAE_AGENTPATH_OPTS is a space separated list of agents.
+   *
    * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
    * otherwise.
    */
@@ -199,7 +201,6 @@ final class GcpEnvironment {
     // GAE_SERVICE environment variable for the value "java8", however the presence of
     // GAE_AGENTPATH_OPTS is sufficient.
     String agentPathOpts = environmentStore.get("GAE_AGENTPATH_OPTS");
-
     if (agentPathOpts == null || agentPathOpts.isEmpty()) {
       return null;
     }
@@ -209,11 +210,27 @@ final class GcpEnvironment {
       agentDir = agentDir.substring(0, agentDir.length() - 1);
     }
 
-    // An example value for GAE_AGENTPATH_OPTS is: 'cdbg/cdbg_java_agent.so=--use-firebase=true'
-    // Anything after the '=' are parameters passed into the agent, however it is optional and may
-    // not be present.
-    int argStartIdx = agentPathOpts.indexOf("=");
-    String relativeFilePath = argStartIdx == -1 ? agentPathOpts : agentPathOpts.substring(0, argStartIdx);
+    String[] agentPathOptsEntries = agentPathOpts.split(" ");
+    for (String entry: agentPathOptsEntries) {
+      String userDir = getUserDirForGaeAgentPathOptsEntry(agentDir, entry.trim());
+      if (userDir != null) {
+        return userDir;
+      }
+    }
+
+    return null;
+  }
+
+  public static String getUserDirForGaeAgentPathOptsEntry(String agentDir, String agentPathOptsEntry) {
+    if (agentDir.isEmpty() || agentPathOptsEntry.isEmpty()) {
+      return null;
+    }
+
+    // An example value for an entry in GAE_AGENTPATH_OPTS is:
+    // 'cdbg/cdbg_java_agent.so=--use-firebase=true'
+    // Anything after the '=' are parameters passed into the agent, however it is optional and may not be present.
+    int argStartIdx = agentPathOptsEntry.indexOf("=");
+    String relativeFilePath = argStartIdx == -1 ? agentPathOptsEntry : agentPathOptsEntry.substring(0, argStartIdx);
 
     int pathEndIdx = relativeFilePath.lastIndexOf("/");
     String relativeAgentPath = pathEndIdx == -1 ? "" : relativeFilePath.substring(0, pathEndIdx);
@@ -226,11 +243,11 @@ final class GcpEnvironment {
 
     // In an actual App Engine Java8 environment this case would be unexpected, but if
     // GAE_AGENTPATH_OPTS happened to be set in a different environment it could happen.
-    if (!agentDir.endsWith(relativeAgentPath)) {
+    if (!agentDir.endsWith("/" + relativeAgentPath)) {
       return null;
     }
 
-    return agentDir.substring(0, agentDir.length() - relativeAgentPath.length());
+    return agentDir.substring(0, agentDir.length() - (relativeAgentPath.length() + 1));
   }
 
 

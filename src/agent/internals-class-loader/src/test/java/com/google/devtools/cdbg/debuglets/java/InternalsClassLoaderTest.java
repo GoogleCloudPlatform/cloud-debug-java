@@ -81,7 +81,7 @@ public class InternalsClassLoaderTest {
         TestDataPath.get(
             "__main__/src/agent/internals-class-loader/src/test/java/com/google/devtools/cdbg/debuglets/java",
             "InternalsClassLoaderTest.jar");
-    classLoader = new InternalsClassLoader(testsJarFile.getAbsolutePath());
+    classLoader = new InternalsClassLoader(new String[]{testsJarFile.getAbsolutePath()});
   }
 
   @Test

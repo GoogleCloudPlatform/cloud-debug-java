@@ -174,6 +174,67 @@ final class GcpEnvironment {
   }
 
   /**
+   * Returns the user dir of a Java8 App Engine Standard instance. This is the base directory where the
+   * user's files are deployed. If no Java 8 App Enving Standard user dir could be determined an
+   * null is returned, as a result it is safe to call this regardless of environment, as long as the
+   * return value is checked.
+   *
+   * <p> While there is a system property defined, "user.dir", in Java8 App Engine environments, it
+   * is unfortunately not set at the point in time this agent code runs, so it cannot be relied
+   * upon. Here we use the GAE_AGENTPATH_OPTS environment variable which users much specify to load
+   * an agent. It has the relative path in the application deployment to the agent .so file. We also
+   * have access to the full path of the directory containing the .so file. Using these two values
+   * the user dir can be extracted.
+   *
+   * Example:
+   * agentDir: /base/data/home/apps/s~my-project/20230126t151823.449561295697253946/cdbg
+   * GAE_AGENTPATH_OPTS: cdbg/cdbg_java_agent.so=--use-firebase=true
+   * Extracted user dir: /base/data/home/apps/s~my-project/20230126t151823.449561295697253946
+   *
+   * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
+   * otherwise.
+   */
+  public static String getAppEngineJava8UserDir(String agentDir) {
+    // Note, we could also check that we are definitely in Java 8 App Engine by checking the
+    // GAE_SERVICE environment variable for the value "java8", however the presence of
+    // GAE_AGENTPATH_OPTS is sufficient.
+    String agentPathOpts = environmentStore.get("GAE_AGENTPATH_OPTS");
+
+    if (agentPathOpts == null || agentPathOpts.isEmpty()) {
+      return null;
+    }
+
+    // In case there's a trailing / remove it.
+    if (agentDir.endsWith("/")) {
+      agentDir = agentDir.substring(0, agentDir.length() - 1);
+    }
+
+    // An example value for GAE_AGENTPATH_OPTS is: 'cdbg/cdbg_java_agent.so=--use-firebase=true'
+    // Anything after the '=' are parameters passed into the agent, however it is optional and may
+    // not be present.
+    int argStartIdx = agentPathOpts.indexOf("=");
+    String relativeFilePath = argStartIdx == -1 ? agentPathOpts : agentPathOpts.substring(0, argStartIdx);
+
+    int pathEndIdx = relativeFilePath.lastIndexOf("/");
+    String relativeAgentPath = pathEndIdx == -1 ? "" : relativeFilePath.substring(0, pathEndIdx);
+
+    // This means the agent is found at the root of the app engine deployment, so the user dir is
+    // the same as the agent dir.
+    if (relativeAgentPath.isEmpty()) {
+      return agentDir;
+    }
+
+    // In an actual App Engine Java8 environment this case would be unexpected, but if
+    // GAE_AGENTPATH_OPTS happened to be set in a different environment it could happen.
+    if (!agentDir.endsWith(relativeAgentPath)) {
+      return null;
+    }
+
+    return agentDir.substring(0, agentDir.length() - relativeAgentPath.length());
+  }
+
+
+  /**
    * Gets the Debuggee.canaryMode from the corresponding System properties.
    */
   static DebuggeeCanaryMode getDebuggeeCanaryMode() {

@@ -127,6 +127,7 @@ java_library(
     ],
     deps = [
         ":datatype_converter",
+        ":gcp_environment",
         ":logger",
         ":safe_caller",
         ":yaml_config_parser",

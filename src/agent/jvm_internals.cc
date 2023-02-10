@@ -28,15 +28,15 @@
 
 namespace {
 
-bool file_exists(const std::string& full_file_name) {
+bool FileExists(const std::string& full_file_name) {
   return (access(full_file_name.c_str(), F_OK) != -1);
 }
 
-bool string_starts_with(const std::string& str, const std::string& prefix) {
+bool StringStartsWith(const std::string& str, const std::string& prefix) {
   return str.find(prefix) == 0;
 }
 
-bool string_ends_with(const std::string& str, const std::string& suffix) {
+bool StringEndsWith(const std::string& str, const std::string& suffix) {
   auto pos = str.rfind(suffix);
   return (pos != std::string::npos) &&
          (pos == (str.length() - suffix.length()));
@@ -60,15 +60,15 @@ bool string_ends_with(const std::string& str, const std::string& suffix) {
  *   jar files. If an error occurs or none were found an empty vector is
  *   returned.
  */
-std::vector<std::string> find_all_split_internals_jars(
-    const std::string& agentdir) {
+std::vector<std::string> FindAllSplitInternalsJars(
+    const std::string& agent_dir) {
   // Note, implemented using the C library, as std::filesystem was introduced in
   // C++17, and we're still targetting building with C++11.
   DIR* dir;
   struct dirent* ent;
   std::vector<std::string> jar_files;
 
-  dir = opendir(agentdir.c_str());
+  dir = opendir(agent_dir.c_str());
   if (dir == nullptr) {
     return {};
   }
@@ -76,15 +76,15 @@ std::vector<std::string> find_all_split_internals_jars(
   auto is_split_jar = [](const std::string& file_name) {
     // Simply matching the prefix and suffix suffices, there's no need to be
     // more rigid in the check.
-    return string_starts_with(file_name, "cdbg_java_agent_internals-") &&
-           string_ends_with(file_name, ".jar");
+    return StringStartsWith(file_name, "cdbg_java_agent_internals-") &&
+           StringEndsWith(file_name, ".jar");
   };
 
   while ((ent = readdir(dir)) != NULL) {
     if (ent->d_type == DT_REG) {
       std::string file_name = std::string(ent->d_name);
       if (is_split_jar(file_name)) {
-        jar_files.push_back(agentdir + "/" + file_name);
+        jar_files.emplace_back(agent_dir + "/" + file_name);
       }
     }
   }
@@ -405,7 +405,7 @@ std::set<std::string> JvmInternals::ReadApplicationResource(
   return std::set<std::string>(resources.begin(), resources.end());
 }
 
-bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
+bool JvmInternals::LoadClassLoader(const std::string& agent_dir) {
   DCHECK(class_loader_obj_ == nullptr);
 
   // Load the class in JVM.
@@ -436,7 +436,7 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
 
   // Create class loader instance exposing classes from
   // "cdbg_java_agent_internals.jar".
-  std::vector<std::string> jar_paths = GetInternalsJarPaths(agentdir);
+  std::vector<std::string> jar_paths = GetInternalsJarPaths(agent_dir);
   if (jar_paths.empty()) {
     return false;
   }
@@ -672,13 +672,13 @@ FormatMessageModel JvmInternals::ConvertFormatMessage(
  *   that must be loaded. On error an empty vector is returned.
  */
 std::vector<std::string> JvmInternals::GetInternalsJarPaths(
-    const std::string& agentdir) {
+    const std::string& agent_dir) {
   std::vector<std::string> paths;
 
-  if (file_exists(agentdir + "/cdbg_java_agent_internals.jar")) {
-    paths.emplace_back(agentdir + "/cdbg_java_agent_internals.jar");
+  if (FileExists(agent_dir + "/cdbg_java_agent_internals.jar")) {
+    paths.emplace_back(agent_dir + "/cdbg_java_agent_internals.jar");
   } else {
-    paths = find_all_split_internals_jars(agentdir);
+    paths = FindAllSplitInternalsJars(agent_dir);
   }
 
   if (paths.empty()) {

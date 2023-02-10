@@ -16,10 +16,10 @@
 
 #include "jvm_internals.h"
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <dlfcn.h>
 #include <unistd.h>
-
-#include <fstream>  // NOLINT
 
 #include "jvariant.h"
 #include "model_util.h"
@@ -27,68 +27,73 @@
 #include "stopwatch.h"
 
 namespace {
+
 bool file_exists(const std::string& full_file_name) {
   return (access(full_file_name.c_str(), F_OK) != -1);
+}
+
+bool string_starts_with(const std::string& str, const std::string& prefix) {
+  return str.find(prefix) == 0;
+}
+
+bool string_ends_with(const std::string& str, const std::string& suffix) {
+  auto pos = str.rfind(suffix);
+  return (pos != std::string::npos) &&
+         (pos == (str.length() - suffix.length()));
 }
 
 /**
  * Under AppEngine Java8, there is currently a maximum file size limit of 32MB.
  * As a result jar splitting must be done to the cdbg_java_agent_internals.jar
  * file so it can be deployed, and so in this case multiple jar files are
- * expected instead of just one. This utility function will determine which
- * scenario is present and will create the vector of jar files accordingly.
+ * expected instead of just one. This utility function finds the jar files in
+ * the split jar scenario.
  *
- * E.g.
- *  AppEngine Java8:
+ * Example of split jar files:
  *   cdbg_java_agent_internals-0000.jar
  *   cdbg_java_agent_internals-0001.jar
  *   ....
  *   cdbg_java_agent_internals-0004.jar
  *
- *  All Other environments
- *   cdbg_java_agent_internals.jar
- *
  * Returns:
- *   On success returns a vector of the full jar file names representing the agent internals classes
- *   that must be loaded. On error an empty vector is returned.
+ *   On success returns a vector of the full jar file names of all of the split
+ *   jar files. If an error occurs or none were found an empty vector is
+ *   returned.
  */
-std::vector<std::string> get_internals_jar_paths(const std::string& agentdir) {
-  std::vector<std::string> paths;
+std::vector<std::string> find_all_split_internals_jars(
+    const std::string& agentdir) {
+  // Note, implemented using the C library, as std::filesystem was introduced in
+  // C++17, and we're still targetting building with C++11.
+  DIR* dir;
+  struct dirent* ent;
+  std::vector<std::string> jar_files;
 
-  // This number is overkill, as the jars are split into sizes of ~10MB each,
-  // and as of the time of this writing cdbg_java_agent_internals.jar is ~52MB.
-  // However the jar splitting allows for 4 digits.
-  const int kMaxJars = 10000;
+  dir = opendir(agentdir.c_str());
+  if (dir == nullptr) {
+    return {};
+  }
 
-  if (file_exists(agentdir + "/cdbg_java_agent_internals.jar")) {
-    paths.emplace_back(agentdir + "/cdbg_java_agent_internals.jar");
-    LOG(INFO) << "Loading internals from " << paths.back();
-  } else {
-    const int kBufSize = 5;
-    char buf[kBufSize];
-    for (int i = 0; i < kMaxJars; ++i) {
-      snprintf(buf, sizeof(buf), "%04d", i);
-      std::string file_name =
-          agentdir + "/cdbg_java_agent_internals-" + buf + ".jar";
+  auto is_split_jar = [](const std::string& file_name) {
+    // Simply matching the prefix and suffix suffices, there's no need to be
+    // more rigid in the check.
+    return string_starts_with(file_name, "cdbg_java_agent_internals-") &&
+           string_ends_with(file_name, ".jar");
+  };
 
-      if (!file_exists(file_name)) {
-        break;
+  while ((ent = readdir(dir)) != NULL) {
+    if (ent->d_type == DT_REG) {
+      std::string file_name = std::string(ent->d_name);
+      if (is_split_jar(file_name)) {
+        jar_files.push_back(agentdir + "/" + file_name);
       }
-      paths.push_back(file_name);
-      LOG(INFO) << "Loading internals from " << paths.back();
     }
   }
 
-  // If we actually hit the max something is wrong and we should not proceed.
-  if (paths.size() == kMaxJars) {
-    LOG(ERROR) << "Hit the maximum number of jars, cannot proceed";
-    paths.clear();
-  }
-
-  return paths;
+  closedir(dir);
+  return jar_files;
 }
 
-} // namespace
+}  // namespace
 
 namespace devtools {
 namespace cdbg {
@@ -431,7 +436,7 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
 
   // Create class loader instance exposing classes from
   // "cdbg_java_agent_internals.jar".
-  std::vector<std::string> jar_paths = get_internals_jar_paths(agentdir);
+  std::vector<std::string> jar_paths = GetInternalsJarPaths(agentdir);
   if (jar_paths.empty()) {
     return false;
   }
@@ -643,6 +648,48 @@ FormatMessageModel JvmInternals::ConvertFormatMessage(
   }
 
   return { std::move(format), std::move(parameters) };
+}
+
+/**
+ * Under AppEngine Java8, there is currently a maximum file size limit of 32MB.
+ * As a result jar splitting must be done to the cdbg_java_agent_internals.jar
+ * file so it can be deployed, and so in this case multiple jar files are
+ * expected instead of just one. This utility function will determine which
+ * scenario is present and will create the vector of jar files accordingly.
+ *
+ * E.g.
+ *  AppEngine Java8:
+ *   cdbg_java_agent_internals-0000.jar
+ *   cdbg_java_agent_internals-0001.jar
+ *   ....
+ *   cdbg_java_agent_internals-0004.jar
+ *
+ *  All Other environments
+ *   cdbg_java_agent_internals.jar
+ *
+ * Returns:
+ *   On success returns a vector of the full jar file names representing the agent internals classes
+ *   that must be loaded. On error an empty vector is returned.
+ */
+std::vector<std::string> JvmInternals::GetInternalsJarPaths(
+    const std::string& agentdir) {
+  std::vector<std::string> paths;
+
+  if (file_exists(agentdir + "/cdbg_java_agent_internals.jar")) {
+    paths.emplace_back(agentdir + "/cdbg_java_agent_internals.jar");
+  } else {
+    paths = find_all_split_internals_jars(agentdir);
+  }
+
+  if (paths.empty()) {
+    LOG(ERROR) << "Failed to find internals jar file";
+  } else {
+    for (const std::string& p : paths) {
+      LOG(INFO) << "Loading internals from " << p;
+    }
+  }
+
+  return paths;
 }
 
 }  // namespace cdbg

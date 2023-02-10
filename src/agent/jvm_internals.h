@@ -61,6 +61,10 @@ class JvmInternals : public ClassPathLookup {
 
   jobject class_loader_obj() const { return class_loader_obj_; }
 
+  // Public for testing, used internally only.
+  static std::vector<std::string> GetInternalsJarPaths(
+      const std::string& agentdir);
+
  private:
   // Loads and instantiates "InternalsClassLoader".
   bool LoadClassLoader(const std::string& agentdir);

@@ -25,6 +25,7 @@ import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;
+import junitparams.naming.TestCaseName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -162,23 +163,26 @@ public class GcpEnvironmentTest {
 
   @Test
   @Parameters({
-    "null|/foo|null",
-    "cdbg_java_agent.so|/foo|/foo",
-    "cdbg_java_agent.so|/foo/|/foo",
-    "bar/cdbg_java_agent.so|/foo/bar|/foo",
-    "bar/cdbg_java_agent.so|/foo/bar/|/foo",
-    "cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|foo|foo",
-    "r1/r2/r3/cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|/w1/w2/w3/r1/r2/r3|/w1/w2/w3",
-    "f1/f2/f3/cdbg_java_agent.so|/f1/f2/f3/f1/f2/f3/f1/f2/f3|/f1/f2/f3/f1/f2/f3",
-    "r1/foo.so|/w1/r1|/w1",
-    "r1/foo.so|/w1/r2|null",
-    "r1/agent1.so r2/agent2.so|/w1/r2/|/w1",
-    "r2/agent1.so r1/agent2.so|/w1/r2/|/w1",
-    "r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
-    "r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
-    "  r1/agent1.so      r2/agent2.so     |/w1/r2/|/w1",
+    "Env Var Not Set|null|/foo|null",
+    "Agent In Worksapce Root|cdbg_java_agent.so|/foo|/foo",
+    "Agent In Root Agent Dir Trailing Slash|cdbg_java_agent.so|/foo/|/foo",
+    "Agent 1 Level Deep|bar/cdbg_java_agent.so|/foo/bar|/foo",
+    "Agent 1 Level Deep Agent Dir Tailing Slash|bar/cdbg_java_agent.so|/foo/bar/|/foo",
+    "Agent Has Params Set|cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|foo|foo",
+    "Agent Multi Level Nesting|r1/r2/r3/cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|/w1/w2/w3/r1/r2/r3|/w1/w2/w3",
+    "Relative Dir Repeated In Workspace Root 1|f1/cdbg_java_agent.so|/f1/f1/f1|/f1/f1",
+    "Relative Dir Repeated In Workspace Root 2|f1/f2/f3/cdbg_java_agent.so|/f1/f2/f3/f1/f2/f3/f1/f2/f3|/f1/f2/f3/f1/f2/f3",
+    "Agent Name Cdbg Not Included|r1/foo.so|/w1/r1|/w1",
+    "Multiple Agents No Params 1|r1/agent1.so r2/agent2.so|/w1/r2/|/w1",
+    "Multiple Agents No Params 2|r2/agent1.so r1/agent2.so|/w1/r2/|/w1",
+    "Multiple Agents With Params 1|r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
+    "Multiple Agents With Params 2|r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
+    "Excess Spacing|  r1/agent1.so      r2/agent2.so     |/w1/r2/|/w1",
+    "Relative Dir Not A Suffix Of Agent Dir|r1/foo.so|/w1/r2|null",
+    "Multiple Agents Mo Match|r1/agent1.so r2/agent2.so|/w1/r3/|null",
   })
-  public void getAppEngineJava8UserDir(
+  @TestCaseName("{method} [{0}]")
+  public void getAppEngineJava8UserDir(String testName,
       @Nullable String agentPathOpts, String agentDir, @Nullable String expectedResult) throws Exception {
     environmentStore.set("GAE_AGENTPATH_OPTS", agentPathOpts);
     assertThat(GcpEnvironment.getAppEngineJava8UserDir(agentDir)).isEqualTo(expectedResult);

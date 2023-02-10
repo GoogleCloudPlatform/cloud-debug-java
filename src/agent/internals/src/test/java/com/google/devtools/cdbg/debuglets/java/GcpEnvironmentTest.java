@@ -28,13 +28,17 @@ import junitparams.converters.Nullable;
 import junitparams.naming.TestCaseName;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Unit test for {@link GcpEnvironment}. */
 @RunWith(JUnitParamsRunner.class)
 public class GcpEnvironmentTest {
+  @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   private static class TestEnvironmentStore implements GcpEnvironment.EnvironmentStore {
     Map<String, String> overrides = new HashMap<>();
 
@@ -163,28 +167,29 @@ public class GcpEnvironmentTest {
 
   @Test
   @Parameters({
-    "Env Var Not Set|null|/foo|null",
-    "Agent In Worksapce Root|cdbg_java_agent.so|/foo|/foo",
-    "Agent In Root Agent Dir Trailing Slash|cdbg_java_agent.so|/foo/|/foo",
-    "Agent 1 Level Deep|bar/cdbg_java_agent.so|/foo/bar|/foo",
-    "Agent 1 Level Deep Agent Dir Tailing Slash|bar/cdbg_java_agent.so|/foo/bar/|/foo",
-    "Agent Has Params Set|cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|foo|foo",
-    "Agent Multi Level Nesting|r1/r2/r3/cdbg_java_agent.so=use_firebase=true\\,--logtostderr=true|/w1/w2/w3/r1/r2/r3|/w1/w2/w3",
-    "Relative Dir Repeated In Workspace Root 1|f1/cdbg_java_agent.so|/f1/f1/f1|/f1/f1",
-    "Relative Dir Repeated In Workspace Root 2|f1/f2/f3/cdbg_java_agent.so|/f1/f2/f3/f1/f2/f3/f1/f2/f3|/f1/f2/f3/f1/f2/f3",
-    "Agent Name Cdbg Not Included|r1/foo.so|/w1/r1|/w1",
-    "Multiple Agents No Params 1|r1/agent1.so r2/agent2.so|/w1/r2/|/w1",
-    "Multiple Agents No Params 2|r2/agent1.so r1/agent2.so|/w1/r2/|/w1",
-    "Multiple Agents With Params 1|r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
-    "Multiple Agents With Params 2|r1/agent1.so=p1=true r2/agent2.so=p2=true|/w1/r2/|/w1",
-    "Excess Spacing|  r1/agent1.so      r2/agent2.so     |/w1/r2/|/w1",
-    "Relative Dir Not A Suffix Of Agent Dir|r1/foo.so|/w1/r2|null",
-    "Multiple Agents Mo Match|r1/agent1.so r2/agent2.so|/w1/r3/|null",
+      "Agent In Workspace Root|root|root|root",
+      "Agent Level 1|root/l1|root|root",
+      "Agent Level 2|root/l1/l2|root|root",
+      "Agent Deeply Nested|root/l1/l2/l3/l4/l5/l6/l7|root|root",
+      "Agent Nested Under WebInf 1|root/WEB-INF|root|root",
+      "Agent Nested Under WebInf 2|root/WEB-INF/cdbg|root|root",
+      "WebInf Doesn't Exist|root|null|null",
+      "No Common Ancesstor|foo|bar|null",
   })
   @TestCaseName("{method} [{0}]")
-  public void getAppEngineJava8UserDir(String testName,
-      @Nullable String agentPathOpts, String agentDir, @Nullable String expectedResult) throws Exception {
-    environmentStore.set("GAE_AGENTPATH_OPTS", agentPathOpts);
+  public void
+  getAppEngineJava8UserDir(String testName, String relativeAgentDir,
+      @Nullable String relativeWebInfDir, @Nullable String relativeExpectedResult)
+      throws Exception {
+    if (relativeWebInfDir != null) {
+      temporaryFolder.newFolder(relativeWebInfDir + "/WEB-INF");
+    }
+
+    String expectedResult = relativeExpectedResult == null
+        ? null
+        : temporaryFolder.getRoot().getAbsolutePath() + "/" + relativeExpectedResult;
+    String agentDir = temporaryFolder.getRoot().getAbsolutePath() + "/" + relativeAgentDir;
+
     assertThat(GcpEnvironment.getAppEngineJava8UserDir(agentDir)).isEqualTo(expectedResult);
   }
 

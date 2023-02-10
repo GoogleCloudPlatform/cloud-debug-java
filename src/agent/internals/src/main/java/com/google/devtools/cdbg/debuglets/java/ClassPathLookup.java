@@ -406,8 +406,8 @@ final class ClassPathLookup {
   }
 
   /**
-   * If the environment is Java8 App Engine Standard it will attempt to add the WEB-INF/lib and
-   * WEB-INF/classes directories to the paths for indexing.
+   * If the environment is Java8 App Engine Standard it will attempt to add the USER_DIR/WEB-INF/lib
+   * and USER_DIR/WEB-INF/classes directories to the paths for indexing.
    *
    * <p>No effect if the environment is not Java8 App Engine Standard or the directories don't
    * exist.

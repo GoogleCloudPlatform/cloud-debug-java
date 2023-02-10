@@ -695,7 +695,6 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", "/tomcat");
       System.setProperty("jetty.base", "/jetty");
-      environmentStore.set("GAE_AGENTPATH_OPTS", "cdbg_java_agent.so");
 
       assertThat(ClassPathLookup.findExtraClassPath("/foo")).isEmpty();
     } finally {
@@ -711,7 +710,8 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     File jettyRoot = new File(root, "jetty");
     File java8Root = new File(root, "java8");
 
-    String[] appServerSuffixes = new String[] {"webapps/ROOT/WEB-INF/lib", "webapps/ROOT/WEB-INF/classes"};
+    String[] appServerSuffixes =
+        new String[] {"webapps/ROOT/WEB-INF/lib", "webapps/ROOT/WEB-INF/classes"};
     for (File prefix : new File[] {tomcatRoot, jettyRoot, java8Root}) {
       for (String suffix : appServerSuffixes) {
         new File(prefix, suffix).mkdirs();
@@ -728,9 +728,12 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", tomcatRoot.toString());
       System.setProperty("jetty.base", jettyRoot.toString());
-      environmentStore.set("GAE_AGENTPATH_OPTS", "cdbg_java_agent.so");
 
-      assertThat(ClassPathLookup.findExtraClassPath(java8Root.getAbsolutePath()))
+      // Since the WEB-INFO directory is in the java8Root, setting the agentDir to match it ensures
+      // the code internally will determie the java 8 user dir is also java8Root, ensuring it gets
+      // found by findExtraClassPath..
+      String agentDir = java8Root.getAbsolutePath();
+      assertThat(ClassPathLookup.findExtraClassPath(agentDir))
           .asList()
           .containsExactly(
               tomcatRoot + "/webapps/ROOT/WEB-INF/lib",

@@ -290,6 +290,7 @@ target_version_txt: internals_jar
 #    (default and recommended solution)
 # 3. Java Cloud Debugger package used on GCE with service account authentication
 #    (Identical to #2, retained for legacy purposes).
+# 4. Java Cloud Debugger package used on App Engine Standard Java 8
 packages: target_agent internals_jar $(APPENGINE_FORMAT_SCRIPT) target_version_txt
 	cp $(INTERNALS_JAR) cdbg_java_agent_internals.jar
 	java -jar $(JAR_SPLITTER_TOOL) cdbg_java_agent_internals.jar .

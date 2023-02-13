@@ -191,7 +191,12 @@ final class GcpEnvironment {
    * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
    * otherwise.
    */
-  public static String getAppEngineJava8UserDir(String agentDir) {
+  public static String tryGetAppEngineJava8UserDir(String agentDir) {
+    String gaeRuntime = environmentStore.get("GAE_RUNTIME");
+    if (gaeRuntime == null || !gaeRuntime.equals("java8")) {
+      return null;
+    }
+
     File currentDir = new File(agentDir);
 
     while (currentDir != null) {

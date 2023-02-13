@@ -35,6 +35,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -50,6 +52,25 @@ import org.objectweb.asm.ClassWriter;
  */
 @RunWith(JUnit4.class)
 public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
+  private static class TestEnvironmentStore implements GcpEnvironment.EnvironmentStore {
+    Map<String, String> overrides = new HashMap<>();
+
+    @Override
+    public String get(String name) {
+      if (overrides.containsKey(name)) {
+        return overrides.get(name);
+      }
+      return System.getenv(name);
+    }
+
+    public void set(String name, String value) {
+      overrides.put(name, value);
+    }
+  }
+
+  private TestEnvironmentStore environmentStore;
+  private GcpEnvironment.EnvironmentStore oldEnvironmentStore;
+
   private static final String SIGNATURE_BASE =
       "com/google/devtools/cdbg/debuglets/java/ClassPathLookupTest";
 
@@ -139,6 +160,18 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
   public ClassPathLookupTest() {
     myInteger++;
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    environmentStore = new TestEnvironmentStore();
+    oldEnvironmentStore = GcpEnvironment.environmentStore;
+    GcpEnvironment.environmentStore = environmentStore;
+  }
+
+  @After
+  public void cleanup() throws Exception {
+    GcpEnvironment.environmentStore = oldEnvironmentStore;
   }
 
   @Test
@@ -654,7 +687,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
 
   @Test
   public void emptyAutoClassPath() {
-    assertThat(ClassPathLookup.findExtraClassPath(DEFAULT_AGENT_DIR)).isEmpty();
+    assertThat(ClassPathLookup.findExtraClassPath("/foo")).isEmpty();
   }
 
   @Test
@@ -662,6 +695,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", "/tomcat");
       System.setProperty("jetty.base", "/jetty");
+      environmentStore.set("GAE_RUNTIME", "java8");
 
       assertThat(ClassPathLookup.findExtraClassPath("/foo")).isEmpty();
     } finally {
@@ -695,6 +729,7 @@ public class ClassPathLookupTest { // BPTAG: CLASS_PATH_LOOKUP_TEST_OPEN
     try {
       System.setProperty("catalina.base", tomcatRoot.toString());
       System.setProperty("jetty.base", jettyRoot.toString());
+      environmentStore.set("GAE_RUNTIME", "java8");
 
       // Since the WEB-INFO directory is in the java8Root, setting the agentDir to match it ensures
       // the code internally will determie the java 8 user dir is also java8Root, ensuring it gets

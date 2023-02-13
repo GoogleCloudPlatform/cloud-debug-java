@@ -413,7 +413,7 @@ final class ClassPathLookup {
    * exist.
    */
   public static void addAppEngineJava8Paths(Set<String> paths, String agentDir) {
-    String userDir = GcpEnvironment.getAppEngineJava8UserDir(agentDir);
+    String userDir = GcpEnvironment.tryGetAppEngineJava8UserDir(agentDir);
     if (userDir == null) {
       return;
     }

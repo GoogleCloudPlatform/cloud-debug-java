@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ public class JarSplitterMain {
       System.exit(1);
     }
 
-    // Taking default values for JarSplitter constructor based on
-    // https://github.com/GoogleCloudPlatform/appengine-java-standard/blob/6b724ba9e2a181ba55e07a9daf28105dc11be16d/lib/tools_api/src/main/java/com/google/appengine/tools/admin/Application.java#L1494
     try {
       File jarFile = new File(args[0]);
       File outputDirectory = new File(args[1]);
@@ -42,6 +40,8 @@ public class JarSplitterMain {
         maxJarSize = Integer.parseInt(args[2]);
       }
 
+      // Taking default values for JarSplitter constructor based on
+      // https://github.com/GoogleCloudPlatform/appengine-java-standard/blob/6b724ba9e2a181ba55e07a9daf28105dc11be16d/lib/tools_api/src/main/java/com/google/appengine/tools/admin/Application.java#L1494
       new com.google.appengine.tools.util.JarSplitter(
               jarFile,
               outputDirectory,

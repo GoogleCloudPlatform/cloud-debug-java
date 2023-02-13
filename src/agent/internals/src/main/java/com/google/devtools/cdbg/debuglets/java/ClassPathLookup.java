@@ -78,17 +78,19 @@ final class ClassPathLookup {
    *     indexed
    * @param extraClassPath optional file system locations to search for .class and .jar files beyond
    *     what's normally specified in Java class path
+   * @param agentDir The directory the agent .so file is located.
    */
-  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath) {
+  public ClassPathLookup(boolean useDefaultClassPath, String[] extraClassPath, String agentDir) {
     infofmt(
-        "Initializing ClassPathLookup, default classpath: %b, extra classpath: %s",
-        useDefaultClassPath, (extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath));
+        "Initializing ClassPathLookup, default classpath: %b, extra classpath: %s, agent dir: %s",
+        useDefaultClassPath, (extraClassPath == null) ? "<null>" : Arrays.asList(extraClassPath),
+        agentDir);
 
     // Try to guess where application classes might be besides class path. We only do it if the
     // debugger uses default configuration. If the user sets additional directories, we use that and
     // not try to guess anything.
     if (useDefaultClassPath && ((extraClassPath == null) || (extraClassPath.length == 0))) {
-      extraClassPath = findExtraClassPath();
+      extraClassPath = findExtraClassPath(agentDir);
     }
 
     this.useDefaultClassPath = useDefaultClassPath;
@@ -382,9 +384,13 @@ final class ClassPathLookup {
    * in the default ROOT directory.
    *
    * <p>This function is marked as public for unit tests.
+   *
+   * @param agentDir The directory the agent .so file is located.
    */
-  public static String[] findExtraClassPath() {
+  public static String[] findExtraClassPath(String agentDir) {
     Set<String> paths = new HashSet<>();
+
+    addAppEngineJava8Paths(paths, agentDir);
 
     // Tomcat.
     addSystemPropertyRelative(paths, "catalina.base", "webapps/ROOT/WEB-INF/lib");
@@ -400,6 +406,23 @@ final class ClassPathLookup {
   }
 
   /**
+   * If the environment is Java8 App Engine Standard it will attempt to add the USER_DIR/WEB-INF/lib
+   * and USER_DIR/WEB-INF/classes directories to the paths for indexing.
+   *
+   * <p>No effect if the environment is not Java8 App Engine Standard or the directories don't
+   * exist.
+   */
+  public static void addAppEngineJava8Paths(Set<String> paths, String agentDir) {
+    String userDir = GcpEnvironment.tryGetAppEngineJava8UserDir(agentDir);
+    if (userDir == null) {
+      return;
+    }
+
+    addPathRelative(paths, userDir, "WEB-INF/lib");
+    addPathRelative(paths, userDir, "WEB-INF/classes");
+  }
+
+  /**
    * Appends a path relative to the base path defined in a system property.
    *
    * <p>No effect if the system property is not defined or the combined path does not exist.
@@ -410,11 +433,21 @@ final class ClassPathLookup {
       return;
     }
 
-    File path = new File(value, suffix);
+    addPathRelative(paths, value, suffix);
+  }
+
+  /**
+   * Appends a path relative to a base path.
+   *
+   * <p>No effect if the combined path does not exist.
+   */
+  private static void addPathRelative(Set<String> paths, String basePath, String suffix) {
+    File path = new File(basePath, suffix);
     if (!path.exists()) {
       return;
     }
 
+    infofmt("Adding path %s for indexing", path.toString());
     paths.add(path.toString());
   }
 

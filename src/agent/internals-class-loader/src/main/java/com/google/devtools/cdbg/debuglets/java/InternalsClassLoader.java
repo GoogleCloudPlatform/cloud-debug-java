@@ -30,10 +30,12 @@ final class InternalsClassLoader extends URLClassLoader {
   /**
    * Class constructor.
    *
-   * @param internalsJarPath required path to cdbg_java_agent_internals.jar file
+   * @param internalsJarPaths required paths to cdbg_java_agent_internals.jar file. This is an array
+   * as under AppEngine Standard Java 8, the jar file is expected to be split into multiple files to
+   * work around a maximum file size limit of 32MB.
    */
-  public InternalsClassLoader(String internalsJarPath) throws MalformedURLException {
-    super(new URL[] {new URL("file:" + internalsJarPath)}, null); // Parent class loader
+  public InternalsClassLoader(String[] internalsJarPaths) throws MalformedURLException {
+    super(convertJarPathsToURLs(internalsJarPaths), null); // Parent class loader
   }
 
   @Override
@@ -46,5 +48,14 @@ final class InternalsClassLoader extends URLClassLoader {
     }
 
     return super.loadClass(name, resolve);
+  }
+
+  static URL[] convertJarPathsToURLs(String[] internalsJarPath) throws MalformedURLException {
+    URL[] urls = new URL[internalsJarPath.length];
+    for (int i = 0; i < urls.length; ++i) {
+      urls[i] = new URL("file:" + internalsJarPath[i]);
+    }
+
+    return urls;
   }
 }

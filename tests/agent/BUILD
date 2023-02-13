@@ -484,6 +484,18 @@ cc_test(
 )
 
 cc_test(
+    name = "jvm_internals_test",
+    srcs = ["jvm_internals_test.cc"],
+    deps = [
+        ":file_utils",
+        ":mock_jni_env",
+        ":mock_jvmti_env",
+        "//src/agent:jvm_internals",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "jvm_local_variable_reader_test",
     srcs = ["jvm_local_variable_reader_test.cc"],
     deps = [

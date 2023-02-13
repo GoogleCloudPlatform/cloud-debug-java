@@ -63,6 +63,7 @@ java_test(
     deps = [
         ":BreakpointTag",
         ":test_data_path",
+        "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:gcp_environment",
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:mapper",
         "//tests/agent:libtest_logger.so",
         "@maven//:com_google_guava_guava",
@@ -135,6 +136,7 @@ java_test(
         "//src/agent/internals/src/main/java/com/google/devtools/cdbg/debuglets/java:labels",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
 

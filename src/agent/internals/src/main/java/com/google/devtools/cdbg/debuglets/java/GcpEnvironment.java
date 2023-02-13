@@ -15,6 +15,8 @@ package com.google.devtools.cdbg.debuglets.java;
 
 import static com.google.devtools.cdbg.debuglets.java.AgentLogger.info;
 
+import java.io.File;
+
 // Needed to wrap the calls to the native logging methods which may fail for unit tests of classes
 // that use the AgentLogger, since there won't be a .so loaded that provides the native methods.
 import java.lang.UnsatisfiedLinkError;
@@ -171,6 +173,41 @@ final class GcpEnvironment {
     }
 
     return labels;
+  }
+
+  /**
+   * Returns the user dir of a Java8 App Engine Standard instance. This is the base directory where
+   * the user's files are deployed. If no Java 8 App Engine Standard user dir could be determined
+   * null is returned.  It is safe to call this regardless of environment, as long as the return
+   * value is checked.
+   *
+   * <p> While there is a system property defined, "user.dir", in Java8 App Engine environments, it
+   * is unfortunately not set at the point in time this agent code runs, so it cannot be relied
+   * upon. Here we use the heuristic that the WEB-INF directory is deployed at the root of the user
+   * dir, and the deployed agent is deployed somewhere under the user dir. This means we can search
+   * through the agent directory's ancestors looking for the WEB-INFO directory, and once found
+   * we've found the user dir.
+   *
+   * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
+   * otherwise.
+   */
+  public static String tryGetAppEngineJava8UserDir(String agentDir) {
+    String gaeRuntime = environmentStore.get("GAE_RUNTIME");
+    if (gaeRuntime == null || !gaeRuntime.equals("java8")) {
+      return null;
+    }
+
+    File currentDir = new File(agentDir);
+
+    while (currentDir != null) {
+      if (new File(currentDir.getAbsolutePath(), "WEB-INF").exists()) {
+        break;
+      }
+
+      currentDir = currentDir.getParentFile();
+    }
+
+    return currentDir == null ? null : currentDir.getAbsolutePath();
   }
 
   /**

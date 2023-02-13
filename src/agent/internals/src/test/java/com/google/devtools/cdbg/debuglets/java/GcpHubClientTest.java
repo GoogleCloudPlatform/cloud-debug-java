@@ -95,7 +95,7 @@ public class GcpHubClientTest {
 
   private URL baseUrl;
 
-  private ClassPathLookup classPathLookup = new ClassPathLookup(false, null);
+  private ClassPathLookup classPathLookup = new ClassPathLookup(false, null, "");
 
   /** Body of last RegisterDebuggee request. */
   private String registerDebuggeeRequest;
@@ -338,7 +338,8 @@ public class GcpHubClientTest {
               folder5.getRoot().toString(),
               fooJar.toString(),
               barJar.toString()
-            });
+            },
+            /* agentDir= */ "");
 
     ByteArrayOutputStream requestStream = new ByteArrayOutputStream();
     HttpURLConnection connection = mock(HttpURLConnection.class);

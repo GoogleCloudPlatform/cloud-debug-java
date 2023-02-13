@@ -111,7 +111,7 @@ public final class FirebaseClientTest {
   // functionality will use their own value.
   private Duration markDebuggeeActivePeriod = Duration.ofHours(1);
   private MetadataQuery metadata;
-  private ClassPathLookup classPathLookup = new ClassPathLookup(false, null);
+  private ClassPathLookup classPathLookup = new ClassPathLookup(false, null, "");
 
   /**
    * Last registered debuggee.
@@ -397,7 +397,8 @@ public final class FirebaseClientTest {
               folder6.getRoot().toString(),
               fooJar.toString(),
               barJar.toString()
-            });
+            },
+            /* agentDir= */ "");
 
     registerDebuggee();
     assertThat(registeredDebuggee.sourceContexts)

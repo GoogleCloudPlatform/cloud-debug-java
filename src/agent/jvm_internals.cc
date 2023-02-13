@@ -16,14 +16,84 @@
 
 #include "jvm_internals.h"
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <dlfcn.h>
-
-#include <fstream>  // NOLINT
+#include <unistd.h>
 
 #include "jvariant.h"
 #include "model_util.h"
 #include "resolved_source_location.h"
 #include "stopwatch.h"
+
+namespace {
+
+bool FileExists(const std::string& full_file_name) {
+  return (access(full_file_name.c_str(), F_OK) != -1);
+}
+
+bool StringStartsWith(const std::string& str, const std::string& prefix) {
+  return str.find(prefix) == 0;
+}
+
+bool StringEndsWith(const std::string& str, const std::string& suffix) {
+  auto pos = str.rfind(suffix);
+  return (pos != std::string::npos) &&
+         (pos == (str.length() - suffix.length()));
+}
+
+/**
+ * Under AppEngine Java8, there is currently a maximum file size limit of 32MB.
+ * As a result jar splitting must be done to the cdbg_java_agent_internals.jar
+ * file so it can be deployed, and so in this case multiple jar files are
+ * expected instead of just one. This utility function finds the jar files in
+ * the split jar scenario.
+ *
+ * Example of split jar files:
+ *   cdbg_java_agent_internals-0000.jar
+ *   cdbg_java_agent_internals-0001.jar
+ *   ....
+ *   cdbg_java_agent_internals-0004.jar
+ *
+ * Returns:
+ *   On success returns a vector of the full jar file names of all of the split
+ *   jar files. If an error occurs or none were found an empty vector is
+ *   returned.
+ */
+std::vector<std::string> FindAllSplitInternalsJars(
+    const std::string& agent_dir) {
+  // Note, implemented using the C library, as std::filesystem was introduced in
+  // C++17, and we're still targetting building with C++11.
+  DIR* dir;
+  struct dirent* ent;
+  std::vector<std::string> jar_files;
+
+  dir = opendir(agent_dir.c_str());
+  if (dir == nullptr) {
+    return {};
+  }
+
+  auto is_split_jar = [](const std::string& file_name) {
+    // Simply matching the prefix and suffix suffices, there's no need to be
+    // more rigid in the check.
+    return StringStartsWith(file_name, "cdbg_java_agent_internals-") &&
+           StringEndsWith(file_name, ".jar");
+  };
+
+  while ((ent = readdir(dir)) != NULL) {
+    if (ent->d_type == DT_REG) {
+      std::string file_name = std::string(ent->d_name);
+      if (is_split_jar(file_name)) {
+        jar_files.emplace_back(agent_dir + "/" + file_name);
+      }
+    }
+  }
+
+  closedir(dir);
+  return jar_files;
+}
+
+}  // namespace
 
 namespace devtools {
 namespace cdbg {
@@ -118,7 +188,8 @@ bool JvmInternals::CreateClassPathLookupInstance(
           class_path_lookup_.cls.get(),
           class_path_lookup_.constructor,
           use_default_class_path,
-          extra_class_path)))
+          extra_class_path,
+          JniToJavaString(GetAgentDirectory()).get())))
       .Release(ExceptionAction::LOG_AND_IGNORE);
 
   if (instance_local_ref == nullptr) {
@@ -334,7 +405,7 @@ std::set<std::string> JvmInternals::ReadApplicationResource(
   return std::set<std::string>(resources.begin(), resources.end());
 }
 
-bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
+bool JvmInternals::LoadClassLoader(const std::string& agent_dir) {
   DCHECK(class_loader_obj_ == nullptr);
 
   // Load the class in JVM.
@@ -356,7 +427,7 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
   class_loader_cls.Assign(static_cast<jclass>(define_class_rc.get()));
 
   jmethodID constructor_method =
-      class_loader_cls.GetConstructor("(Ljava/lang/String;)V");
+      class_loader_cls.GetConstructor("([Ljava/lang/String;)V");
   if (constructor_method == nullptr) {
     LOG(ERROR) << "Couldn't find constructor of InternalsClassLoader class";
     class_loader_cls.ReleaseRef();
@@ -365,15 +436,17 @@ bool JvmInternals::LoadClassLoader(const std::string& agentdir) {
 
   // Create class loader instance exposing classes from
   // "cdbg_java_agent_internals.jar".
-  const std::string internals_jar_path =
-      agentdir + "/cdbg_java_agent_internals.jar";
-  LOG(INFO) << "Loading internals from " << internals_jar_path;
-  JniLocalRef jstr_internals_path(JniToJavaString(internals_jar_path));
+  std::vector<std::string> jar_paths = GetInternalsJarPaths(agent_dir);
+  if (jar_paths.empty()) {
+    return false;
+  }
+
+  JniLocalRef jstr_internals_paths(JniToJavaStringArray(jar_paths));
 
   JniLocalRef class_loader_obj_local_ref(jni()->NewObject(
       class_loader_cls.get(),
       constructor_method,
-      jstr_internals_path.get()));
+      jstr_internals_paths.get()));
 
   class_loader_cls.ReleaseRef();
 
@@ -405,7 +478,7 @@ bool JvmInternals::LoadClasses() {
   class_path_lookup_.constructor =
       class_path_lookup_.cls.GetInstanceMethod(
           "<init>",
-          "(Z[Ljava/lang/String;)V");
+          "(Z[Ljava/lang/String;Ljava/lang/String;)V");
   if (class_path_lookup_.constructor == nullptr) {
     return false;
   }
@@ -575,6 +648,48 @@ FormatMessageModel JvmInternals::ConvertFormatMessage(
   }
 
   return { std::move(format), std::move(parameters) };
+}
+
+/**
+ * Under AppEngine Java8, there is currently a maximum file size limit of 32MB.
+ * As a result jar splitting must be done to the cdbg_java_agent_internals.jar
+ * file so it can be deployed, and so in this case multiple jar files are
+ * expected instead of just one. This utility function will determine which
+ * scenario is present and will create the vector of jar files accordingly.
+ *
+ * E.g.
+ *  AppEngine Java8:
+ *   cdbg_java_agent_internals-0000.jar
+ *   cdbg_java_agent_internals-0001.jar
+ *   ....
+ *   cdbg_java_agent_internals-0004.jar
+ *
+ *  All Other environments
+ *   cdbg_java_agent_internals.jar
+ *
+ * Returns:
+ *   On success returns a vector of the full jar file names representing the agent internals classes
+ *   that must be loaded. On error an empty vector is returned.
+ */
+std::vector<std::string> JvmInternals::GetInternalsJarPaths(
+    const std::string& agent_dir) {
+  std::vector<std::string> paths;
+
+  if (FileExists(agent_dir + "/cdbg_java_agent_internals.jar")) {
+    paths.emplace_back(agent_dir + "/cdbg_java_agent_internals.jar");
+  } else {
+    paths = FindAllSplitInternalsJars(agent_dir);
+  }
+
+  if (paths.empty()) {
+    LOG(ERROR) << "Failed to find internals jar file";
+  } else {
+    for (const std::string& p : paths) {
+      LOG(INFO) << "Loading internals from " << p;
+    }
+  }
+
+  return paths;
 }
 
 }  // namespace cdbg

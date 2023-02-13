@@ -22,15 +22,23 @@ import static org.junit.Assert.assertThrows;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.converters.Nullable;
+import junitparams.naming.TestCaseName;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Unit test for {@link GcpEnvironment}. */
-@RunWith(JUnit4.class)
+@RunWith(JUnitParamsRunner.class)
 public class GcpEnvironmentTest {
+  @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   private static class TestEnvironmentStore implements GcpEnvironment.EnvironmentStore {
     Map<String, String> overrides = new HashMap<>();
 
@@ -155,6 +163,42 @@ public class GcpEnvironmentTest {
         .hasCauseThat()
         .hasMessageThat()
         .isEqualTo("/file_does_not_exist.txt (No such file or directory)");
+  }
+
+  @Test
+  @Parameters({
+      "Agent In Workspace Root|root|root|java8|root",
+      "Agent Level 1|root/l1|root|java8|root",
+      "Agent Level 2|root/l1/l2|root|java8|root",
+      "Agent Deeply Nested|root/l1/l2/l3/l4/l5/l6/l7|root|java8|root",
+      "Agent Nested Under WebInf 1|root/WEB-INF|root|java8|root",
+      "Agent Nested Under WebInf 2|root/WEB-INF/cdbg|root|java8|root",
+      "WebInf Doesn't Exist|root|null|java8|null",
+      "No Common Ancesstor|foo|bar|java8|null",
+      "GAE_RUNTIME not set|root|root|null|null",
+      "GAE_RUNTIME empty|root|root||null",
+      "GAE_RUNTIME Not Java8 1|root|root|java11|null",
+      "GAE_RUNTIME Not Java8 2|root|root|flex|null",
+  })
+  @TestCaseName("{method} [{0}]")
+  public void
+  tryGetAppEngineJava8UserDir(String testName, String relativeAgentDir,
+      @Nullable String relativeWebInfDir, @Nullable String gaeRuntime,
+      @Nullable String relativeExpectedResult) throws Exception {
+    if (gaeRuntime != null) {
+      environmentStore.set("GAE_RUNTIME", gaeRuntime);
+    }
+
+    if (relativeWebInfDir != null) {
+      temporaryFolder.newFolder(relativeWebInfDir + "/WEB-INF");
+    }
+
+    String expectedResult = relativeExpectedResult == null
+        ? null
+        : temporaryFolder.getRoot().getAbsolutePath() + "/" + relativeExpectedResult;
+    String agentDir = temporaryFolder.getRoot().getAbsolutePath() + "/" + relativeAgentDir;
+
+    assertThat(GcpEnvironment.tryGetAppEngineJava8UserDir(agentDir)).isEqualTo(expectedResult);
   }
 
   private static void setAndTestCanaryMode(

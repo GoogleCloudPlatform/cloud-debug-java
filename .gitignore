@@ -12,10 +12,7 @@
 # itself. If this gets fixed at some point, these rules can be removed.
 dist/
 src/agent/antlrgen
-src/agent/internals/target
-src/agent/internals-class-loader/target/
 src/agent/internals_class_loader_static_defs.inl
-src/agent/service-account-auth/target
 src/agent/version.txt
 src/codegen/target
 src/codegen/*.cc
@@ -24,3 +21,6 @@ third_party/gflags*
 third_party/glog*
 third_party/install
 third_party/jsoncpp*
+
+# Maven build output
+target/

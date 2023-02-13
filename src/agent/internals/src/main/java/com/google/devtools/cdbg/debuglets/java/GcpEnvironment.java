@@ -183,9 +183,10 @@ final class GcpEnvironment {
    *
    * <p> While there is a system property defined, "user.dir", in Java8 App Engine environments, it
    * is unfortunately not set at the point in time this agent code runs, so it cannot be relied
-   * upon. Here we use the heuristic that the WEB-INF directory and the deployed agent will share
-   * a common ancestor somewhere in the directory hierachy. So we can search through the agent
-   * directory's ancestors looking for the WEB-INFO directory.
+   * upon. Here we use the heuristic that the WEB-INF directory is deployed at the root of the user
+   * dir, and the deployed agent is deployed somewhere under the user dir. This means we can search
+   * through the agent directory's ancestors looking for the WEB-INFO directory, and once found
+   * we've found the user dir.
    *
    * @return the Java 8 App Engine Standard user directory if it was able to be determined, null
    * otherwise.

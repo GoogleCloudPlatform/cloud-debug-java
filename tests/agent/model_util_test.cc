@@ -26,6 +26,8 @@
 namespace devtools {
 namespace cdbg {
 
+using testing::Eq;
+
 class ModelUtilTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -439,6 +441,50 @@ TEST_F(ModelUtilTest, BreakpointCreateTime) {
       BreakpointBuilder().set_id("A").set_create_time(test_timestamp));
 }
 
+
+TEST_F(ModelUtilTest, BreakpointCreateTimeUnixMsec) {
+  TimestampModel test_timestamp;
+  test_timestamp.seconds = 1444163838L;
+  test_timestamp.nanos = 123456789;  // Internal precision is milliseconds.
+                                     // Will be truncated to '123'.
+  CheckBuilder(
+      "{"
+      "   'id' : 'A'"
+      "}",
+      BreakpointBuilder().set_id("A").set_create_time_unix_msec(
+          kUnspecifiedTimestamp));
+
+  CheckBuilder(
+      "{"
+      "   'id' : 'A',"
+      "   'createTimeUnixMsec' : 1444163838123"
+      "}",
+      BreakpointBuilder().set_id("A").set_create_time_unix_msec(
+          test_timestamp));
+}
+
+TEST_F(ModelUtilTest, GetCreateTimestamp) {
+  TimestampModel test_timestamp;
+  test_timestamp.seconds = 1444163838L;
+  test_timestamp.nanos = 123456789;
+
+  auto bp1 = BreakpointBuilder()
+                 .set_create_time(test_timestamp)
+                 .set_create_time_unix_msec(kUnspecifiedTimestamp)
+                 .build();
+  auto bp2 = BreakpointBuilder()
+                 .set_create_time(kUnspecifiedTimestamp)
+                 .set_create_time_unix_msec(test_timestamp)
+                 .build();
+  auto bp3 = BreakpointBuilder()
+                 .set_create_time(kUnspecifiedTimestamp)
+                 .set_create_time_unix_msec(kUnspecifiedTimestamp)
+                 .build();
+
+  EXPECT_THAT(GetCreateTimestamp(*bp1), Eq(test_timestamp));
+  EXPECT_THAT(GetCreateTimestamp(*bp2), Eq(test_timestamp));
+  EXPECT_THAT(GetCreateTimestamp(*bp3), Eq(kUnspecifiedTimestamp));
+}
 
 TEST_F(ModelUtilTest, SetBreakpointLabels) {
   std::map<std::string, std::string> labels;

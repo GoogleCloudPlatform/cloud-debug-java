@@ -270,6 +270,11 @@ static void SerializeTimestamp(
   (*root) = Json::Value(value);
 }
 
+static void SerializeTimestampUnixMsec(const TimestampModel& model,
+                                       Json::Value* root) {
+  int64_t total_millis = model.seconds * 1000 + model.nanos / (1000 * 1000);
+  (*root) = Json::Value(total_millis);
+}
 
 static void SerializeModel(
     const StatusMessageModel& model,
@@ -374,6 +379,23 @@ TimestampModel DeserializeTimestamp(const Json::Value& root) {
   return timestamp;
 }
 
+TimestampModel DeserializeTimestampUnixMsec(const Json::Value& root) {
+  if (!root.isInt64()) {
+    return kUnspecifiedTimestamp;
+  }
+
+  int64_t total_millis = root.asInt64();
+
+  if (total_millis == 0) {
+    return kUnspecifiedTimestamp;
+  }
+
+  TimestampModel timestamp;
+  timestamp.seconds = total_millis / 1000;
+  timestamp.nanos = (total_millis % 1000) * 1000 * 1000;
+
+  return timestamp;
+}
 
 template <>
 std::unique_ptr<StatusMessageModel> DeserializeModel<StatusMessageModel>(
@@ -558,6 +580,11 @@ static void SerializeModel(
     SerializeTimestamp(model.create_time, &(*root)["createTime"]);
   }
 
+  if (model.create_time_unix_msec != kUnspecifiedTimestamp) {
+    SerializeTimestampUnixMsec(model.create_time_unix_msec,
+                               &(*root)["createTimeUnixMsec"]);
+  }
+
   if (model.status != nullptr) {
     SerializeModel(*model.status, &(*root)["status"]);
   }
@@ -611,8 +638,15 @@ std::unique_ptr<BreakpointModel> DeserializeModel<BreakpointModel>(
   // Final state flag.
   model->is_final_state = JsonCppGetBool(root, "isFinalState", false);
 
-  // Breakpoint creation time.
+  // Breakpoint creation time. This field is from the Cloud Debugger GCP Backend
+  // version of the service, and is a string in RFC3339 format.
   model->create_time = DeserializeTimestamp(root["createTime"]);
+
+  // Breakpoint creation time. This field is from the OSS Snapshot Debugger
+  // Firebase Backend version of the service, and is an integer representing
+  // unix epoch time in milliseconds.
+  model->create_time_unix_msec =
+      DeserializeTimestampUnixMsec(root["createTimeUnixMsec"]);
 
   // Breakpoint status.
   if (root.isMember("status")) {

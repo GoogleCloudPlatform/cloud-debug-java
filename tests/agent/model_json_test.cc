@@ -379,7 +379,8 @@ TEST_F(ModelJsonTest, BreakpointCreateTime) {
   std::unique_ptr<BreakpointModel> breakpoint = CreateFullBreakpoint();
 
   breakpoint->create_time.seconds = 1444163838L;
-  breakpoint->create_time.nanos = 893000000;
+  breakpoint->create_time.nanos = 893000000;  // Rfc3339 timestamp parser only
+                                              // supports millisecond precision.
   SerializationLoop(*breakpoint);
 
   breakpoint->create_time.seconds = 3489578;

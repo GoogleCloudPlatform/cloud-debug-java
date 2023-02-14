@@ -481,9 +481,9 @@ TEST_F(ModelUtilTest, GetCreateTimestamp) {
                  .set_create_time_unix_msec(kUnspecifiedTimestamp)
                  .build();
 
-  EXPECT_THAT(GetCreateTimestamp(*bp1), Eq(test_timestamp));
-  EXPECT_THAT(GetCreateTimestamp(*bp2), Eq(test_timestamp));
-  EXPECT_THAT(GetCreateTimestamp(*bp3), Eq(kUnspecifiedTimestamp));
+  EXPECT_THAT(model_util::GetCreateTimestamp(*bp1), Eq(test_timestamp));
+  EXPECT_THAT(model_util::GetCreateTimestamp(*bp2), Eq(test_timestamp));
+  EXPECT_THAT(model_util::GetCreateTimestamp(*bp3), Eq(kUnspecifiedTimestamp));
 }
 
 TEST_F(ModelUtilTest, SetBreakpointLabels) {

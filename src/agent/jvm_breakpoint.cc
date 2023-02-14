@@ -205,12 +205,12 @@ void JvmBreakpoint::Initialize() {
 
   // Schedule breakpoint cancellation.
   time_t expiration_time_base;
-  if (GetCreateTimestamp(*definition_) == kUnspecifiedTimestamp) {
+  if (model_util::GetCreateTimestamp(*definition_) == kUnspecifiedTimestamp) {
     // It really shouldn't happen, but if it does start computing expiration
     // time from this moment.
     expiration_time_base = scheduler_->CurrentTime();
   } else {
-    expiration_time_base = GetCreateTimestamp(*definition_).seconds;
+    expiration_time_base = model_util::GetCreateTimestamp(*definition_).seconds;
   }
 
   int32_t expiration_seconds = absl::GetFlag(FLAGS_breakpoint_expiration_sec);

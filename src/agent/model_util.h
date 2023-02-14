@@ -418,6 +418,7 @@ class BreakpointBuilder {
     set_is_final_state(source.is_final_state);
 
     set_create_time(source.create_time);
+    set_create_time_unix_msec(source.create_time_unix_msec);
 
     if (source.status != nullptr) {
       set_status(StatusMessageBuilder(*source.status).build());
@@ -498,6 +499,11 @@ class BreakpointBuilder {
 
   BreakpointBuilder& set_create_time(TimestampModel timestamp) {
     data_->create_time = timestamp;
+    return *this;
+  }
+
+  BreakpointBuilder& set_create_time_unix_msec(TimestampModel timestamp) {
+    data_->create_time_unix_msec = timestamp;
     return *this;
   }
 
@@ -660,7 +666,6 @@ class ErrorOr {
   FormatMessageModel error_message_;
 };
 
-
 inline bool operator== (const TimestampModel& t1, const TimestampModel& t2) {
   return (t1.seconds == t2.seconds) && (t1.nanos == t2.nanos);
 }
@@ -669,6 +674,16 @@ inline bool operator== (const TimestampModel& t1, const TimestampModel& t2) {
 inline bool operator!= (const TimestampModel& t1, const TimestampModel& t2) {
   return !(t1 == t2);
 }
+
+namespace model_util {
+
+inline TimestampModel GetCreateTimestamp(const BreakpointModel& model) {
+  return (model.create_time != kUnspecifiedTimestamp)
+             ? model.create_time
+             : model.create_time_unix_msec;
+}
+
+}  // namespace model_util
 
 inline bool operator== (const DurationModel& d1, const DurationModel& d2) {
   return (d1.seconds == d2.seconds) && (d1.nanos == d2.nanos);

@@ -144,7 +144,16 @@ struct BreakpointModel {
   std::string log_message_format;
   LogLevel log_level = LogLevel::INFO;
   bool is_final_state = false;
+
+  // The Cloud Debugger GCP Backend version of the service uses a field called
+  // 'create_time' to represent the breakpoint creation time. The OSS Snapshot
+  // Debugger Firebase Backend version of the service uses a field called
+  // 'create_time_unix_msec'. For simplicity when serializing we treat them
+  // seperately and they will either get serialized or not depending on if they
+  // have a real value or not.
   TimestampModel create_time;
+  TimestampModel create_time_unix_msec;
+
   std::unique_ptr<StatusMessageModel> status;
   std::vector<std::unique_ptr<StackFrameModel>> stack;
   std::vector<std::unique_ptr<VariableModel>> evaluated_expressions;

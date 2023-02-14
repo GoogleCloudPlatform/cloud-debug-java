@@ -136,6 +136,7 @@ static bool IsEqual(
          (model1.log_level == model2.log_level) &&
          (model1.is_final_state == model2.is_final_state) &&
          (model1.create_time == model2.create_time) &&
+         (model1.create_time_unix_msec == model2.create_time_unix_msec) &&
          IsEqual(model1.status, model2.status) &&
          IsEqual(model1.stack, model2.stack) &&
          IsEqual(model1.evaluated_expressions, model2.evaluated_expressions) &&
@@ -384,6 +385,19 @@ TEST_F(ModelJsonTest, BreakpointCreateTime) {
 
   breakpoint->create_time.seconds = 3489578;
   breakpoint->create_time.nanos = TimestampModel().nanos;
+  SerializationLoop(*breakpoint);
+}
+
+
+TEST_F(ModelJsonTest, BreakpointCreateTimeUnixMsec) {
+  std::unique_ptr<BreakpointModel> breakpoint = CreateFullBreakpoint();
+
+  breakpoint->create_time_unix_msec.seconds = 1444163838L;
+  breakpoint->create_time_unix_msec.nanos = 893000000;
+  SerializationLoop(*breakpoint);
+
+  breakpoint->create_time_unix_msec.seconds = 3489578;
+  breakpoint->create_time_unix_msec.nanos = TimestampModel().nanos;
   SerializationLoop(*breakpoint);
 }
 

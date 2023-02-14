@@ -575,6 +575,19 @@ TEST_F(JvmBreakpointTest, BreakpointExpirationWithCreatedTime) {
   scheduler_.Process();
 }
 
+TEST_F(JvmBreakpointTest, BreakpointExpirationWithCreatedTimeUnixMsec) {
+  Create(BreakpointBuilder(*breakpoint_template_)
+             .set_create_time_unix_msec(
+                 TimestampBuilder::Build(simulated_time_sec_))
+             .build());
+
+  EXPECT_CALL(breakpoints_manager_, CompleteBreakpoint("test_breakpoint_id"))
+      .WillOnce(Return());
+
+  simulated_time_sec_ += absl::GetFlag(FLAGS_breakpoint_expiration_sec);
+  scheduler_.Process();
+}
+
 TEST_F(JvmBreakpointTest, BreakpointExpirationNoCreatedTime) {
   Create(BreakpointBuilder(*breakpoint_template_).build());
 

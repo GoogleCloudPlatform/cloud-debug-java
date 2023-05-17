@@ -303,10 +303,18 @@ instead of the Cloud Debugger service.  If the Firebase backend is
 used, breakpoints can be viewed and set using the Snapshot Debugger CLI instead
 of the Cloud Console.
 
-To use the Firebase backend, set the following system properties:
+The Firebase backend functionality can be configured either via system
+properties or by passing flags directly to the agent:
 
 ```
 -Dcom.google.cdbg.agent.use_firebase=True
+```
+
+or
+
+```
+-agentpath:/opt/cdbg/cdbg_java_agent.so=--use_firebase=true
+
 ```
 
 Additional configuration can be provided if necessary:
@@ -314,6 +322,12 @@ Additional configuration can be provided if necessary:
 ```
 -Dcom.google.cdbg.agent.use_firebase=True
 -Dcom.google.cdbg.agent.firebase_db_url=https://my-database-url.firebaseio.com
+```
+
+or
+
+```
+-agentpath:/opt/cdbg/cdbg_java_agent.so=-use_firebase=true,--firebase_db_url=https://my-database-url.firebaseio.com
 ```
 
 See https://github.com/GoogleCloudPlatform/snapshot-debugger and

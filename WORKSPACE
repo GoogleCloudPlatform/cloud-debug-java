@@ -36,7 +36,7 @@ maven_install(
         "org.ow2.asm:asm:9.1",
         "org.ow2.asm:asm-commons:9.1",
         "org.ow2.asm:asm-util:9.1",
-        "org.yaml:snakeyaml:1.32",
+        "org.yaml:snakeyaml:2.0",
         "pl.pragmatists:JUnitParams:1.1.1",
     ],
     repositories = [

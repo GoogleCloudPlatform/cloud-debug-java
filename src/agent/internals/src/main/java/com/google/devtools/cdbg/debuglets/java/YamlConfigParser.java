@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -165,7 +166,7 @@ public class YamlConfigParser {
    * structure.
    */
   private void parseYaml(InputStream yamlConfig) throws YamlConfigParserException {
-    Yaml yaml = new Yaml(new SafeConstructor());
+    Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
     Set<String> blocklistPatternSet = new HashSet<>();
     Set<String> blocklistExceptionPatternSet = new HashSet<>();
 

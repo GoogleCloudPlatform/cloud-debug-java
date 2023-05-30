@@ -18,7 +18,6 @@ ALL_GENERATED_CLASSES = [
     "firebaseclient",
     "gcpbreakpointlabelsprovider",
     "gcpdebugletversion",
-    "gcphubclient",
     "hubclient",
     "hubclient_listactivebreakpointsresult",
     "iterable",

@@ -66,21 +66,6 @@ java_library(
 )
 
 java_library(
-    name = "gcp_hub_client",
-    srcs = ["GcpHubClient.java"],
-    deps = [
-        ":gcp_debuglet_version",
-        ":gcp_environment",
-        ":gcp_metadata",
-        ":hub_client",
-        ":labels",
-        ":logger",
-        ":mapper",
-        "@maven//:com_google_code_gson_gson"
-    ],
-)
-
-java_library(
     name = "gcp_metadata",
     srcs = [
         "GceMetadataQuery.java",
@@ -176,7 +161,6 @@ java_library(
         ":gcp_breakpoint_labels_provider",
         ":gcp_debuglet_version",
         ":gcp_environment",
-        ":gcp_hub_client",
         ":gcp_metadata",
         ":hub_client",
         ":labels",

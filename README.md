@@ -32,7 +32,7 @@ Snapshot Debugger consists of 3 primary components:
     Explore the
     [schema](https://github.com/GoogleCloudPlatform/snapshot-debugger/blob/main/docs/SCHEMA.md).
 3.  User interface, including a command line interface
-    [`snapshot-dbg-cli`](https://github.com/GoogleCloudPlatform/snapshot-debugger) and a
+    [`snapshot-dbg-cli`](https://pypi.org/project/snapshot-dbg-cli/) and a
     [VSCode extension](https://github.com/GoogleCloudPlatform/snapshot-debugger/tree/main/snapshot_dbg_extension)
 
 ## Getting Help

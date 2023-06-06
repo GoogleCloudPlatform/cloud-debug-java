@@ -1,7 +1,7 @@
-# Java Cloud Debugger Agent
+# Java Snapshot Debugger Agent
 
 [Snapshot debugger](https://github.com/GoogleCloudPlatform/snapshot-debugger/)
-for Java.
+agent for Java 7, Java 8 and Java 11.
 
 ## Overview
 
@@ -145,10 +145,13 @@ or
 -agentpath:/opt/cdbg/cdbg_java_agent.so=--firebase_db_url=https://my-database-url.firebaseio.com
 ```
 
-To note, if neither of the flags `--database-id` or `--location` were specfied
+By default the Java agent will check for a configured database first at
+`https://PROJECT_ID-cdbg.firebaseio.com`, and then failing that
+`https://PROJECT_ID-default-rtdb.firebaseio.com`. If your database has an
+address different from either of those, the URL needs to be specified. In
+general if either of the flags `--database-id` or `--location` were specfied
 when running the `snapshot-dbg-cli init` command to create the database this
-should not be necessary and the Java agent should be able to find the database
-itself.
+will be necessary.
 
 ### Application Servers
 

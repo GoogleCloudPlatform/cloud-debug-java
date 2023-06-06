@@ -1,21 +1,22 @@
 # Java Cloud Debugger Agent
 
-Google [Cloud Debugger](https://cloud.google.com/debugger/) for Java.
+[Snapshot debugger](https://github.com/GoogleCloudPlatform/snapshot-debugger/)
+for Java.
 
 ## Overview
 
-Cloud Debugger (also known as Stackdriver Debugger) lets you inspect the state
-of a running cloud application, at any code location, without stopping or
-slowing it down. It is not your traditional process debugger but rather an
-always on, whole app debugger taking snapshots from any instance of the app.
+Snapshot Debugger lets you inspect the state of a running cloud application, at
+any code location, without stopping or slowing it down. It is not your
+traditional process debugger but rather an always on, whole app debugger taking
+snapshots from any instance of the app.
 
-Cloud Debugger is safe for use with production apps or during development.
-The Java debugger agent adds less than 10ms to the request latency when a
-debug snapshot is captured. In most cases, this is not noticeable to users.
+Snapshot Debugger is safe for use with production apps or during development.
+The Java debugger agent adds less than 10ms to the request latency when a debug
+snapshot is captured. In most cases, this is not noticeable to users.
 Furthermore, the Java debugger agent does not allow modification of application
 state in any way, and has close to zero impact on the app instances.
 
-Cloud Debugger attaches to all instances of the app providing the ability to
+Snapshot Debugger attaches to all instances of the app providing the ability to
 take debug snapshots and add logpoints. A snapshot captures the call-stack and
 variables from any one instance that executes the snapshot location. A logpoint
 writes a formatted message to the application log whenever any instance of the
@@ -24,34 +25,37 @@ app executes the logpoint location.
 The Java debugger agent is only supported on Linux at the moment. It was tested
 on Debian Linux, but it should work on other distributions as well.
 
-Cloud Debugger consists of 3 primary components:
+Snapshot Debugger consists of 3 primary components:
 
 1.  The Java debugger agent (requires Java 7 and above).
-2.  Cloud Debugger service storing and managing snapshots/logpoints. Explore the
-    API's using
-    [APIs Explorer](https://cloud.google.com/debugger/api/reference/rest/).
+2.  A Firebase Realtime Database for storing and managing snapshots/logpoints.
+    Explore the
+    [schema](https://github.com/GoogleCloudPlatform/snapshot-debugger/blob/main/docs/SCHEMA.md).
 3.  User interface, including a command line interface
-    [`gcloud debug`](https://cloud.google.com/sdk/gcloud/reference/debug/) and a
-    Web interface on
-    [Google Cloud Console](https://console.cloud.google.com/debug/). See the
-    [online help](https://cloud.google.com/debugger/docs/using/snapshots) on how
-    to use Google Cloud Console Debug page.
+    [`snapshot-dbg-cli`](https://github.com/GoogleCloudPlatform/snapshot-debugger) and a
+    [VSCode extension](https://github.com/GoogleCloudPlatform/snapshot-debugger/tree/main/snapshot_dbg_extension)
 
 ## Getting Help
 
+1.  File an [issue](https://github.com/GoogleCloudPlatform/cloud-debug-java/issues)
 1.  StackOverflow: http://stackoverflow.com/questions/tagged/google-cloud-debugger
-2.  Send email to: [Cloud Debugger Feedback](mailto:cdbg-feedback@google.com)
-3.  Send Feedback from Google Cloud Console
 
 ## Installation
 
-The easiest way to install the Java debugger agent for
-[Google Cloud Platform](https://cloud.google.com) is to download the pre-built
-package from the Internet. (the package is updated periodically):
+The easiest way to install the Java debugger agent is to download the pre-built
+package from the Internet.
 
+**For most enviroments, use:**
 ```shell
 mkdir /opt/cdbg
-wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | \
+wget -qO- https://github.com/GoogleCloudPlatform/cloud-debug-java/releases/latest/download/cdbg_java_agent_gce.tar.gz | \
+    tar xvz -C /opt/cdbg
+```
+
+**For Google App Engine Java 8 Standard Environment:**
+```shell
+mkdir /opt/cdbg
+wget -qO- https://github.com/GoogleCloudPlatform/cloud-debug-java/releases/latest/download/cdbg_java_agent_gae_java8.tar.gz | \
     tar xvz -C /opt/cdbg
 ```
 
@@ -62,7 +66,12 @@ git clone https://github.com/GoogleCloudPlatform/cloud-debug-java.git
 cd cloud-debug-java
 chmod +x build.sh
 ./build.sh
+
+# For all supported environments other than GAE Java8 Standard:
 ls cdbg_java_agent_gce.tar.gz
+
+# For Google App Engine Java 8 Standard Environment:
+ls cdbg_java_agent_gae_java8.tar.gz
 ```
 
 Note that the build script assumes some dependencies. To install these
@@ -83,6 +92,16 @@ The Java agent is not regularly tested on Alpine Linux, and support will be on a
 best effort basis. The [Dockerfile](alpine/Dockerfile) shows how to build a
 minimal image with the agent installed.
 
+## Historical note
+
+Version 3.x of this agent supported both the now shutdown Cloud Debugger service
+(by default) and the
+[Snapshot Debugger](https://github.com/GoogleCloudPlatform/snapshot-debugger/)
+(Firebase RTDB backend) by setting the `use_firebase` flag to true. Version 4.0
+removed support for the Cloud Debugger service, making the Snapshot Debugger the
+default. To note the `use_firebase` flag is now obsolete, but still present for
+backward compatibility.
+
 ## Setup
 
 The Java debugger agent is a
@@ -101,7 +120,7 @@ java <b>-agentpath:/opt/cdbg/cdbg_java_agent.so</b> -jar ~/myapp.jar
 By default the Java debugger agent assumes that it runs on Google Cloud Platform
 and obtain the credentials from the local
 [metadata service](https://cloud.google.com/compute/docs/metadata). To use the
-Java debugger agent outside Google Cloud Platform  requires setting up a
+Java debugger agent outside Google Cloud Platform requires setting up a
 [service account](#service-account).
 
 You can customize the behavior of the agent by passing arguments to it.
@@ -112,6 +131,24 @@ spaces, as follows:
 java -agentpath:/opt/cdbg/cdbg_java_agent.so<b>=--arg1=val1,--arg2=val2</b> -jar ~/myapp.jar
 </pre>
 
+### Configuring the Firebase Realtime Database URL
+
+It may be necessary to specify the database's URL, which can be done as follows:
+
+```
+-Dcom.google.cdbg.agent.firebase_db_url=https://my-database-url.firebaseio.com
+```
+
+or
+
+```
+-agentpath:/opt/cdbg/cdbg_java_agent.so=--firebase_db_url=https://my-database-url.firebaseio.com
+```
+
+To note, if neither of the flags `--database-id` or `--location` were specfied
+when running the `snapshot-dbg-cli init` command to create the database this
+should not be necessary and the Java agent should be able to find the database
+itself.
 
 ### Application Servers
 
@@ -214,11 +251,6 @@ on [Google Cloud Console](https://console.cloud.google.com).
 Once you have the service account JSON file, deploy it alongside the Java
 debugger agent.
 
-Using the service account option requires the Java debugger agent version that
-supports it. Either download the pre-packaged agent from
-https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_service_account.tar.gz
-or the locally built `cdbg_java_agent_service_account.tar.gz`
-
 To use the service account credentials add this system property:
 <pre>
 -Dcom.google.cdbg.auth.serviceaccount.jsonfile=<i>/opt/cdbg/gcp-svc.json</i>
@@ -227,33 +259,6 @@ To use the service account credentials add this system property:
 Alternatively, you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment
 variable to the JSON file path instead of adding the
 `auth.serviceaccount.jsonfile` system property.
-
-### Breakpoint Canary
-
-This feature protects large jobs from any potential bug in the Debugger agent
-which can take the entire job down when a snapshot or a logpoint is applied.
-
-When enabled, new snapshots and logpoints are rolled out to a subset of the
-application's instances (roughly 10% of the instances) first. The subset is
-called the canary set, and this canary set is decided upon every time a new
-snapshot or logpoint is created. This means that the canary set might be
-different for each individual snapshot/logpoint. The verification takes around
-40 seconds to finish. Once the verification on the canary set is finished, the
-snapshot or logpoint is applied to the remaining tasks. However, sometimes a
-snapshot hits before it is rolled out to the entire job, saving the need to
-apply it to all.
-
-Note that this feature can be enabled/disabled on the application at
-registration time or on the snapshot/logpoint when being created. Currently, the
-later part (individual snapshot/logpoint when being created) is not surfaced
-through any tools yet.
-
-Currently this feature is not enabled by default. To enable this feature, set
-the following property:
-
-<pre>
--Dcom.google.cdbg.breakpoints.enable_canary=true
-</pre>
 
 ### Other JVM Languages
 
@@ -291,44 +296,3 @@ used in an expression as `MainKt.getGreeting()`
 Companion object methods can be accessed by qualifying them with the `Companion`
 keyword. For instance, the `welcome` function above can be used in an expression
 as `Main.Companion.welcome()`
-
-### Snapshot Debugger - Firebase Realtime Database Backend
-
-This functionality is available for release 3.0 onward of this agent and
-provides support for the Snapshot Debugger, which is being provided as a
-replacement for the deprecated Cloud Debugger service.
-
-The agent can be configured to use Firebase Realtime Database as a backend
-instead of the Cloud Debugger service.  If the Firebase backend is
-used, breakpoints can be viewed and set using the Snapshot Debugger CLI instead
-of the Cloud Console.
-
-The Firebase backend functionality can be configured either via system
-properties or by passing flags directly to the agent:
-
-```
--Dcom.google.cdbg.agent.use_firebase=True
-```
-
-or
-
-```
--agentpath:/opt/cdbg/cdbg_java_agent.so=--use_firebase=true
-
-```
-
-Additional configuration can be provided if necessary:
-
-```
--Dcom.google.cdbg.agent.use_firebase=True
--Dcom.google.cdbg.agent.firebase_db_url=https://my-database-url.firebaseio.com
-```
-
-or
-
-```
--agentpath:/opt/cdbg/cdbg_java_agent.so=-use_firebase=true,--firebase_db_url=https://my-database-url.firebaseio.com
-```
-
-See https://github.com/GoogleCloudPlatform/snapshot-debugger and
-https://cloud.google.com/debugger/docs/deprecations for more details.
